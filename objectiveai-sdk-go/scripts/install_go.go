@@ -101,11 +101,13 @@ func goFieldName(propName string) string {
 	if cleaned == "" {
 		cleaned = "Val"
 	}
-	// Split on underscores AND forward slashes: enum renames like
-	// `"POST_/agent/completions"` (from viewer.ApiCallSubType) need
-	// to become `POSTAgentCompletions`, not `POST/agent/completions`.
+	// Split on underscores, forward slashes, AND dots. Enum renames
+	// like `"POST_/agent/completions"` (viewer.ApiCallSubType) and
+	// variant titles like `"client_objectiveai_mcp.client_response.Response.Ok"`
+	// (anyOf variants in tagged-enum schemas) must collapse to a
+	// valid Go identifier (`POSTAgentCompletions`, `ClientObjectiveaiMcpClientResponseResponseOk`).
 	parts := strings.FieldsFunc(cleaned, func(r rune) bool {
-		return r == '_' || r == '/'
+		return r == '_' || r == '/' || r == '.'
 	})
 	var b strings.Builder
 	for _, p := range parts {

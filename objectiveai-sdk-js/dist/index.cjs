@@ -1,10 +1,10 @@
 'use strict';
 
-var z485 = require('zod');
+var z484 = require('zod');
 
 function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
 
-var z485__default = /*#__PURE__*/_interopDefault(z485);
+var z484__default = /*#__PURE__*/_interopDefault(z484);
 
 var __defProp = Object.defineProperty;
 var __getOwnPropNames = Object.getOwnPropertyNames;
@@ -102,296 +102,296 @@ var init_event = __esm({
     })(TauriEvent || (TauriEvent = {}));
   }
 });
-var AgentClaudeAgentSdkEffortSchema = z485.z.union([z485.z.literal("low").describe("Minimal output, concise responses.").meta({ "variantTitle": "Low" }), z485.z.literal("medium").describe("Balanced output (default, normalized away during preparation).").meta({ "variantTitle": "Medium" }), z485.z.literal("high").describe("Detailed output with thorough explanations.").meta({ "variantTitle": "High" }), z485.z.literal("max").describe("Maximum effort, most detailed output possible.").meta({ "variantTitle": "Max" })]).describe("The effort level for model output.\n\nThis setting hints to the model how detailed its responses should be.").meta({ title: "agent.claude_agent_sdk.Effort" });
-var AgentClaudeAgentSdkOutputModeSchema = z485.z.literal("instruction").describe("The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.").meta({ title: "agent.claude_agent_sdk.OutputMode" });
-var AgentClaudeAgentSdkUpstreamSchema = z485.z.literal("claude_agent_sdk").describe("Claude Agent SDK upstream marker.").meta({ title: "agent.claude_agent_sdk.Upstream" });
-var AgentClientObjectiveaiMcpEntrySchema = z485.z.object({
-  name: z485.z.string(),
-  owner: z485.z.string(),
-  version: z485.z.string()
+var AgentClaudeAgentSdkEffortSchema = z484.z.union([z484.z.literal("low").describe("Minimal output, concise responses.").meta({ "variantTitle": "Low" }), z484.z.literal("medium").describe("Balanced output (default, normalized away during preparation).").meta({ "variantTitle": "Medium" }), z484.z.literal("high").describe("Detailed output with thorough explanations.").meta({ "variantTitle": "High" }), z484.z.literal("max").describe("Maximum effort, most detailed output possible.").meta({ "variantTitle": "Max" })]).describe("The effort level for model output.\n\nThis setting hints to the model how detailed its responses should be.").meta({ title: "agent.claude_agent_sdk.Effort" });
+var AgentClaudeAgentSdkOutputModeSchema = z484.z.literal("instruction").describe("The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.").meta({ title: "agent.claude_agent_sdk.OutputMode" });
+var AgentClaudeAgentSdkUpstreamSchema = z484.z.literal("claude_agent_sdk").describe("Claude Agent SDK upstream marker.").meta({ title: "agent.claude_agent_sdk.Upstream" });
+var AgentClientObjectiveaiMcpEntrySchema = z484.z.object({
+  name: z484.z.string(),
+  owner: z484.z.string(),
+  version: z484.z.string()
 }).describe("A single `owner` / `name` / `version` reference identifying one\nplugin or one tool inside [`ClientObjectiveaiMcp`].").meta({ title: "agent.ClientObjectiveaiMcpEntry" });
 
 // src/agent/clientObjectiveaiMcp.ts
-var AgentClientObjectiveaiMcpSchema = z485.z.object({
-  objectiveai: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
-  plugins: z485.z.array(AgentClientObjectiveaiMcpEntrySchema).meta({ omitempty: true }),
-  tools: z485.z.array(AgentClientObjectiveaiMcpEntrySchema).meta({ omitempty: true })
+var AgentClientObjectiveaiMcpSchema = z484.z.object({
+  objectiveai: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  plugins: z484.z.array(AgentClientObjectiveaiMcpEntrySchema).meta({ omitempty: true }),
+  tools: z484.z.array(AgentClientObjectiveaiMcpEntrySchema).meta({ omitempty: true })
 }).describe("Client-side MCP surface the agent expects:\n\n- `objectiveai`: whether the calling client exposes the built-in\n  `objectiveai-mcp`. `None` means unspecified; `Some(true)` /\n  `Some(false)` explicitly opt in / out.\n- `plugins`: specific plugins (by `owner` / `name` / `version`).\n- `tools`: specific tools (by `owner` / `name` / `version`).").meta({ title: "agent.ClientObjectiveaiMcp" });
-var AgentCompletionsMessageFileSchema = z485.z.object({
-  file_data: z485.z.string().nullable().describe("Base64-encoded file data.").meta({ omitempty: true }).optional(),
-  file_id: z485.z.string().nullable().describe("The ID of a previously uploaded file.").meta({ omitempty: true }).optional(),
-  file_url: z485.z.string().nullable().describe("A URL to fetch the file from.").meta({ omitempty: true }).optional(),
-  filename: z485.z.string().nullable().describe("The filename for display purposes.").meta({ omitempty: true }).optional()
+var AgentCompletionsMessageFileSchema = z484.z.object({
+  file_data: z484.z.string().nullable().describe("Base64-encoded file data.").meta({ omitempty: true }).optional(),
+  file_id: z484.z.string().nullable().describe("The ID of a previously uploaded file.").meta({ omitempty: true }).optional(),
+  file_url: z484.z.string().nullable().describe("A URL to fetch the file from.").meta({ omitempty: true }).optional(),
+  filename: z484.z.string().nullable().describe("The filename for display purposes.").meta({ omitempty: true }).optional()
 }).describe("A file attachment for multimodal input.").meta({ title: "agent.completions.message.File" });
-var AgentCompletionsMessageImageUrlDetailSchema = z485.z.union([z485.z.literal("auto").describe("Let the model decide the detail level.").meta({ "variantTitle": "Auto" }), z485.z.literal("low").describe("Low detail mode (faster, less tokens).").meta({ "variantTitle": "Low" }), z485.z.literal("high").describe("High detail mode (more accurate, more tokens).").meta({ "variantTitle": "High" })]).describe("Detail level for image processing.").meta({ title: "agent.completions.message.ImageUrlDetail" });
+var AgentCompletionsMessageImageUrlDetailSchema = z484.z.union([z484.z.literal("auto").describe("Let the model decide the detail level.").meta({ "variantTitle": "Auto" }), z484.z.literal("low").describe("Low detail mode (faster, less tokens).").meta({ "variantTitle": "Low" }), z484.z.literal("high").describe("High detail mode (more accurate, more tokens).").meta({ "variantTitle": "High" })]).describe("Detail level for image processing.").meta({ title: "agent.completions.message.ImageUrlDetail" });
 
 // src/agent/completions/message/imageUrl.ts
-var AgentCompletionsMessageImageUrlSchema = z485.z.object({
+var AgentCompletionsMessageImageUrlSchema = z484.z.object({
   detail: AgentCompletionsMessageImageUrlDetailSchema.nullable().describe("The detail level for image processing.").meta({ omitempty: true }).optional(),
-  url: z485.z.string().describe("The URL of the image (can be a data URL or HTTP URL).")
+  url: z484.z.string().describe("The URL of the image (can be a data URL or HTTP URL).")
 }).describe("An image URL for multimodal input.").meta({ title: "agent.completions.message.ImageUrl" });
-var AgentCompletionsMessageInputAudioSchema = z485.z.object({
-  data: z485.z.string().describe("Base64-encoded audio data."),
-  format: z485.z.string().describe('The audio format (e.g., "wav", "mp3").')
+var AgentCompletionsMessageInputAudioSchema = z484.z.object({
+  data: z484.z.string().describe("Base64-encoded audio data."),
+  format: z484.z.string().describe('The audio format (e.g., "wav", "mp3").')
 }).describe("Audio input for multimodal messages.").meta({ title: "agent.completions.message.InputAudio" });
-var AgentCompletionsMessageVideoUrlSchema = z485.z.object({
-  url: z485.z.string().describe("The URL of the video.")
+var AgentCompletionsMessageVideoUrlSchema = z484.z.object({
+  url: z484.z.string().describe("The URL of the video.")
 }).describe("A video URL for multimodal input.").meta({ title: "agent.completions.message.VideoUrl" });
 
 // src/agent/completions/message/richContentPart.ts
-var AgentCompletionsMessageRichContentPartSchema = z485.z.union([z485.z.object({
-  text: z485.z.string(),
-  type: z485.z.literal("text")
-}).describe("Text content.").meta({ "variantTitle": "Text" }), z485.z.object({
+var AgentCompletionsMessageRichContentPartSchema = z484.z.union([z484.z.object({
+  text: z484.z.string(),
+  type: z484.z.literal("text")
+}).describe("Text content.").meta({ "variantTitle": "Text" }), z484.z.object({
   image_url: AgentCompletionsMessageImageUrlSchema,
-  type: z485.z.literal("image_url")
-}).describe("An image URL.").meta({ "variantTitle": "ImageUrl" }), z485.z.object({
+  type: z484.z.literal("image_url")
+}).describe("An image URL.").meta({ "variantTitle": "ImageUrl" }), z484.z.object({
   input_audio: AgentCompletionsMessageInputAudioSchema,
-  type: z485.z.literal("input_audio")
-}).describe("Audio input.").meta({ "variantTitle": "InputAudio" }), z485.z.object({
-  type: z485.z.literal("input_video"),
+  type: z484.z.literal("input_audio")
+}).describe("Audio input.").meta({ "variantTitle": "InputAudio" }), z484.z.object({
+  type: z484.z.literal("input_video"),
   video_url: AgentCompletionsMessageVideoUrlSchema
-}).describe("Video input.").meta({ "variantTitle": "InputVideo" }), z485.z.object({
-  type: z485.z.literal("video_url"),
+}).describe("Video input.").meta({ "variantTitle": "InputVideo" }), z484.z.object({
+  type: z484.z.literal("video_url"),
   video_url: AgentCompletionsMessageVideoUrlSchema
-}).describe("A video URL.").meta({ "variantTitle": "VideoUrl" }), z485.z.object({
+}).describe("A video URL.").meta({ "variantTitle": "VideoUrl" }), z484.z.object({
   file: AgentCompletionsMessageFileSchema,
-  type: z485.z.literal("file")
+  type: z484.z.literal("file")
 }).describe("A file.").meta({ "variantTitle": "File" })]).describe("A part of rich content.").meta({ title: "agent.completions.message.RichContentPart" });
 
 // src/agent/completions/message/richContent.ts
-var AgentCompletionsMessageRichContentSchema = z485.z.union([z485.z.string().describe("Plain text content.").meta({ "variantTitle": "Text" }), z485.z.array(AgentCompletionsMessageRichContentPartSchema).describe("Multi-part content (text, images, audio, video, files).").meta({ "variantTitle": "Parts" })]).describe("Rich content for user/assistant messages (supports multimodal input).").meta({ title: "agent.completions.message.RichContent" });
-var AgentMcpServerSchema = z485.z.object({
-  authorization: z485.z.boolean().default(false).describe("Whether this MCP server uses authorization."),
-  url: z485.z.string().describe("The URL of the MCP server.")
+var AgentCompletionsMessageRichContentSchema = z484.z.union([z484.z.string().describe("Plain text content.").meta({ "variantTitle": "Text" }), z484.z.array(AgentCompletionsMessageRichContentPartSchema).describe("Multi-part content (text, images, audio, video, files).").meta({ "variantTitle": "Parts" })]).describe("Rich content for user/assistant messages (supports multimodal input).").meta({ title: "agent.completions.message.RichContent" });
+var AgentMcpServerSchema = z484.z.object({
+  authorization: z484.z.boolean().default(false).describe("Whether this MCP server uses authorization."),
+  url: z484.z.string().describe("The URL of the MCP server.")
 }).describe("An MCP server that the agent can connect to.").meta({ title: "agent.McpServer" });
 
 // src/agent/claude_agent_sdk/agent.ts
-var AgentClaudeAgentSdkAgentSchema = z485.z.object({
+var AgentClaudeAgentSdkAgentSchema = z484.z.object({
   client_objectiveai_mcp: AgentClientObjectiveaiMcpSchema.nullable().describe("Client-side ObjectiveAI MCP surface the calling client is\nexpected to expose locally back to the API (objectiveai\nbuilt-in, plus specific plugins / tools by owner+name+version).").meta({ omitempty: true }).optional(),
   effort: AgentClaudeAgentSdkEffortSchema.nullable().describe("The effort level for model output.").meta({ omitempty: true }).optional(),
-  id: z485.z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
-  mcp_servers: z485.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
-  model: z485.z.string().describe("The upstream language model identifier."),
+  id: z484.z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
+  mcp_servers: z484.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
+  model: z484.z.string().describe("The upstream language model identifier."),
   output_mode: AgentClaudeAgentSdkOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
   prefix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content prepended to the user's prompt.").meta({ omitempty: true }).optional(),
   suffix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content appended after the user's prompt.").meta({ omitempty: true }).optional(),
-  system_prompt: z485.z.string().nullable().describe("System prompt for the agent.").meta({ omitempty: true }).optional(),
-  thinking: z485.z.boolean().nullable().describe("Whether thinking/extended thinking is enabled.\n\nDefaults to `true`. Set to `false` to disable.").meta({ omitempty: true }).optional(),
+  system_prompt: z484.z.string().nullable().describe("System prompt for the agent.").meta({ omitempty: true }).optional(),
+  thinking: z484.z.boolean().nullable().describe("Whether thinking/extended thinking is enabled.\n\nDefaults to `true`. Set to `false` to disable.").meta({ omitempty: true }).optional(),
   upstream: AgentClaudeAgentSdkUpstreamSchema.describe("The upstream provider marker.")
 }).describe("A validated Claude Agent SDK Agent with its computed content-addressed ID.").meta({ title: "agent.claude_agent_sdk.Agent" });
-var AgentClaudeAgentSdkAgentBaseSchema = z485.z.object({
+var AgentClaudeAgentSdkAgentBaseSchema = z484.z.object({
   client_objectiveai_mcp: AgentClientObjectiveaiMcpSchema.nullable().describe("Client-side ObjectiveAI MCP surface the calling client is\nexpected to expose locally back to the API (objectiveai\nbuilt-in, plus specific plugins / tools by owner+name+version).").meta({ omitempty: true }).optional(),
   effort: AgentClaudeAgentSdkEffortSchema.nullable().describe("The effort level for model output.").meta({ omitempty: true }).optional(),
-  mcp_servers: z485.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
-  model: z485.z.string().describe("The upstream language model identifier."),
+  mcp_servers: z484.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
+  model: z484.z.string().describe("The upstream language model identifier."),
   output_mode: AgentClaudeAgentSdkOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
   prefix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content prepended to the user's prompt.").meta({ omitempty: true }).optional(),
   suffix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content appended after the user's prompt.").meta({ omitempty: true }).optional(),
-  system_prompt: z485.z.string().nullable().describe("System prompt for the agent.").meta({ omitempty: true }).optional(),
-  thinking: z485.z.boolean().nullable().describe("Whether thinking/extended thinking is enabled.\n\nDefaults to `true`. Set to `false` to disable.").meta({ omitempty: true }).optional(),
+  system_prompt: z484.z.string().nullable().describe("System prompt for the agent.").meta({ omitempty: true }).optional(),
+  thinking: z484.z.boolean().nullable().describe("Whether thinking/extended thinking is enabled.\n\nDefaults to `true`. Set to `false` to disable.").meta({ omitempty: true }).optional(),
   upstream: AgentClaudeAgentSdkUpstreamSchema.describe("The upstream provider marker.")
 }).describe("The base configuration for a Claude Agent SDK Agent (without computed ID).").meta({ title: "agent.claude_agent_sdk.AgentBase" });
-var AgentClaudeAgentSdkContinuationSchema = z485.z.object({
-  mcp_sessions: z485.z.record(z485.z.string(), z485.z.string()),
-  session_id: z485.z.string(),
+var AgentClaudeAgentSdkContinuationSchema = z484.z.object({
+  mcp_sessions: z484.z.record(z484.z.string(), z484.z.string()),
+  session_id: z484.z.string(),
   upstream: AgentClaudeAgentSdkUpstreamSchema
 }).meta({ title: "agent.claude_agent_sdk.Continuation" });
-var AgentCodexSdkEffortSchema = z485.z.union([z485.z.literal("minimal").describe("Minimal reasoning, fastest responses.").meta({ "variantTitle": "Minimal" }), z485.z.literal("low").describe("Low reasoning effort.").meta({ "variantTitle": "Low" }), z485.z.literal("medium").describe("Balanced reasoning (default, normalized away during preparation).").meta({ "variantTitle": "Medium" }), z485.z.literal("high").describe("High reasoning effort.").meta({ "variantTitle": "High" })]).describe("Reasoning-effort level for the Codex model. Maps to Codex's\n`model_reasoning_effort` (see `openai_codex_sdk` `ModelReasoningEffort`).\n\n`Medium` is the default and is normalized to `None` during preparation\nfor content-addressing stability.").meta({ title: "agent.codex_sdk.Effort" });
-var AgentCodexSdkOutputModeSchema = z485.z.literal("instruction").describe("The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.").meta({ title: "agent.codex_sdk.OutputMode" });
-var AgentCodexSdkUpstreamSchema = z485.z.literal("codex_sdk").describe("Codex SDK upstream marker.").meta({ title: "agent.codex_sdk.Upstream" });
+var AgentCodexSdkEffortSchema = z484.z.union([z484.z.literal("minimal").describe("Minimal reasoning, fastest responses.").meta({ "variantTitle": "Minimal" }), z484.z.literal("low").describe("Low reasoning effort.").meta({ "variantTitle": "Low" }), z484.z.literal("medium").describe("Balanced reasoning (default, normalized away during preparation).").meta({ "variantTitle": "Medium" }), z484.z.literal("high").describe("High reasoning effort.").meta({ "variantTitle": "High" })]).describe("Reasoning-effort level for the Codex model. Maps to Codex's\n`model_reasoning_effort` (see `openai_codex_sdk` `ModelReasoningEffort`).\n\n`Medium` is the default and is normalized to `None` during preparation\nfor content-addressing stability.").meta({ title: "agent.codex_sdk.Effort" });
+var AgentCodexSdkOutputModeSchema = z484.z.literal("instruction").describe("The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.").meta({ title: "agent.codex_sdk.OutputMode" });
+var AgentCodexSdkUpstreamSchema = z484.z.literal("codex_sdk").describe("Codex SDK upstream marker.").meta({ title: "agent.codex_sdk.Upstream" });
 
 // src/agent/codex_sdk/agent.ts
-var AgentCodexSdkAgentSchema = z485.z.object({
+var AgentCodexSdkAgentSchema = z484.z.object({
   client_objectiveai_mcp: AgentClientObjectiveaiMcpSchema.nullable().describe("Client-side ObjectiveAI MCP surface the calling client is\nexpected to expose locally back to the API (objectiveai\nbuilt-in, plus specific plugins / tools by owner+name+version).").meta({ omitempty: true }).optional(),
   effort: AgentCodexSdkEffortSchema.nullable().describe("Reasoning effort \u2014 maps to Codex's `model_reasoning_effort`.").meta({ omitempty: true }).optional(),
-  id: z485.z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
-  mcp_servers: z485.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
-  model: z485.z.string().describe("The upstream language model identifier (e.g. `gpt-5`)."),
+  id: z484.z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
+  mcp_servers: z484.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
+  model: z484.z.string().describe("The upstream language model identifier (e.g. `gpt-5`)."),
   output_mode: AgentCodexSdkOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
   prefix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content prepended to the user's prompt.").meta({ omitempty: true }).optional(),
   suffix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content appended after the user's prompt.").meta({ omitempty: true }).optional(),
   upstream: AgentCodexSdkUpstreamSchema.describe("The upstream provider marker."),
-  web_search_enabled: z485.z.boolean().nullable().describe("Whether this agent may use the codex binary's web-search tool.").meta({ omitempty: true }).optional()
+  web_search_enabled: z484.z.boolean().nullable().describe("Whether this agent may use the codex binary's web-search tool.").meta({ omitempty: true }).optional()
 }).describe("A validated Codex SDK Agent with its computed content-addressed ID.").meta({ title: "agent.codex_sdk.Agent" });
-var AgentCodexSdkAgentBaseSchema = z485.z.object({
+var AgentCodexSdkAgentBaseSchema = z484.z.object({
   client_objectiveai_mcp: AgentClientObjectiveaiMcpSchema.nullable().describe("Client-side ObjectiveAI MCP surface the calling client is\nexpected to expose locally back to the API (objectiveai\nbuilt-in, plus specific plugins / tools by owner+name+version).").meta({ omitempty: true }).optional(),
   effort: AgentCodexSdkEffortSchema.nullable().describe("Reasoning effort \u2014 maps to Codex's `model_reasoning_effort`.").meta({ omitempty: true }).optional(),
-  mcp_servers: z485.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
-  model: z485.z.string().describe("The upstream language model identifier (e.g. `gpt-5`)."),
+  mcp_servers: z484.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
+  model: z484.z.string().describe("The upstream language model identifier (e.g. `gpt-5`)."),
   output_mode: AgentCodexSdkOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
   prefix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content prepended to the user's prompt.").meta({ omitempty: true }).optional(),
   suffix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content appended after the user's prompt.").meta({ omitempty: true }).optional(),
   upstream: AgentCodexSdkUpstreamSchema.describe("The upstream provider marker."),
-  web_search_enabled: z485.z.boolean().nullable().describe("Whether this agent may use the codex binary's web-search tool.").meta({ omitempty: true }).optional()
+  web_search_enabled: z484.z.boolean().nullable().describe("Whether this agent may use the codex binary's web-search tool.").meta({ omitempty: true }).optional()
 }).describe("The base configuration for a Codex SDK Agent (without computed ID).").meta({ title: "agent.codex_sdk.AgentBase" });
-var AgentCodexSdkContinuationSchema = z485.z.object({
-  mcp_sessions: z485.z.record(z485.z.string(), z485.z.string()),
-  thread_id: z485.z.string(),
+var AgentCodexSdkContinuationSchema = z484.z.object({
+  mcp_sessions: z484.z.record(z484.z.string(), z484.z.string()),
+  thread_id: z484.z.string(),
   upstream: AgentCodexSdkUpstreamSchema
 }).meta({ title: "agent.codex_sdk.Continuation" });
-var AgentCompletionsMessageAssistantToolCallFunctionSchema = z485.z.object({
-  arguments: z485.z.string().describe("The arguments to pass to the function, as a JSON string."),
-  name: z485.z.string().describe("The name of the function to call.")
+var AgentCompletionsMessageAssistantToolCallFunctionSchema = z484.z.object({
+  arguments: z484.z.string().describe("The arguments to pass to the function, as a JSON string."),
+  name: z484.z.string().describe("The name of the function to call.")
 }).describe("Details of a function call made by the assistant.").meta({ title: "agent.completions.message.AssistantToolCallFunction" });
 
 // src/agent/completions/message/assistantToolCall.ts
-var AgentCompletionsMessageAssistantToolCallSchema = z485.z.object({
+var AgentCompletionsMessageAssistantToolCallSchema = z484.z.object({
   function: AgentCompletionsMessageAssistantToolCallFunctionSchema.describe("The function being called."),
-  id: z485.z.string().describe("The unique ID of this tool call."),
-  type: z485.z.literal("function")
+  id: z484.z.string().describe("The unique ID of this tool call."),
+  type: z484.z.literal("function")
 }).describe("A function call with an ID and function details.").meta({ title: "agent.completions.message.AssistantToolCall" });
 
 // src/agent/completions/message/assistantMessage.ts
-var AgentCompletionsMessageAssistantMessageSchema = z485.z.object({
+var AgentCompletionsMessageAssistantMessageSchema = z484.z.object({
   content: AgentCompletionsMessageRichContentSchema.nullable().describe("The message content, if any.").meta({ omitempty: true }).optional(),
-  name: z485.z.string().nullable().describe("Optional name for the assistant.").meta({ omitempty: true }).optional(),
-  reasoning: z485.z.string().nullable().describe("Reasoning content from models that support chain-of-thought.").meta({ omitempty: true }).optional(),
-  refusal: z485.z.string().nullable().describe("Refusal message if the model declined to respond.").meta({ omitempty: true }).optional(),
-  tool_calls: z485.z.array(AgentCompletionsMessageAssistantToolCallSchema).nullable().describe("Tool calls made by the assistant.").meta({ omitempty: true }).optional()
+  name: z484.z.string().nullable().describe("Optional name for the assistant.").meta({ omitempty: true }).optional(),
+  reasoning: z484.z.string().nullable().describe("Reasoning content from models that support chain-of-thought.").meta({ omitempty: true }).optional(),
+  refusal: z484.z.string().nullable().describe("Refusal message if the model declined to respond.").meta({ omitempty: true }).optional(),
+  tool_calls: z484.z.array(AgentCompletionsMessageAssistantToolCallSchema).nullable().describe("Tool calls made by the assistant.").meta({ omitempty: true }).optional()
 }).describe("An assistant message (model's previous response).").meta({ title: "agent.completions.message.AssistantMessage" });
-var FunctionsExpressionSpecialSchema = z485.z.union([z485.z.literal("input").describe("Returns the params input as-is.").meta({ "variantTitle": "Input" }), z485.z.literal("output").describe("Returns the params output as-is.").meta({ "variantTitle": "Output" }), z485.z.literal("task_output_l1_normalized").describe("L1-normalizes the output. Scalar/Err pass through.\nVector: L1 normalize. Vectors: L1 normalize each.").meta({ "variantTitle": "TaskOutputL1Normalized" }), z485.z.literal("task_output_weighted_sum").describe("Weighted sum of the output. Vector \u2192 Scalar. Vectors \u2192 Vector.").meta({ "variantTitle": "TaskOutputWeightedSum" }), z485.z.literal("input_items_output_length").describe("Returns the length of input['items'] as u64").meta({ "variantTitle": "InputItemsOutputLength" }), z485.z.literal("input_items_optional_context_split").describe("Splits an input containing items and optionally context into multiple inputs").meta({ "variantTitle": "InputItemsOptionalContextSplit" }), z485.z.literal("input_items_optional_context_merge").describe("Merges multiple inputs containing items and optionally context into a single input").meta({ "variantTitle": "InputItemsOptionalContextMerge" })]).describe("Predefined expression behaviors that require no user-authored code.").meta({ title: "functions.expression.Special" });
+var FunctionsExpressionSpecialSchema = z484.z.union([z484.z.literal("input").describe("Returns the params input as-is.").meta({ "variantTitle": "Input" }), z484.z.literal("output").describe("Returns the params output as-is.").meta({ "variantTitle": "Output" }), z484.z.literal("task_output_l1_normalized").describe("L1-normalizes the output. Scalar/Err pass through.\nVector: L1 normalize. Vectors: L1 normalize each.").meta({ "variantTitle": "TaskOutputL1Normalized" }), z484.z.literal("task_output_weighted_sum").describe("Weighted sum of the output. Vector \u2192 Scalar. Vectors \u2192 Vector.").meta({ "variantTitle": "TaskOutputWeightedSum" }), z484.z.literal("input_items_output_length").describe("Returns the length of input['items'] as u64").meta({ "variantTitle": "InputItemsOutputLength" }), z484.z.literal("input_items_optional_context_split").describe("Splits an input containing items and optionally context into multiple inputs").meta({ "variantTitle": "InputItemsOptionalContextSplit" }), z484.z.literal("input_items_optional_context_merge").describe("Merges multiple inputs containing items and optionally context into a single input").meta({ "variantTitle": "InputItemsOptionalContextMerge" })]).describe("Predefined expression behaviors that require no user-authored code.").meta({ title: "functions.expression.Special" });
 
 // src/functions/expression/expression.ts
-var FunctionsExpressionExpressionSchema = z485.z.union([z485.z.object({
-  $jmespath: z485.z.string()
-}).strict().describe("A JMESPath expression.").meta({ "variantTitle": "JMESPath" }), z485.z.object({
-  $starlark: z485.z.string()
-}).strict().describe("A Starlark expression.").meta({ "variantTitle": "Starlark" }), z485.z.object({
+var FunctionsExpressionExpressionSchema = z484.z.union([z484.z.object({
+  $jmespath: z484.z.string()
+}).strict().describe("A JMESPath expression.").meta({ "variantTitle": "JMESPath" }), z484.z.object({
+  $starlark: z484.z.string()
+}).strict().describe("A Starlark expression.").meta({ "variantTitle": "Starlark" }), z484.z.object({
   $special: FunctionsExpressionSpecialSchema
 }).strict().describe("A predefined special expression variant.").meta({ "variantTitle": "Special" })]).describe('An expression that can be either JMESPath or Starlark.\n\nSerializes as `{"$jmespath": "..."}` or `{"$starlark": "..."}` in JSON.\n\n# Examples\n\nJMESPath:\n```json\n{"$jmespath": "input.items[0].name"}\n```\n\nStarlark:\n```json\n{"$starlark": "input[\'items\'][0][\'name\']"}\n```').meta({ title: "functions.expression.Expression" });
 
 // src/agent/completions/message/assistantToolCallFunctionExpression.ts
-var AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema = z485.z.object({
-  arguments: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('The arguments expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
-  name: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('The function name expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+var AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema = z484.z.object({
+  arguments: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('The arguments expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  name: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('The function name expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
 }).describe("Expression variant of [`AssistantToolCallFunction`] for dynamic content.").meta({ title: "agent.completions.message.AssistantToolCallFunctionExpression" });
 
 // src/agent/completions/message/assistantToolCallExpression.ts
-var AgentCompletionsMessageAssistantToolCallExpressionSchema = z485.z.object({
-  function: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.AssistantToolCallFunctionExpression", "variantTitle": "Value" })]).describe('The function expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
-  id: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('The tool call ID expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
-  type: z485.z.literal("function")
+var AgentCompletionsMessageAssistantToolCallExpressionSchema = z484.z.object({
+  function: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.AssistantToolCallFunctionExpression", "variantTitle": "Value" })]).describe('The function expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  id: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('The tool call ID expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  type: z484.z.literal("function")
 }).describe("A function call expression.").meta({ title: "agent.completions.message.AssistantToolCallExpression" });
-var AgentCompletionsMessageRichContentPartExpressionSchema = z485.z.union([z485.z.object({
-  text: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
-  type: z485.z.literal("text")
-}).meta({ "variantTitle": "Text" }), z485.z.object({
-  image_url: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageImageUrlSchema.describe("A literal value.").meta({ "title": "agent.completions.message.ImageUrl", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
-  type: z485.z.literal("image_url")
-}).meta({ "variantTitle": "ImageUrl" }), z485.z.object({
-  input_audio: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageInputAudioSchema.describe("A literal value.").meta({ "title": "agent.completions.message.InputAudio", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
-  type: z485.z.literal("input_audio")
-}).meta({ "variantTitle": "InputAudio" }), z485.z.object({
-  type: z485.z.literal("input_video"),
-  video_url: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageVideoUrlSchema.describe("A literal value.").meta({ "title": "agent.completions.message.VideoUrl", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
-}).meta({ "variantTitle": "InputVideo" }), z485.z.object({
-  type: z485.z.literal("video_url"),
-  video_url: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageVideoUrlSchema.describe("A literal value.").meta({ "title": "agent.completions.message.VideoUrl", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
-}).meta({ "variantTitle": "VideoUrl" }), z485.z.object({
-  file: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageFileSchema.describe("A literal value.").meta({ "title": "agent.completions.message.File", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
-  type: z485.z.literal("file")
+var AgentCompletionsMessageRichContentPartExpressionSchema = z484.z.union([z484.z.object({
+  text: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  type: z484.z.literal("text")
+}).meta({ "variantTitle": "Text" }), z484.z.object({
+  image_url: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageImageUrlSchema.describe("A literal value.").meta({ "title": "agent.completions.message.ImageUrl", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  type: z484.z.literal("image_url")
+}).meta({ "variantTitle": "ImageUrl" }), z484.z.object({
+  input_audio: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageInputAudioSchema.describe("A literal value.").meta({ "title": "agent.completions.message.InputAudio", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  type: z484.z.literal("input_audio")
+}).meta({ "variantTitle": "InputAudio" }), z484.z.object({
+  type: z484.z.literal("input_video"),
+  video_url: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageVideoUrlSchema.describe("A literal value.").meta({ "title": "agent.completions.message.VideoUrl", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+}).meta({ "variantTitle": "InputVideo" }), z484.z.object({
+  type: z484.z.literal("video_url"),
+  video_url: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageVideoUrlSchema.describe("A literal value.").meta({ "title": "agent.completions.message.VideoUrl", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+}).meta({ "variantTitle": "VideoUrl" }), z484.z.object({
+  file: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageFileSchema.describe("A literal value.").meta({ "title": "agent.completions.message.File", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  type: z484.z.literal("file")
 }).meta({ "variantTitle": "File" })]).describe("Expression variant of [`RichContentPart`] for dynamic content.").meta({ title: "agent.completions.message.RichContentPartExpression" });
 
 // src/agent/completions/message/richContentExpression.ts
-var AgentCompletionsMessageRichContentExpressionSchema = z485.z.union([z485.z.string().describe("Plain text content.").meta({ "variantTitle": "Text" }), z485.z.array(z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageRichContentPartExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.RichContentPartExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("Multi-part content expressions.").meta({ "variantTitle": "Parts" })]).describe("Expression variant of [`RichContent`] for dynamic content.").meta({ title: "agent.completions.message.RichContentExpression" });
+var AgentCompletionsMessageRichContentExpressionSchema = z484.z.union([z484.z.string().describe("Plain text content.").meta({ "variantTitle": "Text" }), z484.z.array(z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageRichContentPartExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.RichContentPartExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("Multi-part content expressions.").meta({ "variantTitle": "Parts" })]).describe("Expression variant of [`RichContent`] for dynamic content.").meta({ title: "agent.completions.message.RichContentExpression" });
 
 // src/agent/completions/message/assistantMessageExpression.ts
-var AgentCompletionsMessageAssistantMessageExpressionSchema = z485.z.object({
-  content: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageRichContentExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.RichContentExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().describe("The content expression.").meta({ omitempty: true }).optional(),
-  name: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().meta({ omitempty: true }).optional(),
-  reasoning: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().meta({ omitempty: true }).optional(),
-  refusal: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().meta({ omitempty: true }).optional(),
-  tool_calls: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.array(z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageAssistantToolCallExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.AssistantToolCallExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().meta({ omitempty: true }).optional()
+var AgentCompletionsMessageAssistantMessageExpressionSchema = z484.z.object({
+  content: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageRichContentExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.RichContentExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().describe("The content expression.").meta({ omitempty: true }).optional(),
+  name: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().meta({ omitempty: true }).optional(),
+  reasoning: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().meta({ omitempty: true }).optional(),
+  refusal: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().meta({ omitempty: true }).optional(),
+  tool_calls: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.array(z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageAssistantToolCallExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.AssistantToolCallExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().meta({ omitempty: true }).optional()
 }).describe("Expression variant of [`AssistantMessage`] for dynamic content.").meta({ title: "agent.completions.message.AssistantMessageExpression" });
-var AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema = z485.z.object({
-  arguments: z485.z.string().nullable().describe("The arguments being streamed (accumulated across deltas).").meta({ omitempty: true }).optional(),
-  name: z485.z.string().nullable().describe("The function name (only present in the first delta).").meta({ omitempty: true }).optional()
+var AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema = z484.z.object({
+  arguments: z484.z.string().nullable().describe("The arguments being streamed (accumulated across deltas).").meta({ omitempty: true }).optional(),
+  name: z484.z.string().nullable().describe("The function name (only present in the first delta).").meta({ omitempty: true }).optional()
 }).describe("Function call details in a streaming tool call.").meta({ title: "agent.completions.message.AssistantToolCallFunctionDelta" });
-var AgentCompletionsMessageAssistantToolCallTypeSchema = z485.z.literal("function").describe("A function call.").meta({ title: "agent.completions.message.AssistantToolCallType" });
+var AgentCompletionsMessageAssistantToolCallTypeSchema = z484.z.literal("function").describe("A function call.").meta({ title: "agent.completions.message.AssistantToolCallType" });
 
 // src/agent/completions/message/assistantToolCallDelta.ts
-var AgentCompletionsMessageAssistantToolCallDeltaSchema = z485.z.object({
+var AgentCompletionsMessageAssistantToolCallDeltaSchema = z484.z.object({
   function: AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema.nullable().describe("The function call details.").meta({ omitempty: true }).optional(),
-  id: z485.z.string().nullable().describe("The unique ID of this tool call.").meta({ omitempty: true }).optional(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3).describe("The index of this tool call."),
+  id: z484.z.string().nullable().describe("The unique ID of this tool call.").meta({ omitempty: true }).optional(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3).describe("The index of this tool call."),
   type: AgentCompletionsMessageAssistantToolCallTypeSchema.nullable().describe('The type of tool call (always "function").').meta({ omitempty: true }).optional()
 }).describe("A tool call delta in a streaming response.").meta({ title: "agent.completions.message.AssistantToolCallDelta" });
-var AgentCompletionsMessageSimpleContentPartSchema = z485.z.object({
-  text: z485.z.string().describe("The text content."),
-  type: z485.z.literal("text")
+var AgentCompletionsMessageSimpleContentPartSchema = z484.z.object({
+  text: z484.z.string().describe("The text content."),
+  type: z484.z.literal("text")
 }).describe("A text part.").meta({ title: "agent.completions.message.SimpleContentPart" });
 
 // src/agent/completions/message/simpleContent.ts
-var AgentCompletionsMessageSimpleContentSchema = z485.z.union([z485.z.string().describe("Plain text content.").meta({ "variantTitle": "Text" }), z485.z.array(AgentCompletionsMessageSimpleContentPartSchema).describe("Multi-part text content.").meta({ "variantTitle": "Parts" })]).describe("Simple text content for system/developer messages.").meta({ title: "agent.completions.message.SimpleContent" });
+var AgentCompletionsMessageSimpleContentSchema = z484.z.union([z484.z.string().describe("Plain text content.").meta({ "variantTitle": "Text" }), z484.z.array(AgentCompletionsMessageSimpleContentPartSchema).describe("Multi-part text content.").meta({ "variantTitle": "Parts" })]).describe("Simple text content for system/developer messages.").meta({ title: "agent.completions.message.SimpleContent" });
 
 // src/agent/completions/message/developerMessage.ts
-var AgentCompletionsMessageDeveloperMessageSchema = z485.z.object({
+var AgentCompletionsMessageDeveloperMessageSchema = z484.z.object({
   content: AgentCompletionsMessageSimpleContentSchema.describe("The message content."),
-  name: z485.z.string().nullable().describe("Optional name for the message author.").meta({ omitempty: true }).optional()
+  name: z484.z.string().nullable().describe("Optional name for the message author.").meta({ omitempty: true }).optional()
 }).describe("A developer message.").meta({ title: "agent.completions.message.DeveloperMessage" });
-var AgentCompletionsMessageSimpleContentPartExpressionSchema = z485.z.object({
-  text: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('The text expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
-  type: z485.z.literal("text")
+var AgentCompletionsMessageSimpleContentPartExpressionSchema = z484.z.object({
+  text: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('The text expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  type: z484.z.literal("text")
 }).describe("A text part expression.").meta({ title: "agent.completions.message.SimpleContentPartExpression" });
 
 // src/agent/completions/message/simpleContentExpression.ts
-var AgentCompletionsMessageSimpleContentExpressionSchema = z485.z.union([z485.z.string().describe("Plain text content.").meta({ "variantTitle": "Text" }), z485.z.array(z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageSimpleContentPartExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.SimpleContentPartExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("Multi-part text content expressions.").meta({ "variantTitle": "Parts" })]).describe("Expression variant of [`SimpleContent`] for dynamic content.").meta({ title: "agent.completions.message.SimpleContentExpression" });
+var AgentCompletionsMessageSimpleContentExpressionSchema = z484.z.union([z484.z.string().describe("Plain text content.").meta({ "variantTitle": "Text" }), z484.z.array(z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageSimpleContentPartExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.SimpleContentPartExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("Multi-part text content expressions.").meta({ "variantTitle": "Parts" })]).describe("Expression variant of [`SimpleContent`] for dynamic content.").meta({ title: "agent.completions.message.SimpleContentExpression" });
 
 // src/agent/completions/message/developerMessageExpression.ts
-var AgentCompletionsMessageDeveloperMessageExpressionSchema = z485.z.object({
-  content: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageSimpleContentExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.SimpleContentExpression", "variantTitle": "Value" })]).describe('The message content expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
-  name: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().describe("Optional name expression.").meta({ omitempty: true }).optional()
+var AgentCompletionsMessageDeveloperMessageExpressionSchema = z484.z.object({
+  content: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageSimpleContentExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.SimpleContentExpression", "variantTitle": "Value" })]).describe('The message content expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  name: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().describe("Optional name expression.").meta({ omitempty: true }).optional()
 }).describe("Expression variant of [`DeveloperMessage`] for dynamic content.").meta({ title: "agent.completions.message.DeveloperMessageExpression" });
-var AgentCompletionsMessageSystemMessageSchema = z485.z.object({
+var AgentCompletionsMessageSystemMessageSchema = z484.z.object({
   content: AgentCompletionsMessageSimpleContentSchema.describe("The message content."),
-  name: z485.z.string().nullable().describe("Optional name for the message author.").meta({ omitempty: true }).optional()
+  name: z484.z.string().nullable().describe("Optional name for the message author.").meta({ omitempty: true }).optional()
 }).describe("A system message setting context or instructions.").meta({ title: "agent.completions.message.SystemMessage" });
-var AgentCompletionsMessageToolMessageSchema = z485.z.object({
+var AgentCompletionsMessageToolMessageSchema = z484.z.object({
   content: AgentCompletionsMessageRichContentSchema.describe("The content of the tool response."),
-  tool_call_id: z485.z.string().describe("The ID of the tool call this message responds to.")
+  tool_call_id: z484.z.string().describe("The ID of the tool call this message responds to.")
 }).describe("A tool message containing the result of a tool call.").meta({ title: "agent.completions.message.ToolMessage" });
-var AgentCompletionsMessageUserMessageSchema = z485.z.object({
+var AgentCompletionsMessageUserMessageSchema = z484.z.object({
   content: AgentCompletionsMessageRichContentSchema.describe("The message content (supports text, images, audio, video, files)."),
-  name: z485.z.string().nullable().describe("Optional name for the user.").meta({ omitempty: true }).optional()
+  name: z484.z.string().nullable().describe("Optional name for the user.").meta({ omitempty: true }).optional()
 }).describe("A user message from the end user.").meta({ title: "agent.completions.message.UserMessage" });
 
 // src/agent/completions/message/message.ts
-var AgentCompletionsMessageMessageSchema = z485.z.union([AgentCompletionsMessageDeveloperMessageSchema.and(z485.z.object({
-  role: z485.z.literal("developer")
-})).describe("A developer message (similar to system, but from the developer).").meta({ "variantTitle": "Developer" }), AgentCompletionsMessageSystemMessageSchema.and(z485.z.object({
-  role: z485.z.literal("system")
-})).describe("A system message setting context or instructions.").meta({ "variantTitle": "System" }), AgentCompletionsMessageUserMessageSchema.and(z485.z.object({
-  role: z485.z.literal("user")
-})).describe("A user message from the end user.").meta({ "variantTitle": "User" }), AgentCompletionsMessageAssistantMessageSchema.and(z485.z.object({
-  role: z485.z.literal("assistant")
-})).describe("An assistant message (model's previous response).").meta({ "variantTitle": "Assistant" }), AgentCompletionsMessageToolMessageSchema.and(z485.z.object({
-  role: z485.z.literal("tool")
+var AgentCompletionsMessageMessageSchema = z484.z.union([AgentCompletionsMessageDeveloperMessageSchema.and(z484.z.object({
+  role: z484.z.literal("developer")
+})).describe("A developer message (similar to system, but from the developer).").meta({ "variantTitle": "Developer" }), AgentCompletionsMessageSystemMessageSchema.and(z484.z.object({
+  role: z484.z.literal("system")
+})).describe("A system message setting context or instructions.").meta({ "variantTitle": "System" }), AgentCompletionsMessageUserMessageSchema.and(z484.z.object({
+  role: z484.z.literal("user")
+})).describe("A user message from the end user.").meta({ "variantTitle": "User" }), AgentCompletionsMessageAssistantMessageSchema.and(z484.z.object({
+  role: z484.z.literal("assistant")
+})).describe("An assistant message (model's previous response).").meta({ "variantTitle": "Assistant" }), AgentCompletionsMessageToolMessageSchema.and(z484.z.object({
+  role: z484.z.literal("tool")
 })).describe("A tool message containing the result of a tool call.").meta({ "variantTitle": "Tool" })]).describe("A message in the conversation.").meta({ title: "agent.completions.message.Message" });
-var AgentCompletionsMessageSystemMessageExpressionSchema = z485.z.object({
-  content: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageSimpleContentExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.SimpleContentExpression", "variantTitle": "Value" })]).describe('The message content expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
-  name: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().describe("Optional name expression.").meta({ omitempty: true }).optional()
+var AgentCompletionsMessageSystemMessageExpressionSchema = z484.z.object({
+  content: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageSimpleContentExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.SimpleContentExpression", "variantTitle": "Value" })]).describe('The message content expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  name: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().describe("Optional name expression.").meta({ omitempty: true }).optional()
 }).describe("Expression variant of [`SystemMessage`] for dynamic content.").meta({ title: "agent.completions.message.SystemMessageExpression" });
-var AgentCompletionsMessageToolMessageExpressionSchema = z485.z.object({
-  content: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageRichContentExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.RichContentExpression", "variantTitle": "Value" })]).describe('The content expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
-  tool_call_id: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('The tool call ID expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+var AgentCompletionsMessageToolMessageExpressionSchema = z484.z.object({
+  content: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageRichContentExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.RichContentExpression", "variantTitle": "Value" })]).describe('The content expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  tool_call_id: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('The tool call ID expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
 }).describe("Expression variant of [`ToolMessage`] for dynamic content.").meta({ title: "agent.completions.message.ToolMessageExpression" });
-var AgentCompletionsMessageUserMessageExpressionSchema = z485.z.object({
-  content: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageRichContentExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.RichContentExpression", "variantTitle": "Value" })]).describe('The message content expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
-  name: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().describe("Optional name expression.").meta({ omitempty: true }).optional()
+var AgentCompletionsMessageUserMessageExpressionSchema = z484.z.object({
+  content: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageRichContentExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.RichContentExpression", "variantTitle": "Value" })]).describe('The message content expression.\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  name: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').nullable().describe("Optional name expression.").meta({ omitempty: true }).optional()
 }).describe("Expression variant of [`UserMessage`] for dynamic content.").meta({ title: "agent.completions.message.UserMessageExpression" });
 
 // src/agent/completions/message/messageExpression.ts
-var AgentCompletionsMessageMessageExpressionSchema = z485.z.union([AgentCompletionsMessageDeveloperMessageExpressionSchema.and(z485.z.object({
-  role: z485.z.literal("developer")
-})).meta({ "variantTitle": "Developer" }), AgentCompletionsMessageSystemMessageExpressionSchema.and(z485.z.object({
-  role: z485.z.literal("system")
-})).meta({ "variantTitle": "System" }), AgentCompletionsMessageUserMessageExpressionSchema.and(z485.z.object({
-  role: z485.z.literal("user")
-})).meta({ "variantTitle": "User" }), AgentCompletionsMessageAssistantMessageExpressionSchema.and(z485.z.object({
-  role: z485.z.literal("assistant")
-})).meta({ "variantTitle": "Assistant" }), AgentCompletionsMessageToolMessageExpressionSchema.and(z485.z.object({
-  role: z485.z.literal("tool")
+var AgentCompletionsMessageMessageExpressionSchema = z484.z.union([AgentCompletionsMessageDeveloperMessageExpressionSchema.and(z484.z.object({
+  role: z484.z.literal("developer")
+})).meta({ "variantTitle": "Developer" }), AgentCompletionsMessageSystemMessageExpressionSchema.and(z484.z.object({
+  role: z484.z.literal("system")
+})).meta({ "variantTitle": "System" }), AgentCompletionsMessageUserMessageExpressionSchema.and(z484.z.object({
+  role: z484.z.literal("user")
+})).meta({ "variantTitle": "User" }), AgentCompletionsMessageAssistantMessageExpressionSchema.and(z484.z.object({
+  role: z484.z.literal("assistant")
+})).meta({ "variantTitle": "Assistant" }), AgentCompletionsMessageToolMessageExpressionSchema.and(z484.z.object({
+  role: z484.z.literal("tool")
 })).meta({ "variantTitle": "Tool" })]).describe("A message with expressions for dynamic content.\n\nThis is the expression variant of [`Message`] used in function definitions\nwhere message content can be computed from the function input at runtime.\nSupports both JMESPath and Starlark expressions.").meta({ title: "agent.completions.message.MessageExpression" });
 
 // src/agent/completions/message/richContentMerged.ts
@@ -1852,276 +1852,276 @@ var vectorResponseId = _wasm.vectorResponseId;
 function wasmAgentCompletionsMessagePromptId(prompt) {
   return promptId(prompt);
 }
-var AgentCompletionsRequestProviderDataCollectionSchema = z485.z.union([z485.z.literal("deny").describe("Do not allow data collection.").meta({ "variantTitle": "Deny" }), z485.z.literal("allow").describe("Allow data collection.").meta({ "variantTitle": "Allow" })]).describe("Data collection policy for providers.").meta({ title: "agent.completions.request.ProviderDataCollection" });
-var AgentCompletionsRequestProviderMaxPriceSchema = z485.z.object({
-  audio: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Maximum price per audio second.").meta({ omitempty: true }).optional(),
-  completion: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Maximum price per completion token.").meta({ omitempty: true }).optional(),
-  image: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Maximum price per image.").meta({ omitempty: true }).optional(),
-  prompt: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Maximum price per prompt token.").meta({ omitempty: true }).optional(),
-  request: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Maximum price per request.").meta({ omitempty: true }).optional()
+var AgentCompletionsRequestProviderDataCollectionSchema = z484.z.union([z484.z.literal("deny").describe("Do not allow data collection.").meta({ "variantTitle": "Deny" }), z484.z.literal("allow").describe("Allow data collection.").meta({ "variantTitle": "Allow" })]).describe("Data collection policy for providers.").meta({ title: "agent.completions.request.ProviderDataCollection" });
+var AgentCompletionsRequestProviderMaxPriceSchema = z484.z.object({
+  audio: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Maximum price per audio second.").meta({ omitempty: true }).optional(),
+  completion: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Maximum price per completion token.").meta({ omitempty: true }).optional(),
+  image: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Maximum price per image.").meta({ omitempty: true }).optional(),
+  prompt: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Maximum price per prompt token.").meta({ omitempty: true }).optional(),
+  request: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Maximum price per request.").meta({ omitempty: true }).optional()
 }).describe("Maximum price constraints per token type.").meta({ title: "agent.completions.request.ProviderMaxPrice" });
-var AgentCompletionsRequestProviderSortSchema = z485.z.union([z485.z.literal("price").describe("Prioritize by price (cheapest first).").meta({ "variantTitle": "Price" }), z485.z.literal("throughput").describe("Prioritize by throughput (fastest first).").meta({ "variantTitle": "Throughput" }), z485.z.literal("latency").describe("Prioritize by latency (lowest first).").meta({ "variantTitle": "Latency" })]).describe("How to sort/prioritize providers.").meta({ title: "agent.completions.request.ProviderSort" });
+var AgentCompletionsRequestProviderSortSchema = z484.z.union([z484.z.literal("price").describe("Prioritize by price (cheapest first).").meta({ "variantTitle": "Price" }), z484.z.literal("throughput").describe("Prioritize by throughput (fastest first).").meta({ "variantTitle": "Throughput" }), z484.z.literal("latency").describe("Prioritize by latency (lowest first).").meta({ "variantTitle": "Latency" })]).describe("How to sort/prioritize providers.").meta({ title: "agent.completions.request.ProviderSort" });
 
 // src/agent/completions/request/provider.ts
-var AgentCompletionsRequestProviderSchema = z485.z.object({
+var AgentCompletionsRequestProviderSchema = z484.z.object({
   data_collection: AgentCompletionsRequestProviderDataCollectionSchema.nullable().describe("Whether to allow providers to collect data.").meta({ omitempty: true }).optional(),
-  max_latency: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Hard maximum latency requirement (seconds).").meta({ omitempty: true }).optional(),
+  max_latency: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Hard maximum latency requirement (seconds).").meta({ omitempty: true }).optional(),
   max_price: AgentCompletionsRequestProviderMaxPriceSchema.nullable().describe("Maximum price constraints.").meta({ omitempty: true }).optional(),
-  min_throughput: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Hard minimum throughput requirement (tokens/second).").meta({ omitempty: true }).optional(),
-  preferred_max_latency: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Preferred maximum latency (seconds).").meta({ omitempty: true }).optional(),
-  preferred_min_throughput: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Preferred minimum throughput (tokens/second).").meta({ omitempty: true }).optional(),
+  min_throughput: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Hard minimum throughput requirement (tokens/second).").meta({ omitempty: true }).optional(),
+  preferred_max_latency: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Preferred maximum latency (seconds).").meta({ omitempty: true }).optional(),
+  preferred_min_throughput: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Preferred minimum throughput (tokens/second).").meta({ omitempty: true }).optional(),
   sort: AgentCompletionsRequestProviderSortSchema.nullable().describe("How to sort/prioritize providers.").meta({ omitempty: true }).optional(),
-  zdr: z485.z.boolean().nullable().describe("Whether to use zero data retention providers only.").meta({ omitempty: true }).optional()
+  zdr: z484.z.boolean().nullable().describe("Whether to use zero data retention providers only.").meta({ omitempty: true }).optional()
 }).describe("Provider routing and selection preferences.").meta({ title: "agent.completions.request.Provider" });
-var JsonValueSchema = z485.z.union([
-  z485.z.string(),
-  z485.z.number(),
-  z485.z.boolean(),
-  z485.z.null(),
-  z485.z.array(z485.z.lazy(() => JsonValueSchema)),
-  z485.z.record(z485.z.string(), z485.z.lazy(() => JsonValueSchema))
+var JsonValueSchema = z484.z.union([
+  z484.z.string(),
+  z484.z.number(),
+  z484.z.boolean(),
+  z484.z.null(),
+  z484.z.array(z484.z.lazy(() => JsonValueSchema)),
+  z484.z.record(z484.z.string(), z484.z.lazy(() => JsonValueSchema))
 ]);
 
 // src/agent/completions/request/responseFormat.ts
-var AgentCompletionsRequestResponseFormatSchema = z485.z.union([z485.z.object({
-  type: z485.z.literal("text")
-}).describe("Plain text response (default).").meta({ "variantTitle": "Text" }), z485.z.object({
-  type: z485.z.literal("json_object")
-}).describe("Response must be valid JSON.").meta({ "variantTitle": "JsonObject" }), z485.z.object({
-  schema: z485.z.record(z485.z.string(), JsonValueSchema).describe("The JSON Schema definition."),
-  type: z485.z.literal("json_schema")
-}).describe("Response must conform to a JSON schema.").meta({ "variantTitle": "JsonSchema" }), z485.z.object({
-  grammar: z485.z.string(),
-  type: z485.z.literal("grammar")
-}).describe("Response must conform to a grammar.").meta({ "variantTitle": "Grammar" }), z485.z.object({
-  type: z485.z.literal("python")
-}).describe("Response must be valid Python code.").meta({ "variantTitle": "Python" }), z485.z.object({
-  description: z485.z.string().describe("A description of the tool."),
-  name: z485.z.string().describe("The name of the tool."),
-  required: z485.z.boolean().nullable().describe("Whether the tool MUST be called.").meta({ omitempty: true }).optional(),
-  schema: z485.z.record(z485.z.string(), JsonValueSchema).describe("The JSON Schema definition."),
-  type: z485.z.literal("tool_call")
+var AgentCompletionsRequestResponseFormatSchema = z484.z.union([z484.z.object({
+  type: z484.z.literal("text")
+}).describe("Plain text response (default).").meta({ "variantTitle": "Text" }), z484.z.object({
+  type: z484.z.literal("json_object")
+}).describe("Response must be valid JSON.").meta({ "variantTitle": "JsonObject" }), z484.z.object({
+  schema: z484.z.record(z484.z.string(), JsonValueSchema).describe("The JSON Schema definition."),
+  type: z484.z.literal("json_schema")
+}).describe("Response must conform to a JSON schema.").meta({ "variantTitle": "JsonSchema" }), z484.z.object({
+  grammar: z484.z.string(),
+  type: z484.z.literal("grammar")
+}).describe("Response must conform to a grammar.").meta({ "variantTitle": "Grammar" }), z484.z.object({
+  type: z484.z.literal("python")
+}).describe("Response must be valid Python code.").meta({ "variantTitle": "Python" }), z484.z.object({
+  description: z484.z.string().describe("A description of the tool."),
+  name: z484.z.string().describe("The name of the tool."),
+  required: z484.z.boolean().nullable().describe("Whether the tool MUST be called.").meta({ omitempty: true }).optional(),
+  schema: z484.z.record(z484.z.string(), JsonValueSchema).describe("The JSON Schema definition."),
+  type: z484.z.literal("tool_call")
 }).describe("The final assistant message will contain this tool call").meta({ "variantTitle": "ToolCall" })]).describe("The format of the model's response.").meta({ title: "agent.completions.request.ResponseFormat" });
 
 // src/agent/completions/request/responseFormatParam.ts
-var AgentCompletionsRequestResponseFormatParamSchema = z485.z.union([AgentCompletionsRequestResponseFormatSchema.describe("A single response format applied to all agents.").meta({ "title": "agent.completions.request.ResponseFormat", "variantTitle": "Single" }), z485.z.record(z485.z.string(), AgentCompletionsRequestResponseFormatSchema).describe("Per-agent response formats, keyed by agent ID.").meta({ "variantTitle": "PerAgent" })]).describe("Either a single response format or a per-agent map.").meta({ title: "agent.completions.request.ResponseFormatParam" });
-var AgentMockModeSchema = z485.z.enum(["default", "invention", "laboratory_builder", "laboratory_evaluation"]).meta({ title: "agent.mock.Mode" });
-var AgentMockOutputModeSchema = z485.z.union([z485.z.literal("instruction").describe("The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.").meta({ "variantTitle": "Instruction" }), z485.z.literal("json_schema").describe("A JSON schema response format is used with an enum of possible keys.\n\nRequires model support for structured JSON output.").meta({ "variantTitle": "JsonSchema" }), z485.z.literal("tool_call").describe("A forced tool call with an argument schema containing possible keys.\n\nRequires model support for tool/function calling.").meta({ "variantTitle": "ToolCall" })]).describe("The method used to constrain LLM output to valid response keys.\n\nIn vector completions, the model must select from a predefined set of\nresponses. This enum controls *how* that constraint is enforced.\n\n**Note:** This setting is only relevant for vector completions and is\ncompletely ignored for agent completions.").meta({ title: "agent.mock.OutputMode" });
-var AgentMockUpstreamSchema = z485.z.literal("mock").describe("Mock upstream marker.").meta({ title: "agent.mock.Upstream" });
+var AgentCompletionsRequestResponseFormatParamSchema = z484.z.union([AgentCompletionsRequestResponseFormatSchema.describe("A single response format applied to all agents.").meta({ "title": "agent.completions.request.ResponseFormat", "variantTitle": "Single" }), z484.z.record(z484.z.string(), AgentCompletionsRequestResponseFormatSchema).describe("Per-agent response formats, keyed by agent ID.").meta({ "variantTitle": "PerAgent" })]).describe("Either a single response format or a per-agent map.").meta({ title: "agent.completions.request.ResponseFormatParam" });
+var AgentMockModeSchema = z484.z.enum(["default", "invention", "laboratory_builder", "laboratory_evaluation"]).meta({ title: "agent.mock.Mode" });
+var AgentMockOutputModeSchema = z484.z.union([z484.z.literal("instruction").describe("The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.").meta({ "variantTitle": "Instruction" }), z484.z.literal("json_schema").describe("A JSON schema response format is used with an enum of possible keys.\n\nRequires model support for structured JSON output.").meta({ "variantTitle": "JsonSchema" }), z484.z.literal("tool_call").describe("A forced tool call with an argument schema containing possible keys.\n\nRequires model support for tool/function calling.").meta({ "variantTitle": "ToolCall" })]).describe("The method used to constrain LLM output to valid response keys.\n\nIn vector completions, the model must select from a predefined set of\nresponses. This enum controls *how* that constraint is enforced.\n\n**Note:** This setting is only relevant for vector completions and is\ncompletely ignored for agent completions.").meta({ title: "agent.mock.OutputMode" });
+var AgentMockUpstreamSchema = z484.z.literal("mock").describe("Mock upstream marker.").meta({ title: "agent.mock.Upstream" });
 
 // src/agent/mock/agentBase.ts
-var AgentMockAgentBaseSchema = z485.z.object({
+var AgentMockAgentBaseSchema = z484.z.object({
   client_objectiveai_mcp: AgentClientObjectiveaiMcpSchema.nullable().describe("Client-side ObjectiveAI MCP surface the calling client is\nexpected to expose locally back to the API (objectiveai\nbuilt-in, plus specific plugins / tools by owner+name+version).").meta({ omitempty: true }).optional(),
-  error: z485.z.boolean().nullable().describe("If true, the mock client will return an error instead of a response.").meta({ omitempty: true }).optional(),
-  error_probability: z485.z.number().int().min(0).max(255).nullable().describe("Probability (0-100) that the mock returns an error mid-stream.\nRequires `error` to be `Some(true)`.").meta({ omitempty: true }).optional(),
-  mcp_servers: z485.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
+  error: z484.z.boolean().nullable().describe("If true, the mock client will return an error instead of a response.").meta({ omitempty: true }).optional(),
+  error_probability: z484.z.number().int().min(0).max(255).nullable().describe("Probability (0-100) that the mock returns an error mid-stream.\nRequires `error` to be `Some(true)`.").meta({ omitempty: true }).optional(),
+  mcp_servers: z484.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
   mode: AgentMockModeSchema.nullable().describe("Mock agent mode. Defaults to `default`.").meta({ omitempty: true }).optional(),
   output_mode: AgentMockOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
-  top_logprobs: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
+  top_logprobs: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
   upstream: AgentMockUpstreamSchema.describe("The upstream provider marker.")
 }).describe("The base configuration for a Mock Agent (without computed ID).").meta({ title: "agent.mock.AgentBase" });
-var AgentOpenrouterOutputModeSchema = z485.z.union([z485.z.literal("instruction").describe("The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.").meta({ "variantTitle": "Instruction" }), z485.z.literal("json_schema").describe("A JSON schema response format is used with an enum of possible keys.\n\nRequires model support for structured JSON output.").meta({ "variantTitle": "JsonSchema" }), z485.z.literal("tool_call").describe("A forced tool call with an argument schema containing possible keys.\n\nRequires model support for tool/function calling.").meta({ "variantTitle": "ToolCall" })]).describe("The method used to constrain LLM output to valid response keys.\n\nIn vector completions, the model must select from a predefined set of\nresponses. This enum controls *how* that constraint is enforced.\n\n**Note:** This setting is only relevant for vector completions and is\ncompletely ignored for agent completions.").meta({ title: "agent.openrouter.OutputMode" });
-var AgentOpenrouterProviderQuantizationSchema = z485.z.union([z485.z.literal("int4").describe("4-bit integer quantization.").meta({ "variantTitle": "Int4" }), z485.z.literal("int8").describe("8-bit integer quantization.").meta({ "variantTitle": "Int8" }), z485.z.literal("fp4").describe("4-bit floating point quantization.").meta({ "variantTitle": "Fp4" }), z485.z.literal("fp6").describe("6-bit floating point quantization.").meta({ "variantTitle": "Fp6" }), z485.z.literal("fp8").describe("8-bit floating point quantization.").meta({ "variantTitle": "Fp8" }), z485.z.literal("fp16").describe("16-bit floating point (half precision).").meta({ "variantTitle": "Fp16" }), z485.z.literal("bf16").describe("16-bit brain floating point.").meta({ "variantTitle": "Bf16" }), z485.z.literal("fp32").describe("32-bit floating point (full precision).").meta({ "variantTitle": "Fp32" }), z485.z.literal("unknown").describe("Unknown quantization level.").meta({ "variantTitle": "Unknown" })]).describe("Model quantization levels for provider filtering.\n\nQuantization reduces model precision to decrease memory usage and\nincrease inference speed, potentially at the cost of output quality.").meta({ title: "agent.openrouter.ProviderQuantization" });
+var AgentOpenrouterOutputModeSchema = z484.z.union([z484.z.literal("instruction").describe("The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.").meta({ "variantTitle": "Instruction" }), z484.z.literal("json_schema").describe("A JSON schema response format is used with an enum of possible keys.\n\nRequires model support for structured JSON output.").meta({ "variantTitle": "JsonSchema" }), z484.z.literal("tool_call").describe("A forced tool call with an argument schema containing possible keys.\n\nRequires model support for tool/function calling.").meta({ "variantTitle": "ToolCall" })]).describe("The method used to constrain LLM output to valid response keys.\n\nIn vector completions, the model must select from a predefined set of\nresponses. This enum controls *how* that constraint is enforced.\n\n**Note:** This setting is only relevant for vector completions and is\ncompletely ignored for agent completions.").meta({ title: "agent.openrouter.OutputMode" });
+var AgentOpenrouterProviderQuantizationSchema = z484.z.union([z484.z.literal("int4").describe("4-bit integer quantization.").meta({ "variantTitle": "Int4" }), z484.z.literal("int8").describe("8-bit integer quantization.").meta({ "variantTitle": "Int8" }), z484.z.literal("fp4").describe("4-bit floating point quantization.").meta({ "variantTitle": "Fp4" }), z484.z.literal("fp6").describe("6-bit floating point quantization.").meta({ "variantTitle": "Fp6" }), z484.z.literal("fp8").describe("8-bit floating point quantization.").meta({ "variantTitle": "Fp8" }), z484.z.literal("fp16").describe("16-bit floating point (half precision).").meta({ "variantTitle": "Fp16" }), z484.z.literal("bf16").describe("16-bit brain floating point.").meta({ "variantTitle": "Bf16" }), z484.z.literal("fp32").describe("32-bit floating point (full precision).").meta({ "variantTitle": "Fp32" }), z484.z.literal("unknown").describe("Unknown quantization level.").meta({ "variantTitle": "Unknown" })]).describe("Model quantization levels for provider filtering.\n\nQuantization reduces model precision to decrease memory usage and\nincrease inference speed, potentially at the cost of output quality.").meta({ title: "agent.openrouter.ProviderQuantization" });
 
 // src/agent/openrouter/provider.ts
-var AgentOpenrouterProviderSchema = z485.z.object({
-  allow_fallbacks: z485.z.boolean().nullable().describe("Whether to allow fallback to other providers if preferred ones fail.\nDefaults to `true`.").meta({ omitempty: true }).optional(),
-  ignore: z485.z.array(z485.z.string()).nullable().describe("Providers to exclude from routing.").meta({ omitempty: true }).optional(),
-  only: z485.z.array(z485.z.string()).nullable().describe("Exclusive list of allowed providers. If set, only these providers are used.").meta({ omitempty: true }).optional(),
-  order: z485.z.array(z485.z.string()).nullable().describe("Preferred provider order. Earlier providers are tried first.").meta({ omitempty: true }).optional(),
-  quantizations: z485.z.array(AgentOpenrouterProviderQuantizationSchema).nullable().describe("Allowed model quantization levels.").meta({ omitempty: true }).optional(),
-  require_parameters: z485.z.boolean().nullable().describe("Whether to require that the provider supports all request parameters.\nDefaults to `false`.").meta({ omitempty: true }).optional()
+var AgentOpenrouterProviderSchema = z484.z.object({
+  allow_fallbacks: z484.z.boolean().nullable().describe("Whether to allow fallback to other providers if preferred ones fail.\nDefaults to `true`.").meta({ omitempty: true }).optional(),
+  ignore: z484.z.array(z484.z.string()).nullable().describe("Providers to exclude from routing.").meta({ omitempty: true }).optional(),
+  only: z484.z.array(z484.z.string()).nullable().describe("Exclusive list of allowed providers. If set, only these providers are used.").meta({ omitempty: true }).optional(),
+  order: z484.z.array(z484.z.string()).nullable().describe("Preferred provider order. Earlier providers are tried first.").meta({ omitempty: true }).optional(),
+  quantizations: z484.z.array(AgentOpenrouterProviderQuantizationSchema).nullable().describe("Allowed model quantization levels.").meta({ omitempty: true }).optional(),
+  require_parameters: z484.z.boolean().nullable().describe("Whether to require that the provider supports all request parameters.\nDefaults to `false`.").meta({ omitempty: true }).optional()
 }).describe("Provider routing preferences.\n\nControls which providers are used and in what order when routing\nrequests to upstream model hosts.").meta({ title: "agent.openrouter.Provider" });
-var AgentOpenrouterReasoningEffortSchema = z485.z.union([z485.z.literal("none").describe("No reasoning.").meta({ "variantTitle": "None" }), z485.z.literal("minimal").describe("Minimal reasoning effort.").meta({ "variantTitle": "Minimal" }), z485.z.literal("low").describe("Low reasoning effort.").meta({ "variantTitle": "Low" }), z485.z.literal("medium").describe("Medium reasoning effort.").meta({ "variantTitle": "Medium" }), z485.z.literal("high").describe("High reasoning effort.").meta({ "variantTitle": "High" }), z485.z.literal("xhigh").describe("Maximum reasoning effort.").meta({ "variantTitle": "Xhigh" })]).describe("The level of effort the model should put into reasoning.\n\nOnly supported by some models.").meta({ title: "agent.openrouter.ReasoningEffort" });
-var AgentOpenrouterReasoningSummaryVerbositySchema = z485.z.union([z485.z.literal("auto").describe("Let the model decide (default, normalized away).").meta({ "variantTitle": "Auto" }), z485.z.literal("concise").describe("Brief summary of reasoning.").meta({ "variantTitle": "Concise" }), z485.z.literal("detailed").describe("Thorough summary of reasoning.").meta({ "variantTitle": "Detailed" })]).describe("Verbosity of the reasoning summary included in responses.\n\nOnly supported by some models.").meta({ title: "agent.openrouter.ReasoningSummaryVerbosity" });
+var AgentOpenrouterReasoningEffortSchema = z484.z.union([z484.z.literal("none").describe("No reasoning.").meta({ "variantTitle": "None" }), z484.z.literal("minimal").describe("Minimal reasoning effort.").meta({ "variantTitle": "Minimal" }), z484.z.literal("low").describe("Low reasoning effort.").meta({ "variantTitle": "Low" }), z484.z.literal("medium").describe("Medium reasoning effort.").meta({ "variantTitle": "Medium" }), z484.z.literal("high").describe("High reasoning effort.").meta({ "variantTitle": "High" }), z484.z.literal("xhigh").describe("Maximum reasoning effort.").meta({ "variantTitle": "Xhigh" })]).describe("The level of effort the model should put into reasoning.\n\nOnly supported by some models.").meta({ title: "agent.openrouter.ReasoningEffort" });
+var AgentOpenrouterReasoningSummaryVerbositySchema = z484.z.union([z484.z.literal("auto").describe("Let the model decide (default, normalized away).").meta({ "variantTitle": "Auto" }), z484.z.literal("concise").describe("Brief summary of reasoning.").meta({ "variantTitle": "Concise" }), z484.z.literal("detailed").describe("Thorough summary of reasoning.").meta({ "variantTitle": "Detailed" })]).describe("Verbosity of the reasoning summary included in responses.\n\nOnly supported by some models.").meta({ title: "agent.openrouter.ReasoningSummaryVerbosity" });
 
 // src/agent/openrouter/reasoning.ts
-var AgentOpenrouterReasoningSchema = z485.z.object({
+var AgentOpenrouterReasoningSchema = z484.z.object({
   effort: AgentOpenrouterReasoningEffortSchema.nullable().describe("The reasoning effort level.\n\nOnly supported by some models.").meta({ omitempty: true }).optional(),
-  enabled: z485.z.boolean().nullable().describe("Whether reasoning is enabled. Defaults to `true` if other fields are set.").meta({ omitempty: true }).optional(),
-  max_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Maximum tokens for the reasoning/thinking output.\n\nOnly supported by some models.").meta({ omitempty: true }).optional(),
+  enabled: z484.z.boolean().nullable().describe("Whether reasoning is enabled. Defaults to `true` if other fields are set.").meta({ omitempty: true }).optional(),
+  max_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Maximum tokens for the reasoning/thinking output.\n\nOnly supported by some models.").meta({ omitempty: true }).optional(),
   summary_verbosity: AgentOpenrouterReasoningSummaryVerbositySchema.nullable().describe("Verbosity of reasoning summaries in the response.\n\nOnly supported by some models.").meta({ omitempty: true }).optional()
 }).describe('Configuration for model reasoning/thinking capabilities.\n\nSome models (like o1, o3, Claude with extended thinking) support\nexplicit reasoning modes where they can "think" before responding.\nThis struct configures those capabilities.\n\n**Note:** The `max_tokens`, `effort`, and `summary_verbosity` fields are\nonly supported by some models. Unsupported fields are silently ignored.').meta({ title: "agent.openrouter.Reasoning" });
-var AgentOpenrouterStopSchema = z485.z.union([z485.z.string().describe("A single stop sequence.").meta({ "variantTitle": "String" }), z485.z.array(z485.z.string()).describe("Multiple stop sequences (up to 4 typically supported).").meta({ "variantTitle": "Strings" })]).describe("Stop sequences that terminate model generation.\n\nWhen the model generates any of these sequences, it immediately\nstops producing further tokens.").meta({ title: "agent.openrouter.Stop" });
-var AgentOpenrouterUpstreamSchema = z485.z.literal("openrouter").describe("OpenRouter upstream marker.").meta({ title: "agent.openrouter.Upstream" });
-var AgentOpenrouterVerbositySchema = z485.z.union([z485.z.literal("low").describe("Minimal output, concise responses.").meta({ "variantTitle": "Low" }), z485.z.literal("medium").describe("Balanced output (default, normalized away during preparation).").meta({ "variantTitle": "Medium" }), z485.z.literal("high").describe("Detailed output with thorough explanations.").meta({ "variantTitle": "High" }), z485.z.literal("max").describe("Maximum verbosity, most detailed output possible.").meta({ "variantTitle": "Max" })]).describe("The verbosity level for model output.\n\nThis setting hints to the model how detailed its responses should be.\nNot all models support this parameter.").meta({ title: "agent.openrouter.Verbosity" });
+var AgentOpenrouterStopSchema = z484.z.union([z484.z.string().describe("A single stop sequence.").meta({ "variantTitle": "String" }), z484.z.array(z484.z.string()).describe("Multiple stop sequences (up to 4 typically supported).").meta({ "variantTitle": "Strings" })]).describe("Stop sequences that terminate model generation.\n\nWhen the model generates any of these sequences, it immediately\nstops producing further tokens.").meta({ title: "agent.openrouter.Stop" });
+var AgentOpenrouterUpstreamSchema = z484.z.literal("openrouter").describe("OpenRouter upstream marker.").meta({ title: "agent.openrouter.Upstream" });
+var AgentOpenrouterVerbositySchema = z484.z.union([z484.z.literal("low").describe("Minimal output, concise responses.").meta({ "variantTitle": "Low" }), z484.z.literal("medium").describe("Balanced output (default, normalized away during preparation).").meta({ "variantTitle": "Medium" }), z484.z.literal("high").describe("Detailed output with thorough explanations.").meta({ "variantTitle": "High" }), z484.z.literal("max").describe("Maximum verbosity, most detailed output possible.").meta({ "variantTitle": "Max" })]).describe("The verbosity level for model output.\n\nThis setting hints to the model how detailed its responses should be.\nNot all models support this parameter.").meta({ title: "agent.openrouter.Verbosity" });
 
 // src/agent/openrouter/agentBase.ts
-var AgentOpenrouterAgentBaseSchema = z485.z.object({
+var AgentOpenrouterAgentBaseSchema = z484.z.object({
   client_objectiveai_mcp: AgentClientObjectiveaiMcpSchema.nullable().describe("Client-side ObjectiveAI MCP surface the calling client is\nexpected to expose locally back to the API (objectiveai\nbuilt-in, plus specific plugins / tools by owner+name+version).").meta({ omitempty: true }).optional(),
-  frequency_penalty: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).").meta({ omitempty: true }).optional(),
-  logit_bias: z485.z.record(z485.z.string(), z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3)).nullable().describe("Token ID to bias mapping (-100 to 100). Positive values increase likelihood.").meta({ omitempty: true }).optional(),
-  max_completion_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Maximum tokens in the completion.").meta({ omitempty: true }).optional(),
-  max_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Maximum tokens (OpenRouter variant of max_completion_tokens).").meta({ omitempty: true }).optional(),
-  mcp_servers: z485.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
-  min_p: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Minimum probability threshold for sampling (0.0 to 1.0).").meta({ omitempty: true }).optional(),
-  model: z485.z.string().describe('The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).'),
+  frequency_penalty: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).").meta({ omitempty: true }).optional(),
+  logit_bias: z484.z.record(z484.z.string(), z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3)).nullable().describe("Token ID to bias mapping (-100 to 100). Positive values increase likelihood.").meta({ omitempty: true }).optional(),
+  max_completion_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Maximum tokens in the completion.").meta({ omitempty: true }).optional(),
+  max_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Maximum tokens (OpenRouter variant of max_completion_tokens).").meta({ omitempty: true }).optional(),
+  mcp_servers: z484.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
+  min_p: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Minimum probability threshold for sampling (0.0 to 1.0).").meta({ omitempty: true }).optional(),
+  model: z484.z.string().describe('The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).'),
   output_mode: AgentOpenrouterOutputModeSchema.default("instruction").describe("The output mode for vector completions. Ignored for agent completions."),
-  post_system_prefix_messages: z485.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages inserted after the leading chain of system/developer messages.").meta({ omitempty: true }).optional(),
-  prefix_messages: z485.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages prepended to the user's prompt.").meta({ omitempty: true }).optional(),
-  presence_penalty: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).").meta({ omitempty: true }).optional(),
+  post_system_prefix_messages: z484.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages inserted after the leading chain of system/developer messages.").meta({ omitempty: true }).optional(),
+  prefix_messages: z484.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages prepended to the user's prompt.").meta({ omitempty: true }).optional(),
+  presence_penalty: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).").meta({ omitempty: true }).optional(),
   provider: AgentOpenrouterProviderSchema.nullable().describe("Provider routing preferences.").meta({ omitempty: true }).optional(),
   reasoning: AgentOpenrouterReasoningSchema.nullable().describe("Reasoning/thinking configuration for supported models.").meta({ omitempty: true }).optional(),
-  repetition_penalty: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Repetition penalty (0.0 to 2.0). Values > 1.0 penalize repetition.").meta({ omitempty: true }).optional(),
+  repetition_penalty: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Repetition penalty (0.0 to 2.0). Values > 1.0 penalize repetition.").meta({ omitempty: true }).optional(),
   stop: AgentOpenrouterStopSchema.nullable().describe("Stop sequences that halt generation.").meta({ omitempty: true }).optional(),
-  suffix_messages: z485.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages appended after the user's prompt.").meta({ omitempty: true }).optional(),
-  synthetic_reasoning: z485.z.boolean().nullable().describe("Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
-  temperature: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Sampling temperature (0.0 to 2.0). Higher = more random.").meta({ omitempty: true }).optional(),
-  top_a: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Top-a sampling parameter (0.0 to 1.0).").meta({ omitempty: true }).optional(),
-  top_k: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Top-k sampling: only consider the k most likely tokens.").meta({ omitempty: true }).optional(),
-  top_logprobs: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
-  top_p: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Nucleus sampling probability (0.0 to 1.0).").meta({ omitempty: true }).optional(),
+  suffix_messages: z484.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages appended after the user's prompt.").meta({ omitempty: true }).optional(),
+  synthetic_reasoning: z484.z.boolean().nullable().describe("Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
+  temperature: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Sampling temperature (0.0 to 2.0). Higher = more random.").meta({ omitempty: true }).optional(),
+  top_a: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Top-a sampling parameter (0.0 to 1.0).").meta({ omitempty: true }).optional(),
+  top_k: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Top-k sampling: only consider the k most likely tokens.").meta({ omitempty: true }).optional(),
+  top_logprobs: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
+  top_p: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Nucleus sampling probability (0.0 to 1.0).").meta({ omitempty: true }).optional(),
   upstream: AgentOpenrouterUpstreamSchema.describe("The upstream provider marker."),
   verbosity: AgentOpenrouterVerbositySchema.nullable().describe("Output verbosity hint for supported models.").meta({ omitempty: true }).optional()
 }).describe("The base configuration for an OpenRouter Agent (without computed ID).").meta({ title: "agent.openrouter.AgentBase" });
 
 // src/agent/inlineAgentBase.ts
-var AgentInlineAgentBaseSchema = z485.z.union([AgentOpenrouterAgentBaseSchema.meta({ "title": "agent.openrouter.AgentBase", "variantTitle": "Openrouter" }), AgentClaudeAgentSdkAgentBaseSchema.meta({ "title": "agent.claude_agent_sdk.AgentBase", "variantTitle": "ClaudeAgentSdk" }), AgentCodexSdkAgentBaseSchema.meta({ "title": "agent.codex_sdk.AgentBase", "variantTitle": "CodexSdk" }), AgentMockAgentBaseSchema.meta({ "title": "agent.mock.AgentBase", "variantTitle": "Mock" })]).describe("The base inline configuration for an Agent (without computed ID or metadata).\n\nThis is an untagged enum that dispatches to the per-upstream AgentBase.\nDeserialization tries each variant in order until one matches.").meta({ title: "agent.InlineAgentBase" });
+var AgentInlineAgentBaseSchema = z484.z.union([AgentOpenrouterAgentBaseSchema.meta({ "title": "agent.openrouter.AgentBase", "variantTitle": "Openrouter" }), AgentClaudeAgentSdkAgentBaseSchema.meta({ "title": "agent.claude_agent_sdk.AgentBase", "variantTitle": "ClaudeAgentSdk" }), AgentCodexSdkAgentBaseSchema.meta({ "title": "agent.codex_sdk.AgentBase", "variantTitle": "CodexSdk" }), AgentMockAgentBaseSchema.meta({ "title": "agent.mock.AgentBase", "variantTitle": "Mock" })]).describe("The base inline configuration for an Agent (without computed ID or metadata).\n\nThis is an untagged enum that dispatches to the per-upstream AgentBase.\nDeserialization tries each variant in order until one matches.").meta({ title: "agent.InlineAgentBase" });
 
 // src/agent/inlineAgentBaseWithFallbacks.ts
-var AgentInlineAgentBaseWithFallbacksSchema = AgentInlineAgentBaseSchema.and(z485.z.object({
-  fallbacks: z485.z.array(AgentInlineAgentBaseSchema).nullable().describe("Fallback agents to try if the primary fails.").meta({ omitempty: true }).optional()
+var AgentInlineAgentBaseWithFallbacksSchema = AgentInlineAgentBaseSchema.and(z484.z.object({
+  fallbacks: z484.z.array(AgentInlineAgentBaseSchema).nullable().describe("Fallback agents to try if the primary fails.").meta({ omitempty: true }).optional()
 })).describe("An [`InlineAgentBase`] with optional fallbacks (no description).").meta({ title: "agent.InlineAgentBaseWithFallbacks" });
-var RemotePathCommitOptionalSchema = z485.z.union([z485.z.object({
-  commit: z485.z.string().nullable().optional(),
-  owner: z485.z.string(),
-  remote: z485.z.literal("github"),
-  repository: z485.z.string()
-}).meta({ "variantTitle": "Github" }), z485.z.object({
-  commit: z485.z.string().nullable().optional(),
-  owner: z485.z.string(),
-  remote: z485.z.literal("filesystem"),
-  repository: z485.z.string()
-}).meta({ "variantTitle": "Filesystem" }), z485.z.object({
-  name: z485.z.string(),
-  remote: z485.z.literal("mock")
+var RemotePathCommitOptionalSchema = z484.z.union([z484.z.object({
+  commit: z484.z.string().nullable().optional(),
+  owner: z484.z.string(),
+  remote: z484.z.literal("github"),
+  repository: z484.z.string()
+}).meta({ "variantTitle": "Github" }), z484.z.object({
+  commit: z484.z.string().nullable().optional(),
+  owner: z484.z.string(),
+  remote: z484.z.literal("filesystem"),
+  repository: z484.z.string()
+}).meta({ "variantTitle": "Filesystem" }), z484.z.object({
+  name: z484.z.string(),
+  remote: z484.z.literal("mock")
 }).meta({ "variantTitle": "Mock" })]).meta({ title: "RemotePathCommitOptional" });
 
 // src/agent/inlineAgentBaseWithFallbacksOrRemoteCommitOptional.ts
-var AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema = z485.z.union([AgentInlineAgentBaseWithFallbacksSchema.meta({ "title": "agent.InlineAgentBaseWithFallbacks", "variantTitle": "AgentBase" }), RemotePathCommitOptionalSchema.meta({ "title": "RemotePathCommitOptional", "variantTitle": "Remote" })]).describe("Like [`InlineAgentBaseWithFallbacksOrRemote`] but with optional commit.\nUsed in request types where commit resolution happens server-side.").meta({ title: "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional" });
+var AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema = z484.z.union([AgentInlineAgentBaseWithFallbacksSchema.meta({ "title": "agent.InlineAgentBaseWithFallbacks", "variantTitle": "AgentBase" }), RemotePathCommitOptionalSchema.meta({ "title": "RemotePathCommitOptional", "variantTitle": "Remote" })]).describe("Like [`InlineAgentBaseWithFallbacksOrRemote`] but with optional commit.\nUsed in request types where commit resolution happens server-side.").meta({ title: "agent.InlineAgentBaseWithFallbacksOrRemoteCommitOptional" });
 
 // src/agent/completions/request/agentCompletionCreateParams.ts
-var AgentCompletionsRequestAgentCompletionCreateParamsSchema = z485.z.object({
+var AgentCompletionsRequestAgentCompletionCreateParamsSchema = z484.z.object({
   agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema.describe("The agent to use (inline Agent or stored ID)."),
-  continuation: z485.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
-  messages: z485.z.array(AgentCompletionsMessageMessageSchema).describe("The conversation messages."),
+  continuation: z484.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
+  messages: z484.z.array(AgentCompletionsMessageMessageSchema).describe("The conversation messages."),
   provider: AgentCompletionsRequestProviderSchema.nullable().describe("Provider routing preferences.").meta({ omitempty: true }).optional(),
   response_format: AgentCompletionsRequestResponseFormatParamSchema.nullable().describe("Output format constraints (text, JSON, or JSON schema).").meta({ omitempty: true }).optional(),
-  seed: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().describe("Random seed for deterministic generation.").meta({ omitempty: true }).optional(),
-  stream: z485.z.boolean().nullable().describe("Whether to stream the response.").meta({ omitempty: true }).optional()
+  seed: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().describe("Random seed for deterministic generation.").meta({ omitempty: true }).optional(),
+  stream: z484.z.boolean().nullable().describe("Whether to stream the response.").meta({ omitempty: true }).optional()
 }).describe("Parameters for creating a agent completion.").meta({ title: "agent.completions.request.AgentCompletionCreateParams" });
-var AgentCompletionsRequestAgentCompletionNotifyParamsSchema = z485.z.object({
+var AgentCompletionsRequestAgentCompletionNotifyParamsSchema = z484.z.object({
   content: AgentCompletionsMessageRichContentSchema.describe("The user message content to inject (text or multi-part rich\ncontent)."),
-  response_id: z485.z.string().describe("The `id` of the agent completion response this message is for \u2014\nthe same value the api echoes in the streaming/unary response's\n`id` field.")
+  response_id: z484.z.string().describe("The `id` of the agent completion response this message is for \u2014\nthe same value the api echoes in the streaming/unary response's\n`id` field.")
 }).describe("Parameters for the `agent.completions.notify` endpoint. Pushes a\nuser message at a running agent completion identified by\n`response_id`; the message surfaces to the model on its next\nnatural inspection point. The endpoint has no response body \u2014 any\n2xx status is the success signal.").meta({ title: "agent.completions.request.AgentCompletionNotifyParams" });
-var AgentCompletionsResponseAssistantRoleSchema = z485.z.literal("assistant").describe("The assistant role.").meta({ title: "agent.completions.response.AssistantRole" });
-var AgentCompletionsResponseFinishReasonSchema = z485.z.union([z485.z.literal("stop").describe("The model reached a natural stop point or stop sequence.").meta({ "variantTitle": "Stop" }), z485.z.literal("length").describe("The model reached the maximum token limit.").meta({ "variantTitle": "Length" }), z485.z.literal("tool_calls").describe("The model decided to call one or more tools.").meta({ "variantTitle": "ToolCalls" }), z485.z.literal("content_filter").describe("The response was filtered due to content policy.").meta({ "variantTitle": "ContentFilter" }), z485.z.literal("error").describe("An error occurred during generation.").meta({ "variantTitle": "Error" })]).describe("The reason the model stopped generating.").meta({ title: "agent.completions.response.FinishReason" });
-var AgentCompletionsResponseTopLogprobSchema = z485.z.object({
-  bytes: z485.z.array(z485.z.number().int().min(0).max(255)).nullable().describe("The raw bytes of the token.").optional(),
-  logprob: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("The log probability of this token.").optional(),
-  token: z485.z.string().describe("The token string.")
+var AgentCompletionsResponseAssistantRoleSchema = z484.z.literal("assistant").describe("The assistant role.").meta({ title: "agent.completions.response.AssistantRole" });
+var AgentCompletionsResponseFinishReasonSchema = z484.z.union([z484.z.literal("stop").describe("The model reached a natural stop point or stop sequence.").meta({ "variantTitle": "Stop" }), z484.z.literal("length").describe("The model reached the maximum token limit.").meta({ "variantTitle": "Length" }), z484.z.literal("tool_calls").describe("The model decided to call one or more tools.").meta({ "variantTitle": "ToolCalls" }), z484.z.literal("content_filter").describe("The response was filtered due to content policy.").meta({ "variantTitle": "ContentFilter" }), z484.z.literal("error").describe("An error occurred during generation.").meta({ "variantTitle": "Error" })]).describe("The reason the model stopped generating.").meta({ title: "agent.completions.response.FinishReason" });
+var AgentCompletionsResponseTopLogprobSchema = z484.z.object({
+  bytes: z484.z.array(z484.z.number().int().min(0).max(255)).nullable().describe("The raw bytes of the token.").optional(),
+  logprob: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("The log probability of this token.").optional(),
+  token: z484.z.string().describe("The token string.")
 }).describe("A top alternative token with its log probability.").meta({ title: "agent.completions.response.TopLogprob" });
 
 // src/agent/completions/response/logprob.ts
-var AgentCompletionsResponseLogprobSchema = z485.z.object({
-  bytes: z485.z.array(z485.z.number().int().min(0).max(255)).nullable().describe("The raw bytes of the token.").optional(),
-  logprob: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The log probability of this token."),
-  token: z485.z.string().describe("The token string."),
-  top_logprobs: z485.z.array(AgentCompletionsResponseTopLogprobSchema).describe("The top alternative tokens and their log probabilities.")
+var AgentCompletionsResponseLogprobSchema = z484.z.object({
+  bytes: z484.z.array(z484.z.number().int().min(0).max(255)).nullable().describe("The raw bytes of the token.").optional(),
+  logprob: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The log probability of this token."),
+  token: z484.z.string().describe("The token string."),
+  top_logprobs: z484.z.array(AgentCompletionsResponseTopLogprobSchema).describe("The top alternative tokens and their log probabilities.")
 }).describe("Log probability information for a single token.").meta({ title: "agent.completions.response.Logprob" });
 
 // src/agent/completions/response/logprobs.ts
-var AgentCompletionsResponseLogprobsSchema = z485.z.object({
-  content: z485.z.array(AgentCompletionsResponseLogprobSchema).nullable().describe("Log probabilities for content tokens.").optional(),
-  refusal: z485.z.array(AgentCompletionsResponseLogprobSchema).nullable().describe("Log probabilities for refusal tokens.").optional()
+var AgentCompletionsResponseLogprobsSchema = z484.z.object({
+  content: z484.z.array(AgentCompletionsResponseLogprobSchema).nullable().describe("Log probabilities for content tokens.").optional(),
+  refusal: z484.z.array(AgentCompletionsResponseLogprobSchema).nullable().describe("Log probabilities for refusal tokens.").optional()
 }).describe("Log probabilities for generated tokens.").meta({ title: "agent.completions.response.Logprobs" });
-var AgentCompletionsResponseCompletionTokensDetailsSchema = z485.z.object({
-  accepted_prediction_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Tokens from accepted predictions (speculative decoding).").meta({ omitempty: true }).optional(),
-  audio_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Audio output tokens.").meta({ omitempty: true }).optional(),
-  reasoning_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Tokens used for reasoning/thinking.").meta({ omitempty: true }).optional(),
-  rejected_prediction_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Tokens from rejected predictions (speculative decoding).").meta({ omitempty: true }).optional()
+var AgentCompletionsResponseCompletionTokensDetailsSchema = z484.z.object({
+  accepted_prediction_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Tokens from accepted predictions (speculative decoding).").meta({ omitempty: true }).optional(),
+  audio_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Audio output tokens.").meta({ omitempty: true }).optional(),
+  reasoning_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Tokens used for reasoning/thinking.").meta({ omitempty: true }).optional(),
+  rejected_prediction_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Tokens from rejected predictions (speculative decoding).").meta({ omitempty: true }).optional()
 }).describe("Detailed breakdown of completion token usage.").meta({ title: "agent.completions.response.CompletionTokensDetails" });
-var AgentCompletionsResponseCostDetailsSchema = z485.z.object({
-  upstream_inference_cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Cost charged by the immediate upstream (e.g., OpenRouter)."),
-  upstream_upstream_inference_cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Cost charged by the upstream's upstream (e.g., the actual model provider).")
+var AgentCompletionsResponseCostDetailsSchema = z484.z.object({
+  upstream_inference_cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Cost charged by the immediate upstream (e.g., OpenRouter)."),
+  upstream_upstream_inference_cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Cost charged by the upstream's upstream (e.g., the actual model provider).")
 }).describe("Detailed cost breakdown.").meta({ title: "agent.completions.response.CostDetails" });
-var AgentCompletionsResponsePromptTokensDetailsSchema = z485.z.object({
-  audio_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Audio input tokens.").meta({ omitempty: true }).optional(),
-  cache_write_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Tokens written to cache.").meta({ omitempty: true }).optional(),
-  cached_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Tokens served from cache.").meta({ omitempty: true }).optional(),
-  video_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Video input tokens.").meta({ omitempty: true }).optional()
+var AgentCompletionsResponsePromptTokensDetailsSchema = z484.z.object({
+  audio_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Audio input tokens.").meta({ omitempty: true }).optional(),
+  cache_write_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Tokens written to cache.").meta({ omitempty: true }).optional(),
+  cached_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Tokens served from cache.").meta({ omitempty: true }).optional(),
+  video_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Video input tokens.").meta({ omitempty: true }).optional()
 }).describe("Detailed breakdown of prompt token usage.").meta({ title: "agent.completions.response.PromptTokensDetails" });
 
 // src/agent/completions/response/upstreamUsage.ts
-var AgentCompletionsResponseUpstreamUsageSchema = z485.z.object({
-  completion_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Number of tokens in the completion."),
+var AgentCompletionsResponseUpstreamUsageSchema = z484.z.object({
+  completion_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Number of tokens in the completion."),
   completion_tokens_details: AgentCompletionsResponseCompletionTokensDetailsSchema.nullable().describe("Detailed breakdown of completion tokens.").meta({ omitempty: true }).optional(),
-  cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The cost charged by ObjectiveAI for this request."),
+  cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The cost charged by ObjectiveAI for this request."),
   cost_details: AgentCompletionsResponseCostDetailsSchema.nullable().describe("Detailed cost breakdown.").meta({ omitempty: true }).optional(),
-  cost_multiplier: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The multiplier applied to compute ObjectiveAI's charge."),
-  is_byok: z485.z.boolean().describe("Whether this request used Bring Your Own Key (BYOK)."),
-  prompt_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Number of tokens in the prompt."),
+  cost_multiplier: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The multiplier applied to compute ObjectiveAI's charge."),
+  is_byok: z484.z.boolean().describe("Whether this request used Bring Your Own Key (BYOK)."),
+  prompt_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Number of tokens in the prompt."),
   prompt_tokens_details: AgentCompletionsResponsePromptTokensDetailsSchema.nullable().describe("Detailed breakdown of prompt tokens.").meta({ omitempty: true }).optional(),
-  total_cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost including ObjectiveAI's charge plus all upstream charges.\nFor BYOK requests, ObjectiveAI only charges the cost_multiplier difference,\nbut total_cost still includes what the upstream provider charged."),
-  total_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total tokens (prompt + completion).")
+  total_cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost including ObjectiveAI's charge plus all upstream charges.\nFor BYOK requests, ObjectiveAI only charges the cost_multiplier difference,\nbut total_cost still includes what the upstream provider charged."),
+  total_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total tokens (prompt + completion).")
 }).describe("Token usage and cost information from an upstream provider.\n\nThis is the per-assistant-response usage yielded by upstream clients.\nIt includes upstream-specific fields like `cost_multiplier` and `is_byok`.").meta({ title: "agent.completions.response.UpstreamUsage" });
 
 // src/agent/completions/response/streaming/assistantResponseChunk.ts
-var AgentCompletionsResponseStreamingAssistantResponseChunkSchema = z485.z.object({
-  agent: z485.z.string(),
+var AgentCompletionsResponseStreamingAssistantResponseChunkSchema = z484.z.object({
+  agent: z484.z.string(),
   content: AgentCompletionsMessageRichContentSchema.nullable().meta({ omitempty: true }).optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   finish_reason: AgentCompletionsResponseFinishReasonSchema.nullable().optional(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
   logprobs: AgentCompletionsResponseLogprobsSchema.nullable().meta({ omitempty: true }).optional(),
-  model: z485.z.string(),
-  provider: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  reasoning: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  refusal: z485.z.string().nullable().meta({ omitempty: true }).optional(),
+  model: z484.z.string(),
+  provider: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  reasoning: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  refusal: z484.z.string().nullable().meta({ omitempty: true }).optional(),
   role: AgentCompletionsResponseAssistantRoleSchema,
-  service_tier: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  system_fingerprint: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  tool_calls: z485.z.array(AgentCompletionsMessageAssistantToolCallDeltaSchema).nullable().meta({ omitempty: true }).optional(),
-  upstream_id: z485.z.string(),
+  service_tier: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  system_fingerprint: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  tool_calls: z484.z.array(AgentCompletionsMessageAssistantToolCallDeltaSchema).nullable().meta({ omitempty: true }).optional(),
+  upstream_id: z484.z.string(),
   usage: AgentCompletionsResponseUpstreamUsageSchema.nullable().describe("Upstream usage for this assistant response (set by upstream clients).").meta({ omitempty: true }).optional()
 }).describe("A chunk of a streaming agent completion response.\n\nMultiple chunks are received via Server-Sent Events and can be\naccumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)\nusing the [`push`](Self::push) method.").meta({ title: "agent.completions.response.streaming.AssistantResponseChunk" });
-var AgentCompletionsResponseToolRoleSchema = z485.z.literal("tool").meta({ title: "agent.completions.response.ToolRole" });
+var AgentCompletionsResponseToolRoleSchema = z484.z.literal("tool").meta({ title: "agent.completions.response.ToolRole" });
 
 // src/agent/completions/response/toolResponse.ts
-var AgentCompletionsResponseToolResponseSchema = z485.z.object({
+var AgentCompletionsResponseToolResponseSchema = z484.z.object({
   content: AgentCompletionsMessageRichContentSchema.describe("The content of the tool response."),
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
   role: AgentCompletionsResponseToolRoleSchema,
-  tool_call_id: z485.z.string().describe("The ID of the tool call this message responds to.")
+  tool_call_id: z484.z.string().describe("The ID of the tool call this message responds to.")
 }).describe("A tool message containing the result of a tool call.").meta({ title: "agent.completions.response.ToolResponse" });
 
 // src/agent/completions/response/streaming/messageChunk.ts
-var AgentCompletionsResponseStreamingMessageChunkSchema = z485.z.union([AgentCompletionsResponseStreamingAssistantResponseChunkSchema.meta({ "title": "agent.completions.response.streaming.AssistantResponseChunk", "variantTitle": "Assistant" }), AgentCompletionsResponseToolResponseSchema.meta({ "title": "agent.completions.response.ToolResponse", "variantTitle": "Tool" })]).meta({ title: "agent.completions.response.streaming.MessageChunk" });
-var AgentCompletionsResponseStreamingObjectSchema = z485.z.literal("agent.completion.chunk").describe("A agent completion chunk object.").meta({ title: "agent.completions.response.streaming.Object" });
-var AgentCompletionsResponseUsageSchema = z485.z.object({
-  completion_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total tokens generated across all assistant responses."),
+var AgentCompletionsResponseStreamingMessageChunkSchema = z484.z.union([AgentCompletionsResponseStreamingAssistantResponseChunkSchema.meta({ "title": "agent.completions.response.streaming.AssistantResponseChunk", "variantTitle": "Assistant" }), AgentCompletionsResponseToolResponseSchema.meta({ "title": "agent.completions.response.ToolResponse", "variantTitle": "Tool" })]).meta({ title: "agent.completions.response.streaming.MessageChunk" });
+var AgentCompletionsResponseStreamingObjectSchema = z484.z.literal("agent.completion.chunk").describe("A agent completion chunk object.").meta({ title: "agent.completions.response.streaming.Object" });
+var AgentCompletionsResponseUsageSchema = z484.z.object({
+  completion_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total tokens generated across all assistant responses."),
   completion_tokens_details: AgentCompletionsResponseCompletionTokensDetailsSchema.nullable().describe("Breakdown of completion tokens (reasoning, audio, etc.) if available.").meta({ omitempty: true }).optional(),
-  cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Cost charged by ObjectiveAI for this request."),
+  cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Cost charged by ObjectiveAI for this request."),
   cost_details: AgentCompletionsResponseCostDetailsSchema.nullable().describe("Breakdown of upstream and upstream_upstream costs if available.").meta({ omitempty: true }).optional(),
-  prompt_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens across all assistant responses."),
+  prompt_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens across all assistant responses."),
   prompt_tokens_details: AgentCompletionsResponsePromptTokensDetailsSchema.nullable().describe("Breakdown of prompt tokens (cached, audio, etc.) if available.").meta({ omitempty: true }).optional(),
-  total_cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost including upstream provider charges. Only differs from `cost`\nwhen using BYOK (Bring Your Own Key)."),
-  total_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Sum of completion and prompt tokens.")
+  total_cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost including upstream provider charges. Only differs from `cost`\nwhen using BYOK (Bring Your Own Key)."),
+  total_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Sum of completion and prompt tokens.")
 }).describe('Aggregated token and cost usage for an agent completion.\n\nThis is the "primary" usage type that aggregates across all upstream\nassistant responses within a single agent completion.').meta({ title: "agent.completions.response.Usage" });
-var AgentUpstreamSchema = z485.z.union([z485.z.literal("unknown").describe("Unknown Upstream.").meta({ "variantTitle": "Unknown" }), z485.z.literal("openrouter").describe("OpenRouter Upstream.").meta({ "variantTitle": "Openrouter" }), z485.z.literal("claude_agent_sdk").describe("Claude Agent SDK Upstream.").meta({ "variantTitle": "ClaudeAgentSdk" }), z485.z.literal("codex_sdk").describe("Codex SDK Upstream.").meta({ "variantTitle": "CodexSdk" }), z485.z.literal("mock").describe("Mock Upstream.").meta({ "variantTitle": "Mock" })]).describe("Supported agent upstreams.").meta({ title: "agent.Upstream" });
-var ErrorResponseErrorSchema = z485.z.object({
-  code: z485.z.number().int().min(0).max(65535).describe("The HTTP status code of the error response."),
+var AgentUpstreamSchema = z484.z.union([z484.z.literal("unknown").describe("Unknown Upstream.").meta({ "variantTitle": "Unknown" }), z484.z.literal("openrouter").describe("OpenRouter Upstream.").meta({ "variantTitle": "Openrouter" }), z484.z.literal("claude_agent_sdk").describe("Claude Agent SDK Upstream.").meta({ "variantTitle": "ClaudeAgentSdk" }), z484.z.literal("codex_sdk").describe("Codex SDK Upstream.").meta({ "variantTitle": "CodexSdk" }), z484.z.literal("mock").describe("Mock Upstream.").meta({ "variantTitle": "Mock" })]).describe("Supported agent upstreams.").meta({ title: "agent.Upstream" });
+var ErrorResponseErrorSchema = z484.z.object({
+  code: z484.z.number().int().min(0).max(65535).describe("The HTTP status code of the error response."),
   message: JsonValueSchema.describe("The error message or details as a JSON value.")
 }).describe("An error returned by the ObjectiveAI API.\n\nThis struct represents an API error response containing an HTTP status\ncode and a message. The message can be any JSON value, allowing for\nboth simple string errors and structured error objects.").meta({ title: "error.ResponseError" });
 
 // src/agent/completions/response/streaming/agentCompletionChunk.ts
-var AgentCompletionsResponseStreamingAgentCompletionChunkSchema = z485.z.object({
-  continuation: z485.z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var AgentCompletionsResponseStreamingAgentCompletionChunkSchema = z484.z.object({
+  continuation: z484.z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").meta({ omitempty: true }).optional(),
-  id: z485.z.string(),
-  messages: z485.z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
-  messages_queued: z485.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. Only\nset when `continuation` is also set \u2014 the caller acts on it by\nissuing the continuation. Absent when nothing is queued, when\nthere is no continuation to act on, or when the peek failed\n(the failure is surfaced via `error`).").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  messages: z484.z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
+  messages_queued: z484.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. Only\nset when `continuation` is also set \u2014 the caller acts on it by\nissuing the continuation. Absent when nothing is queued, when\nthere is no continuation to act on, or when the peek failed\n(the failure is surfaced via `error`).").meta({ omitempty: true }).optional(),
   object: AgentCompletionsResponseStreamingObjectSchema.describe('The object type (always "agent.completion.chunk").'),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema.nullable().describe("Token usage (only present in the final chunk).").meta({ omitempty: true }).optional()
@@ -2469,46 +2469,46 @@ function wasmAgentCompletionsResponseStreamingGenerateAgentCompletionChunk(seed)
 function wasmAgentCompletionsResponseStreamingNormalizeAgentCompletionForTests(a) {
   return JSON.parse(normalizeAgentCompletionForTests(a));
 }
-var AgentCompletionsResponseUnaryAssistantResponseSchema = z485.z.object({
-  agent: z485.z.string(),
+var AgentCompletionsResponseUnaryAssistantResponseSchema = z484.z.object({
+  agent: z484.z.string(),
   content: AgentCompletionsMessageRichContentSchema.nullable().optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   finish_reason: AgentCompletionsResponseFinishReasonSchema,
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
   logprobs: AgentCompletionsResponseLogprobsSchema.nullable().optional(),
-  model: z485.z.string(),
-  provider: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  reasoning: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  refusal: z485.z.string().nullable().optional(),
+  model: z484.z.string(),
+  provider: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  reasoning: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  refusal: z484.z.string().nullable().optional(),
   role: AgentCompletionsResponseAssistantRoleSchema,
-  service_tier: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  system_fingerprint: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  tool_calls: z485.z.array(AgentCompletionsMessageAssistantToolCallSchema).nullable().optional(),
-  upstream_id: z485.z.string(),
+  service_tier: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  system_fingerprint: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  tool_calls: z484.z.array(AgentCompletionsMessageAssistantToolCallSchema).nullable().optional(),
+  upstream_id: z484.z.string(),
   usage: AgentCompletionsResponseUpstreamUsageSchema.describe("Upstream usage for this assistant response (set by upstream clients).")
 }).describe("An assistant response in a unary agent completion.").meta({ title: "agent.completions.response.unary.AssistantResponse" });
 
 // src/agent/completions/response/unary/message.ts
-var AgentCompletionsResponseUnaryMessageSchema = z485.z.union([AgentCompletionsResponseUnaryAssistantResponseSchema.meta({ "title": "agent.completions.response.unary.AssistantResponse", "variantTitle": "Assistant" }), AgentCompletionsResponseToolResponseSchema.meta({ "title": "agent.completions.response.ToolResponse", "variantTitle": "Tool" })]).meta({ title: "agent.completions.response.unary.Message" });
-var AgentCompletionsResponseUnaryObjectSchema = z485.z.literal("agent.completion").describe("A agent completion object.").meta({ title: "agent.completions.response.unary.Object" });
+var AgentCompletionsResponseUnaryMessageSchema = z484.z.union([AgentCompletionsResponseUnaryAssistantResponseSchema.meta({ "title": "agent.completions.response.unary.AssistantResponse", "variantTitle": "Assistant" }), AgentCompletionsResponseToolResponseSchema.meta({ "title": "agent.completions.response.ToolResponse", "variantTitle": "Tool" })]).meta({ title: "agent.completions.response.unary.Message" });
+var AgentCompletionsResponseUnaryObjectSchema = z484.z.literal("agent.completion").describe("A agent completion object.").meta({ title: "agent.completions.response.unary.Object" });
 
 // src/agent/completions/response/unary/agentCompletion.ts
-var AgentCompletionsResponseUnaryAgentCompletionSchema = z485.z.object({
-  continuation: z485.z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var AgentCompletionsResponseUnaryAgentCompletionSchema = z484.z.object({
+  continuation: z484.z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
-  id: z485.z.string(),
-  messages: z485.z.array(AgentCompletionsResponseUnaryMessageSchema),
-  messages_queued: z485.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. See\n[`super::streaming::AgentCompletionChunk::messages_queued`].").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  messages: z484.z.array(AgentCompletionsResponseUnaryMessageSchema),
+  messages_queued: z484.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. See\n[`super::streaming::AgentCompletionChunk::messages_queued`].").meta({ omitempty: true }).optional(),
   object: AgentCompletionsResponseUnaryObjectSchema.describe('The object type (always "agent.completion").'),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema
 }).describe("A complete agent completion response.").meta({ title: "agent.completions.response.unary.AgentCompletion" });
 var AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema = AgentCompletionsRequestAgentCompletionCreateParamsSchema.extend({
-  stream: z485__default.default.literal(true)
+  stream: z484__default.default.literal(true)
 });
 var AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema = AgentCompletionsRequestAgentCompletionCreateParamsSchema.extend({
-  stream: z485__default.default.literal(false).optional().nullable()
+  stream: z484__default.default.literal(false).optional().nullable()
 });
 function agentCompletionsCreateAgentCompletion(client, body, options) {
   if (body.stream) {
@@ -2531,125 +2531,125 @@ function agentCompletionsNotifyAgentCompletion(client, body, options) {
     options
   );
 }
-var AgentFavoritesActionSchema = z485.z.enum(["added", "edited", "removed"]).meta({ title: "agent.favorites.Action" });
-var AgentFavoritesChangedNotificationSchema = z485.z.object({
+var AgentFavoritesActionSchema = z484.z.enum(["added", "edited", "removed"]).meta({ title: "agent.favorites.Action" });
+var AgentFavoritesChangedNotificationSchema = z484.z.object({
   action: AgentFavoritesActionSchema,
-  name: z485.z.string()
+  name: z484.z.string()
 }).meta({ title: "agent.favorites.ChangedNotification" });
-var AgentMockAgentSchema = z485.z.object({
+var AgentMockAgentSchema = z484.z.object({
   client_objectiveai_mcp: AgentClientObjectiveaiMcpSchema.nullable().describe("Client-side ObjectiveAI MCP surface the calling client is\nexpected to expose locally back to the API (objectiveai\nbuilt-in, plus specific plugins / tools by owner+name+version).").meta({ omitempty: true }).optional(),
-  error: z485.z.boolean().nullable().describe("If true, the mock client will return an error instead of a response.").meta({ omitempty: true }).optional(),
-  error_probability: z485.z.number().int().min(0).max(255).nullable().describe("Probability (0-100) that the mock returns an error mid-stream.\nRequires `error` to be `Some(true)`.").meta({ omitempty: true }).optional(),
-  id: z485.z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
-  mcp_servers: z485.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
+  error: z484.z.boolean().nullable().describe("If true, the mock client will return an error instead of a response.").meta({ omitempty: true }).optional(),
+  error_probability: z484.z.number().int().min(0).max(255).nullable().describe("Probability (0-100) that the mock returns an error mid-stream.\nRequires `error` to be `Some(true)`.").meta({ omitempty: true }).optional(),
+  id: z484.z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
+  mcp_servers: z484.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
   mode: AgentMockModeSchema.nullable().describe("Mock agent mode. Defaults to `default`.").meta({ omitempty: true }).optional(),
   output_mode: AgentMockOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
-  top_logprobs: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
+  top_logprobs: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
   upstream: AgentMockUpstreamSchema.describe("The upstream provider marker.")
 }).describe("A validated Mock Agent with its computed content-addressed ID.").meta({ title: "agent.mock.Agent" });
-var AgentMockContinuationSchema = z485.z.object({
-  mcp_sessions: z485.z.record(z485.z.string(), z485.z.string()),
-  messages: z485.z.array(AgentCompletionsMessageMessageSchema),
+var AgentMockContinuationSchema = z484.z.object({
+  mcp_sessions: z484.z.record(z484.z.string(), z484.z.string()),
+  messages: z484.z.array(AgentCompletionsMessageMessageSchema),
   upstream: AgentMockUpstreamSchema
 }).meta({ title: "agent.mock.Continuation" });
-var AgentOpenrouterAgentSchema = z485.z.object({
+var AgentOpenrouterAgentSchema = z484.z.object({
   client_objectiveai_mcp: AgentClientObjectiveaiMcpSchema.nullable().describe("Client-side ObjectiveAI MCP surface the calling client is\nexpected to expose locally back to the API (objectiveai\nbuilt-in, plus specific plugins / tools by owner+name+version).").meta({ omitempty: true }).optional(),
-  frequency_penalty: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).").meta({ omitempty: true }).optional(),
-  id: z485.z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
-  logit_bias: z485.z.record(z485.z.string(), z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3)).nullable().describe("Token ID to bias mapping (-100 to 100). Positive values increase likelihood.").meta({ omitempty: true }).optional(),
-  max_completion_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Maximum tokens in the completion.").meta({ omitempty: true }).optional(),
-  max_tokens: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Maximum tokens (OpenRouter variant of max_completion_tokens).").meta({ omitempty: true }).optional(),
-  mcp_servers: z485.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
-  min_p: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Minimum probability threshold for sampling (0.0 to 1.0).").meta({ omitempty: true }).optional(),
-  model: z485.z.string().describe('The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).'),
+  frequency_penalty: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).").meta({ omitempty: true }).optional(),
+  id: z484.z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
+  logit_bias: z484.z.record(z484.z.string(), z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3)).nullable().describe("Token ID to bias mapping (-100 to 100). Positive values increase likelihood.").meta({ omitempty: true }).optional(),
+  max_completion_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Maximum tokens in the completion.").meta({ omitempty: true }).optional(),
+  max_tokens: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Maximum tokens (OpenRouter variant of max_completion_tokens).").meta({ omitempty: true }).optional(),
+  mcp_servers: z484.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").meta({ omitempty: true }).optional(),
+  min_p: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Minimum probability threshold for sampling (0.0 to 1.0).").meta({ omitempty: true }).optional(),
+  model: z484.z.string().describe('The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).'),
   output_mode: AgentOpenrouterOutputModeSchema.default("instruction").describe("The output mode for vector completions. Ignored for agent completions."),
-  post_system_prefix_messages: z485.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages inserted after the leading chain of system/developer messages.").meta({ omitempty: true }).optional(),
-  prefix_messages: z485.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages prepended to the user's prompt.").meta({ omitempty: true }).optional(),
-  presence_penalty: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).").meta({ omitempty: true }).optional(),
+  post_system_prefix_messages: z484.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages inserted after the leading chain of system/developer messages.").meta({ omitempty: true }).optional(),
+  prefix_messages: z484.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages prepended to the user's prompt.").meta({ omitempty: true }).optional(),
+  presence_penalty: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).").meta({ omitempty: true }).optional(),
   provider: AgentOpenrouterProviderSchema.nullable().describe("Provider routing preferences.").meta({ omitempty: true }).optional(),
   reasoning: AgentOpenrouterReasoningSchema.nullable().describe("Reasoning/thinking configuration for supported models.").meta({ omitempty: true }).optional(),
-  repetition_penalty: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Repetition penalty (0.0 to 2.0). Values > 1.0 penalize repetition.").meta({ omitempty: true }).optional(),
+  repetition_penalty: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Repetition penalty (0.0 to 2.0). Values > 1.0 penalize repetition.").meta({ omitempty: true }).optional(),
   stop: AgentOpenrouterStopSchema.nullable().describe("Stop sequences that halt generation.").meta({ omitempty: true }).optional(),
-  suffix_messages: z485.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages appended after the user's prompt.").meta({ omitempty: true }).optional(),
-  synthetic_reasoning: z485.z.boolean().nullable().describe("Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
-  temperature: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Sampling temperature (0.0 to 2.0). Higher = more random.").meta({ omitempty: true }).optional(),
-  top_a: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Top-a sampling parameter (0.0 to 1.0).").meta({ omitempty: true }).optional(),
-  top_k: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Top-k sampling: only consider the k most likely tokens.").meta({ omitempty: true }).optional(),
-  top_logprobs: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
-  top_p: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Nucleus sampling probability (0.0 to 1.0).").meta({ omitempty: true }).optional(),
+  suffix_messages: z484.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages appended after the user's prompt.").meta({ omitempty: true }).optional(),
+  synthetic_reasoning: z484.z.boolean().nullable().describe("Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
+  temperature: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Sampling temperature (0.0 to 2.0). Higher = more random.").meta({ omitempty: true }).optional(),
+  top_a: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Top-a sampling parameter (0.0 to 1.0).").meta({ omitempty: true }).optional(),
+  top_k: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Top-k sampling: only consider the k most likely tokens.").meta({ omitempty: true }).optional(),
+  top_logprobs: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.").meta({ omitempty: true }).optional(),
+  top_p: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Nucleus sampling probability (0.0 to 1.0).").meta({ omitempty: true }).optional(),
   upstream: AgentOpenrouterUpstreamSchema.describe("The upstream provider marker."),
   verbosity: AgentOpenrouterVerbositySchema.nullable().describe("Output verbosity hint for supported models.").meta({ omitempty: true }).optional()
 }).describe("A validated OpenRouter Agent with its computed content-addressed ID.").meta({ title: "agent.openrouter.Agent" });
-var AgentOpenrouterContinuationSchema = z485.z.object({
-  mcp_sessions: z485.z.record(z485.z.string(), z485.z.string()),
-  messages: z485.z.array(AgentCompletionsMessageMessageSchema),
+var AgentOpenrouterContinuationSchema = z484.z.object({
+  mcp_sessions: z484.z.record(z484.z.string(), z484.z.string()),
+  messages: z484.z.array(AgentCompletionsMessageMessageSchema),
   upstream: AgentOpenrouterUpstreamSchema
 }).meta({ title: "agent.openrouter.Continuation" });
-var AgentInlineAgentSchema = z485.z.union([AgentOpenrouterAgentSchema.meta({ "title": "agent.openrouter.Agent", "variantTitle": "Openrouter" }), AgentClaudeAgentSdkAgentSchema.meta({ "title": "agent.claude_agent_sdk.Agent", "variantTitle": "ClaudeAgentSdk" }), AgentCodexSdkAgentSchema.meta({ "title": "agent.codex_sdk.Agent", "variantTitle": "CodexSdk" }), AgentMockAgentSchema.meta({ "title": "agent.mock.Agent", "variantTitle": "Mock" })]).describe("A validated inline Agent with its computed content-addressed ID.\n\nThis is an untagged enum that dispatches to the per-upstream Agent.").meta({ title: "agent.InlineAgent" });
-var AgentRemoteAgentSchema = AgentInlineAgentSchema.and(z485.z.object({
-  description: z485.z.string()
+var AgentInlineAgentSchema = z484.z.union([AgentOpenrouterAgentSchema.meta({ "title": "agent.openrouter.Agent", "variantTitle": "Openrouter" }), AgentClaudeAgentSdkAgentSchema.meta({ "title": "agent.claude_agent_sdk.Agent", "variantTitle": "ClaudeAgentSdk" }), AgentCodexSdkAgentSchema.meta({ "title": "agent.codex_sdk.Agent", "variantTitle": "CodexSdk" }), AgentMockAgentSchema.meta({ "title": "agent.mock.Agent", "variantTitle": "Mock" })]).describe("A validated inline Agent with its computed content-addressed ID.\n\nThis is an untagged enum that dispatches to the per-upstream Agent.").meta({ title: "agent.InlineAgent" });
+var AgentRemoteAgentSchema = AgentInlineAgentSchema.and(z484.z.object({
+  description: z484.z.string()
 })).describe("A validated remote Agent with metadata and computed content-addressed ID.").meta({ title: "agent.RemoteAgent" });
 
 // src/agent/agent.ts
-var AgentAgentSchema = z485.z.union([AgentRemoteAgentSchema.meta({ "title": "agent.RemoteAgent", "variantTitle": "Remote" }), AgentInlineAgentSchema.meta({ "title": "agent.InlineAgent", "variantTitle": "Inline" })]).describe("A validated Agent, either remote (with metadata) or inline.").meta({ title: "agent.Agent" });
-var AgentRemoteAgentBaseSchema = AgentInlineAgentBaseSchema.and(z485.z.object({
-  description: z485.z.string()
+var AgentAgentSchema = z484.z.union([AgentRemoteAgentSchema.meta({ "title": "agent.RemoteAgent", "variantTitle": "Remote" }), AgentInlineAgentSchema.meta({ "title": "agent.InlineAgent", "variantTitle": "Inline" })]).describe("A validated Agent, either remote (with metadata) or inline.").meta({ title: "agent.Agent" });
+var AgentRemoteAgentBaseSchema = AgentInlineAgentBaseSchema.and(z484.z.object({
+  description: z484.z.string()
 })).describe("A remote agent base definition with metadata.\n\nLike [`InlineAgentBase`] but includes a description field for remote storage.").meta({ title: "agent.RemoteAgentBase" });
 
 // src/agent/agentBase.ts
-var AgentAgentBaseSchema = z485.z.union([AgentRemoteAgentBaseSchema.meta({ "title": "agent.RemoteAgentBase", "variantTitle": "Remote" }), AgentInlineAgentBaseSchema.meta({ "title": "agent.InlineAgentBase", "variantTitle": "Inline" })]).describe("An Agent base definition, either remote (with metadata) or inline.").meta({ title: "agent.AgentBase" });
-var AgentInlineAgentWithFallbacksSchema = AgentInlineAgentSchema.and(z485.z.object({
-  fallbacks: z485.z.array(AgentInlineAgentSchema).nullable().describe("Fallback agents to try if the primary fails.").meta({ omitempty: true }).optional()
+var AgentAgentBaseSchema = z484.z.union([AgentRemoteAgentBaseSchema.meta({ "title": "agent.RemoteAgentBase", "variantTitle": "Remote" }), AgentInlineAgentBaseSchema.meta({ "title": "agent.InlineAgentBase", "variantTitle": "Inline" })]).describe("An Agent base definition, either remote (with metadata) or inline.").meta({ title: "agent.AgentBase" });
+var AgentInlineAgentWithFallbacksSchema = AgentInlineAgentSchema.and(z484.z.object({
+  fallbacks: z484.z.array(AgentInlineAgentSchema).nullable().describe("Fallback agents to try if the primary fails.").meta({ omitempty: true }).optional()
 })).describe("A validated [`InlineAgent`] with optional fallbacks (no description).").meta({ title: "agent.InlineAgentWithFallbacks" });
-var AgentRemoteAgentWithFallbacksSchema = AgentInlineAgentWithFallbacksSchema.and(z485.z.object({
-  description: z485.z.string()
+var AgentRemoteAgentWithFallbacksSchema = AgentInlineAgentWithFallbacksSchema.and(z484.z.object({
+  description: z484.z.string()
 })).describe("A validated remote agent with description and optional fallbacks.").meta({ title: "agent.RemoteAgentWithFallbacks" });
 
 // src/agent/agentWithFallbacks.ts
-var AgentAgentWithFallbacksSchema = z485.z.union([AgentRemoteAgentWithFallbacksSchema.meta({ "title": "agent.RemoteAgentWithFallbacks", "variantTitle": "Remote" }), AgentInlineAgentWithFallbacksSchema.meta({ "title": "agent.InlineAgentWithFallbacks", "variantTitle": "Inline" })]).describe("A validated agent with optional fallbacks, either remote (with description) or inline.").meta({ title: "agent.AgentWithFallbacks" });
-var AgentAgentWithFallbacksWithCountSchema = AgentAgentWithFallbacksSchema.and(z485.z.object({
-  count: z485.z.number().int().min(0).max(18446744073709552e3).default(1).describe("Number of instances of this agent in the swarm. Defaults to 1.")
+var AgentAgentWithFallbacksSchema = z484.z.union([AgentRemoteAgentWithFallbacksSchema.meta({ "title": "agent.RemoteAgentWithFallbacks", "variantTitle": "Remote" }), AgentInlineAgentWithFallbacksSchema.meta({ "title": "agent.InlineAgentWithFallbacks", "variantTitle": "Inline" })]).describe("A validated agent with optional fallbacks, either remote (with description) or inline.").meta({ title: "agent.AgentWithFallbacks" });
+var AgentAgentWithFallbacksWithCountSchema = AgentAgentWithFallbacksSchema.and(z484.z.object({
+  count: z484.z.number().int().min(0).max(18446744073709552e3).default(1).describe("Number of instances of this agent in the swarm. Defaults to 1.")
 })).describe("An [`AgentWithFallbacks`] with a count (post-validation swarm agent slot).").meta({ title: "agent.AgentWithFallbacksWithCount" });
-var AgentContinuationSchema = z485.z.union([AgentOpenrouterContinuationSchema.meta({ "title": "agent.openrouter.Continuation", "variantTitle": "Openrouter" }), AgentClaudeAgentSdkContinuationSchema.meta({ "title": "agent.claude_agent_sdk.Continuation", "variantTitle": "ClaudeAgentSdk" }), AgentCodexSdkContinuationSchema.meta({ "title": "agent.codex_sdk.Continuation", "variantTitle": "CodexSdk" }), AgentMockContinuationSchema.meta({ "title": "agent.mock.Continuation", "variantTitle": "Mock" })]).describe("Continuation state for multi-turn agent completions.\n\nReturned in the final streaming chunk and in unary responses.\nPass it back in the next request to continue the conversation.\nSerialized as base64-encoded JSON.").meta({ title: "agent.Continuation" });
-var RemotePathSchema = z485.z.union([z485.z.object({
-  commit: z485.z.string(),
-  owner: z485.z.string(),
-  remote: z485.z.literal("github"),
-  repository: z485.z.string()
-}).meta({ "variantTitle": "Github" }), z485.z.object({
-  commit: z485.z.string(),
-  owner: z485.z.string(),
-  remote: z485.z.literal("filesystem"),
-  repository: z485.z.string()
-}).meta({ "variantTitle": "Filesystem" }), z485.z.object({
-  name: z485.z.string(),
-  remote: z485.z.literal("mock")
+var AgentContinuationSchema = z484.z.union([AgentOpenrouterContinuationSchema.meta({ "title": "agent.openrouter.Continuation", "variantTitle": "Openrouter" }), AgentClaudeAgentSdkContinuationSchema.meta({ "title": "agent.claude_agent_sdk.Continuation", "variantTitle": "ClaudeAgentSdk" }), AgentCodexSdkContinuationSchema.meta({ "title": "agent.codex_sdk.Continuation", "variantTitle": "CodexSdk" }), AgentMockContinuationSchema.meta({ "title": "agent.mock.Continuation", "variantTitle": "Mock" })]).describe("Continuation state for multi-turn agent completions.\n\nReturned in the final streaming chunk and in unary responses.\nPass it back in the next request to continue the conversation.\nSerialized as base64-encoded JSON.").meta({ title: "agent.Continuation" });
+var RemotePathSchema = z484.z.union([z484.z.object({
+  commit: z484.z.string(),
+  owner: z484.z.string(),
+  remote: z484.z.literal("github"),
+  repository: z484.z.string()
+}).meta({ "variantTitle": "Github" }), z484.z.object({
+  commit: z484.z.string(),
+  owner: z484.z.string(),
+  remote: z484.z.literal("filesystem"),
+  repository: z484.z.string()
+}).meta({ "variantTitle": "Filesystem" }), z484.z.object({
+  name: z484.z.string(),
+  remote: z484.z.literal("mock")
 }).meta({ "variantTitle": "Mock" })]).meta({ title: "RemotePath" });
 
 // src/agent/getAgentResponse.ts
-var AgentGetAgentResponseSchema = RemotePathSchema.and(z485.z.object({})).describe("Response containing a single Agent with creation timestamp.").meta({ title: "agent.GetAgentResponse" });
-var AgentInlineAgentBaseWithFallbacksOrRemoteSchema = z485.z.union([AgentInlineAgentBaseWithFallbacksSchema.meta({ "title": "agent.InlineAgentBaseWithFallbacks", "variantTitle": "AgentBase" }), RemotePathSchema.meta({ "title": "RemotePath", "variantTitle": "Remote" })]).describe("An agent specification that is either an inline agent base with fallbacks\nor a remote path reference.\n\nUsed in swarm definitions to allow agents to be specified inline\n(with optional fallbacks) or resolved from a remote source via a\nhashmap during conversion.").meta({ title: "agent.InlineAgentBaseWithFallbacksOrRemote" });
-var AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema = AgentInlineAgentBaseWithFallbacksOrRemoteSchema.and(z485.z.object({
-  count: z485.z.number().int().min(0).max(18446744073709552e3).default(1).describe("Number of instances of this agent in the swarm. Defaults to 1.")
+var AgentGetAgentResponseSchema = RemotePathSchema.and(z484.z.object({})).describe("Response containing a single Agent with creation timestamp.").meta({ title: "agent.GetAgentResponse" });
+var AgentInlineAgentBaseWithFallbacksOrRemoteSchema = z484.z.union([AgentInlineAgentBaseWithFallbacksSchema.meta({ "title": "agent.InlineAgentBaseWithFallbacks", "variantTitle": "AgentBase" }), RemotePathSchema.meta({ "title": "RemotePath", "variantTitle": "Remote" })]).describe("An agent specification that is either an inline agent base with fallbacks\nor a remote path reference.\n\nUsed in swarm definitions to allow agents to be specified inline\n(with optional fallbacks) or resolved from a remote source via a\nhashmap during conversion.").meta({ title: "agent.InlineAgentBaseWithFallbacksOrRemote" });
+var AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema = AgentInlineAgentBaseWithFallbacksOrRemoteSchema.and(z484.z.object({
+  count: z484.z.number().int().min(0).max(18446744073709552e3).default(1).describe("Number of instances of this agent in the swarm. Defaults to 1.")
 })).describe("An [`InlineAgentBaseWithFallbacksOrRemote`] with a count\n(pre-validation swarm agent slot).").meta({ title: "agent.InlineAgentBaseWithFallbacksOrRemoteWithCount" });
-var AgentListAgentResponseSchema = z485.z.object({
-  data: z485.z.array(RemotePathSchema).describe("The list of Agent summaries.")
+var AgentListAgentResponseSchema = z484.z.object({
+  data: z484.z.array(RemotePathSchema).describe("The list of Agent summaries.")
 }).describe("Response containing a list of Agents.").meta({ title: "agent.ListAgentResponse" });
-var AgentListAgentsSourceSchema = z485.z.enum(["all", "mock", "filesystem", "objectiveai"]).describe("Source filter for listing agents.").meta({ title: "agent.ListAgentsSource" });
+var AgentListAgentsSourceSchema = z484.z.enum(["all", "mock", "filesystem", "objectiveai"]).describe("Source filter for listing agents.").meta({ title: "agent.ListAgentsSource" });
 
 // src/agent/listAgentsRequest.ts
-var AgentListAgentsRequestSchema = z485.z.object({
+var AgentListAgentsRequestSchema = z484.z.object({
   source: AgentListAgentsSourceSchema.nullable().describe("Optional source filter for listing agents.").meta({ omitempty: true }).optional()
 }).describe("Query parameters for the list agents endpoint.").meta({ title: "agent.ListAgentsRequest" });
-var AgentOutputModeSchema = z485.z.union([z485.z.literal("instruction").describe("The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.").meta({ "variantTitle": "Instruction" }), z485.z.literal("json_schema").describe("A JSON schema response format is used with an enum of possible keys.\n\nRequires model support for structured JSON output.").meta({ "variantTitle": "JsonSchema" }), z485.z.literal("tool_call").describe("A forced tool call with an argument schema containing possible keys.\n\nRequires model support for tool/function calling.").meta({ "variantTitle": "ToolCall" })]).describe("The method used to constrain LLM output to valid response keys.\n\nIn vector completions, the model must select from a predefined set of\nresponses. This enum controls *how* that constraint is enforced.\n\n**Note:** This setting is only relevant for vector completions and is\ncompletely ignored for agent completions.").meta({ title: "agent.OutputMode" });
-var AgentRemoteAgentBaseWithFallbacksSchema = AgentInlineAgentBaseWithFallbacksSchema.and(z485.z.object({
-  description: z485.z.string()
+var AgentOutputModeSchema = z484.z.union([z484.z.literal("instruction").describe("The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.").meta({ "variantTitle": "Instruction" }), z484.z.literal("json_schema").describe("A JSON schema response format is used with an enum of possible keys.\n\nRequires model support for structured JSON output.").meta({ "variantTitle": "JsonSchema" }), z484.z.literal("tool_call").describe("A forced tool call with an argument schema containing possible keys.\n\nRequires model support for tool/function calling.").meta({ "variantTitle": "ToolCall" })]).describe("The method used to constrain LLM output to valid response keys.\n\nIn vector completions, the model must select from a predefined set of\nresponses. This enum controls *how* that constraint is enforced.\n\n**Note:** This setting is only relevant for vector completions and is\ncompletely ignored for agent completions.").meta({ title: "agent.OutputMode" });
+var AgentRemoteAgentBaseWithFallbacksSchema = AgentInlineAgentBaseWithFallbacksSchema.and(z484.z.object({
+  description: z484.z.string()
 })).describe("A remote agent base definition with description and optional fallbacks.").meta({ title: "agent.RemoteAgentBaseWithFallbacks" });
-var AgentUsageAgentResponseSchema = z485.z.object({
-  completion_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total completion tokens generated."),
-  prompt_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens processed."),
-  requests: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this Agent."),
-  total_cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
+var AgentUsageAgentResponseSchema = z484.z.object({
+  completion_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total completion tokens generated."),
+  prompt_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens processed."),
+  requests: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this Agent."),
+  total_cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
 }).describe("Usage statistics for an Agent.").meta({ title: "agent.UsageAgentResponse" });
 
 // src/agent/http.ts
@@ -2667,49 +2667,49 @@ function agentGetAgentUsage(client, params, options) {
 function wasmAgentValidateAgent(agent) {
   return JSON.parse(validateAgent(agent));
 }
-var PrefixedUuidSchema = z485.z.object({
-  uuid: z485.z.string().uuid()
+var PrefixedUuidSchema = z484.z.object({
+  uuid: z484.z.string().uuid()
 }).describe("A UUID with a 3-character prefix for type-safe identifiers.\n\nThis struct wraps a standard UUID and adds a compile-time prefix,\nensuring that different types of identifiers (API keys, swarm IDs, etc.)\ncannot be confused at the type level.\n\nThe prefix is specified as three `const char` generic parameters.\n\n# Type Parameters\n\n* `PFX_1` - First character of the prefix\n* `PFX_2` - Second character of the prefix\n* `PFX_3` - Third character of the prefix\n\n# Examples\n\n```\nuse objectiveai_sdk::prefixed_uuid::PrefixedUuid;\n\n// Define an API key type with prefix \"apk\"\ntype ApiKey = PrefixedUuid<'a', 'p', 'k'>;\n\n// Create a new API key\nlet key = ApiKey::new();\nprintln!(\"{}\", key); // Outputs: apk<uuid>\n```").meta({ title: "PrefixedUuid" });
 
 // src/auth/apiKeyWithMetadata.ts
-var AuthApiKeyWithMetadataSchema = z485.z.object({
+var AuthApiKeyWithMetadataSchema = z484.z.object({
   api_key: PrefixedUuidSchema.describe("The API key itself."),
-  created: z485.z.string().datetime({ offset: true }).describe("The timestamp when the API key was created (RFC 3339 format)."),
-  description: z485.z.string().nullable().describe("The user-provided description of the API key, or `None` if not provided.").optional(),
-  disabled: z485.z.string().datetime({ offset: true }).nullable().describe("The timestamp when the API key was disabled, or `None` if it is active.").optional(),
-  expires: z485.z.string().datetime({ offset: true }).nullable().describe("The timestamp when the API key expires, or `None` if it does not expire.").optional(),
-  name: z485.z.string().describe("The user-provided name of the API key.")
+  created: z484.z.string().datetime({ offset: true }).describe("The timestamp when the API key was created (RFC 3339 format)."),
+  description: z484.z.string().nullable().describe("The user-provided description of the API key, or `None` if not provided.").optional(),
+  disabled: z484.z.string().datetime({ offset: true }).nullable().describe("The timestamp when the API key was disabled, or `None` if it is active.").optional(),
+  expires: z484.z.string().datetime({ offset: true }).nullable().describe("The timestamp when the API key expires, or `None` if it does not expire.").optional(),
+  name: z484.z.string().describe("The user-provided name of the API key.")
 }).describe("An ObjectiveAI API Key with associated metadata.\n\nThis struct contains the API key itself along with information about\nwhen it was created, when it expires (if ever), whether it has been\ndisabled, and user-provided name and description.").meta({ title: "auth.ApiKeyWithMetadata" });
-var AuthCreateApiKeyRequestSchema = z485.z.object({
-  description: z485.z.string().nullable().describe("An optional description providing additional context about the key's purpose.").optional(),
-  expires: z485.z.string().datetime({ offset: true }).nullable().describe("The expiration timestamp for the API key, or `None` for a non-expiring key.").optional(),
-  name: z485.z.string().describe("A user-provided name to identify this API key.")
+var AuthCreateApiKeyRequestSchema = z484.z.object({
+  description: z484.z.string().nullable().describe("An optional description providing additional context about the key's purpose.").optional(),
+  expires: z484.z.string().datetime({ offset: true }).nullable().describe("The expiration timestamp for the API key, or `None` for a non-expiring key.").optional(),
+  name: z484.z.string().describe("A user-provided name to identify this API key.")
 }).describe("Request to create a new API key.\n\n# Fields\n\n* `expires` - Optional expiration timestamp. If `None`, the key never expires.\n* `name` - A user-provided name for identifying the key.\n* `description` - Optional description providing additional context.").meta({ title: "auth.CreateApiKeyRequest" });
-var AuthCreateOpenRouterByokApiKeyRequestSchema = z485.z.object({
-  api_key: z485.z.string().describe("The OpenRouter API key to associate with the user's account.")
+var AuthCreateOpenRouterByokApiKeyRequestSchema = z484.z.object({
+  api_key: z484.z.string().describe("The OpenRouter API key to associate with the user's account.")
 }).describe("Request to create or update an OpenRouter BYOK (Bring Your Own Key) API key.\n\nThis allows users to provide their own OpenRouter API key for routing\nrequests through OpenRouter's model marketplace.").meta({ title: "auth.CreateOpenRouterByokApiKeyRequest" });
-var AuthDisableApiKeyRequestSchema = z485.z.object({
+var AuthDisableApiKeyRequestSchema = z484.z.object({
   api_key: PrefixedUuidSchema.describe("The API key to disable.")
 }).describe("Request to disable an existing API key.\n\nOnce disabled, the API key can no longer be used for authentication.\nThis action is reversible only by creating a new key.").meta({ title: "auth.DisableApiKeyRequest" });
-var AuthGetCreditsResponseSchema = z485.z.object({
-  credits: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The current available credit balance."),
-  total_credits_purchased: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The total amount of credits ever purchased."),
-  total_credits_used: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The total amount of credits consumed by API usage.")
+var AuthGetCreditsResponseSchema = z484.z.object({
+  credits: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The current available credit balance."),
+  total_credits_purchased: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The total amount of credits ever purchased."),
+  total_credits_used: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The total amount of credits consumed by API usage.")
 }).describe("Response containing the user's credit balance information.\n\nCredits are the billing unit for ObjectiveAI. This response provides\na complete view of the user's credit status.").meta({ title: "auth.GetCreditsResponse" });
-var AuthGetOpenRouterByokApiKeyResponseSchema = z485.z.object({
-  api_key: z485.z.string().nullable().describe("The OpenRouter API key, or `None` if not configured.").optional()
+var AuthGetOpenRouterByokApiKeyResponseSchema = z484.z.object({
+  api_key: z484.z.string().nullable().describe("The OpenRouter API key, or `None` if not configured.").optional()
 }).describe("Response containing the user's OpenRouter BYOK API key.").meta({ title: "auth.GetOpenRouterByokApiKeyResponse" });
-var AuthListApiKeyItemSchema = z485.z.object({
+var AuthListApiKeyItemSchema = z484.z.object({
   api_key: PrefixedUuidSchema.describe("The API key itself."),
-  cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The total cost incurred by this API key."),
-  created: z485.z.string().datetime({ offset: true }).describe("The timestamp when the API key was created (RFC 3339 format)."),
-  description: z485.z.string().nullable().describe("The user-provided description of the API key, or `None` if not provided.").optional(),
-  disabled: z485.z.string().datetime({ offset: true }).nullable().describe("The timestamp when the API key was disabled, or `None` if it is active.").optional(),
-  expires: z485.z.string().datetime({ offset: true }).nullable().describe("The timestamp when the API key expires, or `None` if it does not expire.").optional(),
-  name: z485.z.string().describe("The user-provided name of the API key.")
+  cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The total cost incurred by this API key."),
+  created: z484.z.string().datetime({ offset: true }).describe("The timestamp when the API key was created (RFC 3339 format)."),
+  description: z484.z.string().nullable().describe("The user-provided description of the API key, or `None` if not provided.").optional(),
+  disabled: z484.z.string().datetime({ offset: true }).nullable().describe("The timestamp when the API key was disabled, or `None` if it is active.").optional(),
+  expires: z484.z.string().datetime({ offset: true }).nullable().describe("The timestamp when the API key expires, or `None` if it does not expire.").optional(),
+  name: z484.z.string().describe("The user-provided name of the API key.")
 }).describe("An API key with metadata and accumulated cost information.\n\nThis extends [`ApiKeyWithMetadata`](super::ApiKeyWithMetadata) with\nthe total cost incurred by requests using this key.").meta({ title: "auth.ListApiKeyItem" });
-var AuthListApiKeyResponseSchema = z485.z.object({
-  data: z485.z.array(AuthListApiKeyItemSchema).describe("The list of API keys with their metadata and usage costs.")
+var AuthListApiKeyResponseSchema = z484.z.object({
+  data: z484.z.array(AuthListApiKeyItemSchema).describe("The list of API keys with their metadata and usage costs.")
 }).describe("Response containing a list of API keys.").meta({ title: "auth.ListApiKeyResponse" });
 
 // src/auth/http.ts
@@ -2741,273 +2741,266 @@ function authGetOpenrouterByokApiKey(client, options) {
 function authGetCredits(client, options) {
   return client.get_unary("/auth/credits", options);
 }
-var CliOutputNotificationAgentsCompletionsContentSchema = z485.z.object({
-  content: z485.z.string()
+var CliOutputNotificationAgentsCompletionsContentSchema = z484.z.object({
+  content: z484.z.string()
 }).describe('Final assistant message text returned by `agents completions create`.\n\nWire: `{"type":"notification","content":"...text..."}`.').meta({ title: "cli.output.notification.agents.completions.Content" });
-var CliOutputNotificationAgentsAgentSchema = z485.z.object({
+var CliOutputNotificationAgentsAgentSchema = z484.z.object({
   agent: AgentGetAgentResponseSchema
 }).describe('Result of `agents get`.\n\nWire: `{"type":"notification","agent":{...GetAgentResponse...}}`.').meta({ title: "cli.output.notification.agents.Agent" });
-var CliOutputNotificationApiDetachedSchema = z485.z.object({
-  pid: z485.z.number().int().min(0).max(4294967295)
+var CliOutputNotificationApiDetachedSchema = z484.z.object({
+  pid: z484.z.number().int().min(0).max(4294967295)
 }).describe('Emitted by the parent process during `--detach` once the child has\nbeen spawned. Replaces the prior `println!("PID: {pid}")`.\n\nWire: `{"type":"notification","pid":12345}`.').meta({ title: "cli.output.notification.api.Detached" });
-var FunctionsExpressionTaskOutputSchema = z485.z.union([z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("A single scalar score.").meta({ "variantTitle": "Scalar" }), z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("A vector of scores.").meta({ "variantTitle": "Vector" }), z485.z.array(z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22))).describe("Multiple vectors of scores (from mapped tasks).").meta({ "variantTitle": "Vectors" }), z485.z.object({
+var FunctionsExpressionTaskOutputSchema = z484.z.union([z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("A single scalar score.").meta({ "variantTitle": "Scalar" }), z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("A vector of scores.").meta({ "variantTitle": "Vector" }), z484.z.array(z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22))).describe("Multiple vectors of scores (from mapped tasks).").meta({ "variantTitle": "Vectors" }), z484.z.object({
   error: JsonValueSchema
 }).describe("An error occurred during execution.").meta({ "variantTitle": "Err" })]).describe("Owned task output variants.").meta({ title: "functions.expression.TaskOutput" });
 
 // src/cli/output/notification/functions/executions/executionResult.ts
-var CliOutputNotificationFunctionsExecutionsExecutionResultSchema = z485.z.object({
+var CliOutputNotificationFunctionsExecutionsExecutionResultSchema = z484.z.object({
   output: FunctionsExpressionTaskOutputSchema
 }).describe("Body of an execution result: the final task output.").meta({ title: "cli.output.notification.functions.executions.ExecutionResult" });
 
 // src/cli/output/notification/functions/executions/execution.ts
-var CliOutputNotificationFunctionsExecutionsExecutionSchema = z485.z.object({
+var CliOutputNotificationFunctionsExecutionsExecutionSchema = z484.z.object({
   execution: CliOutputNotificationFunctionsExecutionsExecutionResultSchema
 }).describe('Result of `functions executions create`.\n\nWire: `{"type":"notification","execution":{"output":...}}`.\n\nPer-task / per-vote / reasoning errors are surfaced live during\nstreaming via `Output::Error` notifications (see the CLI\'s\nstreaming handler). They are NOT bundled into this payload.').meta({ title: "cli.output.notification.functions.executions.Execution" });
-var CliOutputNotificationFunctionsInventionsRecursiveInventionResultItemSchema = z485.z.object({
-  name: z485.z.string(),
+var CliOutputNotificationFunctionsInventionsRecursiveInventionResultItemSchema = z484.z.object({
+  name: z484.z.string(),
   path: RemotePathSchema.nullable().meta({ omitempty: true }).optional()
 }).describe('One entry per invention produced. `name` is the human-readable\nstate label (e.g. `"alpha_scalar_leaf"`); `path` is set only when\nthe invention successfully resolved to a remote definition\n(`None` if it failed). Per-invention failures surface live via\n`Output::Error` notifications during streaming, not on this struct.').meta({ title: "cli.output.notification.functions.inventions.recursive.InventionResultItem" });
-var CliOutputNotificationFunctionsInventionsRecursiveInventionsSchema = z485.z.object({
-  inventions: z485.z.array(CliOutputNotificationFunctionsInventionsRecursiveInventionResultItemSchema)
+var CliOutputNotificationFunctionsInventionsRecursiveInventionsSchema = z484.z.object({
+  inventions: z484.z.array(CliOutputNotificationFunctionsInventionsRecursiveInventionResultItemSchema)
 }).describe('Result of `functions inventions recursive create`.\n\nWire: `{"type":"notification","inventions":[...InventionResultItem...]}`.').meta({ title: "cli.output.notification.functions.inventions.recursive.Inventions" });
-var FunctionsInventionsStateGetFunctionInventionStateResponseSchema = RemotePathSchema.and(z485.z.object({})).describe("Response from retrieving a function invention state.").meta({ title: "functions.inventions.state.GetFunctionInventionStateResponse" });
+var FunctionsInventionsStateGetFunctionInventionStateResponseSchema = RemotePathSchema.and(z484.z.object({})).describe("Response from retrieving a function invention state.").meta({ title: "functions.inventions.state.GetFunctionInventionStateResponse" });
 
 // src/cli/output/notification/functions/inventions/state.ts
-var CliOutputNotificationFunctionsInventionsStateSchema = z485.z.object({
+var CliOutputNotificationFunctionsInventionsStateSchema = z484.z.object({
   state: FunctionsInventionsStateGetFunctionInventionStateResponseSchema
 }).describe('Result of `functions inventions state get`.\n\nWire: `{"type":"notification","state":{...GetFunctionInventionStateResponse...}}`.').meta({ title: "cli.output.notification.functions.inventions.State" });
-var FunctionsGetFunctionResponseSchema = RemotePathSchema.and(z485.z.object({})).meta({ title: "functions.GetFunctionResponse" });
-var FunctionsProfilesGetProfileResponseSchema = RemotePathSchema.and(z485.z.object({})).meta({ title: "functions.profiles.GetProfileResponse" });
+var FunctionsGetFunctionResponseSchema = RemotePathSchema.and(z484.z.object({})).meta({ title: "functions.GetFunctionResponse" });
+var FunctionsProfilesGetProfileResponseSchema = RemotePathSchema.and(z484.z.object({})).meta({ title: "functions.profiles.GetProfileResponse" });
 
 // src/cli/output/notification/functions/profiles/functionProfilePair.ts
-var CliOutputNotificationFunctionsProfilesFunctionProfilePairSchema = z485.z.object({
+var CliOutputNotificationFunctionsProfilesFunctionProfilePairSchema = z484.z.object({
   function: FunctionsGetFunctionResponseSchema,
   profile: FunctionsProfilesGetProfileResponseSchema
 }).describe("The composite body inside a `Pair` notification.").meta({ title: "cli.output.notification.functions.profiles.FunctionProfilePair" });
-var CliOutputNotificationFunctionsProfilesPairSchema = z485.z.object({
+var CliOutputNotificationFunctionsProfilesPairSchema = z484.z.object({
   pair: CliOutputNotificationFunctionsProfilesFunctionProfilePairSchema
 }).describe('Result of `functions profiles pairs get`. The CLI fetches both\nhalves of the pair and emits them together.\n\nWire: `{"type":"notification","pair":{"function":...,"profile":...}}`.').meta({ title: "cli.output.notification.functions.profiles.Pair" });
-var CliOutputNotificationFunctionsProfilesProfileSchema = z485.z.object({
+var CliOutputNotificationFunctionsProfilesProfileSchema = z484.z.object({
   profile: FunctionsProfilesGetProfileResponseSchema
 }).describe('Result of `functions profiles get`.\n\nWire: `{"type":"notification","profile":{...GetProfileResponse...}}`.').meta({ title: "cli.output.notification.functions.profiles.Profile" });
-var CliOutputNotificationFunctionsFunctionSchema = z485.z.object({
+var CliOutputNotificationFunctionsFunctionSchema = z484.z.object({
   function: FunctionsGetFunctionResponseSchema
 }).describe('Result of `functions get`.\n\nWire: `{"type":"notification","function":{...GetFunctionResponse...}}`.').meta({ title: "cli.output.notification.functions.Function" });
-var CliOutputNotificationLaboratoriesExecutionsLabResultItemSchema = z485.z.object({
+var CliOutputNotificationLaboratoriesExecutionsLabResultItemSchema = z484.z.object({
   agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema,
-  score: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().optional()
+  score: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().optional()
 }).describe("One agent evaluated. `score = None` means the evaluation either\nfailed or returned no scoreable output; per-evaluation failures\nsurface live via `Output::Error` notifications during streaming.").meta({ title: "cli.output.notification.laboratories.executions.LabResultItem" });
 
 // src/cli/output/notification/laboratories/executions/laboratory.ts
-var CliOutputNotificationLaboratoriesExecutionsLaboratorySchema = z485.z.object({
-  laboratory: z485.z.array(CliOutputNotificationLaboratoriesExecutionsLabResultItemSchema)
+var CliOutputNotificationLaboratoriesExecutionsLaboratorySchema = z484.z.object({
+  laboratory: z484.z.array(CliOutputNotificationLaboratoriesExecutionsLabResultItemSchema)
 }).describe('Result of `laboratories executions create`. One item per agent\nevaluated.\n\nWire: `{"type":"notification","laboratory":[...LabResultItem...]}`.').meta({ title: "cli.output.notification.laboratories.executions.Laboratory" });
-var SwarmGetSwarmResponseSchema = RemotePathSchema.and(z485.z.object({})).describe("Response containing a single Swarm.").meta({ title: "swarm.GetSwarmResponse" });
+var SwarmGetSwarmResponseSchema = RemotePathSchema.and(z484.z.object({})).describe("Response containing a single Swarm.").meta({ title: "swarm.GetSwarmResponse" });
 
 // src/cli/output/notification/swarms/swarm.ts
-var CliOutputNotificationSwarmsSwarmSchema = z485.z.object({
+var CliOutputNotificationSwarmsSwarmSchema = z484.z.object({
   swarm: SwarmGetSwarmResponseSchema
 }).describe('Result of `swarms get`.\n\nWire: `{"type":"notification","swarm":{...GetSwarmResponse...}}`.').meta({ title: "cli.output.notification.swarms.Swarm" });
-var CliOutputNotificationClearedSchema = z485.z.object({
-  cleared: z485.z.number().int().min(0).max(18446744073709552e3)
+var CliOutputNotificationClearedSchema = z484.z.object({
+  cleared: z484.z.number().int().min(0).max(18446744073709552e3)
 }).describe('Number of log files cleared by `<scope> logs clear` (or the global\n`logs clear`). Wire: `{"type":"notification","cleared":7}`.').meta({ title: "cli.output.notification.Cleared" });
-var CliOutputNotificationInstalledSchema = z485.z.object({
-  installed: z485.z.boolean()
+var CliOutputNotificationInstalledSchema = z484.z.object({
+  installed: z484.z.boolean()
 }).describe('Wire shape: `{"type":"notification","value":{"installed": true|false}}`.\nEmitted by `objectiveai plugins install`. `true` means the binary\nlanded at `<base_dir>/plugins/<repository>/plugin[.exe]`; `false`\nmeans the manifest fetched OK but this platform isn\'t in its\n`binaries` map (nothing to install, not an error).').meta({ title: "cli.output.notification.Installed" });
-var CliOutputNotificationInstructionsSchema = z485.z.object({
-  instructions: z485.z.string()
+var CliOutputNotificationInstructionsSchema = z484.z.object({
+  instructions: z484.z.string()
 }).describe("Wire shape for `<scope> instructions get` (and the global\n`instructions get`). The body is the instruction text the user is\nmeant to follow plus the generated instructions ID line.").meta({ title: "cli.output.notification.Instructions" });
-var CliOutputNotificationJqResultsSchema = z485.z.object({
+var CliOutputNotificationJqResultsSchema = z484.z.object({
   jq: JsonValueSchema
 }).describe('Result of a user-supplied jq filter applied to a config getter.\n`jq` is the one explicit escape hatch for untyped JSON: the filter\ncan produce literally any shape, so the body is `serde_json::Value`.\nWire: `{"type":"notification","jq":<value>}`.').meta({ title: "cli.output.notification.JqResults" });
-var FilesystemConfigFavoriteSchema = RemotePathCommitOptionalSchema.and(z485.z.object({
-  name: z485.z.string(),
-  note: z485.z.string()
+var FilesystemConfigFavoriteSchema = RemotePathCommitOptionalSchema.and(z484.z.object({
+  name: z484.z.string(),
+  note: z484.z.string()
 })).meta({ title: "filesystem.config.Favorite" });
 
 // src/cli/output/notification/listItem.ts
-var CliOutputNotificationListItemSchema = z485.z.union([FilesystemConfigFavoriteSchema.meta({ "title": "filesystem.config.Favorite", "variantTitle": "Favorite" }), RemotePathSchema.meta({ "title": "RemotePath", "variantTitle": "Item" })]).describe("One entry in a non-pair resource listing \u2014 either a favorite that\nmatches a remote resource or a resolved remote path. Untagged so the\nwire shape is whichever underlying object matches.").meta({ title: "cli.output.notification.ListItem" });
-var CliOutputNotificationLogContentSchema = z485.z.union([z485.z.object({
+var CliOutputNotificationListItemSchema = z484.z.union([FilesystemConfigFavoriteSchema.meta({ "title": "filesystem.config.Favorite", "variantTitle": "Favorite" }), RemotePathSchema.meta({ "title": "RemotePath", "variantTitle": "Item" })]).describe("One entry in a non-pair resource listing \u2014 either a favorite that\nmatches a remote resource or a resolved remote path. Untagged so the\nwire shape is whichever underlying object matches.").meta({ title: "cli.output.notification.ListItem" });
+var CliOutputNotificationLogContentSchema = z484.z.union([z484.z.object({
   content: JsonValueSchema
-}).meta({ "variantTitle": "Json" }), z485.z.object({
-  content_data_url: z485.z.string()
+}).meta({ "variantTitle": "Json" }), z484.z.object({
+  content_data_url: z484.z.string()
 }).meta({ "variantTitle": "DataUrl" })]).describe('Contents of a log read or subscribe. Mirrors the upstream\n`crate::filesystem::logs::LogContent` (which has no serde\nderives) so the wire shape is parseable in cli-lib without depending\non it for serialization.\n\n`Json` carries an arbitrary API payload (one of the two intentional\nuses of `serde_json::Value` in this module). `DataUrl` carries\n`data:{mime};base64,{payload}` for binary log content.\n\nWire shapes:\n  `{"type":"notification","content":<value>}`\n  `{"type":"notification","content_data_url":"data:..."}`').meta({ title: "cli.output.notification.LogContent" });
-var CliOutputNotificationLogStreamReadySchema = z485.z.object({
-  log_stream_ready: z485.z.string()
+var CliOutputNotificationLogStreamReadySchema = z484.z.object({
+  log_stream_ready: z484.z.string()
 }).describe('Emitted mid-stream by long-running `*/create` commands once a log\nid has been allocated and the log file is available. Replaces the\nprior `"Logs ID: ..."` plaintext sentinel.\n\nWire: `{"type":"notification","log_stream_ready":"<id>"}`.').meta({ title: "cli.output.notification.LogStreamReady" });
-var CliOutputNotificationOkSchema = z485.z.object({
-  ok: z485.z.boolean()
+var CliOutputNotificationOkSchema = z484.z.object({
+  ok: z484.z.boolean()
 }).describe('Wire shape for silent-success notifications (`config set`,\n`favorites add/del/edit`, `instructions clear`, etc.). Wire:\n`{"type":"notification","ok":true}`.').meta({ title: "cli.output.notification.Ok" });
-var FilesystemConfigPairFavoriteSchema = z485.z.object({
+var FilesystemConfigPairFavoriteSchema = z484.z.object({
   function: RemotePathCommitOptionalSchema,
-  name: z485.z.string(),
-  note: z485.z.string(),
+  name: z484.z.string(),
+  note: z484.z.string(),
   profile: RemotePathCommitOptionalSchema
 }).meta({ title: "filesystem.config.PairFavorite" });
-var FunctionsListFunctionProfilePairItemSchema = z485.z.object({
+var FunctionsListFunctionProfilePairItemSchema = z484.z.object({
   function: RemotePathSchema.describe("The function."),
   profile: RemotePathSchema.describe("The profile.")
 }).describe("A function-profile pair in a list response.").meta({ title: "functions.ListFunctionProfilePairItem" });
 
 // src/cli/output/notification/pairListItem.ts
-var CliOutputNotificationPairListItemSchema = z485.z.union([FilesystemConfigPairFavoriteSchema.meta({ "title": "filesystem.config.PairFavorite", "variantTitle": "Favorite" }), FunctionsListFunctionProfilePairItemSchema.meta({ "title": "functions.ListFunctionProfilePairItem", "variantTitle": "Item" })]).describe("One entry in a function-profile pair listing.").meta({ title: "cli.output.notification.PairListItem" });
-var FilesystemPluginsBinariesSchema = z485.z.object({
-  linux_aarch64: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  linux_x86_64: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  macos_aarch64: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  macos_x86_64: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  windows_aarch64: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  windows_x86_64: z485.z.string().nullable().meta({ omitempty: true }).optional()
+var CliOutputNotificationPairListItemSchema = z484.z.union([FilesystemConfigPairFavoriteSchema.meta({ "title": "filesystem.config.PairFavorite", "variantTitle": "Favorite" }), FunctionsListFunctionProfilePairItemSchema.meta({ "title": "functions.ListFunctionProfilePairItem", "variantTitle": "Item" })]).describe("One entry in a function-profile pair listing.").meta({ title: "cli.output.notification.PairListItem" });
+var FilesystemPluginsBinariesSchema = z484.z.object({
+  linux_aarch64: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  linux_x86_64: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  macos_aarch64: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  macos_x86_64: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  windows_aarch64: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  windows_x86_64: z484.z.string().nullable().meta({ omitempty: true }).optional()
 }).describe("Release-asset filename per platform. Every field is optional;\ndeclare only the platforms a plugin ships for. The wire shape is\na flat JSON object \u2014 absent platforms are omitted, never\nserialised as `null`.\n\nExposes a [`Self::get`] method that takes a [`Platform`] enum so\ncallers can read the asset filename for the current host without\npattern-matching the field set themselves.").meta({ title: "filesystem.plugins.Binaries" });
-var FilesystemPluginsHttpMethodSchema = z485.z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]).describe('HTTP methods supported by [`ViewerRoute`]. Serializes as upper-case\n(`"GET"`, `"POST"`, \u2026) on the wire.').meta({ title: "filesystem.plugins.HttpMethod" });
+var FilesystemPluginsHttpMethodSchema = z484.z.enum(["GET", "POST", "PUT", "PATCH", "DELETE"]).describe('HTTP methods supported by [`ViewerRoute`]. Serializes as upper-case\n(`"GET"`, `"POST"`, \u2026) on the wire.').meta({ title: "filesystem.plugins.HttpMethod" });
 
 // src/filesystem/plugins/viewerRoute.ts
-var FilesystemPluginsViewerRouteSchema = z485.z.object({
+var FilesystemPluginsViewerRouteSchema = z484.z.object({
   method: FilesystemPluginsHttpMethodSchema.describe("HTTP method this route handles. Methods other than the listed\nfive aren't supported (and don't appear in plugin practice)."),
-  path: z485.z.string().describe("Path relative to the plugin's namespace. Must start with `/`;\nthe host prepends `/plugin/<repository>` before registering."),
-  type: z485.z.string().describe("String tag forwarded to the plugin's iframe as the `type`\nfield of the resulting `PluginRequest`. Plugin authors pick\nany value they want; the host doesn't interpret it.")
+  path: z484.z.string().describe("Path relative to the plugin's namespace. Must start with `/`;\nthe host prepends `/plugin/<repository>` before registering."),
+  type: z484.z.string().describe("String tag forwarded to the plugin's iframe as the `type`\nfield of the resulting `PluginRequest`. Plugin authors pick\nany value they want; the host doesn't interpret it.")
 }).describe("One HTTP route a plugin's viewer registers on the host viewer's\nembedded axum server. The full path served is\n`/plugin/<repository>/<self.path>`; on a hit, the body is\nJSON-decoded and forwarded as a `PluginRequest { type: self.type,\nvalue: body }` event to the frontend.").meta({ title: "filesystem.plugins.ViewerRoute" });
 
 // src/filesystem/plugins/manifestWithNameAndSource.ts
-var FilesystemPluginsManifestWithNameAndSourceSchema = z485.z.object({
-  author: z485.z.string().nullable().describe("Author or authors of the plugin. Free-form string.").meta({ omitempty: true }).optional(),
+var FilesystemPluginsManifestWithNameAndSourceSchema = z484.z.object({
+  author: z484.z.string().nullable().describe("Author or authors of the plugin. Free-form string.").meta({ omitempty: true }).optional(),
   binaries: FilesystemPluginsBinariesSchema.describe("Release-asset filename per platform \u2014 what the cli should\ndownload from the GitHub release tagged `v<version>` to install\nthe plugin's binary on each platform. Values are filenames\n(e.g. `psyops-linux-x86_64`, `psyops-windows-x86_64.exe`), NOT\nURLs; the URL is composed from the repository + tag + asset\nname elsewhere.\n\n**Every platform field is optional.** Declare entries only for\nthe platforms this plugin actually ships a binary for; absent\nplatforms are simply not supported by this release. A plugin\nshipping only Linux x86_64 declares one entry; a plugin\nshipping all six declares six. All-None \u2194 field omitted in\nthe wire shape.").meta({ omitempty: true }),
-  description: z485.z.string().describe("One-line description of what the plugin does. Surfaced in\nlistings and the plugin's `--help`-equivalent UI."),
-  homepage: z485.z.string().nullable().describe("Homepage or repository URL.").meta({ omitempty: true }).optional(),
-  license: z485.z.string().nullable().describe("SPDX license identifier (or any string).").meta({ omitempty: true }).optional(),
-  mobile_ready: z485.z.boolean().describe('Plugin author opts in to mobile viewer support by setting\nthis. Mobile viewer builds only surface plugins with this\nflag true \u2014 mobile has no local backend binary, so plugin\nUIs that require a backend will misbehave unless their\nauthors specifically design for "no-backend" mode. Defaults\nto false (desktop-only).'),
-  name: z485.z.string().describe("The plugin's identifier \u2014 the filename it lives under in the\nplugins directory (e.g. `psyops` for `~/.objectiveai/plugins/psyops`)."),
-  owner: z485.z.string().describe("GitHub `<owner>` segment of the source repo. Authors write\ntheir canonical owner here; the installer overwrites this\nfield with whatever owner it was actually installed from (so\nforks land on disk with the fork's owner, not the upstream's)."),
-  source: z485.z.string().describe("Where this manifest came from \u2014 e.g. an absolute filesystem path,\na URL, or a registry reference. Free-form string; the host\njust displays it."),
-  version: z485.z.string().describe("Version string. Semver convention is recommended but not\nenforced \u2014 the host just displays whatever's here."),
-  viewer_routes: z485.z.array(FilesystemPluginsViewerRouteSchema).describe("HTTP routes the viewer exposes on behalf of this plugin.\nEach entry registers a handler at\n`/plugin/<repository>/<path>` on the viewer's embedded axum\nserver; a hit emits a `PluginRequest { type, value }` event\nto the React frontend, which dispatches to the plugin's\niframe via the postMessage bridge."),
-  viewer_url: z485.z.string().nullable().describe("Remote URL the viewer's iframe loads directly, instead of an\non-disk bundle from [`Self::viewer_zip`]. The full URL is used\nas the iframe `src=` verbatim \u2014 query string, path, port,\nfragment all pass through. Must use `https://`, or `http://`\ntargeting `localhost` / `127.0.0.1` (development only).\n\nMutually exclusive with [`Self::viewer_zip`]. [`Self::viewer_routes`]\nand [`Self::mobile_ready`] apply to remote-URL viewers the same\nway they apply to zip-bundled viewers \u2014 the embedded axum\nserver still hosts the declared routes; the iframe still\nreceives the same postMessage protocol regardless of where\nits HTML/JS loaded from.").meta({ omitempty: true }).optional(),
-  viewer_zip: z485.z.string().nullable().describe("GitHub-release asset filename for the plugin's viewer UI\nbundle (a `.zip` whose root contains `index.html` plus\nassets). When absent, the plugin has no viewer tab from this\nsource. Mutually exclusive with [`Self::viewer_url`] \u2014\nvalidated by [`Self::validate`].").meta({ omitempty: true }).optional()
+  description: z484.z.string().describe("One-line description of what the plugin does. Surfaced in\nlistings and the plugin's `--help`-equivalent UI."),
+  homepage: z484.z.string().nullable().describe("Homepage or repository URL.").meta({ omitempty: true }).optional(),
+  license: z484.z.string().nullable().describe("SPDX license identifier (or any string).").meta({ omitempty: true }).optional(),
+  mobile_ready: z484.z.boolean().describe('Plugin author opts in to mobile viewer support by setting\nthis. Mobile viewer builds only surface plugins with this\nflag true \u2014 mobile has no local backend binary, so plugin\nUIs that require a backend will misbehave unless their\nauthors specifically design for "no-backend" mode. Defaults\nto false (desktop-only).'),
+  name: z484.z.string().describe("The plugin's identifier \u2014 the filename it lives under in the\nplugins directory (e.g. `psyops` for `~/.objectiveai/plugins/psyops`)."),
+  owner: z484.z.string().describe("GitHub `<owner>` segment of the source repo. Authors write\ntheir canonical owner here; the installer overwrites this\nfield with whatever owner it was actually installed from (so\nforks land on disk with the fork's owner, not the upstream's)."),
+  source: z484.z.string().describe("Where this manifest came from \u2014 e.g. an absolute filesystem path,\na URL, or a registry reference. Free-form string; the host\njust displays it."),
+  version: z484.z.string().describe("Version string. Semver convention is recommended but not\nenforced \u2014 the host just displays whatever's here."),
+  viewer_routes: z484.z.array(FilesystemPluginsViewerRouteSchema).describe("HTTP routes the viewer exposes on behalf of this plugin.\nEach entry registers a handler at\n`/plugin/<repository>/<path>` on the viewer's embedded axum\nserver; a hit emits a `PluginRequest { type, value }` event\nto the React frontend, which dispatches to the plugin's\niframe via the postMessage bridge."),
+  viewer_url: z484.z.string().nullable().describe("Remote URL the viewer's iframe loads directly, instead of an\non-disk bundle from [`Self::viewer_zip`]. The full URL is used\nas the iframe `src=` verbatim \u2014 query string, path, port,\nfragment all pass through. Must use `https://`, or `http://`\ntargeting `localhost` / `127.0.0.1` (development only).\n\nMutually exclusive with [`Self::viewer_zip`]. [`Self::viewer_routes`]\nand [`Self::mobile_ready`] apply to remote-URL viewers the same\nway they apply to zip-bundled viewers \u2014 the embedded axum\nserver still hosts the declared routes; the iframe still\nreceives the same postMessage protocol regardless of where\nits HTML/JS loaded from.").meta({ omitempty: true }).optional(),
+  viewer_zip: z484.z.string().nullable().describe("GitHub-release asset filename for the plugin's viewer UI\nbundle (a `.zip` whose root contains `index.html` plus\nassets). When absent, the plugin has no viewer tab from this\nsource. Mutually exclusive with [`Self::viewer_url`] \u2014\nvalidated by [`Self::validate`].").meta({ omitempty: true }).optional()
 }).describe("A [`Manifest`] enriched with the plugin's identifying `name` and\nthe `source` it was loaded from. Used when listing or describing\ninstalled plugins, where the bare manifest fields are not enough\nto identify which plugin they belong to or where they came from.\n\n`name` sits before the manifest body; `source` sits after. The\n`manifest` field is `#[serde(flatten)]`-ed so the wire shape is\none flat JSON object \u2014 `serde_json`'s `preserve_order` feature\nkeeps the declared field order, so consumers see `name` first\nand `source` last.").meta({ title: "filesystem.plugins.ManifestWithNameAndSource" });
 
 // src/cli/output/notification/plugin.ts
-var CliOutputNotificationPluginSchema = z485.z.object({
+var CliOutputNotificationPluginSchema = z484.z.object({
   plugin: FilesystemPluginsManifestWithNameAndSourceSchema.nullable().optional()
 }).describe('Wire shape: `{"type":"notification","value":{"plugin": <manifest> | null}}`.\nEmitted by `objectiveai plugins get <name>`. The value is the\nresolved `ManifestWithNameAndSource` when the manifest file exists\nand parses, or JSON `null` when it doesn\'t (same silent-skip policy\nas `list`).').meta({ title: "cli.output.notification.Plugin" });
-var CliOutputNotificationPluginsSchema = z485.z.object({
-  plugins: z485.z.array(FilesystemPluginsManifestWithNameAndSourceSchema)
+var CliOutputNotificationPluginsSchema = z484.z.object({
+  plugins: z484.z.array(FilesystemPluginsManifestWithNameAndSourceSchema)
 }).describe('Wire shape: `{"type":"notification","value":{"plugins":[...]}}`.\nEmitted by `objectiveai plugins list`. One entry per `.json`\nmanifest discovered in `<base_dir>/plugins/`; failures during\ndiscovery are silently dropped (see `Client::list_plugins`).').meta({ title: "cli.output.notification.Plugins" });
-var CliOutputNotificationPublishedSchema = z485.z.object({
-  sha: z485.z.string()
+var CliOutputNotificationPublishedSchema = z484.z.object({
+  sha: z484.z.string()
 }).describe('Result of `<resource> publish`. The SHA identifies the resulting\ncommit on the local filesystem repo.\n\nWire: `{"type":"notification","sha":"<commit-sha>"}`.').meta({ title: "cli.output.notification.Published" });
-var CliOutputNotificationSchemaSchema = z485.z.object({
+var CliOutputNotificationSchemaSchema = z484.z.object({
   schema: JsonValueSchema
 }).describe('A single JSON Schema document, emitted by `schemas <category> <type> get`.\nThe body is the raw schema as a `Value` since JSON Schemas have an\nopen recursive structure.\n\nWire: `{"type":"notification","schema":{...JSON Schema...}}`.').meta({ title: "cli.output.notification.Schema" });
-var CliOutputNotificationSchemasSchema = z485.z.object({
-  schemas: z485.z.array(z485.z.string())
+var CliOutputNotificationSchemasSchema = z484.z.object({
+  schemas: z484.z.array(z484.z.string())
 }).describe('Names of the schemas at the current namespace level, emitted by\n`schemas list` and per-category `schemas <category> list` commands.\n\nWire: `{"type":"notification","schemas":["name1","name2",...]}`.').meta({ title: "cli.output.notification.Schemas" });
-var CliOutputNotificationSkipReasonSchema = z485.z.union([z485.z.literal("unsupported_platform").describe("Host OS/arch combination doesn't have a release asset.").meta({ "variantTitle": "UnsupportedPlatform" }), z485.z.literal("dev_tree").describe("Binary is running out of a `target*/` directory \u2014 looks like a\ndev build (`cargo run`), not an installed binary.").meta({ "variantTitle": "DevTree" }), z485.z.literal("incomplete_release").describe("The latest release is missing one or more of the four expected\nassets for this host triple. No partial updates: refuse the\nwhole run.").meta({ "variantTitle": "IncompleteRelease" })]).describe("Reasons the updater can skip a run *and emit a notification about it*.").meta({ title: "cli.output.notification.SkipReason" });
-var FilesystemToolsManifestWithNameAndSourceSchema = z485.z.object({
-  description: z485.z.string().describe("One-line description of what the tool does. Surfaced to\nagents that consume the tool."),
-  exec: z485.z.string().describe("Filename of the executable to invoke, resolved relative to\n`<base_dir>/tools/`. The author is responsible for including\nany platform-specific extension (`.exe`, `.sh`, `.bat`, \u2026) \u2014\nthe SDK doesn't synthesise one."),
-  name: z485.z.string().describe("The tool's identifier \u2014 the filename it lives under in the\ntools directory (e.g. `hello` for `~/.objectiveai/tools/hello.json`)."),
-  owner: z485.z.string().describe("GitHub-style owner (user or org) of the tool's source repo.\nFree-form; tools have no installer, so this is purely\nauthor-supplied metadata \u2014 nothing overrides it the way the\nplugin installer overrides the plugin manifest's owner."),
-  source: z485.z.string().describe("Where this manifest came from \u2014 typically an absolute\nfilesystem path. Free-form string; the host just displays it."),
-  version: z485.z.string().describe("Version string. Free-form; the host displays whatever's here\n(semver convention recommended but not enforced).")
+var CliOutputNotificationSkipReasonSchema = z484.z.union([z484.z.literal("unsupported_platform").describe("Host OS/arch combination doesn't have a release asset.").meta({ "variantTitle": "UnsupportedPlatform" }), z484.z.literal("dev_tree").describe("Binary is running out of a `target*/` directory \u2014 looks like a\ndev build (`cargo run`), not an installed binary.").meta({ "variantTitle": "DevTree" }), z484.z.literal("incomplete_release").describe("The latest release is missing one or more of the four expected\nassets for this host triple. No partial updates: refuse the\nwhole run.").meta({ "variantTitle": "IncompleteRelease" })]).describe("Reasons the updater can skip a run *and emit a notification about it*.").meta({ title: "cli.output.notification.SkipReason" });
+var FilesystemToolsManifestWithNameAndSourceSchema = z484.z.object({
+  description: z484.z.string().describe("One-line description of what the tool does. Surfaced to\nagents that consume the tool."),
+  exec: z484.z.string().describe("Filename of the executable to invoke, resolved relative to\n`<base_dir>/tools/`. The author is responsible for including\nany platform-specific extension (`.exe`, `.sh`, `.bat`, \u2026) \u2014\nthe SDK doesn't synthesise one."),
+  name: z484.z.string().describe("The tool's identifier \u2014 the filename it lives under in the\ntools directory (e.g. `hello` for `~/.objectiveai/tools/hello.json`)."),
+  owner: z484.z.string().describe("GitHub-style owner (user or org) of the tool's source repo.\nFree-form; tools have no installer, so this is purely\nauthor-supplied metadata \u2014 nothing overrides it the way the\nplugin installer overrides the plugin manifest's owner."),
+  source: z484.z.string().describe("Where this manifest came from \u2014 typically an absolute\nfilesystem path. Free-form string; the host just displays it."),
+  version: z484.z.string().describe("Version string. Free-form; the host displays whatever's here\n(semver convention recommended but not enforced).")
 }).describe("A [`Manifest`] enriched with the tool's identifying `name` and the\n`source` it was loaded from. Same shape and ordering convention\nas `filesystem::plugins::ManifestWithNameAndSource`.").meta({ title: "filesystem.tools.ManifestWithNameAndSource" });
 
 // src/cli/output/notification/tool.ts
-var CliOutputNotificationToolSchema = z485.z.object({
+var CliOutputNotificationToolSchema = z484.z.object({
   tool: FilesystemToolsManifestWithNameAndSourceSchema.nullable().optional()
 }).describe('Wire shape: `{"type":"notification","value":{"tool": <manifest> | null}}`.\nEmitted by `objectiveai tools get <name>`. The value is the\nresolved `ManifestWithNameAndSource` when the manifest file exists\nand parses, or JSON `null` when it doesn\'t (same silent-skip policy\nas `list`).').meta({ title: "cli.output.notification.Tool" });
-var CliOutputNotificationToolLineSchema = z485.z.object({
-  line: z485.z.string(),
-  stderr: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
-  stdout: z485.z.boolean().nullable().meta({ omitempty: true }).optional()
+var CliOutputNotificationToolLineSchema = z484.z.object({
+  line: z484.z.string(),
+  stderr: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  stdout: z484.z.boolean().nullable().meta({ omitempty: true }).optional()
 }).describe('One line of subprocess output from a tool spawned by\n`objectiveai tools <name> <args\u2026>`. Wire shape:\n\n- stdout line: `{"line":"hello","stdout":true}`\n- stderr line: `{"line":"oops","stderr":true}`\n\nExactly one of `stdout` / `stderr` is set per emission; the other\nis omitted from the wire shape via `skip_serializing_if`.').meta({ title: "cli.output.notification.ToolLine" });
-var CliOutputNotificationToolsSchema = z485.z.object({
-  tools: z485.z.array(FilesystemToolsManifestWithNameAndSourceSchema)
+var CliOutputNotificationToolsSchema = z484.z.object({
+  tools: z484.z.array(FilesystemToolsManifestWithNameAndSourceSchema)
 }).describe('Wire shape: `{"type":"notification","value":{"tools":[...]}}`.\nEmitted by `objectiveai tools list`. One entry per `.json`\nmanifest discovered in `<base_dir>/tools/`; failures during\ndiscovery are silently dropped (see `Client::list_tools`).').meta({ title: "cli.output.notification.Tools" });
-var CliOutputNotificationUpdaterSchema = z485.z.union([z485.z.object({
-  event: z485.z.literal("skipped"),
+var CliOutputNotificationUpdaterSchema = z484.z.union([z484.z.object({
+  event: z484.z.literal("skipped"),
   reason: CliOutputNotificationSkipReasonSchema
-}).describe("Refused to proceed with the update \u2014 the `reason` carries why.\nNo binaries were modified.").meta({ "variantTitle": "Skipped" }), z485.z.object({
-  asset_name: z485.z.string(),
-  current_version: z485.z.string(),
-  event: z485.z.literal("checking")
-}).describe("All gates passed; about to call\n`GET /repos/ObjectiveAI/objectiveai/releases/latest`. The very\nfirst emitted line of any active update run.").meta({ "variantTitle": "Checking" }), z485.z.object({
-  current_version: z485.z.string(),
-  event: z485.z.literal("up_to_date"),
-  remote_version: z485.z.string()
-}).describe("GitHub returned the latest release tag and it's \u2264 current.\nTerminal \u2014 no more events follow.").meta({ "variantTitle": "UpToDate" }), z485.z.object({
-  asset_name: z485.z.string(),
-  current_version: z485.z.string(),
-  event: z485.z.literal("found"),
-  remote_version: z485.z.string(),
-  url: z485.z.string()
-}).describe("Found a newer release with our asset attached; about to download.").meta({ "variantTitle": "Found" }), z485.z.object({
-  current_version: z485.z.string(),
-  event: z485.z.literal("installed"),
-  remote_version: z485.z.string()
+}).describe("Refused to proceed with the update \u2014 the `reason` carries why.\nNo binaries were modified.").meta({ "variantTitle": "Skipped" }), z484.z.object({
+  asset_name: z484.z.string(),
+  current_version: z484.z.string(),
+  event: z484.z.literal("checking")
+}).describe("All gates passed; about to call\n`GET /repos/ObjectiveAI/objectiveai/releases/latest`. The very\nfirst emitted line of any active update run.").meta({ "variantTitle": "Checking" }), z484.z.object({
+  current_version: z484.z.string(),
+  event: z484.z.literal("up_to_date"),
+  remote_version: z484.z.string()
+}).describe("GitHub returned the latest release tag and it's \u2264 current.\nTerminal \u2014 no more events follow.").meta({ "variantTitle": "UpToDate" }), z484.z.object({
+  asset_name: z484.z.string(),
+  current_version: z484.z.string(),
+  event: z484.z.literal("found"),
+  remote_version: z484.z.string(),
+  url: z484.z.string()
+}).describe("Found a newer release with our asset attached; about to download.").meta({ "variantTitle": "Found" }), z484.z.object({
+  current_version: z484.z.string(),
+  event: z484.z.literal("installed"),
+  remote_version: z484.z.string()
 }).describe("One binary's swap completed. Emitted once per package the\nupdater touched (cli, api, viewer, mcp).").meta({ "variantTitle": "Installed" })]).describe('Wire shapes emitted by the cli\'s `update` subcommand (and by\nprogrammatic callers that invoke the cli\'s updater). Every skip\npath AND every active step emits one of these.\n\nErrors are emitted as `super::super::Output::Error` (level=warn,\nfatal=false), not as a variant here.\n\nWire (in combination with `super::super::Output::Notification` +\n`super::Notification`\'s `value` wrapper):\n  `{"type":"notification","value":{"event":"checking",...}}`.').meta({ title: "cli.output.notification.Updater" });
-var CliOutputLevelSchema = z485.z.enum(["trace", "debug", "info", "warn", "error"]).describe("Severity matching the conventions used by bunyan / pino / `log` crate\nJSON encoders. `fatal` is encoded separately on [`Error`].").meta({ title: "cli.output.Level" });
+var CliOutputLevelSchema = z484.z.enum(["trace", "debug", "info", "warn", "error"]).describe("Severity matching the conventions used by bunyan / pino / `log` crate\nJSON encoders. `fatal` is encoded separately on [`Error`].").meta({ title: "cli.output.Level" });
 
 // src/cli/output/error.ts
-var CliOutputErrorSchema = z485.z.object({
-  agent_id: z485.z.string().nullable().describe("Stamped at emit time by [`super::Handle`] when its `agent_id`\nfield is set; producers leave this `None` and let the handle\nfill it. Serde-skipped when `None`.").meta({ omitempty: true }).optional(),
-  fatal: z485.z.boolean(),
+var CliOutputErrorSchema = z484.z.object({
+  agent_id: z484.z.string().nullable().describe("Stamped at emit time by [`super::Handle`] when its `agent_id`\nfield is set; producers leave this `None` and let the handle\nfill it. Serde-skipped when `None`.").meta({ omitempty: true }).optional(),
+  fatal: z484.z.boolean(),
   level: CliOutputLevelSchema,
   message: JsonValueSchema
 }).describe('A failure or advisory written to stdout. `fatal: true` means the\nprocess is exiting with a non-zero status; `fatal: false` is a\nnon-blocking warning (e.g. auto-update failed but the requested\ncommand still ran).\n\n`message` is an arbitrary JSON value so producers can emit\nstructured payloads (e.g. `{"code": ..., "detail": ...}`). Wrap\na plain string as `Value::String(...)` (or use `.into()`) and the\nwire bytes stay identical to the old `String`-only shape.').meta({ title: "cli.output.Error" });
-var CliPluginsPluginOutputSchema = z485.z.union([CliOutputErrorSchema.and(z485.z.object({
-  type: z485.z.literal("error")
-})).meta({ "variantTitle": "Error" }), z485.z.object({
-  type: z485.z.literal("notification")
-}).meta({ "variantTitle": "Notification" }), z485.z.object({
-  command: z485.z.string(),
-  type: z485.z.literal("command")
+var CliPluginsPluginOutputSchema = z484.z.union([CliOutputErrorSchema.and(z484.z.object({
+  type: z484.z.literal("error")
+})).meta({ "variantTitle": "Error" }), z484.z.object({
+  type: z484.z.literal("notification")
+}).meta({ "variantTitle": "Notification" }), z484.z.object({
+  command: z484.z.string(),
+  type: z484.z.literal("command")
 }).meta({ "variantTitle": "Command" })]).describe('One line of plugin output.\n\nIdentical in shape to [`crate::cli::output::Output`] except:\n\n- [`PluginOutput::Notification`] is a plain `serde_json::Value`\n  (no generic `T`, no nesting wrapper). The plugin is responsible\n  for not including `"type"` as a top-level key in the value,\n  which would collide with the discriminator.\n- No `Begin`/`End` markers \u2014 plugins don\'t bracket their stream.\n- Adds [`PluginOutput::Command`] \u2014 a request the host should act\n  on, identified by a `command` string.').meta({ title: "cli.plugins.PluginOutput" });
-var ClientObjectiveaiMcpClientRequestPayloadSchema = AgentCompletionsRequestAgentCompletionNotifyParamsSchema.and(z485.z.object({
-  type: z485.z.literal("agent_completion_notify")
+var ClientObjectiveaiMcpClientRequestPayloadSchema = AgentCompletionsRequestAgentCompletionNotifyParamsSchema.and(z484.z.object({
+  type: z484.z.literal("agent_completion_notify")
 })).describe("Tagged union of request shapes the API can push down the\nreverse-attach channel to the client-app layer.").meta({ title: "client_objectiveai_mcp.client_request.Payload" });
-var ClientObjectiveaiMcpClientRequestRequestSchema = AgentCompletionsRequestAgentCompletionNotifyParamsSchema.and(z485.z.object({
-  type: z485.z.literal("agent_completion_notify")
+var ClientObjectiveaiMcpClientRequestRequestSchema = AgentCompletionsRequestAgentCompletionNotifyParamsSchema.and(z484.z.object({
+  type: z484.z.literal("agent_completion_notify")
 })).describe('Envelope: correlation `id` + tagged [`super::Payload`]. Wire shape\n(the `id` field lives at the envelope level, the `type` discriminator\nand the variant\'s payload fields are flattened alongside):\n\n```json\n{"id":"\u2026","type":"agent_completion_notify","response_id":"\u2026","content":{\u2026}}\n```').meta({ title: "client_objectiveai_mcp.client_request.Request" });
-var ClientObjectiveaiMcpClientResponseResponseSchema = z485.z.union([z485.z.object({
-  type: z485.z.literal("ok")
-}).describe("Empty success \u2014 the request was accepted."), z485.z.object({
-  code: z485.z.number().int().min(0).max(65535),
+var ClientObjectiveaiMcpClientResponseResponseSchema = z484.z.union([z484.z.object({
+  id: z484.z.string().describe("Matches the `id` of the\n[`super::super::client_request::Request`] this response is for."),
+  type: z484.z.literal("ok")
+}).describe("Empty success \u2014 the request was accepted.").meta({ "variantTitle": "client_objectiveai_mcp.client_response.Response.Ok" }), z484.z.object({
+  code: z484.z.number().int().min(0).max(65535),
+  id: z484.z.string().describe("Matches the `id` of the\n[`super::super::client_request::Request`] this response is for."),
   message: JsonValueSchema,
-  type: z485.z.literal("error")
-}).describe('The request failed. With internally-tagged + struct-variant\nserde flattens the inner fields alongside the `type` tag \u2014\ne.g. `{"id":"\u2026","type":"error","code":404,"message":\u2026}`.')]).and(z485.z.object({
-  id: z485.z.string().describe("Matches the `id` of the\n[`super::super::client_request::Request`] this response is for.")
-}).loose()).describe('Envelope: correlation `id` + tagged [`super::Result`]. Wire shape:\n\n```json\n{"id":"\u2026","type":"ok"}                         // empty success\n{"id":"\u2026","type":"error","code":404,"message":\u2026}  // failure\n```').meta({ title: "client_objectiveai_mcp.client_response.Response" });
-var ClientObjectiveaiMcpClientResponseResultSchema = z485.z.union([z485.z.object({
-  type: z485.z.literal("ok")
-}).describe("Empty success \u2014 the request was accepted."), z485.z.object({
-  code: z485.z.number().int().min(0).max(65535),
-  message: JsonValueSchema,
-  type: z485.z.literal("error")
-}).describe('The request failed. With internally-tagged + struct-variant\nserde flattens the inner fields alongside the `type` tag \u2014\ne.g. `{"id":"\u2026","type":"error","code":404,"message":\u2026}`.')]).describe("Tagged union of response shapes. `Ok` carries no payload \u2014 success\nis implicit in the chunk stream. `Error` carries a numeric `code`\nand a JSON `message` whose shape mirrors\n[`crate::error::ResponseError`].").meta({ title: "client_objectiveai_mcp.client_response.Result" });
-var ClientObjectiveaiMcpServerRequestRequestSchema = z485.z.object({
+  type: z484.z.literal("error")
+}).describe("The request failed.").meta({ "variantTitle": "client_objectiveai_mcp.client_response.Response.Error" })]).describe('Reply to a [`super::super::client_request::Request`]. Wire shape:\n\n```json\n{"id":"\u2026","type":"ok"}                              // success\n{"id":"\u2026","type":"error","code":404,"message":\u2026}    // failure\n```\n\nThe internally-tagged enum keeps the wire flat \u2014 `id`, `type`,\nand any extra fields sit side-by-side on the JSON object \u2014 while\nkeeping the schema clean (no `anyOf`-with-sibling-properties\nstructural quirk that flattening an inner Result enum would\notherwise produce).').meta({ title: "client_objectiveai_mcp.client_response.Response" });
+var ClientObjectiveaiMcpServerRequestRequestSchema = z484.z.object({
   body: JsonValueSchema.describe("Request body. `None` for `GET` and `DELETE`. For `POST`,\nthis is the JSON-RPC envelope the proxy sent.").meta({ omitempty: true }),
-  headers: z485.z.record(z485.z.string(), z485.z.string()).describe("Verbatim copy of the headers the proxy sent on its HTTP\nrequest to the API. The handler stamps these on its own\nrequest to the local objectiveai-mcp, with `Accept` always\nforced to `application/json` so no SSE flows on the handler\nleg.").meta({ omitempty: true }),
-  id: z485.z.string().describe("Server-minted correlation id. Echoed by the matching\n[`super::super::server_response::Response`]."),
-  method: z485.z.string().describe("HTTP method (`POST`, `GET`, `DELETE`).")
+  headers: z484.z.record(z484.z.string(), z484.z.string()).describe("Verbatim copy of the headers the proxy sent on its HTTP\nrequest to the API. The handler stamps these on its own\nrequest to the local objectiveai-mcp, with `Accept` always\nforced to `application/json` so no SSE flows on the handler\nleg.").meta({ omitempty: true }),
+  id: z484.z.string().describe("Server-minted correlation id. Echoed by the matching\n[`super::super::server_response::Response`]."),
+  method: z484.z.string().describe("HTTP method (`POST`, `GET`, `DELETE`).")
 }).describe('One HTTP request the proxy made against the API\'s\n`/objectiveai-mcp/{session_id}` route, forwarded verbatim down\nthe reverse-attach WS to the calling client. The client returns\na matching [`super::super::server_response::Response`] echoing\nthe request `id`.\n\nWire shape:\n\n```json\n{"id":"\u2026","method":"POST","headers":{"Mcp-Session-Id":"\u2026"},"body":{\u2026}}\n```').meta({ title: "client_objectiveai_mcp.server_request.Request" });
-var ClientObjectiveaiMcpServerResponseResponseSchema = z485.z.object({
+var ClientObjectiveaiMcpServerResponseResponseSchema = z484.z.object({
   body: JsonValueSchema.describe("Response body \u2014 the JSON-RPC reply envelope. `None` for empty\nresponses (e.g. `202 Accepted` on notifications).").meta({ omitempty: true }),
-  headers: z485.z.record(z485.z.string(), z485.z.string()).describe("Response headers. Typically just `Content-Type` and possibly\n`Mcp-Session-Id` on the `initialize` response.").meta({ omitempty: true }),
-  id: z485.z.string().describe("Matches the `id` of the\n[`super::super::server_request::Request`] this response is for."),
-  status: z485.z.number().int().min(0).max(65535).describe("HTTP status code (`200` for success, `4xx` / `5xx` for errors).")
+  headers: z484.z.record(z484.z.string(), z484.z.string()).describe("Response headers. Typically just `Content-Type` and possibly\n`Mcp-Session-Id` on the `initialize` response.").meta({ omitempty: true }),
+  id: z484.z.string().describe("Matches the `id` of the\n[`super::super::server_request::Request`] this response is for."),
+  status: z484.z.number().int().min(0).max(65535).describe("HTTP status code (`200` for success, `4xx` / `5xx` for errors).")
 }).describe('One HTTP response the calling client\'s `McpHandler` produces in\nreply to a [`super::super::server_request::Request`]. The API\ntranslates this into the HTTP response it returns to the proxy.\n\nWire shape:\n\n```json\n{"id":"\u2026","status":200,"headers":{"Content-Type":"application/json"},"body":{\u2026}}\n```').meta({ title: "client_objectiveai_mcp.server_response.Response" });
-var ErrorErrorCreateParamsSchema = z485.z.object({
-  seed: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().describe("Random seed for deterministic error generation.").meta({ omitempty: true }).optional(),
-  stream: z485.z.boolean().nullable().describe("Whether to stream the response.").meta({ omitempty: true }).optional()
+var ErrorErrorCreateParamsSchema = z484.z.object({
+  seed: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().describe("Random seed for deterministic error generation.").meta({ omitempty: true }).optional(),
+  stream: z484.z.boolean().nullable().describe("Whether to stream the response.").meta({ omitempty: true }).optional()
 }).describe("Request to trigger an error response for testing purposes.").meta({ title: "error.ErrorCreateParams" });
-var ErrorErrorResponseSchema = z485.z.object({
-  ok: z485.z.boolean().describe("Whether the request completed successfully.")
+var ErrorErrorResponseSchema = z484.z.object({
+  ok: z484.z.boolean().describe("Whether the request completed successfully.")
 }).describe("Response from the error endpoint.").meta({ title: "error.ErrorResponse" });
 var ErrorErrorCreateParamsStreamingSchema = ErrorErrorCreateParamsSchema.extend({
-  stream: z485__default.default.literal(true)
+  stream: z484__default.default.literal(true)
 });
 var ErrorErrorCreateParamsUnarySchema = ErrorErrorCreateParamsSchema.extend({
-  stream: z485__default.default.literal(false).optional().nullable()
+  stream: z484__default.default.literal(false).optional().nullable()
 });
 function errorCreateError(client, body, options) {
   if (body.stream) {
@@ -3023,62 +3016,62 @@ function errorCreateError(client, body, options) {
     options
   );
 }
-var FilesystemConfigAgentsConfigSchema = z485.z.object({
-  favorites: z485.z.array(FilesystemConfigFavoriteSchema).nullable().meta({ omitempty: true }).optional()
+var FilesystemConfigAgentsConfigSchema = z484.z.object({
+  favorites: z484.z.array(FilesystemConfigFavoriteSchema).nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "filesystem.config.AgentsConfig" });
-var FilesystemConfigApiConfigSchema = z485.z.object({
-  address: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  claude_agent_sdk: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
-  codex_sdk: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
-  commit_author_email: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  commit_author_name: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  github_authorization: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  http_referer: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  mcp_authorization: z485.z.record(z485.z.string(), z485.z.string()).nullable().meta({ omitempty: true }).optional(),
-  objectiveai_authorization: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  openrouter_authorization: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  port: z485.z.number().int().min(0).max(65535).nullable().meta({ omitempty: true }).optional(),
-  user_agent: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  x_title: z485.z.string().nullable().describe("`X-Title` HTTP header \u2014 keeps the `x_` prefix because that's the\nliteral header name (every other field had its `x_` dropped on\nthe flatten).").meta({ omitempty: true }).optional()
+var FilesystemConfigApiConfigSchema = z484.z.object({
+  address: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  claude_agent_sdk: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  codex_sdk: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  commit_author_email: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  commit_author_name: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  github_authorization: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  http_referer: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  mcp_authorization: z484.z.record(z484.z.string(), z484.z.string()).nullable().meta({ omitempty: true }).optional(),
+  objectiveai_authorization: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  openrouter_authorization: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  port: z484.z.number().int().min(0).max(65535).nullable().meta({ omitempty: true }).optional(),
+  user_agent: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  x_title: z484.z.string().nullable().describe("`X-Title` HTTP header \u2014 keeps the `x_` prefix because that's the\nliteral header name (every other field had its `x_` dropped on\nthe flatten).").meta({ omitempty: true }).optional()
 }).meta({ title: "filesystem.config.ApiConfig" });
-var RemoteSchema = z485.z.union([z485.z.literal("github").describe("GitHub repository.").meta({ "variantTitle": "Github" }), z485.z.literal("filesystem").describe("Local filesystem.").meta({ "variantTitle": "Filesystem" }), z485.z.literal("mock").describe("Mock (for testing).").meta({ "variantTitle": "Mock" })]).describe("The remote source where a function, profile, or agent is hosted.").meta({ title: "Remote" });
+var RemoteSchema = z484.z.union([z484.z.literal("github").describe("GitHub repository.").meta({ "variantTitle": "Github" }), z484.z.literal("filesystem").describe("Local filesystem.").meta({ "variantTitle": "Filesystem" }), z484.z.literal("mock").describe("Mock (for testing).").meta({ "variantTitle": "Mock" })]).describe("The remote source where a function, profile, or agent is hosted.").meta({ title: "Remote" });
 
 // src/filesystem/config/functionsInventionsConfig.ts
-var FilesystemConfigFunctionsInventionsConfigSchema = z485.z.object({
+var FilesystemConfigFunctionsInventionsConfigSchema = z484.z.object({
   remote: RemoteSchema.default("filesystem")
 }).meta({ title: "filesystem.config.FunctionsInventionsConfig" });
-var FilesystemConfigFunctionsProfilesPairsConfigSchema = z485.z.object({
-  favorites: z485.z.array(FilesystemConfigPairFavoriteSchema).nullable().meta({ omitempty: true }).optional()
+var FilesystemConfigFunctionsProfilesPairsConfigSchema = z484.z.object({
+  favorites: z484.z.array(FilesystemConfigPairFavoriteSchema).nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "filesystem.config.FunctionsProfilesPairsConfig" });
 
 // src/filesystem/config/functionsProfilesConfig.ts
-var FilesystemConfigFunctionsProfilesConfigSchema = z485.z.object({
-  favorites: z485.z.array(FilesystemConfigFavoriteSchema).nullable().meta({ omitempty: true }).optional(),
+var FilesystemConfigFunctionsProfilesConfigSchema = z484.z.object({
+  favorites: z484.z.array(FilesystemConfigFavoriteSchema).nullable().meta({ omitempty: true }).optional(),
   pairs: FilesystemConfigFunctionsProfilesPairsConfigSchema.nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "filesystem.config.FunctionsProfilesConfig" });
 
 // src/filesystem/config/functionsConfig.ts
-var FilesystemConfigFunctionsConfigSchema = z485.z.object({
-  favorites: z485.z.array(FilesystemConfigFavoriteSchema).nullable().meta({ omitempty: true }).optional(),
+var FilesystemConfigFunctionsConfigSchema = z484.z.object({
+  favorites: z484.z.array(FilesystemConfigFavoriteSchema).nullable().meta({ omitempty: true }).optional(),
   inventions: FilesystemConfigFunctionsInventionsConfigSchema.nullable().meta({ omitempty: true }).optional(),
   profiles: FilesystemConfigFunctionsProfilesConfigSchema.nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "filesystem.config.FunctionsConfig" });
-var FilesystemConfigMcpConfigSchema = z485.z.object({
-  address: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  port: z485.z.number().int().min(0).max(65535).nullable().meta({ omitempty: true }).optional()
+var FilesystemConfigMcpConfigSchema = z484.z.object({
+  address: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  port: z484.z.number().int().min(0).max(65535).nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "filesystem.config.McpConfig" });
-var FilesystemConfigSwarmsConfigSchema = z485.z.object({
-  favorites: z485.z.array(FilesystemConfigFavoriteSchema).nullable().meta({ omitempty: true }).optional()
+var FilesystemConfigSwarmsConfigSchema = z484.z.object({
+  favorites: z484.z.array(FilesystemConfigFavoriteSchema).nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "filesystem.config.SwarmsConfig" });
-var FilesystemConfigViewerConfigSchema = z485.z.object({
-  address: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  port: z485.z.number().int().min(0).max(65535).nullable().meta({ omitempty: true }).optional(),
-  secret: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  signature: z485.z.string().nullable().meta({ omitempty: true }).optional()
+var FilesystemConfigViewerConfigSchema = z484.z.object({
+  address: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  port: z484.z.number().int().min(0).max(65535).nullable().meta({ omitempty: true }).optional(),
+  secret: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  signature: z484.z.string().nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "filesystem.config.ViewerConfig" });
 
 // src/filesystem/config/config.ts
-var FilesystemConfigConfigSchema = z485.z.object({
+var FilesystemConfigConfigSchema = z484.z.object({
   agents: FilesystemConfigAgentsConfigSchema.nullable().meta({ omitempty: true }).optional(),
   api: FilesystemConfigApiConfigSchema.nullable().meta({ omitempty: true }).optional(),
   functions: FilesystemConfigFunctionsConfigSchema.nullable().meta({ omitempty: true }).optional(),
@@ -3086,303 +3079,303 @@ var FilesystemConfigConfigSchema = z485.z.object({
   swarms: FilesystemConfigSwarmsConfigSchema.nullable().meta({ omitempty: true }).optional(),
   viewer: FilesystemConfigViewerConfigSchema.nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "filesystem.config.Config" });
-var FilesystemConfigViewerSecretSignaturePairSchema = z485.z.object({
-  secret: z485.z.string().describe("The secret for the viewer server."),
-  signature: z485.z.string().describe("The pre-computed signature for the API client (`sha256=<hex>`).")
+var FilesystemConfigViewerSecretSignaturePairSchema = z484.z.object({
+  secret: z484.z.string().describe("The secret for the viewer server."),
+  signature: z484.z.string().describe("The pre-computed signature for the API client (`sha256=<hex>`).")
 }).describe("A generated secret/signature pair for viewer authentication.\n\nThe viewer server stores the `secret`. The API client stores the `signature`.\nThe signature is `sha256=<hex of SHA256(secret)>`. The viewer server validates\nby computing SHA256(secret) and comparing against the incoming header value.\nKnowing the signature does not reveal the secret (preimage resistance).").meta({ title: "filesystem.config.ViewerSecretSignaturePair" });
-var FilesystemLogsListItemSchema = z485.z.object({
-  created: z485.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp (seconds) when the log was created."),
-  id: z485.z.string().describe('The log ID (filename stem, e.g. `"fexec1-abc123-1712345678"`).')
+var FilesystemLogsListItemSchema = z484.z.object({
+  created: z484.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp (seconds) when the log was created."),
+  id: z484.z.string().describe('The log ID (filename stem, e.g. `"fexec1-abc123-1712345678"`).')
 }).describe("A single entry in a log listing.").meta({ title: "filesystem.logs.ListItem" });
-var FilesystemPluginsManifestSchema = z485.z.object({
-  author: z485.z.string().nullable().describe("Author or authors of the plugin. Free-form string.").meta({ omitempty: true }).optional(),
+var FilesystemPluginsManifestSchema = z484.z.object({
+  author: z484.z.string().nullable().describe("Author or authors of the plugin. Free-form string.").meta({ omitempty: true }).optional(),
   binaries: FilesystemPluginsBinariesSchema.describe("Release-asset filename per platform \u2014 what the cli should\ndownload from the GitHub release tagged `v<version>` to install\nthe plugin's binary on each platform. Values are filenames\n(e.g. `psyops-linux-x86_64`, `psyops-windows-x86_64.exe`), NOT\nURLs; the URL is composed from the repository + tag + asset\nname elsewhere.\n\n**Every platform field is optional.** Declare entries only for\nthe platforms this plugin actually ships a binary for; absent\nplatforms are simply not supported by this release. A plugin\nshipping only Linux x86_64 declares one entry; a plugin\nshipping all six declares six. All-None \u2194 field omitted in\nthe wire shape.").meta({ omitempty: true }),
-  description: z485.z.string().describe("One-line description of what the plugin does. Surfaced in\nlistings and the plugin's `--help`-equivalent UI."),
-  homepage: z485.z.string().nullable().describe("Homepage or repository URL.").meta({ omitempty: true }).optional(),
-  license: z485.z.string().nullable().describe("SPDX license identifier (or any string).").meta({ omitempty: true }).optional(),
-  mobile_ready: z485.z.boolean().describe('Plugin author opts in to mobile viewer support by setting\nthis. Mobile viewer builds only surface plugins with this\nflag true \u2014 mobile has no local backend binary, so plugin\nUIs that require a backend will misbehave unless their\nauthors specifically design for "no-backend" mode. Defaults\nto false (desktop-only).'),
-  owner: z485.z.string().describe("GitHub `<owner>` segment of the source repo. Authors write\ntheir canonical owner here; the installer overwrites this\nfield with whatever owner it was actually installed from (so\nforks land on disk with the fork's owner, not the upstream's)."),
-  version: z485.z.string().describe("Version string. Semver convention is recommended but not\nenforced \u2014 the host just displays whatever's here."),
-  viewer_routes: z485.z.array(FilesystemPluginsViewerRouteSchema).describe("HTTP routes the viewer exposes on behalf of this plugin.\nEach entry registers a handler at\n`/plugin/<repository>/<path>` on the viewer's embedded axum\nserver; a hit emits a `PluginRequest { type, value }` event\nto the React frontend, which dispatches to the plugin's\niframe via the postMessage bridge."),
-  viewer_url: z485.z.string().nullable().describe("Remote URL the viewer's iframe loads directly, instead of an\non-disk bundle from [`Self::viewer_zip`]. The full URL is used\nas the iframe `src=` verbatim \u2014 query string, path, port,\nfragment all pass through. Must use `https://`, or `http://`\ntargeting `localhost` / `127.0.0.1` (development only).\n\nMutually exclusive with [`Self::viewer_zip`]. [`Self::viewer_routes`]\nand [`Self::mobile_ready`] apply to remote-URL viewers the same\nway they apply to zip-bundled viewers \u2014 the embedded axum\nserver still hosts the declared routes; the iframe still\nreceives the same postMessage protocol regardless of where\nits HTML/JS loaded from.").meta({ omitempty: true }).optional(),
-  viewer_zip: z485.z.string().nullable().describe("GitHub-release asset filename for the plugin's viewer UI\nbundle (a `.zip` whose root contains `index.html` plus\nassets). When absent, the plugin has no viewer tab from this\nsource. Mutually exclusive with [`Self::viewer_url`] \u2014\nvalidated by [`Self::validate`].").meta({ omitempty: true }).optional()
+  description: z484.z.string().describe("One-line description of what the plugin does. Surfaced in\nlistings and the plugin's `--help`-equivalent UI."),
+  homepage: z484.z.string().nullable().describe("Homepage or repository URL.").meta({ omitempty: true }).optional(),
+  license: z484.z.string().nullable().describe("SPDX license identifier (or any string).").meta({ omitempty: true }).optional(),
+  mobile_ready: z484.z.boolean().describe('Plugin author opts in to mobile viewer support by setting\nthis. Mobile viewer builds only surface plugins with this\nflag true \u2014 mobile has no local backend binary, so plugin\nUIs that require a backend will misbehave unless their\nauthors specifically design for "no-backend" mode. Defaults\nto false (desktop-only).'),
+  owner: z484.z.string().describe("GitHub `<owner>` segment of the source repo. Authors write\ntheir canonical owner here; the installer overwrites this\nfield with whatever owner it was actually installed from (so\nforks land on disk with the fork's owner, not the upstream's)."),
+  version: z484.z.string().describe("Version string. Semver convention is recommended but not\nenforced \u2014 the host just displays whatever's here."),
+  viewer_routes: z484.z.array(FilesystemPluginsViewerRouteSchema).describe("HTTP routes the viewer exposes on behalf of this plugin.\nEach entry registers a handler at\n`/plugin/<repository>/<path>` on the viewer's embedded axum\nserver; a hit emits a `PluginRequest { type, value }` event\nto the React frontend, which dispatches to the plugin's\niframe via the postMessage bridge."),
+  viewer_url: z484.z.string().nullable().describe("Remote URL the viewer's iframe loads directly, instead of an\non-disk bundle from [`Self::viewer_zip`]. The full URL is used\nas the iframe `src=` verbatim \u2014 query string, path, port,\nfragment all pass through. Must use `https://`, or `http://`\ntargeting `localhost` / `127.0.0.1` (development only).\n\nMutually exclusive with [`Self::viewer_zip`]. [`Self::viewer_routes`]\nand [`Self::mobile_ready`] apply to remote-URL viewers the same\nway they apply to zip-bundled viewers \u2014 the embedded axum\nserver still hosts the declared routes; the iframe still\nreceives the same postMessage protocol regardless of where\nits HTML/JS loaded from.").meta({ omitempty: true }).optional(),
+  viewer_zip: z484.z.string().nullable().describe("GitHub-release asset filename for the plugin's viewer UI\nbundle (a `.zip` whose root contains `index.html` plus\nassets). When absent, the plugin has no viewer tab from this\nsource. Mutually exclusive with [`Self::viewer_url`] \u2014\nvalidated by [`Self::validate`].").meta({ omitempty: true }).optional()
 }).describe("Declarative metadata a plugin ships with itself. The wire shape is\nJSON; the on-disk convention (sibling file, embedded resource,\n`--manifest` flag, \u2026) is deliberately out of scope of this struct\nand will be settled in a follow-up.").meta({ title: "filesystem.plugins.Manifest" });
-var FilesystemPluginsPlatformSchema = z485.z.enum(["linux_x86_64", "linux_aarch64", "windows_x86_64", "windows_aarch64", "macos_x86_64", "macos_aarch64"]).describe('A supported runtime target \u2014 the cross product of OS and CPU\narchitecture the cli knows how to install plugin binaries for.\nSerialized as `<os>_<arch>` (e.g. `"linux_x86_64"`,\n`"windows_aarch64"`). Used as the key type in\n[`super::Manifest::binaries`] so a manifest can declare a distinct\nrelease-asset filename per platform. The underscore separator (vs\nthe hyphen used by Rust target triples) keeps the names usable\ndirectly as identifiers in the cross-language SDK codegen.').meta({ title: "filesystem.plugins.Platform" });
-var FilesystemPluginsWhitelistEntrySchema = z485.z.object({
-  commit_sha: z485.z.string().describe('Regex matching the commit sha. When the user omits\n`--commit-sha`, this is matched against the literal string\n`"HEAD"`.'),
-  owner: z485.z.string().describe("Regex matching the GitHub owner (org or user). Case-sensitive."),
-  repository: z485.z.string().describe("Regex matching the repository name."),
-  version: z485.z.string().describe("Regex matching the manifest's `version` field.")
+var FilesystemPluginsPlatformSchema = z484.z.enum(["linux_x86_64", "linux_aarch64", "windows_x86_64", "windows_aarch64", "macos_x86_64", "macos_aarch64"]).describe('A supported runtime target \u2014 the cross product of OS and CPU\narchitecture the cli knows how to install plugin binaries for.\nSerialized as `<os>_<arch>` (e.g. `"linux_x86_64"`,\n`"windows_aarch64"`). Used as the key type in\n[`super::Manifest::binaries`] so a manifest can declare a distinct\nrelease-asset filename per platform. The underscore separator (vs\nthe hyphen used by Rust target triples) keeps the names usable\ndirectly as identifiers in the cross-language SDK codegen.').meta({ title: "filesystem.plugins.Platform" });
+var FilesystemPluginsWhitelistEntrySchema = z484.z.object({
+  commit_sha: z484.z.string().describe('Regex matching the commit sha. When the user omits\n`--commit-sha`, this is matched against the literal string\n`"HEAD"`.'),
+  owner: z484.z.string().describe("Regex matching the GitHub owner (org or user). Case-sensitive."),
+  repository: z484.z.string().describe("Regex matching the repository name."),
+  version: z484.z.string().describe("Regex matching the manifest's `version` field.")
 }).describe("One whitelist row. Each field is a regex matched **anchored**\nagainst the corresponding install parameter (compiled as\n`^(?:pattern)$`). All four fields must match for the row to\nallow the install.\n\nThe host loads a list of these and accepts a plugin install only\nif the (owner, repository, commit_sha_or_HEAD, manifest.version)\nquadruple matches at least one row. Use `.*` for catch-all fields.").meta({ title: "filesystem.plugins.WhitelistEntry" });
-var FilesystemToolsManifestSchema = z485.z.object({
-  description: z485.z.string().describe("One-line description of what the tool does. Surfaced to\nagents that consume the tool."),
-  exec: z485.z.string().describe("Filename of the executable to invoke, resolved relative to\n`<base_dir>/tools/`. The author is responsible for including\nany platform-specific extension (`.exe`, `.sh`, `.bat`, \u2026) \u2014\nthe SDK doesn't synthesise one."),
-  owner: z485.z.string().describe("GitHub-style owner (user or org) of the tool's source repo.\nFree-form; tools have no installer, so this is purely\nauthor-supplied metadata \u2014 nothing overrides it the way the\nplugin installer overrides the plugin manifest's owner."),
-  version: z485.z.string().describe("Version string. Free-form; the host displays whatever's here\n(semver convention recommended but not enforced).")
+var FilesystemToolsManifestSchema = z484.z.object({
+  description: z484.z.string().describe("One-line description of what the tool does. Surfaced to\nagents that consume the tool."),
+  exec: z484.z.string().describe("Filename of the executable to invoke, resolved relative to\n`<base_dir>/tools/`. The author is responsible for including\nany platform-specific extension (`.exe`, `.sh`, `.bat`, \u2026) \u2014\nthe SDK doesn't synthesise one."),
+  owner: z484.z.string().describe("GitHub-style owner (user or org) of the tool's source repo.\nFree-form; tools have no installer, so this is purely\nauthor-supplied metadata \u2014 nothing overrides it the way the\nplugin installer overrides the plugin manifest's owner."),
+  version: z484.z.string().describe("Version string. Free-form; the host displays whatever's here\n(semver convention recommended but not enforced).")
 }).describe("Declarative metadata a local tool ships with. The wire shape is\nJSON: `<base_dir>/tools/<name>.json`. Companion executable lives\nalongside in `<base_dir>/tools/<exec>`.").meta({ title: "filesystem.tools.Manifest" });
-var FunctionsExpressionAnyOfInputSchemaSchema = z485.z.object({
-  anyOf: z485.z.array(z485.z.lazy(() => FunctionsExpressionInputSchemaSchema)).describe("The possible schemas that the input can match.")
+var FunctionsExpressionAnyOfInputSchemaSchema = z484.z.object({
+  anyOf: z484.z.array(z484.z.lazy(() => FunctionsExpressionInputSchemaSchema)).describe("The possible schemas that the input can match.")
 }).describe("Schema for a union of possible types - input must match at least one.").meta({ title: "functions.expression.AnyOfInputSchema" });
-var FunctionsExpressionArrayInputSchemaTypeSchema = z485.z.literal("array").meta({ title: "functions.expression.ArrayInputSchemaType" });
+var FunctionsExpressionArrayInputSchemaTypeSchema = z484.z.literal("array").meta({ title: "functions.expression.ArrayInputSchemaType" });
 
 // src/functions/expression/arrayInputSchema.ts
-var FunctionsExpressionArrayInputSchemaSchema = z485.z.object({
-  description: z485.z.string().nullable().describe("Human-readable description of the array.").meta({ omitempty: true }).optional(),
-  items: z485.z.lazy(() => FunctionsExpressionInputSchemaSchema).describe("Schema for each item in the array."),
-  maxItems: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Maximum number of items allowed.").meta({ omitempty: true }).optional(),
-  minItems: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Minimum number of items required.").meta({ omitempty: true }).optional(),
+var FunctionsExpressionArrayInputSchemaSchema = z484.z.object({
+  description: z484.z.string().nullable().describe("Human-readable description of the array.").meta({ omitempty: true }).optional(),
+  items: z484.z.lazy(() => FunctionsExpressionInputSchemaSchema).describe("Schema for each item in the array."),
+  maxItems: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Maximum number of items allowed.").meta({ omitempty: true }).optional(),
+  minItems: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Minimum number of items required.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionArrayInputSchemaTypeSchema
 }).describe("Schema for an array input.").meta({ title: "functions.expression.ArrayInputSchema" });
-var FunctionsExpressionAudioInputSchemaTypeSchema = z485.z.literal("audio").meta({ title: "functions.expression.AudioInputSchemaType" });
+var FunctionsExpressionAudioInputSchemaTypeSchema = z484.z.literal("audio").meta({ title: "functions.expression.AudioInputSchemaType" });
 
 // src/functions/expression/audioInputSchema.ts
-var FunctionsExpressionAudioInputSchemaSchema = z485.z.object({
-  description: z485.z.string().nullable().describe("Human-readable description of the expected audio.").meta({ omitempty: true }).optional(),
+var FunctionsExpressionAudioInputSchemaSchema = z484.z.object({
+  description: z484.z.string().nullable().describe("Human-readable description of the expected audio.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionAudioInputSchemaTypeSchema
 }).describe("Schema for an audio input.").meta({ title: "functions.expression.AudioInputSchema" });
-var FunctionsExpressionBooleanInputSchemaTypeSchema = z485.z.literal("boolean").meta({ title: "functions.expression.BooleanInputSchemaType" });
+var FunctionsExpressionBooleanInputSchemaTypeSchema = z484.z.literal("boolean").meta({ title: "functions.expression.BooleanInputSchemaType" });
 
 // src/functions/expression/booleanInputSchema.ts
-var FunctionsExpressionBooleanInputSchemaSchema = z485.z.object({
-  description: z485.z.string().nullable().describe("Human-readable description of the boolean.").meta({ omitempty: true }).optional(),
+var FunctionsExpressionBooleanInputSchemaSchema = z484.z.object({
+  description: z484.z.string().nullable().describe("Human-readable description of the boolean.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionBooleanInputSchemaTypeSchema
 }).describe("Schema for a boolean input.").meta({ title: "functions.expression.BooleanInputSchema" });
-var FunctionsExpressionFileInputSchemaTypeSchema = z485.z.literal("file").meta({ title: "functions.expression.FileInputSchemaType" });
+var FunctionsExpressionFileInputSchemaTypeSchema = z484.z.literal("file").meta({ title: "functions.expression.FileInputSchemaType" });
 
 // src/functions/expression/fileInputSchema.ts
-var FunctionsExpressionFileInputSchemaSchema = z485.z.object({
-  description: z485.z.string().nullable().describe("Human-readable description of the expected file.").meta({ omitempty: true }).optional(),
+var FunctionsExpressionFileInputSchemaSchema = z484.z.object({
+  description: z484.z.string().nullable().describe("Human-readable description of the expected file.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionFileInputSchemaTypeSchema
 }).describe("Schema for a file input.").meta({ title: "functions.expression.FileInputSchema" });
-var FunctionsExpressionImageInputSchemaTypeSchema = z485.z.literal("image").meta({ title: "functions.expression.ImageInputSchemaType" });
+var FunctionsExpressionImageInputSchemaTypeSchema = z484.z.literal("image").meta({ title: "functions.expression.ImageInputSchemaType" });
 
 // src/functions/expression/imageInputSchema.ts
-var FunctionsExpressionImageInputSchemaSchema = z485.z.object({
-  description: z485.z.string().nullable().describe("Human-readable description of the expected image.").meta({ omitempty: true }).optional(),
+var FunctionsExpressionImageInputSchemaSchema = z484.z.object({
+  description: z484.z.string().nullable().describe("Human-readable description of the expected image.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionImageInputSchemaTypeSchema
 }).describe("Schema for an image input (URL or base64-encoded).").meta({ title: "functions.expression.ImageInputSchema" });
-var FunctionsExpressionIntegerInputSchemaTypeSchema = z485.z.literal("integer").meta({ title: "functions.expression.IntegerInputSchemaType" });
+var FunctionsExpressionIntegerInputSchemaTypeSchema = z484.z.literal("integer").meta({ title: "functions.expression.IntegerInputSchemaType" });
 
 // src/functions/expression/integerInputSchema.ts
-var FunctionsExpressionIntegerInputSchemaSchema = z485.z.object({
-  description: z485.z.string().nullable().describe("Human-readable description of the integer.").meta({ omitempty: true }).optional(),
-  maximum: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().describe("Maximum allowed value (inclusive).").meta({ omitempty: true }).optional(),
-  minimum: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().describe("Minimum allowed value (inclusive).").meta({ omitempty: true }).optional(),
+var FunctionsExpressionIntegerInputSchemaSchema = z484.z.object({
+  description: z484.z.string().nullable().describe("Human-readable description of the integer.").meta({ omitempty: true }).optional(),
+  maximum: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().describe("Maximum allowed value (inclusive).").meta({ omitempty: true }).optional(),
+  minimum: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().describe("Minimum allowed value (inclusive).").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionIntegerInputSchemaTypeSchema
 }).describe("Schema for an integer input.").meta({ title: "functions.expression.IntegerInputSchema" });
-var FunctionsExpressionNumberInputSchemaTypeSchema = z485.z.literal("number").meta({ title: "functions.expression.NumberInputSchemaType" });
+var FunctionsExpressionNumberInputSchemaTypeSchema = z484.z.literal("number").meta({ title: "functions.expression.NumberInputSchemaType" });
 
 // src/functions/expression/numberInputSchema.ts
-var FunctionsExpressionNumberInputSchemaSchema = z485.z.object({
-  description: z485.z.string().nullable().describe("Human-readable description of the number.").meta({ omitempty: true }).optional(),
-  maximum: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Maximum allowed value (inclusive).").meta({ omitempty: true }).optional(),
-  minimum: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Minimum allowed value (inclusive).").meta({ omitempty: true }).optional(),
+var FunctionsExpressionNumberInputSchemaSchema = z484.z.object({
+  description: z484.z.string().nullable().describe("Human-readable description of the number.").meta({ omitempty: true }).optional(),
+  maximum: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Maximum allowed value (inclusive).").meta({ omitempty: true }).optional(),
+  minimum: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Minimum allowed value (inclusive).").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionNumberInputSchemaTypeSchema
 }).describe("Schema for a floating-point number input.").meta({ title: "functions.expression.NumberInputSchema" });
-var FunctionsExpressionStringInputSchemaTypeSchema = z485.z.literal("string").meta({ title: "functions.expression.StringInputSchemaType" });
+var FunctionsExpressionStringInputSchemaTypeSchema = z484.z.literal("string").meta({ title: "functions.expression.StringInputSchemaType" });
 
 // src/functions/expression/stringInputSchema.ts
-var FunctionsExpressionStringInputSchemaSchema = z485.z.object({
-  description: z485.z.string().nullable().describe("Human-readable description of the string.").meta({ omitempty: true }).optional(),
-  enum: z485.z.array(z485.z.string()).nullable().describe("If provided, the string must be one of these values.").meta({ omitempty: true }).optional(),
+var FunctionsExpressionStringInputSchemaSchema = z484.z.object({
+  description: z484.z.string().nullable().describe("Human-readable description of the string.").meta({ omitempty: true }).optional(),
+  enum: z484.z.array(z484.z.string()).nullable().describe("If provided, the string must be one of these values.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionStringInputSchemaTypeSchema
 }).describe("Schema for a string input.").meta({ title: "functions.expression.StringInputSchema" });
-var FunctionsExpressionVideoInputSchemaTypeSchema = z485.z.literal("video").meta({ title: "functions.expression.VideoInputSchemaType" });
+var FunctionsExpressionVideoInputSchemaTypeSchema = z484.z.literal("video").meta({ title: "functions.expression.VideoInputSchemaType" });
 
 // src/functions/expression/videoInputSchema.ts
-var FunctionsExpressionVideoInputSchemaSchema = z485.z.object({
-  description: z485.z.string().nullable().describe("Human-readable description of the expected video.").meta({ omitempty: true }).optional(),
+var FunctionsExpressionVideoInputSchemaSchema = z484.z.object({
+  description: z484.z.string().nullable().describe("Human-readable description of the expected video.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionVideoInputSchemaTypeSchema
 }).describe("Schema for a video input (URL or base64-encoded).").meta({ title: "functions.expression.VideoInputSchema" });
 
 // src/functions/expression/inputSchema.ts
-var FunctionsExpressionInputSchemaSchema = z485.z.union([z485.z.lazy(() => FunctionsExpressionAnyOfInputSchemaSchema).describe("A union of schemas - input must match at least one.").meta({ "title": "functions.expression.AnyOfInputSchema", "variantTitle": "AnyOf" }), z485.z.lazy(() => FunctionsExpressionObjectInputSchemaSchema).describe("An object with named properties.").meta({ "title": "functions.expression.ObjectInputSchema", "variantTitle": "Object" }), z485.z.lazy(() => FunctionsExpressionArrayInputSchemaSchema).describe("An array of items.").meta({ "title": "functions.expression.ArrayInputSchema", "variantTitle": "Array" }), FunctionsExpressionStringInputSchemaSchema.describe("A string value.").meta({ "title": "functions.expression.StringInputSchema", "variantTitle": "String" }), FunctionsExpressionIntegerInputSchemaSchema.describe("An integer value.").meta({ "title": "functions.expression.IntegerInputSchema", "variantTitle": "Integer" }), FunctionsExpressionNumberInputSchemaSchema.describe("A floating-point number.").meta({ "title": "functions.expression.NumberInputSchema", "variantTitle": "Number" }), FunctionsExpressionBooleanInputSchemaSchema.describe("A boolean value.").meta({ "title": "functions.expression.BooleanInputSchema", "variantTitle": "Boolean" }), FunctionsExpressionImageInputSchemaSchema.describe("An image (URL or base64).").meta({ "title": "functions.expression.ImageInputSchema", "variantTitle": "Image" }), FunctionsExpressionAudioInputSchemaSchema.describe("Audio content.").meta({ "title": "functions.expression.AudioInputSchema", "variantTitle": "Audio" }), FunctionsExpressionVideoInputSchemaSchema.describe("Video content.").meta({ "title": "functions.expression.VideoInputSchema", "variantTitle": "Video" }), FunctionsExpressionFileInputSchemaSchema.describe("A file.").meta({ "title": "functions.expression.FileInputSchema", "variantTitle": "File" })]).describe("Schema for validating Function input.\n\nDefines the expected structure and constraints for input data.\nUsed by remote Functions to document and validate their inputs.").meta({ title: "functions.expression.InputSchema" });
-var FunctionsExpressionObjectInputSchemaTypeSchema = z485.z.literal("object").meta({ title: "functions.expression.ObjectInputSchemaType" });
+var FunctionsExpressionInputSchemaSchema = z484.z.union([z484.z.lazy(() => FunctionsExpressionAnyOfInputSchemaSchema).describe("A union of schemas - input must match at least one.").meta({ "title": "functions.expression.AnyOfInputSchema", "variantTitle": "AnyOf" }), z484.z.lazy(() => FunctionsExpressionObjectInputSchemaSchema).describe("An object with named properties.").meta({ "title": "functions.expression.ObjectInputSchema", "variantTitle": "Object" }), z484.z.lazy(() => FunctionsExpressionArrayInputSchemaSchema).describe("An array of items.").meta({ "title": "functions.expression.ArrayInputSchema", "variantTitle": "Array" }), FunctionsExpressionStringInputSchemaSchema.describe("A string value.").meta({ "title": "functions.expression.StringInputSchema", "variantTitle": "String" }), FunctionsExpressionIntegerInputSchemaSchema.describe("An integer value.").meta({ "title": "functions.expression.IntegerInputSchema", "variantTitle": "Integer" }), FunctionsExpressionNumberInputSchemaSchema.describe("A floating-point number.").meta({ "title": "functions.expression.NumberInputSchema", "variantTitle": "Number" }), FunctionsExpressionBooleanInputSchemaSchema.describe("A boolean value.").meta({ "title": "functions.expression.BooleanInputSchema", "variantTitle": "Boolean" }), FunctionsExpressionImageInputSchemaSchema.describe("An image (URL or base64).").meta({ "title": "functions.expression.ImageInputSchema", "variantTitle": "Image" }), FunctionsExpressionAudioInputSchemaSchema.describe("Audio content.").meta({ "title": "functions.expression.AudioInputSchema", "variantTitle": "Audio" }), FunctionsExpressionVideoInputSchemaSchema.describe("Video content.").meta({ "title": "functions.expression.VideoInputSchema", "variantTitle": "Video" }), FunctionsExpressionFileInputSchemaSchema.describe("A file.").meta({ "title": "functions.expression.FileInputSchema", "variantTitle": "File" })]).describe("Schema for validating Function input.\n\nDefines the expected structure and constraints for input data.\nUsed by remote Functions to document and validate their inputs.").meta({ title: "functions.expression.InputSchema" });
+var FunctionsExpressionObjectInputSchemaTypeSchema = z484.z.literal("object").meta({ title: "functions.expression.ObjectInputSchemaType" });
 
 // src/functions/expression/objectInputSchema.ts
-var FunctionsExpressionObjectInputSchemaSchema = z485.z.object({
-  description: z485.z.string().nullable().describe("Human-readable description of the object.").meta({ omitempty: true }).optional(),
-  properties: z485.z.record(z485.z.string(), z485.z.lazy(() => FunctionsExpressionInputSchemaSchema)).describe("Schema for each property in the object."),
-  required: z485.z.array(z485.z.string()).nullable().describe("List of property names that must be present.").meta({ omitempty: true }).optional(),
+var FunctionsExpressionObjectInputSchemaSchema = z484.z.object({
+  description: z484.z.string().nullable().describe("Human-readable description of the object.").meta({ omitempty: true }).optional(),
+  properties: z484.z.record(z484.z.string(), z484.z.lazy(() => FunctionsExpressionInputSchemaSchema)).describe("Schema for each property in the object."),
+  required: z484.z.array(z484.z.string()).nullable().describe("List of property names that must be present.").meta({ omitempty: true }).optional(),
   type: FunctionsExpressionObjectInputSchemaTypeSchema
 }).describe("Schema for an object input with named properties.").meta({ title: "functions.expression.ObjectInputSchema" });
 
 // src/functions/alpha_scalar/placeholderScalarFunctionTaskExpression.ts
-var FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema = z485.z.object({
-  depth: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema = z484.z.object({
+  depth: z484.z.number().int().min(0).max(18446744073709552e3),
   input: FunctionsExpressionExpressionSchema,
   input_schema: FunctionsExpressionObjectInputSchemaSchema,
-  max_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  max_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  name: z485.z.string(),
+  max_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  max_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  name: z484.z.string(),
   skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional(),
-  spec: z485.z.string()
+  spec: z484.z.string()
 }).meta({ title: "functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression" });
-var FunctionsAlphaScalarScalarFunctionTaskExpressionSchema = RemotePathSchema.and(z485.z.object({
+var FunctionsAlphaScalarScalarFunctionTaskExpressionSchema = RemotePathSchema.and(z484.z.object({
   input: FunctionsExpressionExpressionSchema,
   skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional()
 })).meta({ title: "functions.alpha_scalar.ScalarFunctionTaskExpression" });
 
 // src/functions/alpha_scalar/branchTaskExpression.ts
-var FunctionsAlphaScalarBranchTaskExpressionSchema = z485.z.union([FunctionsAlphaScalarScalarFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.scalar.function")
-})).meta({ "variantTitle": "ScalarFunction" }), FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("placeholder.alpha.scalar.function")
+var FunctionsAlphaScalarBranchTaskExpressionSchema = z484.z.union([FunctionsAlphaScalarScalarFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.scalar.function")
+})).meta({ "variantTitle": "ScalarFunction" }), FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("placeholder.alpha.scalar.function")
 })).meta({ "variantTitle": "PlaceholderScalarFunction" })]).meta({ title: "functions.alpha_scalar.BranchTaskExpression" });
-var FunctionsAlphaScalarVectorCompletionTaskExpressionSchema = z485.z.object({
+var FunctionsAlphaScalarVectorCompletionTaskExpressionSchema = z484.z.object({
   messages: FunctionsExpressionExpressionSchema,
-  responses: z485.z.array(AgentCompletionsMessageRichContentSchema),
+  responses: z484.z.array(AgentCompletionsMessageRichContentSchema),
   skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.alpha_scalar.VectorCompletionTaskExpression" });
 
 // src/functions/alpha_scalar/leafTaskExpression.ts
-var FunctionsAlphaScalarLeafTaskExpressionSchema = FunctionsAlphaScalarVectorCompletionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("vector.completion")
+var FunctionsAlphaScalarLeafTaskExpressionSchema = FunctionsAlphaScalarVectorCompletionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("vector.completion")
 })).meta({ title: "functions.alpha_scalar.LeafTaskExpression" });
 
 // src/functions/alpha_scalar/inlineFunction.ts
-var FunctionsAlphaScalarInlineFunctionSchema = z485.z.union([z485.z.object({
-  tasks: z485.z.array(FunctionsAlphaScalarBranchTaskExpressionSchema),
-  type: z485.z.literal("alpha.scalar.branch.function")
-}).meta({ "variantTitle": "Branch" }), z485.z.object({
-  tasks: z485.z.array(FunctionsAlphaScalarLeafTaskExpressionSchema),
-  type: z485.z.literal("alpha.scalar.leaf.function")
+var FunctionsAlphaScalarInlineFunctionSchema = z484.z.union([z484.z.object({
+  tasks: z484.z.array(FunctionsAlphaScalarBranchTaskExpressionSchema),
+  type: z484.z.literal("alpha.scalar.branch.function")
+}).meta({ "variantTitle": "Branch" }), z484.z.object({
+  tasks: z484.z.array(FunctionsAlphaScalarLeafTaskExpressionSchema),
+  type: z484.z.literal("alpha.scalar.leaf.function")
 }).meta({ "variantTitle": "Leaf" })]).meta({ title: "functions.alpha_scalar.InlineFunction" });
-var FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema = z485.z.object({
+var FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema = z484.z.object({
   input: FunctionsExpressionExpressionSchema,
   input_schema: FunctionsExpressionObjectInputSchemaSchema,
   skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional(),
-  spec: z485.z.string()
+  spec: z484.z.string()
 }).meta({ title: "functions.alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression" });
 
 // src/functions/alpha_scalar/partialPlaceholderBranchTaskExpression.ts
-var FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema = FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("placeholder.alpha.scalar.function")
+var FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema = FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("placeholder.alpha.scalar.function")
 })).meta({ title: "functions.alpha_scalar.PartialPlaceholderBranchTaskExpression" });
-var FunctionsAlphaScalarRemoteFunctionSchema = z485.z.union([z485.z.object({
-  description: z485.z.string(),
+var FunctionsAlphaScalarRemoteFunctionSchema = z484.z.union([z484.z.object({
+  description: z484.z.string(),
   input_schema: FunctionsExpressionObjectInputSchemaSchema,
-  tasks: z485.z.array(FunctionsAlphaScalarBranchTaskExpressionSchema),
-  type: z485.z.literal("alpha.scalar.branch.function")
-}).meta({ "variantTitle": "Branch" }), z485.z.object({
-  description: z485.z.string(),
+  tasks: z484.z.array(FunctionsAlphaScalarBranchTaskExpressionSchema),
+  type: z484.z.literal("alpha.scalar.branch.function")
+}).meta({ "variantTitle": "Branch" }), z484.z.object({
+  description: z484.z.string(),
   input_schema: FunctionsExpressionObjectInputSchemaSchema,
-  tasks: z485.z.array(FunctionsAlphaScalarLeafTaskExpressionSchema),
-  type: z485.z.literal("alpha.scalar.leaf.function")
+  tasks: z484.z.array(FunctionsAlphaScalarLeafTaskExpressionSchema),
+  type: z484.z.literal("alpha.scalar.leaf.function")
 }).meta({ "variantTitle": "Leaf" })]).meta({ title: "functions.alpha_scalar.RemoteFunction" });
-var FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema = z485.z.object({
+var FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema = z484.z.object({
   context: FunctionsExpressionObjectInputSchemaSchema.nullable().meta({ omitempty: true }).optional(),
   items: FunctionsExpressionInputSchemaSchema
 }).meta({ title: "functions.alpha_vector.expression.VectorFunctionInputSchema" });
-var FunctionsExpressionInputValueSchema = z485.z.union([AgentCompletionsMessageRichContentPartSchema.describe("Rich content (image, audio, video, file).").meta({ "title": "agent.completions.message.RichContentPart", "variantTitle": "RichContentPart" }), z485.z.record(z485.z.string(), z485.z.lazy(() => FunctionsExpressionInputValueSchema)).describe("An object with string keys.").meta({ "variantTitle": "Object" }), z485.z.array(z485.z.lazy(() => FunctionsExpressionInputValueSchema)).describe("An array of values.").meta({ "variantTitle": "Array" }), z485.z.string().describe("A string value.").meta({ "variantTitle": "String" }), z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).describe("An integer value.").meta({ "variantTitle": "Integer" }), z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("A floating-point number.").meta({ "variantTitle": "Number" }), z485.z.boolean().describe("A boolean value.").meta({ "variantTitle": "Boolean" })]).describe("A concrete input value (post-compilation).\n\nRepresents any JSON-like value that can be passed to a Function,\nincluding rich content types (images, audio, video, files).").meta({ title: "functions.expression.InputValue" });
+var FunctionsExpressionInputValueSchema = z484.z.union([AgentCompletionsMessageRichContentPartSchema.describe("Rich content (image, audio, video, file).").meta({ "title": "agent.completions.message.RichContentPart", "variantTitle": "RichContentPart" }), z484.z.record(z484.z.string(), z484.z.lazy(() => FunctionsExpressionInputValueSchema)).describe("An object with string keys.").meta({ "variantTitle": "Object" }), z484.z.array(z484.z.lazy(() => FunctionsExpressionInputValueSchema)).describe("An array of values.").meta({ "variantTitle": "Array" }), z484.z.string().describe("A string value.").meta({ "variantTitle": "String" }), z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).describe("An integer value.").meta({ "variantTitle": "Integer" }), z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("A floating-point number.").meta({ "variantTitle": "Number" }), z484.z.boolean().describe("A boolean value.").meta({ "variantTitle": "Boolean" })]).describe("A concrete input value (post-compilation).\n\nRepresents any JSON-like value that can be passed to a Function,\nincluding rich content types (images, audio, video, files).").meta({ title: "functions.expression.InputValue" });
 
 // src/functions/alpha_vector/expression/vectorFunctionInputValue.ts
-var FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema = z485.z.object({
-  context: z485.z.record(z485.z.string(), FunctionsExpressionInputValueSchema).nullable().meta({ omitempty: true }).optional(),
-  items: z485.z.array(FunctionsExpressionInputValueSchema)
+var FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema = z484.z.object({
+  context: z484.z.record(z484.z.string(), FunctionsExpressionInputValueSchema).nullable().meta({ omitempty: true }).optional(),
+  items: z484.z.array(FunctionsExpressionInputValueSchema)
 }).meta({ title: "functions.alpha_vector.expression.VectorFunctionInputValue" });
-var FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema = z485.z.object({
+var FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema = z484.z.object({
   context: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional(),
   items: FunctionsExpressionExpressionSchema
 }).meta({ title: "functions.alpha_vector.expression.VectorFunctionInputValueExpression" });
-var FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema = z485.z.object({
-  depth: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema = z484.z.object({
+  depth: z484.z.number().int().min(0).max(18446744073709552e3),
   input: FunctionsExpressionExpressionSchema,
   input_schema: FunctionsExpressionObjectInputSchemaSchema,
-  max_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  max_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  name: z485.z.string(),
+  max_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  max_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  name: z484.z.string(),
   skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional(),
-  spec: z485.z.string()
+  spec: z484.z.string()
 }).meta({ title: "functions.alpha_vector.PlaceholderScalarFunctionTaskExpression" });
-var FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema = z485.z.object({
-  depth: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema = z484.z.object({
+  depth: z484.z.number().int().min(0).max(18446744073709552e3),
   input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema,
   input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema,
-  max_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  max_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  name: z485.z.string(),
+  max_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  max_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  name: z484.z.string(),
   skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional(),
-  spec: z485.z.string()
+  spec: z484.z.string()
 }).meta({ title: "functions.alpha_vector.PlaceholderVectorFunctionTaskExpression" });
-var FunctionsAlphaVectorScalarFunctionTaskExpressionSchema = RemotePathSchema.and(z485.z.object({
+var FunctionsAlphaVectorScalarFunctionTaskExpressionSchema = RemotePathSchema.and(z484.z.object({
   input: FunctionsExpressionExpressionSchema,
   skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional()
 })).meta({ title: "functions.alpha_vector.ScalarFunctionTaskExpression" });
-var FunctionsAlphaVectorVectorFunctionTaskExpressionSchema = RemotePathSchema.and(z485.z.object({
+var FunctionsAlphaVectorVectorFunctionTaskExpressionSchema = RemotePathSchema.and(z484.z.object({
   input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema,
   skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional()
 })).meta({ title: "functions.alpha_vector.VectorFunctionTaskExpression" });
 
 // src/functions/alpha_vector/branchTaskExpression.ts
-var FunctionsAlphaVectorBranchTaskExpressionSchema = z485.z.union([FunctionsAlphaVectorScalarFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.scalar.function")
-})).meta({ "variantTitle": "ScalarFunction" }), FunctionsAlphaVectorVectorFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.vector.function")
-})).meta({ "variantTitle": "VectorFunction" }), FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("placeholder.alpha.scalar.function")
-})).meta({ "variantTitle": "PlaceholderScalarFunction" }), FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("placeholder.alpha.vector.function")
+var FunctionsAlphaVectorBranchTaskExpressionSchema = z484.z.union([FunctionsAlphaVectorScalarFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.scalar.function")
+})).meta({ "variantTitle": "ScalarFunction" }), FunctionsAlphaVectorVectorFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.vector.function")
+})).meta({ "variantTitle": "VectorFunction" }), FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("placeholder.alpha.scalar.function")
+})).meta({ "variantTitle": "PlaceholderScalarFunction" }), FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("placeholder.alpha.vector.function")
 })).meta({ "variantTitle": "PlaceholderVectorFunction" })]).meta({ title: "functions.alpha_vector.BranchTaskExpression" });
-var FunctionsAlphaVectorVectorCompletionTaskExpressionSchema = z485.z.object({
+var FunctionsAlphaVectorVectorCompletionTaskExpressionSchema = z484.z.object({
   messages: FunctionsExpressionExpressionSchema,
   responses: FunctionsExpressionExpressionSchema,
   skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.alpha_vector.VectorCompletionTaskExpression" });
 
 // src/functions/alpha_vector/leafTaskExpression.ts
-var FunctionsAlphaVectorLeafTaskExpressionSchema = FunctionsAlphaVectorVectorCompletionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("vector.completion")
+var FunctionsAlphaVectorLeafTaskExpressionSchema = FunctionsAlphaVectorVectorCompletionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("vector.completion")
 })).meta({ title: "functions.alpha_vector.LeafTaskExpression" });
 
 // src/functions/alpha_vector/inlineFunction.ts
-var FunctionsAlphaVectorInlineFunctionSchema = z485.z.union([z485.z.object({
-  tasks: z485.z.array(FunctionsAlphaVectorBranchTaskExpressionSchema),
-  type: z485.z.literal("alpha.vector.branch.function")
-}).meta({ "variantTitle": "Branch" }), z485.z.object({
-  tasks: z485.z.array(FunctionsAlphaVectorLeafTaskExpressionSchema),
-  type: z485.z.literal("alpha.vector.leaf.function")
+var FunctionsAlphaVectorInlineFunctionSchema = z484.z.union([z484.z.object({
+  tasks: z484.z.array(FunctionsAlphaVectorBranchTaskExpressionSchema),
+  type: z484.z.literal("alpha.vector.branch.function")
+}).meta({ "variantTitle": "Branch" }), z484.z.object({
+  tasks: z484.z.array(FunctionsAlphaVectorLeafTaskExpressionSchema),
+  type: z484.z.literal("alpha.vector.leaf.function")
 }).meta({ "variantTitle": "Leaf" })]).meta({ title: "functions.alpha_vector.InlineFunction" });
-var FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema = z485.z.object({
+var FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema = z484.z.object({
   input: FunctionsExpressionExpressionSchema,
   input_schema: FunctionsExpressionObjectInputSchemaSchema,
   skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional(),
-  spec: z485.z.string()
+  spec: z484.z.string()
 }).meta({ title: "functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression" });
-var FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema = z485.z.object({
+var FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema = z484.z.object({
   input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema,
   input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema,
   skip: FunctionsExpressionExpressionSchema.nullable().meta({ omitempty: true }).optional(),
-  spec: z485.z.string()
+  spec: z484.z.string()
 }).meta({ title: "functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression" });
 
 // src/functions/alpha_vector/partialPlaceholderBranchTaskExpression.ts
-var FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema = z485.z.union([FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("placeholder.alpha.scalar.function")
-})).meta({ "variantTitle": "PlaceholderScalarFunction" }), FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("placeholder.alpha.vector.function")
+var FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema = z484.z.union([FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("placeholder.alpha.scalar.function")
+})).meta({ "variantTitle": "PlaceholderScalarFunction" }), FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("placeholder.alpha.vector.function")
 })).meta({ "variantTitle": "PlaceholderVectorFunction" })]).meta({ title: "functions.alpha_vector.PartialPlaceholderBranchTaskExpression" });
-var FunctionsAlphaVectorRemoteFunctionSchema = z485.z.union([z485.z.object({
-  description: z485.z.string(),
+var FunctionsAlphaVectorRemoteFunctionSchema = z484.z.union([z484.z.object({
+  description: z484.z.string(),
   input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema,
-  tasks: z485.z.array(FunctionsAlphaVectorBranchTaskExpressionSchema),
-  type: z485.z.literal("alpha.vector.branch.function")
-}).meta({ "variantTitle": "Branch" }), z485.z.object({
-  description: z485.z.string(),
+  tasks: z484.z.array(FunctionsAlphaVectorBranchTaskExpressionSchema),
+  type: z484.z.literal("alpha.vector.branch.function")
+}).meta({ "variantTitle": "Branch" }), z484.z.object({
+  description: z484.z.string(),
   input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema,
-  tasks: z485.z.array(FunctionsAlphaVectorLeafTaskExpressionSchema),
-  type: z485.z.literal("alpha.vector.leaf.function")
+  tasks: z484.z.array(FunctionsAlphaVectorLeafTaskExpressionSchema),
+  type: z484.z.literal("alpha.vector.leaf.function")
 }).meta({ "variantTitle": "Leaf" })]).meta({ title: "functions.alpha_vector.RemoteFunction" });
-var FunctionsCheckScalarFieldsValidationSchema = z485.z.object({
+var FunctionsCheckScalarFieldsValidationSchema = z484.z.object({
   input_schema: FunctionsExpressionInputSchemaSchema
 }).describe("The fields needed to validate a scalar function's input behavior.").meta({ title: "functions.check.ScalarFieldsValidation" });
-var FunctionsCheckVectorFieldsValidationSchema = z485.z.object({
+var FunctionsCheckVectorFieldsValidationSchema = z484.z.object({
   input_merge: FunctionsExpressionExpressionSchema,
   input_schema: FunctionsExpressionInputSchemaSchema,
   input_split: FunctionsExpressionExpressionSchema,
@@ -3396,29 +3389,29 @@ function wasmFunctionsCheckCheckScalarFields(fields) {
 function wasmFunctionsCheckCheckVectorFields(fields) {
   checkVectorFields(fields);
 }
-var FunctionsExecutionsRequestReasoningSchema = z485.z.object({
+var FunctionsExecutionsRequestReasoningSchema = z484.z.object({
   agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema
 }).meta({ title: "functions.executions.request.Reasoning" });
-var FunctionsExecutionsRequestStrategySchema = z485.z.union([z485.z.object({
-  type: z485.z.literal("default")
-}).describe("Scalar or Vector").meta({ "variantTitle": "Default" }), z485.z.object({
-  pool: z485.z.number().int().min(0).max(4294967295).nullable().describe("How many vector responses for each execution").optional(),
-  rounds: z485.z.number().int().min(0).max(4294967295).nullable().describe("How many sequential rounds of comparison").optional(),
-  type: z485.z.literal("swiss_system")
+var FunctionsExecutionsRequestStrategySchema = z484.z.union([z484.z.object({
+  type: z484.z.literal("default")
+}).describe("Scalar or Vector").meta({ "variantTitle": "Default" }), z484.z.object({
+  pool: z484.z.number().int().min(0).max(4294967295).nullable().describe("How many vector responses for each execution").optional(),
+  rounds: z484.z.number().int().min(0).max(4294967295).nullable().describe("How many sequential rounds of comparison").optional(),
+  type: z484.z.literal("swiss_system")
 }).describe("Vector").meta({ "variantTitle": "SwissSystem" })]).meta({ title: "functions.executions.request.Strategy" });
-var FunctionsAlphaInlineFunctionSchema = z485.z.union([FunctionsAlphaScalarInlineFunctionSchema.meta({ "title": "functions.alpha_scalar.InlineFunction", "variantTitle": "Scalar" }), FunctionsAlphaVectorInlineFunctionSchema.meta({ "title": "functions.alpha_vector.InlineFunction", "variantTitle": "Vector" })]).meta({ title: "functions.AlphaInlineFunction" });
-var FunctionsExpressionInputValueExpressionSchema = z485.z.union([AgentCompletionsMessageRichContentPartSchema.describe("Rich content (image, audio, video, file).").meta({ "title": "agent.completions.message.RichContentPart", "variantTitle": "RichContentPart" }), z485.z.record(z485.z.string(), z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.lazy(() => FunctionsExpressionInputValueExpressionSchema).describe("A literal value.").meta({ "title": "functions.expression.InputValueExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("An object with values that may be expressions.").meta({ "variantTitle": "Object" }), z485.z.array(z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.lazy(() => FunctionsExpressionInputValueExpressionSchema).describe("A literal value.").meta({ "title": "functions.expression.InputValueExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("An array with elements that may be expressions.").meta({ "variantTitle": "Array" }), z485.z.string().describe("A string value.").meta({ "variantTitle": "String" }), z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).describe("An integer value.").meta({ "variantTitle": "Integer" }), z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("A floating-point number.").meta({ "variantTitle": "Number" }), z485.z.boolean().describe("A boolean value.").meta({ "variantTitle": "Boolean" })]).describe("An input value that may contain expressions (pre-compilation).\n\nSimilar to [`InputValue`] but object values and array elements can be\nexpressions (JMESPath or Starlark) that are evaluated during compilation.").meta({ title: "functions.expression.InputValueExpression" });
+var FunctionsAlphaInlineFunctionSchema = z484.z.union([FunctionsAlphaScalarInlineFunctionSchema.meta({ "title": "functions.alpha_scalar.InlineFunction", "variantTitle": "Scalar" }), FunctionsAlphaVectorInlineFunctionSchema.meta({ "title": "functions.alpha_vector.InlineFunction", "variantTitle": "Vector" })]).meta({ title: "functions.AlphaInlineFunction" });
+var FunctionsExpressionInputValueExpressionSchema = z484.z.union([AgentCompletionsMessageRichContentPartSchema.describe("Rich content (image, audio, video, file).").meta({ "title": "agent.completions.message.RichContentPart", "variantTitle": "RichContentPart" }), z484.z.record(z484.z.string(), z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.lazy(() => FunctionsExpressionInputValueExpressionSchema).describe("A literal value.").meta({ "title": "functions.expression.InputValueExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("An object with values that may be expressions.").meta({ "variantTitle": "Object" }), z484.z.array(z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.lazy(() => FunctionsExpressionInputValueExpressionSchema).describe("A literal value.").meta({ "title": "functions.expression.InputValueExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("An array with elements that may be expressions.").meta({ "variantTitle": "Array" }), z484.z.string().describe("A string value.").meta({ "variantTitle": "String" }), z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).describe("An integer value.").meta({ "variantTitle": "Integer" }), z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("A floating-point number.").meta({ "variantTitle": "Number" }), z484.z.boolean().describe("A boolean value.").meta({ "variantTitle": "Boolean" })]).describe("An input value that may contain expressions (pre-compilation).\n\nSimilar to [`InputValue`] but object values and array elements can be\nexpressions (JMESPath or Starlark) that are evaluated during compilation.").meta({ title: "functions.expression.InputValueExpression" });
 
 // src/functions/placeholderScalarFunctionTaskExpression.ts
-var FunctionsPlaceholderScalarFunctionTaskExpressionSchema = z485.z.object({
-  input: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), FunctionsExpressionInputValueExpressionSchema.describe("A literal value.").meta({ "title": "functions.expression.InputValueExpression", "variantTitle": "Value" })]).describe('Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+var FunctionsPlaceholderScalarFunctionTaskExpressionSchema = z484.z.object({
+  input: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), FunctionsExpressionInputValueExpressionSchema.describe("A literal value.").meta({ "title": "functions.expression.InputValueExpression", "variantTitle": "Value" })]).describe('Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
   input_schema: FunctionsExpressionInputSchemaSchema.describe("JSON Schema defining the expected input structure."),
   map: FunctionsExpressionExpressionSchema.nullable().describe("Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).").meta({ omitempty: true }).optional(),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the fixed 0.5 output.\nReceives: `input`, `output` as `Scalar(0.5)`."),
   skip: FunctionsExpressionExpressionSchema.nullable().describe("If this expression evaluates to true, skip the task. Receives: `input`.").meta({ omitempty: true }).optional()
 }).describe("Expression for a placeholder scalar function task (pre-compilation).\n\nLike [`ScalarFunctionTaskExpression`] but without owner/repository/commit.\nAlways produces a fixed output of 0.5.").meta({ title: "functions.PlaceholderScalarFunctionTaskExpression" });
-var FunctionsPlaceholderVectorFunctionTaskExpressionSchema = z485.z.object({
-  input: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), FunctionsExpressionInputValueExpressionSchema.describe("A literal value.").meta({ "title": "functions.expression.InputValueExpression", "variantTitle": "Value" })]).describe('Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+var FunctionsPlaceholderVectorFunctionTaskExpressionSchema = z484.z.object({
+  input: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), FunctionsExpressionInputValueExpressionSchema.describe("A literal value.").meta({ "title": "functions.expression.InputValueExpression", "variantTitle": "Value" })]).describe('Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
   input_merge: FunctionsExpressionExpressionSchema.describe("Expression merging sub-inputs back into one input.\nReceives: `input` (as an array)."),
   input_schema: FunctionsExpressionInputSchemaSchema.describe("JSON Schema defining the expected input structure."),
   input_split: FunctionsExpressionExpressionSchema.describe("Expression transforming input into sub-inputs for swiss system.\nReceives: `input`."),
@@ -3427,207 +3420,207 @@ var FunctionsPlaceholderVectorFunctionTaskExpressionSchema = z485.z.object({
   output_length: FunctionsExpressionExpressionSchema.describe("Expression computing the expected output vector length.\nReceives: `input`."),
   skip: FunctionsExpressionExpressionSchema.nullable().describe("If this expression evaluates to true, skip the task. Receives: `input`.").meta({ omitempty: true }).optional()
 }).describe("Expression for a placeholder vector function task (pre-compilation).\n\nLike [`VectorFunctionTaskExpression`] but without owner/repository/commit.\nAlways produces an equalized vector of length `output_length`.").meta({ title: "functions.PlaceholderVectorFunctionTaskExpression" });
-var FunctionsScalarFunctionTaskExpressionSchema = RemotePathSchema.and(z485.z.object({
-  input: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), FunctionsExpressionInputValueExpressionSchema.describe("A literal value.").meta({ "title": "functions.expression.InputValueExpression", "variantTitle": "Value" })]).describe('Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+var FunctionsScalarFunctionTaskExpressionSchema = RemotePathSchema.and(z484.z.object({
+  input: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), FunctionsExpressionInputValueExpressionSchema.describe("A literal value.").meta({ "title": "functions.expression.InputValueExpression", "variantTitle": "Value" })]).describe('Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
   map: FunctionsExpressionExpressionSchema.nullable().describe("Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).").meta({ omitempty: true }).optional(),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the task result into a valid function output.\n\nReceives `output` which is one of 4 variants:\n- `Scalar(Decimal)` - a single score\n- `Vector(Vec<Decimal>)` - a vector of scores\n- `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)\n- `Err(Value)` - an error\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly."),
   skip: FunctionsExpressionExpressionSchema.nullable().describe("If this expression evaluates to true, skip the task. Receives: `input`.").meta({ omitempty: true }).optional()
 })).describe("Expression for a task that calls a scalar function (pre-compilation).").meta({ title: "functions.ScalarFunctionTaskExpression" });
-var FunctionsVectorCompletionTaskExpressionSchema = z485.z.object({
+var FunctionsVectorCompletionTaskExpressionSchema = z484.z.object({
   map: FunctionsExpressionExpressionSchema.nullable().describe("Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).").meta({ omitempty: true }).optional(),
-  messages: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.array(z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageMessageExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.MessageExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('Expression for the conversation messages (the prompt).\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  messages: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.array(z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageMessageExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.MessageExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('Expression for the conversation messages (the prompt).\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the task result into a valid function output.\n\nReceives `output` as the task's raw result (typically `Vector(scores)`).\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly."),
-  responses: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.array(z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageRichContentExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.RichContentExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('Expression for the possible responses the LLMs can vote for.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+  responses: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.array(z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), AgentCompletionsMessageRichContentExpressionSchema.describe("A literal value.").meta({ "title": "agent.completions.message.RichContentExpression", "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')).describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('Expression for the possible responses the LLMs can vote for.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
   skip: FunctionsExpressionExpressionSchema.nullable().describe("If this expression evaluates to true, skip the task. Receives: `input`.").meta({ omitempty: true }).optional()
 }).describe("Expression for a task that runs a vector completion (pre-compilation).").meta({ title: "functions.VectorCompletionTaskExpression" });
-var FunctionsVectorFunctionTaskExpressionSchema = RemotePathSchema.and(z485.z.object({
-  input: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), FunctionsExpressionInputValueExpressionSchema.describe("A literal value.").meta({ "title": "functions.expression.InputValueExpression", "variantTitle": "Value" })]).describe('Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
+var FunctionsVectorFunctionTaskExpressionSchema = RemotePathSchema.and(z484.z.object({
+  input: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), FunctionsExpressionInputValueExpressionSchema.describe("A literal value.").meta({ "title": "functions.expression.InputValueExpression", "variantTitle": "Value" })]).describe('Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).\n\nA value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```'),
   map: FunctionsExpressionExpressionSchema.nullable().describe("Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).").meta({ omitempty: true }).optional(),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the task result into a valid function output.\n\nReceives `output` which is one of 4 variants:\n- `Scalar(Decimal)` - a single score\n- `Vector(Vec<Decimal>)` - a vector of scores\n- `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)\n- `Err(Value)` - an error\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly."),
   skip: FunctionsExpressionExpressionSchema.nullable().describe("If this expression evaluates to true, skip the task. Receives: `input`.").meta({ omitempty: true }).optional()
 })).describe("Expression for a task that calls a vector function (pre-compilation).").meta({ title: "functions.VectorFunctionTaskExpression" });
 
 // src/functions/taskExpression.ts
-var FunctionsTaskExpressionSchema = z485.z.union([FunctionsScalarFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("scalar.function")
-})).meta({ "variantTitle": "ScalarFunction" }), FunctionsVectorFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("vector.function")
-})).meta({ "variantTitle": "VectorFunction" }), FunctionsVectorCompletionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("vector.completion")
-})).meta({ "variantTitle": "VectorCompletion" }), FunctionsPlaceholderScalarFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("placeholder.scalar.function")
-})).meta({ "variantTitle": "PlaceholderScalarFunction" }), FunctionsPlaceholderVectorFunctionTaskExpressionSchema.and(z485.z.object({
-  type: z485.z.literal("placeholder.vector.function")
+var FunctionsTaskExpressionSchema = z484.z.union([FunctionsScalarFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("scalar.function")
+})).meta({ "variantTitle": "ScalarFunction" }), FunctionsVectorFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("vector.function")
+})).meta({ "variantTitle": "VectorFunction" }), FunctionsVectorCompletionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("vector.completion")
+})).meta({ "variantTitle": "VectorCompletion" }), FunctionsPlaceholderScalarFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("placeholder.scalar.function")
+})).meta({ "variantTitle": "PlaceholderScalarFunction" }), FunctionsPlaceholderVectorFunctionTaskExpressionSchema.and(z484.z.object({
+  type: z484.z.literal("placeholder.vector.function")
 })).meta({ "variantTitle": "PlaceholderVectorFunction" })]).describe("A task definition with expressions (pre-compilation).\n\nTask expressions contain dynamic fields (JMESPath or Starlark) that are\nresolved against input data during compilation. Use [`compile`](Self::compile)\nto produce a concrete [`Task`].").meta({ title: "functions.TaskExpression" });
 
 // src/functions/inlineFunction.ts
-var FunctionsInlineFunctionSchema = z485.z.union([z485.z.object({
-  tasks: z485.z.array(FunctionsTaskExpressionSchema).describe("The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped)."),
-  type: z485.z.literal("scalar.function")
-}).describe("Produces a single score in [0, 1].").meta({ "variantTitle": "Scalar" }), z485.z.object({
+var FunctionsInlineFunctionSchema = z484.z.union([z484.z.object({
+  tasks: z484.z.array(FunctionsTaskExpressionSchema).describe("The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped)."),
+  type: z484.z.literal("scalar.function")
+}).describe("Produces a single score in [0, 1].").meta({ "variantTitle": "Scalar" }), z484.z.object({
   input_merge: FunctionsExpressionExpressionSchema.nullable().describe("Expression transforming an array of inputs computed by `input_split`\ninto a single Input object for the Function.\nReceives: `input` (as an array).\nOnly required if the request uses a strategy that needs input splitting.").optional(),
   input_split: FunctionsExpressionExpressionSchema.nullable().describe("Expression transforming input into an input array of the output_length\nWhen the Function is executed with any input from the array,\nThe output_length should be 1.\nReceives: `input`.\nOnly required if the request uses a strategy that needs input splitting.").optional(),
-  tasks: z485.z.array(FunctionsTaskExpressionSchema).describe("The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped)."),
-  type: z485.z.literal("vector.function")
+  tasks: z484.z.array(FunctionsTaskExpressionSchema).describe("The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped)."),
+  type: z484.z.literal("vector.function")
 }).describe("Produces a vector of scores that sums to 1.").meta({ "variantTitle": "Vector" })]).describe("An inline function definition without metadata.\n\nUsed when embedding function logic directly in requests rather than\nreferencing a remote function. Lacks description and input\nschema fields.").meta({ title: "functions.InlineFunction" });
 
 // src/functions/fullInlineFunction.ts
-var FunctionsFullInlineFunctionSchema = z485.z.union([FunctionsAlphaInlineFunctionSchema.meta({ "title": "functions.AlphaInlineFunction", "variantTitle": "Alpha" }), FunctionsInlineFunctionSchema.meta({ "title": "functions.InlineFunction", "variantTitle": "Standard" })]).meta({ title: "functions.FullInlineFunction" });
+var FunctionsFullInlineFunctionSchema = z484.z.union([FunctionsAlphaInlineFunctionSchema.meta({ "title": "functions.AlphaInlineFunction", "variantTitle": "Alpha" }), FunctionsInlineFunctionSchema.meta({ "title": "functions.InlineFunction", "variantTitle": "Standard" })]).meta({ title: "functions.FullInlineFunction" });
 
 // src/functions/fullInlineFunctionOrRemoteCommitOptional.ts
-var FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema = z485.z.union([FunctionsFullInlineFunctionSchema.meta({ "title": "functions.FullInlineFunction", "variantTitle": "Inline" }), RemotePathCommitOptionalSchema.meta({ "title": "RemotePathCommitOptional", "variantTitle": "Remote" })]).describe("A function specification that is either a full inline function definition\nor a remote path reference.").meta({ title: "functions.FullInlineFunctionOrRemoteCommitOptional" });
-var FunctionsTaskProfileSchema = z485.z.union([RemotePathSchema.describe("Profile for a nested function task (references another profile).").meta({ "title": "RemotePath", "variantTitle": "Remote" }), z485.z.lazy(() => FunctionsInlineProfileSchema).describe("Inline profile for a task (tasks-based or auto).").meta({ "title": "functions.InlineProfile", "variantTitle": "Inline" }), z485.z.object({}).describe("Placeholder task \u2014 no configuration needed, output is fixed.").meta({ "variantTitle": "Placeholder" })]).describe("Configuration for a single task within a Profile.\n\nEach variant corresponds to a task type in the Function definition.").meta({ title: "functions.TaskProfile" });
-var WeightsEntrySchema = z485.z.object({
-  invert: z485.z.boolean().nullable().describe("If true, invert this agent's vote distribution before combining.\n\nWhen omitted or false, the vote distribution is used as-is.").meta({ omitempty: true }).optional(),
-  weight: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The weight for this agent in the swarm. Must be in [0, 1].")
+var FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema = z484.z.union([FunctionsFullInlineFunctionSchema.meta({ "title": "functions.FullInlineFunction", "variantTitle": "Inline" }), RemotePathCommitOptionalSchema.meta({ "title": "RemotePathCommitOptional", "variantTitle": "Remote" })]).describe("A function specification that is either a full inline function definition\nor a remote path reference.").meta({ title: "functions.FullInlineFunctionOrRemoteCommitOptional" });
+var FunctionsTaskProfileSchema = z484.z.union([RemotePathSchema.describe("Profile for a nested function task (references another profile).").meta({ "title": "RemotePath", "variantTitle": "Remote" }), z484.z.lazy(() => FunctionsInlineProfileSchema).describe("Inline profile for a task (tasks-based or auto).").meta({ "title": "functions.InlineProfile", "variantTitle": "Inline" }), z484.z.object({}).describe("Placeholder task \u2014 no configuration needed, output is fixed.").meta({ "variantTitle": "Placeholder" })]).describe("Configuration for a single task within a Profile.\n\nEach variant corresponds to a task type in the Function definition.").meta({ title: "functions.TaskProfile" });
+var WeightsEntrySchema = z484.z.object({
+  invert: z484.z.boolean().nullable().describe("If true, invert this agent's vote distribution before combining.\n\nWhen omitted or false, the vote distribution is used as-is.").meta({ omitempty: true }).optional(),
+  weight: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The weight for this agent in the swarm. Must be in [0, 1].")
 }).describe("An entry in weights with an explicit weight and optional invert flag.").meta({ title: "WeightsEntry" });
 
 // src/weights.ts
-var WeightsSchema = z485.z.union([z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Simple vector of decimal weights.").meta({ "variantTitle": "Weights" }), z485.z.array(WeightsEntrySchema).describe("Vector of entries with optional invert flags.").meta({ "variantTitle": "Entries" })]).describe("Weights for a swarm's agents.\n\n- `Weights(Vec<Decimal>)` - simple representation (no inversion)\n- `Entries(Vec<WeightsEntry>)` - weights with optional per-agent `invert`").meta({ title: "Weights" });
+var WeightsSchema = z484.z.union([z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Simple vector of decimal weights.").meta({ "variantTitle": "Weights" }), z484.z.array(WeightsEntrySchema).describe("Vector of entries with optional invert flags.").meta({ "variantTitle": "Entries" })]).describe("Weights for a swarm's agents.\n\n- `Weights(Vec<Decimal>)` - simple representation (no inversion)\n- `Entries(Vec<WeightsEntry>)` - weights with optional per-agent `invert`").meta({ title: "Weights" });
 
 // src/functions/inlineTasksProfile.ts
-var FunctionsInlineTasksProfileSchema = z485.z.object({
-  tasks: z485.z.array(z485.z.lazy(() => FunctionsTaskProfileSchema)).describe("Configuration for each task in the corresponding Function."),
+var FunctionsInlineTasksProfileSchema = z484.z.object({
+  tasks: z484.z.array(z484.z.lazy(() => FunctionsTaskProfileSchema)).describe("Configuration for each task in the corresponding Function."),
   weights: WeightsSchema.nullable().describe("Optional weights for each Task in the corresponding Function.\nIf `None`, uniform weights are used.").meta({ omitempty: true }).optional()
 }).describe("An inline tasks-based profile definition without metadata.").meta({ title: "functions.InlineTasksProfile" });
-var SwarmInlineSwarmBaseSchema = z485.z.object({
-  agents: z485.z.array(AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema).describe("The LLMs in this swarm, with optional counts and fallbacks."),
+var SwarmInlineSwarmBaseSchema = z484.z.object({
+  agents: z484.z.array(AgentInlineAgentBaseWithFallbacksOrRemoteWithCountSchema).describe("The LLMs in this swarm, with optional counts and fallbacks."),
   weights: WeightsSchema.nullable().describe("Optional weights for each agent. If `None`, uniform weights are used.").meta({ omitempty: true }).optional()
 }).describe("An inline swarm base definition (without computed ID or metadata).\n\nContains a list of agent configurations that will be validated, deduplicated,\nand sorted when converting to an [`InlineSwarm`].").meta({ title: "swarm.InlineSwarmBase" });
 
 // src/functions/inlineProfile.ts
-var FunctionsInlineProfileSchema = z485.z.union([z485.z.lazy(() => FunctionsInlineTasksProfileSchema).describe("Tasks-based profile with per-task configuration.").meta({ "title": "functions.InlineTasksProfile", "variantTitle": "Tasks" }), SwarmInlineSwarmBaseSchema.describe("Auto profile that applies a single swarm+weights to all vector completion tasks.").meta({ "title": "swarm.InlineSwarmBase", "variantTitle": "Auto" })]).describe("An inline profile, either tasks-based or auto.").meta({ title: "functions.InlineProfile" });
+var FunctionsInlineProfileSchema = z484.z.union([z484.z.lazy(() => FunctionsInlineTasksProfileSchema).describe("Tasks-based profile with per-task configuration.").meta({ "title": "functions.InlineTasksProfile", "variantTitle": "Tasks" }), SwarmInlineSwarmBaseSchema.describe("Auto profile that applies a single swarm+weights to all vector completion tasks.").meta({ "title": "swarm.InlineSwarmBase", "variantTitle": "Auto" })]).describe("An inline profile, either tasks-based or auto.").meta({ title: "functions.InlineProfile" });
 
 // src/functions/inlineProfileOrRemoteCommitOptional.ts
-var FunctionsInlineProfileOrRemoteCommitOptionalSchema = z485.z.union([FunctionsInlineProfileSchema.meta({ "title": "functions.InlineProfile", "variantTitle": "Inline" }), RemotePathCommitOptionalSchema.meta({ "title": "RemotePathCommitOptional", "variantTitle": "Remote" })]).describe("A profile specification that is either an inline profile definition\nor a remote path reference.").meta({ title: "functions.InlineProfileOrRemoteCommitOptional" });
+var FunctionsInlineProfileOrRemoteCommitOptionalSchema = z484.z.union([FunctionsInlineProfileSchema.meta({ "title": "functions.InlineProfile", "variantTitle": "Inline" }), RemotePathCommitOptionalSchema.meta({ "title": "RemotePathCommitOptional", "variantTitle": "Remote" })]).describe("A profile specification that is either an inline profile definition\nor a remote path reference.").meta({ title: "functions.InlineProfileOrRemoteCommitOptional" });
 
 // src/functions/executions/request/functionExecutionCreateParams.ts
-var FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema = z485.z.object({
-  continuation: z485.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
-  from_cache: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+var FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema = z484.z.object({
+  continuation: z484.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
+  from_cache: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   function: FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema.describe("The function to execute (inline definition or remote path)."),
   input: FunctionsExpressionInputValueSchema,
-  invert: z485.z.boolean().nullable().describe('If `true`, invert every output in the streamed response *after* the\ninner function has finished computing \u2014 scalar outputs become\n`1 - x`, vector outputs are reversed in place. The expression\nevaluator inside the function still sees the original scores; only\nthe chunks delivered to the client (and the aggregated response\npassed to the usage handler) are inverted. Useful when a function\nis naturally written to score "lower is better" but the consumer\nwants "higher is better", or vice versa.').meta({ omitempty: true }).optional(),
+  invert: z484.z.boolean().nullable().describe('If `true`, invert every output in the streamed response *after* the\ninner function has finished computing \u2014 scalar outputs become\n`1 - x`, vector outputs are reversed in place. The expression\nevaluator inside the function still sees the original scores; only\nthe chunks delivered to the client (and the aggregated response\npassed to the usage handler) are inverted. Useful when a function\nis naturally written to score "lower is better" but the consumer\nwants "higher is better", or vice versa.').meta({ omitempty: true }).optional(),
   profile: FunctionsInlineProfileOrRemoteCommitOptionalSchema.describe("The profile to use (inline definition or remote path)."),
   provider: AgentCompletionsRequestProviderSchema.nullable().meta({ omitempty: true }).optional(),
   reasoning: FunctionsExecutionsRequestReasoningSchema.nullable().meta({ omitempty: true }).optional(),
-  retry_token: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  seed: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
-  split: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  retry_token: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  seed: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
+  split: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   strategy: FunctionsExecutionsRequestStrategySchema.nullable().meta({ omitempty: true }).optional(),
-  stream: z485.z.boolean().nullable().meta({ omitempty: true }).optional()
+  stream: z484.z.boolean().nullable().meta({ omitempty: true }).optional()
 }).describe("Parameters for creating a function execution.").meta({ title: "functions.executions.request.FunctionExecutionCreateParams" });
-var FunctionsExecutionsResponseOutputSchema = z485.z.object({
+var FunctionsExecutionsResponseOutputSchema = z484.z.object({
   output: FunctionsExpressionTaskOutputSchema
 }).describe("Wrapper for function execution output, distinguishing between\na null output value and a missing output.").meta({ title: "functions.executions.response.Output" });
-var FunctionsExecutionsResponseStreamingObjectSchema = z485.z.enum(["scalar.function.execution.chunk", "vector.function.execution.chunk"]).meta({ title: "functions.executions.response.streaming.Object" });
-var FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema = z485.z.object({
-  continuation: z485.z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsExecutionsResponseStreamingObjectSchema = z484.z.enum(["scalar.function.execution.chunk", "vector.function.execution.chunk"]).meta({ title: "functions.executions.response.streaming.Object" });
+var FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema = z484.z.object({
+  continuation: z484.z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().meta({ omitempty: true }).optional(),
-  id: z485.z.string(),
-  messages: z485.z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
-  messages_queued: z485.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. Only\nset when `continuation` is also set \u2014 the caller acts on it by\nissuing the continuation. Absent when nothing is queued, when\nthere is no continuation to act on, or when the peek failed\n(the failure is surfaced via `error`).").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  messages: z484.z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
+  messages_queued: z484.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. Only\nset when `continuation` is also set \u2014 the caller acts on it by\nissuing the continuation. Absent when nothing is queued, when\nthere is no continuation to act on, or when the peek failed\n(the failure is surfaced via `error`).").meta({ omitempty: true }).optional(),
   object: AgentCompletionsResponseStreamingObjectSchema.describe('The object type (always "agent.completion.chunk").'),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema.nullable().describe("Token usage (only present in the final chunk).").meta({ omitempty: true }).optional()
 }).describe("A chunk of a streaming agent completion response.\n\nMultiple chunks are received via Server-Sent Events and can be\naccumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)\nusing the [`push`](Self::push) method.").meta({ title: "functions.executions.response.streaming.ReasoningSummaryChunk" });
-var FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema = z485.z.object({
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema = z484.z.object({
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().meta({ omitempty: true }).optional(),
   function: RemotePathSchema.nullable().optional(),
-  id: z485.z.string(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
+  id: z484.z.string(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
   object: FunctionsExecutionsResponseStreamingObjectSchema,
   output: FunctionsExecutionsResponseOutputSchema.nullable().meta({ omitempty: true }).optional(),
   profile: RemotePathSchema.nullable().optional(),
   reasoning: FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema.nullable().meta({ omitempty: true }).optional(),
-  retry_token: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  split_index: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
-  swiss_pool_index: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
-  swiss_round: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
-  task_index: z485.z.number().int().min(0).max(18446744073709552e3),
-  task_path: z485.z.array(z485.z.number().int().min(0).max(18446744073709552e3)),
-  tasks: z485.z.array(z485.z.lazy(() => FunctionsExecutionsResponseStreamingTaskChunkSchema)),
-  tasks_errors: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  retry_token: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  split_index: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
+  swiss_pool_index: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
+  swiss_round: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
+  task_index: z484.z.number().int().min(0).max(18446744073709552e3),
+  task_path: z484.z.array(z484.z.number().int().min(0).max(18446744073709552e3)),
+  tasks: z484.z.array(z484.z.lazy(() => FunctionsExecutionsResponseStreamingTaskChunkSchema)),
+  tasks_errors: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   usage: AgentCompletionsResponseUsageSchema.nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.executions.response.streaming.FunctionExecutionTaskChunk" });
-var VectorCompletionsResponseStreamingAgentCompletionChunkSchema = z485.z.object({
-  continuation: z485.z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var VectorCompletionsResponseStreamingAgentCompletionChunkSchema = z484.z.object({
+  continuation: z484.z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").meta({ omitempty: true }).optional(),
-  id: z485.z.string(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Index used to correlate chunks from the same completion."),
-  messages: z485.z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
-  messages_queued: z485.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. Only\nset when `continuation` is also set \u2014 the caller acts on it by\nissuing the continuation. Absent when nothing is queued, when\nthere is no continuation to act on, or when the peek failed\n(the failure is surfaced via `error`).").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Index used to correlate chunks from the same completion."),
+  messages: z484.z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
+  messages_queued: z484.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. Only\nset when `continuation` is also set \u2014 the caller acts on it by\nissuing the continuation. Absent when nothing is queued, when\nthere is no continuation to act on, or when the peek failed\n(the failure is surfaced via `error`).").meta({ omitempty: true }).optional(),
   object: AgentCompletionsResponseStreamingObjectSchema.describe('The object type (always "agent.completion.chunk").'),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema.nullable().describe("Token usage (only present in the final chunk).").meta({ omitempty: true }).optional()
 }).describe("A streaming agent completion chunk from a single agent within a vector completion.\n\nThe `index` field is used to correlate chunks belonging to the same\nunderlying completion when accumulating via [`push`](Self::push).").meta({ title: "vector.completions.response.streaming.AgentCompletionChunk" });
-var VectorCompletionsResponseStreamingObjectSchema = z485.z.literal("vector.completion.chunk").describe("A streaming vector completion chunk.").meta({ title: "vector.completions.response.streaming.Object" });
-var VectorCompletionsResponseVoteSchema = z485.z.object({
-  agent: z485.z.string().describe("The agent that produced this vote (content-addressed ID)."),
-  flat_swarm_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Flattened index accounting for agent counts in the swarm."),
-  from_cache: z485.z.boolean().nullable().describe("If true, this vote was retrieved from cache rather than generated fresh.").meta({ omitempty: true }).optional(),
-  prompt_id: z485.z.string().describe("Content hash of the request messages (for caching/deduplication)."),
-  responses_ids: z485.z.array(z485.z.string()).describe("Content hashes of each response option in the request."),
-  retry: z485.z.boolean().nullable().describe("If true, this vote was reused from a previous request via the `retry`\nparameter. All fields reflect the original request's values.").meta({ omitempty: true }).optional(),
-  swarm_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Index of the agent configuration within the swarm."),
-  vote: z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("The vote distribution. Each index corresponds to a response from the\nrequest. Typically one element is 1.0 (selected) and the rest are 0.0."),
-  weight: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The weight applied to this vote when computing final scores.")
+var VectorCompletionsResponseStreamingObjectSchema = z484.z.literal("vector.completion.chunk").describe("A streaming vector completion chunk.").meta({ title: "vector.completions.response.streaming.Object" });
+var VectorCompletionsResponseVoteSchema = z484.z.object({
+  agent: z484.z.string().describe("The agent that produced this vote (content-addressed ID)."),
+  flat_swarm_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Flattened index accounting for agent counts in the swarm."),
+  from_cache: z484.z.boolean().nullable().describe("If true, this vote was retrieved from cache rather than generated fresh.").meta({ omitempty: true }).optional(),
+  prompt_id: z484.z.string().describe("Content hash of the request messages (for caching/deduplication)."),
+  responses_ids: z484.z.array(z484.z.string()).describe("Content hashes of each response option in the request."),
+  retry: z484.z.boolean().nullable().describe("If true, this vote was reused from a previous request via the `retry`\nparameter. All fields reflect the original request's values.").meta({ omitempty: true }).optional(),
+  swarm_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Index of the agent configuration within the swarm."),
+  vote: z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("The vote distribution. Each index corresponds to a response from the\nrequest. Typically one element is 1.0 (selected) and the rest are 0.0."),
+  weight: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The weight applied to this vote when computing final scores.")
 }).describe("A single LLM's vote in a vector completion.\n\nEach LLM in the swarm produces a vote indicating which response(s) it\nselected. Votes are weighted according to the profile and combined to\nproduce the final scores.\n\n# Vote Format\n\nThe `vote` field is a vector of decimals corresponding to the responses\nin the request. Typically one element is 1.0 and the rest are 0.0 (discrete\nselection), but when `top_logprobs` is used, votes may be probability\ndistributions.").meta({ title: "vector.completions.response.Vote" });
 
 // src/functions/executions/response/streaming/vectorCompletionTaskChunk.ts
-var FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema = z485.z.object({
-  completions: z485.z.array(VectorCompletionsResponseStreamingAgentCompletionChunkSchema).describe("Incremental agent completion chunks from each agent."),
-  created: z485.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the completion was created."),
+var FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema = z484.z.object({
+  completions: z484.z.array(VectorCompletionsResponseStreamingAgentCompletionChunkSchema).describe("Incremental agent completion chunks from each agent."),
+  created: z484.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the completion was created."),
   error: ErrorResponseErrorSchema.nullable().meta({ omitempty: true }).optional(),
-  id: z485.z.string().describe("Unique identifier for this vector completion."),
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
+  id: z484.z.string().describe("Unique identifier for this vector completion."),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
   object: VectorCompletionsResponseStreamingObjectSchema.describe('Object type identifier (`"vector.completion.chunk"`).'),
-  scores: z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Current weighted scores. Updated as new votes arrive."),
-  swarm: z485.z.string().describe("ID of the swarm used for this completion."),
-  task_index: z485.z.number().int().min(0).max(18446744073709552e3),
-  task_path: z485.z.array(z485.z.number().int().min(0).max(18446744073709552e3)),
+  scores: z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Current weighted scores. Updated as new votes arrive."),
+  swarm: z484.z.string().describe("ID of the swarm used for this completion."),
+  task_index: z484.z.number().int().min(0).max(18446744073709552e3),
+  task_path: z484.z.array(z484.z.number().int().min(0).max(18446744073709552e3)),
   usage: AgentCompletionsResponseUsageSchema.nullable().describe("Aggregated usage statistics. Typically present only in the final chunk.").meta({ omitempty: true }).optional(),
-  votes: z485.z.array(VectorCompletionsResponseVoteSchema).describe("Votes received so far. New votes are appended in subsequent chunks."),
-  weights: z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Current weight distribution across responses. Updated as new votes arrive.")
+  votes: z484.z.array(VectorCompletionsResponseVoteSchema).describe("Votes received so far. New votes are appended in subsequent chunks."),
+  weights: z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Current weight distribution across responses. Updated as new votes arrive.")
 }).describe("A chunk in a streaming vector completion response.\n\nEach chunk contains incremental updates to the completion. Use the\n[`push`](Self::push) method to accumulate chunks into a complete response.").meta({ title: "functions.executions.response.streaming.VectorCompletionTaskChunk" });
 
 // src/functions/executions/response/streaming/taskChunk.ts
-var FunctionsExecutionsResponseStreamingTaskChunkSchema = z485.z.union([z485.z.lazy(() => FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema).meta({ "title": "functions.executions.response.streaming.FunctionExecutionTaskChunk", "variantTitle": "FunctionExecution" }), FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema.meta({ "title": "functions.executions.response.streaming.VectorCompletionTaskChunk", "variantTitle": "VectorCompletion" })]).meta({ title: "functions.executions.response.streaming.TaskChunk" });
+var FunctionsExecutionsResponseStreamingTaskChunkSchema = z484.z.union([z484.z.lazy(() => FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema).meta({ "title": "functions.executions.response.streaming.FunctionExecutionTaskChunk", "variantTitle": "FunctionExecution" }), FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema.meta({ "title": "functions.executions.response.streaming.VectorCompletionTaskChunk", "variantTitle": "VectorCompletion" })]).meta({ title: "functions.executions.response.streaming.TaskChunk" });
 
 // src/functions/executions/response/streaming/functionExecutionChunk.ts
-var FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema = z485.z.object({
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema = z484.z.object({
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().meta({ omitempty: true }).optional(),
   function: RemotePathSchema.nullable().optional(),
-  id: z485.z.string(),
+  id: z484.z.string(),
   object: FunctionsExecutionsResponseStreamingObjectSchema,
   output: FunctionsExecutionsResponseOutputSchema.nullable().meta({ omitempty: true }).optional(),
   profile: RemotePathSchema.nullable().optional(),
   reasoning: FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema.nullable().meta({ omitempty: true }).optional(),
-  retry_token: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  tasks: z485.z.array(FunctionsExecutionsResponseStreamingTaskChunkSchema),
-  tasks_errors: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  retry_token: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  tasks: z484.z.array(FunctionsExecutionsResponseStreamingTaskChunkSchema),
+  tasks_errors: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   usage: AgentCompletionsResponseUsageSchema.nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.executions.response.streaming.FunctionExecutionChunk" });
-var FunctionsExecutionsResponseStreamingInnerErrorSchema = z485.z.union([z485.z.object({
+var FunctionsExecutionsResponseStreamingInnerErrorSchema = z484.z.union([z484.z.object({
   error: ErrorResponseErrorSchema,
-  split_index: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
-  swiss_pool_index: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
-  swiss_round: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
-  task_path: z485.z.array(z485.z.number().int().min(0).max(18446744073709552e3)),
-  type: z485.z.literal("function_task_error")
-}).describe("A nested function execution task failed at its top level.\nYielded when a\n[`FunctionExecutionTaskChunk`](super::FunctionExecutionTaskChunk)'s\nwrapped inner `FunctionExecutionChunk` has its own `.error` set.\n\n`task_path` locates the failing task; `swiss_pool_index` /\n`swiss_round` / `split_index` carry the tournament/split context\nfrom the wrapper when set.").meta({ "variantTitle": "FunctionTaskError" }), z485.z.object({
-  agent_completion_index: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
+  split_index: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
+  swiss_pool_index: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
+  swiss_round: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
+  task_path: z484.z.array(z484.z.number().int().min(0).max(18446744073709552e3)),
+  type: z484.z.literal("function_task_error")
+}).describe("A nested function execution task failed at its top level.\nYielded when a\n[`FunctionExecutionTaskChunk`](super::FunctionExecutionTaskChunk)'s\nwrapped inner `FunctionExecutionChunk` has its own `.error` set.\n\n`task_path` locates the failing task; `swiss_pool_index` /\n`swiss_round` / `split_index` carry the tournament/split context\nfrom the wrapper when set.").meta({ "variantTitle": "FunctionTaskError" }), z484.z.object({
+  agent_completion_index: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
   error: ErrorResponseErrorSchema,
-  task_path: z485.z.array(z485.z.number().int().min(0).max(18446744073709552e3)),
-  type: z485.z.literal("vector_completion_task_error")
-}).describe("A vector completion task failed. The optional `agent_completion_index`\nis the discriminator:\n- `None` \u2192 the task itself failed (the wrapper's own `.error`).\n- `Some(N)` \u2192 agent completion `N` inside the task's vector\n  completion failed.\n\n`task_path` locates the vector completion task.").meta({ "variantTitle": "VectorCompletionTaskError" }), z485.z.object({
+  task_path: z484.z.array(z484.z.number().int().min(0).max(18446744073709552e3)),
+  type: z484.z.literal("vector_completion_task_error")
+}).describe("A vector completion task failed. The optional `agent_completion_index`\nis the discriminator:\n- `None` \u2192 the task itself failed (the wrapper's own `.error`).\n- `Some(N)` \u2192 agent completion `N` inside the task's vector\n  completion failed.\n\n`task_path` locates the vector completion task.").meta({ "variantTitle": "VectorCompletionTaskError" }), z484.z.object({
   error: ErrorResponseErrorSchema,
-  task_path: z485.z.array(z485.z.number().int().min(0).max(18446744073709552e3)),
-  type: z485.z.literal("reasoning_agent_completion_error")
+  task_path: z484.z.array(z484.z.number().int().min(0).max(18446744073709552e3)),
+  type: z484.z.literal("reasoning_agent_completion_error")
 }).describe("The inner agent completion of a reasoning summary failed\n(`ReasoningSummaryChunk.inner.error`).\n\n`task_path` identifies whose reasoning \u2014 empty for the root\nexecution; non-empty for a nested execution at that path.").meta({ "variantTitle": "ReasoningAgentCompletionError" })]).describe('An inner error from a [`FunctionExecutionChunk`](super::FunctionExecutionChunk).\n\nEach variant carries `task_path` \u2014 the full hierarchical path from the\nroot execution down to the failing task (or, for the reasoning variant,\nto the execution whose reasoning agent failed). Empty `task_path` means\nthe error is at the root execution itself.\n\nWire shape (internally tagged on `"type"`):\n```json\n{"type":"function_task_error","task_path":[0],\n "swiss_pool_index":1,"swiss_round":0,"error":{}}\n{"type":"vector_completion_task_error","task_path":[0,1],"error":{}}\n{"type":"vector_completion_task_error","task_path":[0,1],\n "agent_completion_index":2,"error":{}}\n{"type":"reasoning_agent_completion_error","task_path":[],"error":{}}\n```\n\nDoes NOT include:\n- The chunk\'s own top-level `.error` \u2014 reachable directly via\n  [`FunctionExecutionChunk::error`](super::FunctionExecutionChunk::error).\n- The reasoning summary\'s own `.error`; only the inner agent\n  completion\'s failure surfaces as a reasoning error.').meta({ title: "functions.executions.response.streaming.InnerError" });
 
 // src/functions/executions/response/streaming/reasoningSummaryChunkMerged.ts
@@ -3949,88 +3942,88 @@ function wasmFunctionsExecutionsResponseStreamingGenerateFunctionExecutionChunk(
 function wasmFunctionsExecutionsResponseStreamingNormalizeFunctionExecutionForTests(a) {
   return JSON.parse(normalizeFunctionExecutionForTests(a));
 }
-var FunctionsExecutionsResponseUnaryObjectSchema = z485.z.enum(["scalar.function.execution", "vector.function.execution"]).meta({ title: "functions.executions.response.unary.Object" });
-var FunctionsExecutionsResponseUnaryReasoningSummarySchema = z485.z.object({
-  continuation: z485.z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsExecutionsResponseUnaryObjectSchema = z484.z.enum(["scalar.function.execution", "vector.function.execution"]).meta({ title: "functions.executions.response.unary.Object" });
+var FunctionsExecutionsResponseUnaryReasoningSummarySchema = z484.z.object({
+  continuation: z484.z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().optional(),
-  id: z485.z.string(),
-  messages: z485.z.array(AgentCompletionsResponseUnaryMessageSchema),
-  messages_queued: z485.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. See\n[`super::streaming::AgentCompletionChunk::messages_queued`].").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  messages: z484.z.array(AgentCompletionsResponseUnaryMessageSchema),
+  messages_queued: z484.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. See\n[`super::streaming::AgentCompletionChunk::messages_queued`].").meta({ omitempty: true }).optional(),
   object: AgentCompletionsResponseUnaryObjectSchema.describe('The object type (always "agent.completion").'),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema
 }).describe("A complete agent completion response.").meta({ title: "functions.executions.response.unary.ReasoningSummary" });
-var FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema = z485.z.object({
-  created: z485.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the execution was created."),
+var FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema = z484.z.object({
+  created: z484.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the execution was created."),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if the execution failed.").optional(),
   function: RemotePathSchema.nullable().describe("The function used (if remote).").optional(),
-  id: z485.z.string().describe("Unique identifier for this execution."),
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
+  id: z484.z.string().describe("Unique identifier for this execution."),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
   object: FunctionsExecutionsResponseUnaryObjectSchema.describe("Object type identifier."),
   output: FunctionsExecutionsResponseOutputSchema.describe("The final output (scalar or vector score)."),
   profile: RemotePathSchema.nullable().describe("The profile used (if remote).").optional(),
   reasoning: FunctionsExecutionsResponseUnaryReasoningSummarySchema.nullable().describe("Reasoning summary if reasoning was enabled.").optional(),
-  retry_token: z485.z.string().nullable().describe("Token for retrying this execution with cached votes.").optional(),
-  split_index: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
-  swiss_pool_index: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
-  swiss_round: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
-  task_index: z485.z.number().int().min(0).max(18446744073709552e3),
-  task_path: z485.z.array(z485.z.number().int().min(0).max(18446744073709552e3)),
-  tasks: z485.z.array(z485.z.lazy(() => FunctionsExecutionsResponseUnaryTaskSchema)).describe("Results from each task in the function."),
-  tasks_errors: z485.z.boolean().describe("Whether any tasks encountered errors."),
+  retry_token: z484.z.string().nullable().describe("Token for retrying this execution with cached votes.").optional(),
+  split_index: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
+  swiss_pool_index: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
+  swiss_round: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
+  task_index: z484.z.number().int().min(0).max(18446744073709552e3),
+  task_path: z484.z.array(z484.z.number().int().min(0).max(18446744073709552e3)),
+  tasks: z484.z.array(z484.z.lazy(() => FunctionsExecutionsResponseUnaryTaskSchema)).describe("Results from each task in the function."),
+  tasks_errors: z484.z.boolean().describe("Whether any tasks encountered errors."),
   usage: AgentCompletionsResponseUsageSchema.describe("Aggregated token and cost usage.")
 }).describe("A complete function execution response (non-streaming).").meta({ title: "functions.executions.response.unary.FunctionExecutionTask" });
-var VectorCompletionsResponseUnaryAgentCompletionSchema = z485.z.object({
-  continuation: z485.z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var VectorCompletionsResponseUnaryAgentCompletionSchema = z484.z.object({
+  continuation: z484.z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
-  id: z485.z.string(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Index of this completion within the vector completion."),
-  messages: z485.z.array(AgentCompletionsResponseUnaryMessageSchema),
-  messages_queued: z485.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. See\n[`super::streaming::AgentCompletionChunk::messages_queued`].").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Index of this completion within the vector completion."),
+  messages: z484.z.array(AgentCompletionsResponseUnaryMessageSchema),
+  messages_queued: z484.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. See\n[`super::streaming::AgentCompletionChunk::messages_queued`].").meta({ omitempty: true }).optional(),
   object: AgentCompletionsResponseUnaryObjectSchema.describe('The object type (always "agent.completion").'),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema
 }).describe("A agent completion from a single agent within a vector completion.\n\nWraps the standard agent completion response with an index to identify\nwhich agent in the swarm produced it.").meta({ title: "vector.completions.response.unary.AgentCompletion" });
-var VectorCompletionsResponseUnaryObjectSchema = z485.z.literal("vector.completion").describe("A complete vector completion response.").meta({ title: "vector.completions.response.unary.Object" });
+var VectorCompletionsResponseUnaryObjectSchema = z484.z.literal("vector.completion").describe("A complete vector completion response.").meta({ title: "vector.completions.response.unary.Object" });
 
 // src/functions/executions/response/unary/vectorCompletionTask.ts
-var FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema = z485.z.object({
-  completions: z485.z.array(VectorCompletionsResponseUnaryAgentCompletionSchema).describe("The underlying agent completions from each agent in the swarm."),
-  created: z485.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the completion was created."),
+var FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema = z484.z.object({
+  completions: z484.z.array(VectorCompletionsResponseUnaryAgentCompletionSchema).describe("The underlying agent completions from each agent in the swarm."),
+  created: z484.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the completion was created."),
   error: ErrorResponseErrorSchema.nullable().optional(),
-  id: z485.z.string().describe("Unique identifier for this vector completion."),
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
+  id: z484.z.string().describe("Unique identifier for this vector completion."),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
   object: VectorCompletionsResponseUnaryObjectSchema.describe('Object type identifier (`"vector.completion"`).'),
-  scores: z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Final weighted scores for each response option. Sums to 1."),
-  swarm: z485.z.string().describe("ID of the swarm used for this completion."),
-  task_index: z485.z.number().int().min(0).max(18446744073709552e3),
-  task_path: z485.z.array(z485.z.number().int().min(0).max(18446744073709552e3)),
+  scores: z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Final weighted scores for each response option. Sums to 1."),
+  swarm: z484.z.string().describe("ID of the swarm used for this completion."),
+  task_index: z484.z.number().int().min(0).max(18446744073709552e3),
+  task_path: z484.z.array(z484.z.number().int().min(0).max(18446744073709552e3)),
   usage: AgentCompletionsResponseUsageSchema.describe("Aggregated token and cost usage across all completions."),
-  votes: z485.z.array(VectorCompletionsResponseVoteSchema).describe("Individual votes from each agent, showing their selections."),
-  weights: z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Total weight allocated to each response option. Same length as `scores`.\nFor discrete votes, an LLM's full weight goes to its selected response.\nFor probabilistic votes, the weight is divided according to the distribution.")
+  votes: z484.z.array(VectorCompletionsResponseVoteSchema).describe("Individual votes from each agent, showing their selections."),
+  weights: z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Total weight allocated to each response option. Same length as `scores`.\nFor discrete votes, an LLM's full weight goes to its selected response.\nFor probabilistic votes, the weight is divided according to the distribution.")
 }).describe("A complete vector completion response (non-streaming).\n\nContains the final scores, all votes from the swarm, and the underlying\nagent completions that produced those votes.").meta({ title: "functions.executions.response.unary.VectorCompletionTask" });
 
 // src/functions/executions/response/unary/task.ts
-var FunctionsExecutionsResponseUnaryTaskSchema = z485.z.union([z485.z.lazy(() => FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema).meta({ "title": "functions.executions.response.unary.FunctionExecutionTask", "variantTitle": "FunctionExecution" }), FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema.meta({ "title": "functions.executions.response.unary.VectorCompletionTask", "variantTitle": "VectorCompletion" })]).meta({ title: "functions.executions.response.unary.Task" });
+var FunctionsExecutionsResponseUnaryTaskSchema = z484.z.union([z484.z.lazy(() => FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema).meta({ "title": "functions.executions.response.unary.FunctionExecutionTask", "variantTitle": "FunctionExecution" }), FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema.meta({ "title": "functions.executions.response.unary.VectorCompletionTask", "variantTitle": "VectorCompletion" })]).meta({ title: "functions.executions.response.unary.Task" });
 
 // src/functions/executions/response/unary/functionExecution.ts
-var FunctionsExecutionsResponseUnaryFunctionExecutionSchema = z485.z.object({
-  created: z485.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the execution was created."),
+var FunctionsExecutionsResponseUnaryFunctionExecutionSchema = z484.z.object({
+  created: z484.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the execution was created."),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if the execution failed.").optional(),
   function: RemotePathSchema.nullable().describe("The function used (if remote).").optional(),
-  id: z485.z.string().describe("Unique identifier for this execution."),
+  id: z484.z.string().describe("Unique identifier for this execution."),
   object: FunctionsExecutionsResponseUnaryObjectSchema.describe("Object type identifier."),
   output: FunctionsExecutionsResponseOutputSchema.describe("The final output (scalar or vector score)."),
   profile: RemotePathSchema.nullable().describe("The profile used (if remote).").optional(),
   reasoning: FunctionsExecutionsResponseUnaryReasoningSummarySchema.nullable().describe("Reasoning summary if reasoning was enabled.").optional(),
-  retry_token: z485.z.string().nullable().describe("Token for retrying this execution with cached votes.").optional(),
-  tasks: z485.z.array(FunctionsExecutionsResponseUnaryTaskSchema).describe("Results from each task in the function."),
-  tasks_errors: z485.z.boolean().describe("Whether any tasks encountered errors."),
+  retry_token: z484.z.string().nullable().describe("Token for retrying this execution with cached votes.").optional(),
+  tasks: z484.z.array(FunctionsExecutionsResponseUnaryTaskSchema).describe("Results from each task in the function."),
+  tasks_errors: z484.z.boolean().describe("Whether any tasks encountered errors."),
   usage: AgentCompletionsResponseUsageSchema.describe("Aggregated token and cost usage.")
 }).describe("A complete function execution response (non-streaming).").meta({ title: "functions.executions.response.unary.FunctionExecution" });
-var FunctionsExecutionsRetryTokenSchema = z485.z.array(z485.z.string().nullable()).describe("Token that enables reusing votes from a previous function execution.\n\nContains identifiers for each task's votes that can be reused in a\nsubsequent execution. Serialized as base64-encoded JSON.").meta({ title: "functions.executions.RetryToken" });
+var FunctionsExecutionsRetryTokenSchema = z484.z.array(z484.z.string().nullable()).describe("Token that enables reusing votes from a previous function execution.\n\nContains identifiers for each task's votes that can be reused in a\nsubsequent execution. Serialized as base64-encoded JSON.").meta({ title: "functions.executions.RetryToken" });
 
 // src/functions/executions/http.ts
 function functionsExecutionsCreateFunctionExecution(client, body, options) {
@@ -4047,54 +4040,54 @@ function functionsExecutionsCreateFunctionExecution(client, body, options) {
     options
   );
 }
-var FunctionsExpressionParamsSchema = z485.z.object({
-  depth: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Current recursion depth.\nOnly provided for invention prompt expressions.").optional(),
+var FunctionsExpressionParamsSchema = z484.z.object({
+  depth: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Current recursion depth.\nOnly provided for invention prompt expressions.").optional(),
   input: FunctionsExpressionInputValueSchema.describe("The function's input data."),
-  map: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Current map index. Only populated for mapped task expressions.").optional(),
-  name: z485.z.string().nullable().describe("The function's name.\nOnly provided for invention prompt expressions.").optional(),
+  map: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Current map index. Only populated for mapped task expressions.").optional(),
+  name: z484.z.string().nullable().describe("The function's name.\nOnly provided for invention prompt expressions.").optional(),
   output: FunctionsExpressionTaskOutputSchema.nullable().describe("Results from executed tasks. Only populated for task output expressions.").optional(),
-  spec: z485.z.string().nullable().describe("The specification text.\nOnly provided for invention prompt expressions.").optional(),
-  tasks_max: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Resolved maximum task count for this node type.\nOnly provided for invention prompt expressions.").optional(),
-  tasks_min: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Resolved minimum task count for this node type.\nOnly provided for invention prompt expressions.").optional()
+  spec: z484.z.string().nullable().describe("The specification text.\nOnly provided for invention prompt expressions.").optional(),
+  tasks_max: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Resolved maximum task count for this node type.\nOnly provided for invention prompt expressions.").optional(),
+  tasks_min: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("Resolved minimum task count for this node type.\nOnly provided for invention prompt expressions.").optional()
 }).describe("Owned version of expression parameters.").meta({ title: "functions.expression.Params" });
-var FunctionsInventionsPromptsGetPromptResponseSchema = RemotePathSchema.and(z485.z.object({})).meta({ title: "functions.inventions.prompts.GetPromptResponse" });
-var FunctionsInventionsPromptsStepPromptTypeSchema = z485.z.enum(["alpha.scalar.branch.function", "alpha.scalar.leaf.function", "alpha.vector.branch.function", "alpha.vector.leaf.function"]).describe("The type of invention state a prompt applies to.").meta({ title: "functions.inventions.prompts.StepPromptType" });
+var FunctionsInventionsPromptsGetPromptResponseSchema = RemotePathSchema.and(z484.z.object({})).meta({ title: "functions.inventions.prompts.GetPromptResponse" });
+var FunctionsInventionsPromptsStepPromptTypeSchema = z484.z.enum(["alpha.scalar.branch.function", "alpha.scalar.leaf.function", "alpha.vector.branch.function", "alpha.vector.leaf.function"]).describe("The type of invention state a prompt applies to.").meta({ title: "functions.inventions.prompts.StepPromptType" });
 
 // src/functions/inventions/prompts/stepPromptExpression.ts
-var FunctionsInventionsPromptsStepPromptExpressionSchema = z485.z.object({
-  type: z485.z.array(FunctionsInventionsPromptsStepPromptTypeSchema),
-  value: z485.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z485.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
+var FunctionsInventionsPromptsStepPromptExpressionSchema = z484.z.object({
+  type: z484.z.array(FunctionsInventionsPromptsStepPromptTypeSchema),
+  value: z484.z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate.").meta({ "title": "functions.expression.Expression", "variantTitle": "Expression" }), z484.z.string().describe("A literal value.").meta({ "variantTitle": "Value" })]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
 }).describe("A prompt for a single invention step, applicable to one or more state types.").meta({ title: "functions.inventions.prompts.StepPromptExpression" });
 
 // src/functions/inventions/prompts/inlinePrompt.ts
-var FunctionsInventionsPromptsInlinePromptSchema = z485.z.object({
-  description_step: z485.z.array(FunctionsInventionsPromptsStepPromptExpressionSchema),
-  essay_step: z485.z.array(FunctionsInventionsPromptsStepPromptExpressionSchema),
-  essay_tasks_step: z485.z.array(FunctionsInventionsPromptsStepPromptExpressionSchema),
-  input_schema_step: z485.z.array(FunctionsInventionsPromptsStepPromptExpressionSchema),
-  tasks_step: z485.z.array(FunctionsInventionsPromptsStepPromptExpressionSchema)
+var FunctionsInventionsPromptsInlinePromptSchema = z484.z.object({
+  description_step: z484.z.array(FunctionsInventionsPromptsStepPromptExpressionSchema),
+  essay_step: z484.z.array(FunctionsInventionsPromptsStepPromptExpressionSchema),
+  essay_tasks_step: z484.z.array(FunctionsInventionsPromptsStepPromptExpressionSchema),
+  input_schema_step: z484.z.array(FunctionsInventionsPromptsStepPromptExpressionSchema),
+  tasks_step: z484.z.array(FunctionsInventionsPromptsStepPromptExpressionSchema)
 }).describe("Inline invention prompt configuration for all steps.").meta({ title: "functions.inventions.prompts.InlinePrompt" });
-var FunctionsInventionsPromptsInlinePromptOrRemoteCommitOptionalSchema = z485.z.union([FunctionsInventionsPromptsInlinePromptSchema.meta({ "title": "functions.inventions.prompts.InlinePrompt", "variantTitle": "Inline" }), RemotePathCommitOptionalSchema.meta({ "title": "RemotePathCommitOptional", "variantTitle": "Remote" })]).describe("A prompt specification that is either an inline prompt definition\nor a remote path reference.").meta({ title: "functions.inventions.prompts.InlinePromptOrRemoteCommitOptional" });
-var FunctionsInventionsPromptsListPromptResponseSchema = z485.z.object({
-  data: z485.z.array(RemotePathSchema).describe("List of available prompts.")
+var FunctionsInventionsPromptsInlinePromptOrRemoteCommitOptionalSchema = z484.z.union([FunctionsInventionsPromptsInlinePromptSchema.meta({ "title": "functions.inventions.prompts.InlinePrompt", "variantTitle": "Inline" }), RemotePathCommitOptionalSchema.meta({ "title": "RemotePathCommitOptional", "variantTitle": "Remote" })]).describe("A prompt specification that is either an inline prompt definition\nor a remote path reference.").meta({ title: "functions.inventions.prompts.InlinePromptOrRemoteCommitOptional" });
+var FunctionsInventionsPromptsListPromptResponseSchema = z484.z.object({
+  data: z484.z.array(RemotePathSchema).describe("List of available prompts.")
 }).describe("Response from listing prompts.").meta({ title: "functions.inventions.prompts.ListPromptResponse" });
-var FunctionsInventionsPromptsListPromptsSourceSchema = z485.z.enum(["all", "mock", "filesystem", "objectiveai"]).describe("Source filter for listing prompts.").meta({ title: "functions.inventions.prompts.ListPromptsSource" });
+var FunctionsInventionsPromptsListPromptsSourceSchema = z484.z.enum(["all", "mock", "filesystem", "objectiveai"]).describe("Source filter for listing prompts.").meta({ title: "functions.inventions.prompts.ListPromptsSource" });
 
 // src/functions/inventions/prompts/listPromptsRequest.ts
-var FunctionsInventionsPromptsListPromptsRequestSchema = z485.z.object({
+var FunctionsInventionsPromptsListPromptsRequestSchema = z484.z.object({
   source: FunctionsInventionsPromptsListPromptsSourceSchema.nullable().describe("Optional source filter for listing prompts.").meta({ omitempty: true }).optional()
 }).describe("Query parameters for the list prompts endpoint.").meta({ title: "functions.inventions.prompts.ListPromptsRequest" });
-var FunctionsInventionsPromptsRemotePromptSchema = FunctionsInventionsPromptsInlinePromptSchema.and(z485.z.object({
-  description: z485.z.string().describe("Human-readable description of the prompt.")
+var FunctionsInventionsPromptsRemotePromptSchema = FunctionsInventionsPromptsInlinePromptSchema.and(z484.z.object({
+  description: z484.z.string().describe("Human-readable description of the prompt.")
 })).describe("A remote prompt with description and inline prompt fields.").meta({ title: "functions.inventions.prompts.RemotePrompt" });
 
 // src/functions/inventions/prompts/prompt.ts
-var FunctionsInventionsPromptsPromptSchema = z485.z.union([FunctionsInventionsPromptsRemotePromptSchema.describe("A remote prompt with metadata.").meta({ "title": "functions.inventions.prompts.RemotePrompt", "variantTitle": "Remote" }), FunctionsInventionsPromptsInlinePromptSchema.describe("An inline prompt definition.").meta({ "title": "functions.inventions.prompts.InlinePrompt", "variantTitle": "Inline" })]).describe("A Prompt definition, either remote or inline.").meta({ title: "functions.inventions.prompts.Prompt" });
-var FunctionsInventionsPromptsUsagePromptResponseSchema = z485.z.object({
-  completion_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total completion tokens used."),
-  prompt_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens used."),
-  requests: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this prompt."),
-  total_cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
+var FunctionsInventionsPromptsPromptSchema = z484.z.union([FunctionsInventionsPromptsRemotePromptSchema.describe("A remote prompt with metadata.").meta({ "title": "functions.inventions.prompts.RemotePrompt", "variantTitle": "Remote" }), FunctionsInventionsPromptsInlinePromptSchema.describe("An inline prompt definition.").meta({ "title": "functions.inventions.prompts.InlinePrompt", "variantTitle": "Inline" })]).describe("A Prompt definition, either remote or inline.").meta({ title: "functions.inventions.prompts.Prompt" });
+var FunctionsInventionsPromptsUsagePromptResponseSchema = z484.z.object({
+  completion_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total completion tokens used."),
+  prompt_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens used."),
+  requests: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this prompt."),
+  total_cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
 }).describe("Usage statistics for a prompt.").meta({ title: "functions.inventions.prompts.UsagePromptResponse" });
 
 // src/functions/inventions/prompts/http.ts
@@ -4107,191 +4100,191 @@ function functionsInventionsPromptsGetPrompt(client, params, options) {
 function functionsInventionsPromptsGetPromptUsage(client, params, options) {
   return client.post_unary("functions/inventions/prompts/usage", params, options);
 }
-var FunctionsInventionsStateAlphaScalarBranchStateSchema = z485.z.object({
-  depth: z485.z.number().int().min(0).max(18446744073709552e3),
-  description: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  essay: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  essay_tasks: z485.z.string().nullable().meta({ omitempty: true }).optional(),
+var FunctionsInventionsStateAlphaScalarBranchStateSchema = z484.z.object({
+  depth: z484.z.number().int().min(0).max(18446744073709552e3),
+  description: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  essay: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  essay_tasks: z484.z.string().nullable().meta({ omitempty: true }).optional(),
   input_schema: FunctionsExpressionObjectInputSchemaSchema.nullable().meta({ omitempty: true }).optional(),
-  max_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  max_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  name: z485.z.string(),
-  readme: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  spec: z485.z.string(),
-  tasks: z485.z.array(FunctionsAlphaScalarBranchTaskExpressionSchema).nullable().meta({ omitempty: true }).optional(),
-  tasks_length: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional()
+  max_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  max_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  name: z484.z.string(),
+  readme: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  spec: z484.z.string(),
+  tasks: z484.z.array(FunctionsAlphaScalarBranchTaskExpressionSchema).nullable().meta({ omitempty: true }).optional(),
+  tasks_length: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.inventions.state.AlphaScalarBranchState" });
-var FunctionsInventionsStateAlphaScalarLeafStateSchema = z485.z.object({
-  depth: z485.z.number().int().min(0).max(18446744073709552e3),
-  description: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  essay: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  essay_tasks: z485.z.string().nullable().meta({ omitempty: true }).optional(),
+var FunctionsInventionsStateAlphaScalarLeafStateSchema = z484.z.object({
+  depth: z484.z.number().int().min(0).max(18446744073709552e3),
+  description: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  essay: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  essay_tasks: z484.z.string().nullable().meta({ omitempty: true }).optional(),
   input_schema: FunctionsExpressionObjectInputSchemaSchema.nullable().meta({ omitempty: true }).optional(),
-  max_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  max_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  name: z485.z.string(),
-  readme: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  spec: z485.z.string(),
-  tasks: z485.z.array(FunctionsAlphaScalarLeafTaskExpressionSchema).nullable().meta({ omitempty: true }).optional(),
-  tasks_length: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional()
+  max_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  max_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  name: z484.z.string(),
+  readme: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  spec: z484.z.string(),
+  tasks: z484.z.array(FunctionsAlphaScalarLeafTaskExpressionSchema).nullable().meta({ omitempty: true }).optional(),
+  tasks_length: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.inventions.state.AlphaScalarLeafState" });
-var FunctionsInventionsStateAlphaScalarStateSchema = z485.z.object({
-  depth: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsInventionsStateAlphaScalarStateSchema = z484.z.object({
+  depth: z484.z.number().int().min(0).max(18446744073709552e3),
   input_schema: FunctionsExpressionObjectInputSchemaSchema.nullable().meta({ omitempty: true }).optional(),
-  max_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  max_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  name: z485.z.string(),
-  spec: z485.z.string()
+  max_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  max_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  name: z484.z.string(),
+  spec: z484.z.string()
 }).meta({ title: "functions.inventions.state.AlphaScalarState" });
-var FunctionsInventionsStateAlphaVectorBranchStateSchema = z485.z.object({
-  depth: z485.z.number().int().min(0).max(18446744073709552e3),
-  description: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  essay: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  essay_tasks: z485.z.string().nullable().meta({ omitempty: true }).optional(),
+var FunctionsInventionsStateAlphaVectorBranchStateSchema = z484.z.object({
+  depth: z484.z.number().int().min(0).max(18446744073709552e3),
+  description: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  essay: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  essay_tasks: z484.z.string().nullable().meta({ omitempty: true }).optional(),
   input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema.nullable().meta({ omitempty: true }).optional(),
-  max_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  max_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  name: z485.z.string(),
-  readme: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  spec: z485.z.string(),
-  tasks: z485.z.array(FunctionsAlphaVectorBranchTaskExpressionSchema).nullable().meta({ omitempty: true }).optional(),
-  tasks_length: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional()
+  max_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  max_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  name: z484.z.string(),
+  readme: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  spec: z484.z.string(),
+  tasks: z484.z.array(FunctionsAlphaVectorBranchTaskExpressionSchema).nullable().meta({ omitempty: true }).optional(),
+  tasks_length: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.inventions.state.AlphaVectorBranchState" });
-var FunctionsInventionsStateAlphaVectorLeafStateSchema = z485.z.object({
-  depth: z485.z.number().int().min(0).max(18446744073709552e3),
-  description: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  essay: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  essay_tasks: z485.z.string().nullable().meta({ omitempty: true }).optional(),
+var FunctionsInventionsStateAlphaVectorLeafStateSchema = z484.z.object({
+  depth: z484.z.number().int().min(0).max(18446744073709552e3),
+  description: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  essay: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  essay_tasks: z484.z.string().nullable().meta({ omitempty: true }).optional(),
   input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema.nullable().meta({ omitempty: true }).optional(),
-  max_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  max_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  name: z485.z.string(),
-  readme: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  spec: z485.z.string(),
-  tasks: z485.z.array(FunctionsAlphaVectorLeafTaskExpressionSchema).nullable().meta({ omitempty: true }).optional(),
-  tasks_length: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional()
+  max_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  max_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  name: z484.z.string(),
+  readme: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  spec: z484.z.string(),
+  tasks: z484.z.array(FunctionsAlphaVectorLeafTaskExpressionSchema).nullable().meta({ omitempty: true }).optional(),
+  tasks_length: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.inventions.state.AlphaVectorLeafState" });
-var FunctionsInventionsStateAlphaVectorStateSchema = z485.z.object({
-  depth: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsInventionsStateAlphaVectorStateSchema = z484.z.object({
+  depth: z484.z.number().int().min(0).max(18446744073709552e3),
   input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema.nullable().meta({ omitempty: true }).optional(),
-  max_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  max_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  name: z485.z.string(),
-  spec: z485.z.string()
+  max_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  max_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  name: z484.z.string(),
+  spec: z484.z.string()
 }).meta({ title: "functions.inventions.state.AlphaVectorState" });
 
 // src/functions/inventions/state/paramsState.ts
-var FunctionsInventionsStateParamsStateSchema = z485.z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.scalar.branch.function")
-})).meta({ "variantTitle": "AlphaScalarBranch" }), FunctionsInventionsStateAlphaScalarLeafStateSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.scalar.leaf.function")
-})).meta({ "variantTitle": "AlphaScalarLeaf" }), FunctionsInventionsStateAlphaVectorBranchStateSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.vector.branch.function")
-})).meta({ "variantTitle": "AlphaVectorBranch" }), FunctionsInventionsStateAlphaVectorLeafStateSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.vector.leaf.function")
-})).meta({ "variantTitle": "AlphaVectorLeaf" }), FunctionsInventionsStateAlphaScalarStateSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.scalar.function")
-})).meta({ "variantTitle": "AlphaScalar" }), FunctionsInventionsStateAlphaVectorStateSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.vector.function")
+var FunctionsInventionsStateParamsStateSchema = z484.z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.scalar.branch.function")
+})).meta({ "variantTitle": "AlphaScalarBranch" }), FunctionsInventionsStateAlphaScalarLeafStateSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.scalar.leaf.function")
+})).meta({ "variantTitle": "AlphaScalarLeaf" }), FunctionsInventionsStateAlphaVectorBranchStateSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.vector.branch.function")
+})).meta({ "variantTitle": "AlphaVectorBranch" }), FunctionsInventionsStateAlphaVectorLeafStateSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.vector.leaf.function")
+})).meta({ "variantTitle": "AlphaVectorLeaf" }), FunctionsInventionsStateAlphaScalarStateSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.scalar.function")
+})).meta({ "variantTitle": "AlphaScalar" }), FunctionsInventionsStateAlphaVectorStateSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.vector.function")
 })).meta({ "variantTitle": "AlphaVector" })]).meta({ title: "functions.inventions.state.ParamsState" });
 
 // src/functions/inventions/state/paramsStateOrRemoteCommitOptional.ts
-var FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema = z485.z.union([FunctionsInventionsStateParamsStateSchema.meta({ "title": "functions.inventions.state.ParamsState", "variantTitle": "ParamsState" }), RemotePathCommitOptionalSchema.meta({ "title": "RemotePathCommitOptional", "variantTitle": "Remote" })]).describe("A state specification that is either an inline ParamsState definition\nor a remote path reference.").meta({ title: "functions.inventions.state.ParamsStateOrRemoteCommitOptional" });
+var FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema = z484.z.union([FunctionsInventionsStateParamsStateSchema.meta({ "title": "functions.inventions.state.ParamsState", "variantTitle": "ParamsState" }), RemotePathCommitOptionalSchema.meta({ "title": "RemotePathCommitOptional", "variantTitle": "Remote" })]).describe("A state specification that is either an inline ParamsState definition\nor a remote path reference.").meta({ title: "functions.inventions.state.ParamsStateOrRemoteCommitOptional" });
 
 // src/functions/inventions/recursive/request/functionInventionRecursiveCreateParams.ts
-var FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema = z485.z.object({
+var FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema = z484.z.object({
   agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema,
-  continuation: z485.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
-  max_step_retries: z485.z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.").meta({ omitempty: true }).optional(),
-  overwrite: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  continuation: z484.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
+  max_step_retries: z484.z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.").meta({ omitempty: true }).optional(),
+  overwrite: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   prompt: FunctionsInventionsPromptsInlinePromptOrRemoteCommitOptionalSchema,
   provider: AgentCompletionsRequestProviderSchema.nullable().meta({ omitempty: true }).optional(),
   remote: RemoteSchema,
-  seed: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
+  seed: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
   state: FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema,
-  stream: z485.z.boolean().nullable().meta({ omitempty: true }).optional()
+  stream: z484.z.boolean().nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams" });
-var FunctionsAlphaRemoteFunctionSchema = z485.z.union([FunctionsAlphaScalarRemoteFunctionSchema.meta({ "title": "functions.alpha_scalar.RemoteFunction", "variantTitle": "Scalar" }), FunctionsAlphaVectorRemoteFunctionSchema.meta({ "title": "functions.alpha_vector.RemoteFunction", "variantTitle": "Vector" })]).meta({ title: "functions.AlphaRemoteFunction" });
-var FunctionsRemoteFunctionSchema = z485.z.union([z485.z.object({
-  description: z485.z.string().describe("Human-readable description of what the function does."),
+var FunctionsAlphaRemoteFunctionSchema = z484.z.union([FunctionsAlphaScalarRemoteFunctionSchema.meta({ "title": "functions.alpha_scalar.RemoteFunction", "variantTitle": "Scalar" }), FunctionsAlphaVectorRemoteFunctionSchema.meta({ "title": "functions.alpha_vector.RemoteFunction", "variantTitle": "Vector" })]).meta({ title: "functions.AlphaRemoteFunction" });
+var FunctionsRemoteFunctionSchema = z484.z.union([z484.z.object({
+  description: z484.z.string().describe("Human-readable description of what the function does."),
   input_schema: FunctionsExpressionInputSchemaSchema.describe("JSON Schema defining the expected input structure."),
-  tasks: z485.z.array(FunctionsTaskExpressionSchema).describe("The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped)."),
-  type: z485.z.literal("scalar.function")
-}).describe("Produces a single score in [0, 1].").meta({ "variantTitle": "Scalar" }), z485.z.object({
-  description: z485.z.string().describe("Human-readable description of what the function does."),
+  tasks: z484.z.array(FunctionsTaskExpressionSchema).describe("The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped)."),
+  type: z484.z.literal("scalar.function")
+}).describe("Produces a single score in [0, 1].").meta({ "variantTitle": "Scalar" }), z484.z.object({
+  description: z484.z.string().describe("Human-readable description of what the function does."),
   input_merge: FunctionsExpressionExpressionSchema.describe("Expression transforming an array of inputs computed by `input_split`\ninto a single Input object for the Function.\nReceives: `input` (as an array)."),
   input_schema: FunctionsExpressionInputSchemaSchema.describe("JSON Schema defining the expected input structure."),
   input_split: FunctionsExpressionExpressionSchema.describe("Expression transforming input into an input array of the output_length\nWhen the Function is executed with any input from the array,\nThe output_length should be 1.\nReceives: `input`."),
   output_length: FunctionsExpressionExpressionSchema.describe("Expression computing the expected output vector length for task outputs.\nReceives: `input`."),
-  tasks: z485.z.array(FunctionsTaskExpressionSchema).describe("The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped)."),
-  type: z485.z.literal("vector.function")
+  tasks: z484.z.array(FunctionsTaskExpressionSchema).describe("The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped)."),
+  type: z484.z.literal("vector.function")
 }).describe("Produces a vector of scores that sums to 1.").meta({ "variantTitle": "Vector" })]).describe("A remote function with full metadata.\n\nRemote functions are stored as `function.json` in repositories and\nreferenced by `remote/owner/repository`. They include documentation fields\nthat inline functions lack.").meta({ title: "functions.RemoteFunction" });
 
 // src/functions/fullRemoteFunction.ts
-var FunctionsFullRemoteFunctionSchema = z485.z.union([FunctionsAlphaRemoteFunctionSchema.meta({ "title": "functions.AlphaRemoteFunction", "variantTitle": "Alpha" }), FunctionsRemoteFunctionSchema.meta({ "title": "functions.RemoteFunction", "variantTitle": "Standard" })]).meta({ title: "functions.FullRemoteFunction" });
-var FunctionsInventionsResponseStreamingAgentCompletionChunkSchema = z485.z.object({
-  continuation: z485.z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsFullRemoteFunctionSchema = z484.z.union([FunctionsAlphaRemoteFunctionSchema.meta({ "title": "functions.AlphaRemoteFunction", "variantTitle": "Alpha" }), FunctionsRemoteFunctionSchema.meta({ "title": "functions.RemoteFunction", "variantTitle": "Standard" })]).meta({ title: "functions.FullRemoteFunction" });
+var FunctionsInventionsResponseStreamingAgentCompletionChunkSchema = z484.z.object({
+  continuation: z484.z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").meta({ omitempty: true }).optional(),
-  id: z485.z.string(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
-  messages: z485.z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
-  messages_queued: z485.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. Only\nset when `continuation` is also set \u2014 the caller acts on it by\nissuing the continuation. Absent when nothing is queued, when\nthere is no continuation to act on, or when the peek failed\n(the failure is surfaced via `error`).").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
+  messages: z484.z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
+  messages_queued: z484.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. Only\nset when `continuation` is also set \u2014 the caller acts on it by\nissuing the continuation. Absent when nothing is queued, when\nthere is no continuation to act on, or when the peek failed\n(the failure is surfaced via `error`).").meta({ omitempty: true }).optional(),
   object: AgentCompletionsResponseStreamingObjectSchema.describe('The object type (always "agent.completion.chunk").'),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema.nullable().describe("Token usage (only present in the final chunk).").meta({ omitempty: true }).optional()
 }).describe("A chunk of a streaming agent completion response.\n\nMultiple chunks are received via Server-Sent Events and can be\naccumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)\nusing the [`push`](Self::push) method.").meta({ title: "functions.inventions.response.streaming.AgentCompletionChunk" });
-var FunctionsInventionsResponseStreamingObjectSchema = z485.z.enum(["alpha.scalar.function.invention.chunk", "alpha.vector.function.invention.chunk"]).meta({ title: "functions.inventions.response.streaming.Object" });
-var FunctionsInventionsStateStateSchema = z485.z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.scalar.branch.function")
-})).meta({ "variantTitle": "AlphaScalarBranch" }), FunctionsInventionsStateAlphaScalarLeafStateSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.scalar.leaf.function")
-})).meta({ "variantTitle": "AlphaScalarLeaf" }), FunctionsInventionsStateAlphaVectorBranchStateSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.vector.branch.function")
-})).meta({ "variantTitle": "AlphaVectorBranch" }), FunctionsInventionsStateAlphaVectorLeafStateSchema.and(z485.z.object({
-  type: z485.z.literal("alpha.vector.leaf.function")
+var FunctionsInventionsResponseStreamingObjectSchema = z484.z.enum(["alpha.scalar.function.invention.chunk", "alpha.vector.function.invention.chunk"]).meta({ title: "functions.inventions.response.streaming.Object" });
+var FunctionsInventionsStateStateSchema = z484.z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.scalar.branch.function")
+})).meta({ "variantTitle": "AlphaScalarBranch" }), FunctionsInventionsStateAlphaScalarLeafStateSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.scalar.leaf.function")
+})).meta({ "variantTitle": "AlphaScalarLeaf" }), FunctionsInventionsStateAlphaVectorBranchStateSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.vector.branch.function")
+})).meta({ "variantTitle": "AlphaVectorBranch" }), FunctionsInventionsStateAlphaVectorLeafStateSchema.and(z484.z.object({
+  type: z484.z.literal("alpha.vector.leaf.function")
 })).meta({ "variantTitle": "AlphaVectorLeaf" })]).meta({ title: "functions.inventions.state.State" });
 
 // src/functions/inventions/recursive/response/streaming/functionInventionChunk.ts
-var FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema = z485.z.object({
-  completions: z485.z.array(FunctionsInventionsResponseStreamingAgentCompletionChunkSchema),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema = z484.z.object({
+  completions: z484.z.array(FunctionsInventionsResponseStreamingAgentCompletionChunkSchema),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().meta({ omitempty: true }).optional(),
   function: FunctionsFullRemoteFunctionSchema.nullable().meta({ omitempty: true }).optional(),
-  id: z485.z.string(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
+  id: z484.z.string(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
   object: FunctionsInventionsResponseStreamingObjectSchema,
   path: RemotePathSchema.nullable().meta({ omitempty: true }).optional(),
   state: FunctionsInventionsStateStateSchema.nullable().meta({ omitempty: true }).optional(),
   usage: AgentCompletionsResponseUsageSchema.nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.inventions.recursive.response.streaming.FunctionInventionChunk" });
-var FunctionsInventionsRecursiveResponseStreamingObjectSchema = z485.z.enum(["alpha.scalar.function.invention.recursive.chunk", "alpha.vector.function.invention.recursive.chunk"]).meta({ title: "functions.inventions.recursive.response.streaming.Object" });
+var FunctionsInventionsRecursiveResponseStreamingObjectSchema = z484.z.enum(["alpha.scalar.function.invention.recursive.chunk", "alpha.vector.function.invention.recursive.chunk"]).meta({ title: "functions.inventions.recursive.response.streaming.Object" });
 
 // src/functions/inventions/recursive/response/streaming/functionInventionRecursiveChunk.ts
-var FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema = z485.z.object({
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
-  id: z485.z.string(),
-  inventions: z485.z.array(FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema),
-  inventions_errors: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+var FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema = z484.z.object({
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
+  id: z484.z.string(),
+  inventions: z484.z.array(FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema),
+  inventions_errors: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   object: FunctionsInventionsRecursiveResponseStreamingObjectSchema,
   usage: AgentCompletionsResponseUsageSchema.nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk" });
-var FunctionsInventionsRecursiveResponseStreamingInnerErrorSchema = z485.z.object({
-  agent_completion_index: z485.z.number().int().min(0).max(18446744073709552e3).nullable().describe("`Some(N)` if the error came from agent completion `N` inside the\nwrapped invention; `None` if the error is the wrapped invention's\nown top-level `.error`.").meta({ omitempty: true }).optional(),
+var FunctionsInventionsRecursiveResponseStreamingInnerErrorSchema = z484.z.object({
+  agent_completion_index: z484.z.number().int().min(0).max(18446744073709552e3).nullable().describe("`Some(N)` if the error came from agent completion `N` inside the\nwrapped invention; `None` if the error is the wrapped invention's\nown top-level `.error`.").meta({ omitempty: true }).optional(),
   error: ErrorResponseErrorSchema.describe("The underlying error."),
-  function_invention_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Index of the wrapped non-recursive `FunctionInventionChunk`.")
+  function_invention_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Index of the wrapped non-recursive `FunctionInventionChunk`.")
 }).describe('An inner error from a [`FunctionInventionRecursiveChunk`](super::FunctionInventionRecursiveChunk).\n\nAlways carries `function_invention_index` identifying which wrapped\nnon-recursive `FunctionInventionChunk` produced the error (matches\n[`FunctionInventionChunk::index`](super::FunctionInventionChunk::index)).\n\nThe optional `agent_completion_index` disambiguates the failure site:\n\n- `None` \u2192 the wrapped invention\'s own top-level `.error` (the invention\n  itself failed).\n- `Some(N)` \u2192 an inner error from agent completion `N` inside the\n  wrapped invention (one of the items the non-recursive invention\'s\n  own `inner_errors()` would have yielded).\n\nWire shape:\n```json\n{ "function_invention_index": 0, "error": { } }\n{ "function_invention_index": 0, "agent_completion_index": 2, "error": { } }\n```\n\n`agent_completion_index` is omitted on the wire when `None`,\nmatching the chunk-format conventions in the rest of the SDK.\n\nThe recursive chunk has no top-level `.error` field of its own,\nso there is nothing to exclude at this level.').meta({ title: "functions.inventions.recursive.response.streaming.InnerError" });
 
 // src/functions/inventions/response/streaming/agentCompletionChunkMerged.ts
@@ -4465,49 +4458,49 @@ function wasmFunctionsInventionsRecursiveResponseStreamingGenerateFunctionInvent
 function wasmFunctionsInventionsRecursiveResponseStreamingNormalizeFunctionInventionRecursiveForTests(a) {
   return JSON.parse(normalizeFunctionInventionRecursiveForTests(a));
 }
-var FunctionsInventionsResponseUnaryAgentCompletionSchema = z485.z.object({
-  continuation: z485.z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsInventionsResponseUnaryAgentCompletionSchema = z484.z.object({
+  continuation: z484.z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
-  id: z485.z.string(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
-  messages: z485.z.array(AgentCompletionsResponseUnaryMessageSchema),
-  messages_queued: z485.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. See\n[`super::streaming::AgentCompletionChunk::messages_queued`].").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
+  messages: z484.z.array(AgentCompletionsResponseUnaryMessageSchema),
+  messages_queued: z484.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. See\n[`super::streaming::AgentCompletionChunk::messages_queued`].").meta({ omitempty: true }).optional(),
   object: AgentCompletionsResponseUnaryObjectSchema.describe('The object type (always "agent.completion").'),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema
 }).describe("A complete agent completion response.").meta({ title: "functions.inventions.response.unary.AgentCompletion" });
-var FunctionsInventionsResponseUnaryObjectSchema = z485.z.enum(["alpha.scalar.function.invention", "alpha.vector.function.invention"]).meta({ title: "functions.inventions.response.unary.Object" });
+var FunctionsInventionsResponseUnaryObjectSchema = z484.z.enum(["alpha.scalar.function.invention", "alpha.vector.function.invention"]).meta({ title: "functions.inventions.response.unary.Object" });
 
 // src/functions/inventions/recursive/response/unary/functionInvention.ts
-var FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema = z485.z.object({
-  completions: z485.z.array(FunctionsInventionsResponseUnaryAgentCompletionSchema),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema = z484.z.object({
+  completions: z484.z.array(FunctionsInventionsResponseUnaryAgentCompletionSchema),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().optional(),
   function: FunctionsFullRemoteFunctionSchema.nullable().optional(),
-  id: z485.z.string(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
+  id: z484.z.string(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
   object: FunctionsInventionsResponseUnaryObjectSchema,
   path: RemotePathSchema.nullable().optional(),
   state: FunctionsInventionsStateStateSchema,
   usage: AgentCompletionsResponseUsageSchema
 }).meta({ title: "functions.inventions.recursive.response.unary.FunctionInvention" });
-var FunctionsInventionsRecursiveResponseUnaryObjectSchema = z485.z.enum(["alpha.scalar.function.invention.recursive", "alpha.vector.function.invention.recursive"]).meta({ title: "functions.inventions.recursive.response.unary.Object" });
+var FunctionsInventionsRecursiveResponseUnaryObjectSchema = z484.z.enum(["alpha.scalar.function.invention.recursive", "alpha.vector.function.invention.recursive"]).meta({ title: "functions.inventions.recursive.response.unary.Object" });
 
 // src/functions/inventions/recursive/response/unary/functionInventionRecursive.ts
-var FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema = z485.z.object({
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
-  id: z485.z.string(),
-  inventions: z485.z.array(FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema),
-  inventions_errors: z485.z.boolean(),
+var FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema = z484.z.object({
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
+  id: z484.z.string(),
+  inventions: z484.z.array(FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema),
+  inventions_errors: z484.z.boolean(),
   object: FunctionsInventionsRecursiveResponseUnaryObjectSchema,
   usage: AgentCompletionsResponseUsageSchema
 }).meta({ title: "functions.inventions.recursive.response.unary.FunctionInventionRecursive" });
 var FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreamingSchema = FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema.extend({
-  stream: z485__default.default.literal(true)
+  stream: z484__default.default.literal(true)
 });
 var FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnarySchema = FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema.extend({
-  stream: z485__default.default.literal(false).optional().nullable()
+  stream: z484__default.default.literal(false).optional().nullable()
 });
 function functionsInventionsRecursiveCreateFunctionInventionRecursive(client, body, options) {
   if (body.stream) {
@@ -4523,31 +4516,31 @@ function functionsInventionsRecursiveCreateFunctionInventionRecursive(client, bo
     options
   );
 }
-var FunctionsInventionsRequestFunctionInventionCreateParamsSchema = z485.z.object({
+var FunctionsInventionsRequestFunctionInventionCreateParamsSchema = z484.z.object({
   agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema,
-  continuation: z485.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
-  max_step_retries: z485.z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.").meta({ omitempty: true }).optional(),
-  overwrite: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  continuation: z484.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
+  max_step_retries: z484.z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.").meta({ omitempty: true }).optional(),
+  overwrite: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   prompt: FunctionsInventionsPromptsInlinePromptOrRemoteCommitOptionalSchema,
   provider: AgentCompletionsRequestProviderSchema.nullable().meta({ omitempty: true }).optional(),
   remote: RemoteSchema.nullable().meta({ omitempty: true }).optional(),
-  seed: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
+  seed: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
   state: FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema,
-  stream: z485.z.boolean().nullable().meta({ omitempty: true }).optional()
+  stream: z484.z.boolean().nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.inventions.request.FunctionInventionCreateParams" });
-var FunctionsInventionsResponseStreamingFunctionInventionChunkSchema = z485.z.object({
-  completions: z485.z.array(FunctionsInventionsResponseStreamingAgentCompletionChunkSchema),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsInventionsResponseStreamingFunctionInventionChunkSchema = z484.z.object({
+  completions: z484.z.array(FunctionsInventionsResponseStreamingAgentCompletionChunkSchema),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().meta({ omitempty: true }).optional(),
   function: FunctionsFullRemoteFunctionSchema.nullable().meta({ omitempty: true }).optional(),
-  id: z485.z.string(),
+  id: z484.z.string(),
   object: FunctionsInventionsResponseStreamingObjectSchema,
   path: RemotePathSchema.nullable().meta({ omitempty: true }).optional(),
   state: FunctionsInventionsStateStateSchema.nullable().meta({ omitempty: true }).optional(),
   usage: AgentCompletionsResponseUsageSchema.nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.inventions.response.streaming.FunctionInventionChunk" });
-var FunctionsInventionsResponseStreamingInnerErrorSchema = z485.z.object({
-  agent_completion_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Index of the failing completion (matches `AgentCompletionChunk::index`)."),
+var FunctionsInventionsResponseStreamingInnerErrorSchema = z484.z.object({
+  agent_completion_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Index of the failing completion (matches `AgentCompletionChunk::index`)."),
   error: ErrorResponseErrorSchema.describe("The underlying error from the agent completion.")
 }).describe('An error from a single agent completion inside a [`FunctionInventionChunk`](super::FunctionInventionChunk).\n\nYielded by [`FunctionInventionChunk::inner_errors`](super::FunctionInventionChunk::inner_errors).\nIdentifies the failing completion by its `index` (matching\n[`AgentCompletionChunk::index`](super::AgentCompletionChunk::index)) and\ncarries the underlying [`ResponseError`](error::ResponseError) as a `Cow`\nso iteration is zero-allocation (`Cow::Borrowed`) while deserialization\nalways lands in `Cow::Owned`.\n\nWire shape:\n```json\n{ "agent_completion_index": 1, "error": { } }\n```\n\nDoes NOT include the invention chunk\'s own top-level `.error` \u2014 that\nfield is reachable directly via [`FunctionInventionChunk::error`](super::FunctionInventionChunk::error).').meta({ title: "functions.inventions.response.streaming.InnerError" });
 
@@ -4615,76 +4608,76 @@ function wasmFunctionsInventionsResponseStreamingGenerateFunctionInventionChunk(
 function wasmFunctionsInventionsResponseStreamingNormalizeFunctionInventionForTests(a) {
   return JSON.parse(normalizeFunctionInventionForTests(a));
 }
-var FunctionsInventionsResponseUnaryFunctionInventionSchema = z485.z.object({
-  completions: z485.z.array(FunctionsInventionsResponseUnaryAgentCompletionSchema),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsInventionsResponseUnaryFunctionInventionSchema = z484.z.object({
+  completions: z484.z.array(FunctionsInventionsResponseUnaryAgentCompletionSchema),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().optional(),
   function: FunctionsFullRemoteFunctionSchema.nullable().optional(),
-  id: z485.z.string(),
+  id: z484.z.string(),
   object: FunctionsInventionsResponseUnaryObjectSchema,
   path: RemotePathSchema.nullable().optional(),
   state: FunctionsInventionsStateStateSchema,
   usage: AgentCompletionsResponseUsageSchema
 }).meta({ title: "functions.inventions.response.unary.FunctionInvention" });
-var FunctionsInventionsStateInputSchemaSchema = z485.z.union([z485.z.object({
+var FunctionsInventionsStateInputSchemaSchema = z484.z.union([z484.z.object({
   schema: FunctionsExpressionObjectInputSchemaSchema,
-  type: z485.z.literal("alpha.scalar.function")
-}).meta({ "variantTitle": "ScalarFunctionInputSchema" }), z485.z.object({
+  type: z484.z.literal("alpha.scalar.function")
+}).meta({ "variantTitle": "ScalarFunctionInputSchema" }), z484.z.object({
   schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema,
-  type: z485.z.literal("alpha.vector.function")
+  type: z484.z.literal("alpha.vector.function")
 }).meta({ "variantTitle": "VectorFunctionInputSchema" })]).describe("Tagged union of input schema types for invention state serialization.\nThe actual schema is nested under a `schema` key to avoid conflicts\nwith the `type` tag field (since ObjectInputSchema has its own `type` field).").meta({ title: "functions.inventions.state.InputSchema" });
-var FunctionsInventionsStateParamsSchema = z485.z.object({
-  depth: z485.z.number().int().min(0).max(18446744073709552e3),
-  max_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  max_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_branch_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  min_leaf_width: z485.z.number().int().min(0).max(18446744073709552e3),
-  name: z485.z.string(),
-  spec: z485.z.string()
+var FunctionsInventionsStateParamsSchema = z484.z.object({
+  depth: z484.z.number().int().min(0).max(18446744073709552e3),
+  max_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  max_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_branch_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  min_leaf_width: z484.z.number().int().min(0).max(18446744073709552e3),
+  name: z484.z.string(),
+  spec: z484.z.string()
 }).meta({ title: "functions.inventions.state.Params" });
 
 // src/functions/inventions/state/http.ts
 function functionsInventionsStateGetFunctionInventionState(client, params, options) {
   return client.post_unary("functions/inventions/state", params, options);
 }
-var FunctionsInventionsDescriptionObjectSchema = z485.z.object({
-  description: z485.z.string()
+var FunctionsInventionsDescriptionObjectSchema = z484.z.object({
+  description: z484.z.string()
 }).meta({ title: "functions.inventions.DescriptionObject" });
-var FunctionsInventionsEssayObjectSchema = z485.z.object({
-  essay: z485.z.string()
+var FunctionsInventionsEssayObjectSchema = z484.z.object({
+  essay: z484.z.string()
 }).meta({ title: "functions.inventions.EssayObject" });
-var FunctionsInventionsEssayTasksObjectSchema = z485.z.object({
-  essay_tasks: z485.z.string()
+var FunctionsInventionsEssayTasksObjectSchema = z484.z.object({
+  essay_tasks: z484.z.string()
 }).meta({ title: "functions.inventions.EssayTasksObject" });
-var FunctionsInventionsIndexObjectSchema = z485.z.object({
-  index: z485.z.number().int().min(0).max(18446744073709552e3)
+var FunctionsInventionsIndexObjectSchema = z484.z.object({
+  index: z484.z.number().int().min(0).max(18446744073709552e3)
 }).meta({ title: "functions.inventions.IndexObject" });
-var FunctionsInventionsScalarBranchTaskObjectSchema = z485.z.object({
-  task: z485.z.string()
+var FunctionsInventionsScalarBranchTaskObjectSchema = z484.z.object({
+  task: z484.z.string()
 }).describe("Schema for AppendTask on scalar branch functions.\nTakes a `task` property: a JSON string conforming to `functions.alpha_scalar.PartialPlaceholderBranchTaskExpression`.").meta({ title: "functions.inventions.ScalarBranchTaskObject" });
-var FunctionsInventionsScalarInputSchemaObjectSchema = z485.z.object({
-  schema: z485.z.string()
+var FunctionsInventionsScalarInputSchemaObjectSchema = z484.z.object({
+  schema: z484.z.string()
 }).describe("Schema for WriteInputSchema on scalar functions.\nTakes a `schema` property: a JSON string conforming to `functions.expression.ObjectInputSchema`.").meta({ title: "functions.inventions.ScalarInputSchemaObject" });
-var FunctionsInventionsScalarLeafTaskObjectSchema = z485.z.object({
-  task: z485.z.string()
+var FunctionsInventionsScalarLeafTaskObjectSchema = z484.z.object({
+  task: z484.z.string()
 }).describe("Schema for AppendTask on scalar leaf functions.\nTakes a `task` property: a JSON string conforming to `functions.alpha_scalar.LeafTaskExpression`.").meta({ title: "functions.inventions.ScalarLeafTaskObject" });
-var FunctionsInventionsTasksLengthObjectSchema = z485.z.object({
-  tasks_length: z485.z.number().int().min(0).max(18446744073709552e3)
+var FunctionsInventionsTasksLengthObjectSchema = z484.z.object({
+  tasks_length: z484.z.number().int().min(0).max(18446744073709552e3)
 }).meta({ title: "functions.inventions.TasksLengthObject" });
-var FunctionsInventionsVectorBranchTaskObjectSchema = z485.z.object({
-  task: z485.z.string()
+var FunctionsInventionsVectorBranchTaskObjectSchema = z484.z.object({
+  task: z484.z.string()
 }).describe("Schema for AppendTask on vector branch functions.\nTakes a `task` property: a JSON string conforming to `functions.alpha_vector.PartialPlaceholderBranchTaskExpression`.").meta({ title: "functions.inventions.VectorBranchTaskObject" });
-var FunctionsInventionsVectorInputSchemaObjectSchema = z485.z.object({
-  schema: z485.z.string()
+var FunctionsInventionsVectorInputSchemaObjectSchema = z484.z.object({
+  schema: z484.z.string()
 }).describe("Schema for WriteInputSchema on vector functions.\nTakes a `schema` property: a JSON string conforming to `functions.alpha_vector.expression.VectorFunctionInputSchema`.").meta({ title: "functions.inventions.VectorInputSchemaObject" });
-var FunctionsInventionsVectorLeafTaskObjectSchema = z485.z.object({
-  task: z485.z.string()
+var FunctionsInventionsVectorLeafTaskObjectSchema = z484.z.object({
+  task: z484.z.string()
 }).describe("Schema for AppendTask on vector leaf functions.\nTakes a `task` property: a JSON string conforming to `functions.alpha_vector.LeafTaskExpression`.").meta({ title: "functions.inventions.VectorLeafTaskObject" });
 var FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema = FunctionsInventionsRequestFunctionInventionCreateParamsSchema.extend({
-  stream: z485__default.default.literal(true)
+  stream: z484__default.default.literal(true)
 });
 var FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema = FunctionsInventionsRequestFunctionInventionCreateParamsSchema.extend({
-  stream: z485__default.default.literal(false).optional().nullable()
+  stream: z484__default.default.literal(false).optional().nullable()
 });
 function functionsInventionsCreateFunctionInvention(client, body, options) {
   if (body.stream) {
@@ -4700,75 +4693,75 @@ function functionsInventionsCreateFunctionInvention(client, body, options) {
     options
   );
 }
-var FunctionsProfilesComputationsRequestTargetSchema = z485.z.union([z485.z.object({
-  type: z485.z.literal("scalar"),
-  value: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22)
-}).meta({ "variantTitle": "Scalar" }), z485.z.object({
-  type: z485.z.literal("vector"),
-  value: z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22))
-}).meta({ "variantTitle": "Vector" }), z485.z.object({
-  type: z485.z.literal("vector_winner"),
-  value: z485.z.number().int().min(0).max(4294967295)
+var FunctionsProfilesComputationsRequestTargetSchema = z484.z.union([z484.z.object({
+  type: z484.z.literal("scalar"),
+  value: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22)
+}).meta({ "variantTitle": "Scalar" }), z484.z.object({
+  type: z484.z.literal("vector"),
+  value: z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22))
+}).meta({ "variantTitle": "Vector" }), z484.z.object({
+  type: z484.z.literal("vector_winner"),
+  value: z484.z.number().int().min(0).max(4294967295)
 }).meta({ "variantTitle": "VectorWinner" })]).meta({ title: "functions.profiles.computations.request.Target" });
 
 // src/functions/profiles/computations/request/datasetItem.ts
-var FunctionsProfilesComputationsRequestDatasetItemSchema = z485.z.object({
+var FunctionsProfilesComputationsRequestDatasetItemSchema = z484.z.object({
   input: FunctionsExpressionInputValueSchema,
   target: FunctionsProfilesComputationsRequestTargetSchema
 }).meta({ title: "functions.profiles.computations.request.DatasetItem" });
-var SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema = z485.z.union([SwarmInlineSwarmBaseSchema.meta({ "title": "swarm.InlineSwarmBase", "variantTitle": "SwarmBase" }), RemotePathCommitOptionalSchema.meta({ "title": "RemotePathCommitOptional", "variantTitle": "Remote" })]).describe("Like [`InlineSwarmBaseOrRemote`] but with optional commit.\nUsed in request types where commit resolution happens server-side.").meta({ title: "swarm.InlineSwarmBaseOrRemoteCommitOptional" });
+var SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema = z484.z.union([SwarmInlineSwarmBaseSchema.meta({ "title": "swarm.InlineSwarmBase", "variantTitle": "SwarmBase" }), RemotePathCommitOptionalSchema.meta({ "title": "RemotePathCommitOptional", "variantTitle": "Remote" })]).describe("Like [`InlineSwarmBaseOrRemote`] but with optional commit.\nUsed in request types where commit resolution happens server-side.").meta({ title: "swarm.InlineSwarmBaseOrRemoteCommitOptional" });
 
 // src/functions/profiles/computations/request/functionProfileComputationCreateParams.ts
-var FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema = z485.z.object({
-  dataset: z485.z.array(FunctionsProfilesComputationsRequestDatasetItemSchema),
-  from_cache: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+var FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema = z484.z.object({
+  dataset: z484.z.array(FunctionsProfilesComputationsRequestDatasetItemSchema),
+  from_cache: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   function: FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema.describe("The function to compute a profile for (inline definition or remote path)."),
-  max_retries: z485.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
-  n: z485.z.number().int().min(0).max(18446744073709552e3),
+  max_retries: z484.z.number().int().min(0).max(18446744073709552e3).nullable().meta({ omitempty: true }).optional(),
+  n: z484.z.number().int().min(0).max(18446744073709552e3),
   provider: AgentCompletionsRequestProviderSchema.nullable().meta({ omitempty: true }).optional(),
-  retry_token: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  seed: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
-  stream: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  retry_token: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  seed: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
+  stream: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   swarm: SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema
 }).describe("Parameters for creating a function profile computation.").meta({ title: "functions.profiles.computations.request.FunctionProfileComputationCreateParams" });
-var FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema = z485.z.object({
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
-  dataset: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema = z484.z.object({
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
+  dataset: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().meta({ omitempty: true }).optional(),
   function: RemotePathSchema.nullable().optional(),
-  id: z485.z.string(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
-  n: z485.z.number().int().min(0).max(18446744073709552e3),
+  id: z484.z.string(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
+  n: z484.z.number().int().min(0).max(18446744073709552e3),
   object: FunctionsExecutionsResponseStreamingObjectSchema,
   output: FunctionsExecutionsResponseOutputSchema.nullable().meta({ omitempty: true }).optional(),
   profile: RemotePathSchema.nullable().optional(),
   reasoning: FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema.nullable().meta({ omitempty: true }).optional(),
-  retry: z485.z.number().int().min(0).max(18446744073709552e3),
-  retry_token: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  tasks: z485.z.array(FunctionsExecutionsResponseStreamingTaskChunkSchema),
-  tasks_errors: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  retry: z484.z.number().int().min(0).max(18446744073709552e3),
+  retry_token: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  tasks: z484.z.array(FunctionsExecutionsResponseStreamingTaskChunkSchema),
+  tasks_errors: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   usage: AgentCompletionsResponseUsageSchema.nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.profiles.computations.response.streaming.FunctionExecutionChunk" });
-var FunctionsProfilesComputationsResponseFittingStatsSchema = z485.z.object({
-  errors: z485.z.number().int().min(0).max(4294967295),
-  executions: z485.z.number().int().min(0).max(4294967295),
-  loss: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22),
-  rounds: z485.z.number().int().min(0).max(4294967295),
-  starts: z485.z.number().int().min(0).max(4294967295)
+var FunctionsProfilesComputationsResponseFittingStatsSchema = z484.z.object({
+  errors: z484.z.number().int().min(0).max(4294967295),
+  executions: z484.z.number().int().min(0).max(4294967295),
+  loss: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22),
+  rounds: z484.z.number().int().min(0).max(4294967295),
+  starts: z484.z.number().int().min(0).max(4294967295)
 }).meta({ title: "functions.profiles.computations.response.FittingStats" });
-var FunctionsProfilesComputationsResponseStreamingObjectSchema = z485.z.literal("function.profile.computation.chunk").meta({ title: "functions.profiles.computations.response.streaming.Object" });
+var FunctionsProfilesComputationsResponseStreamingObjectSchema = z484.z.literal("function.profile.computation.chunk").meta({ title: "functions.profiles.computations.response.streaming.Object" });
 
 // src/functions/profiles/computations/response/streaming/functionProfileComputationChunk.ts
-var FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema = z485.z.object({
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
-  executions: z485.z.array(FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema),
-  executions_errors: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+var FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema = z484.z.object({
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
+  executions: z484.z.array(FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema),
+  executions_errors: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   fitting_stats: FunctionsProfilesComputationsResponseFittingStatsSchema.nullable().meta({ omitempty: true }).optional(),
   function: RemotePathSchema.nullable().optional(),
-  id: z485.z.string(),
+  id: z484.z.string(),
   object: FunctionsProfilesComputationsResponseStreamingObjectSchema,
   profile: FunctionsInlineTasksProfileSchema.nullable().meta({ omitempty: true }).optional(),
-  retry_token: z485.z.string().nullable().meta({ omitempty: true }).optional(),
+  retry_token: z484.z.string().nullable().meta({ omitempty: true }).optional(),
   usage: AgentCompletionsResponseUsageSchema.nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk" });
 
@@ -4917,40 +4910,40 @@ function wasmFunctionsProfilesComputationsResponseStreamingGenerateFunctionProfi
 function wasmFunctionsProfilesComputationsResponseStreamingNormalizeFunctionProfileComputationForTests(a) {
   return JSON.parse(normalizeFunctionProfileComputationForTests(a));
 }
-var FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema = z485.z.object({
-  created: z485.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the execution was created."),
-  dataset: z485.z.number().int().min(0).max(18446744073709552e3),
+var FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema = z484.z.object({
+  created: z484.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the execution was created."),
+  dataset: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if the execution failed.").optional(),
   function: RemotePathSchema.nullable().describe("The function used (if remote).").optional(),
-  id: z485.z.string().describe("Unique identifier for this execution."),
-  index: z485.z.number().int().min(0).max(18446744073709552e3),
-  n: z485.z.number().int().min(0).max(18446744073709552e3),
+  id: z484.z.string().describe("Unique identifier for this execution."),
+  index: z484.z.number().int().min(0).max(18446744073709552e3),
+  n: z484.z.number().int().min(0).max(18446744073709552e3),
   object: FunctionsExecutionsResponseUnaryObjectSchema.describe("Object type identifier."),
   output: FunctionsExecutionsResponseOutputSchema.describe("The final output (scalar or vector score)."),
   profile: RemotePathSchema.nullable().describe("The profile used (if remote).").optional(),
   reasoning: FunctionsExecutionsResponseUnaryReasoningSummarySchema.nullable().describe("Reasoning summary if reasoning was enabled.").optional(),
-  retry: z485.z.number().int().min(0).max(18446744073709552e3),
-  retry_token: z485.z.string().nullable().describe("Token for retrying this execution with cached votes.").optional(),
-  tasks: z485.z.array(FunctionsExecutionsResponseUnaryTaskSchema).describe("Results from each task in the function."),
-  tasks_errors: z485.z.boolean().describe("Whether any tasks encountered errors."),
+  retry: z484.z.number().int().min(0).max(18446744073709552e3),
+  retry_token: z484.z.string().nullable().describe("Token for retrying this execution with cached votes.").optional(),
+  tasks: z484.z.array(FunctionsExecutionsResponseUnaryTaskSchema).describe("Results from each task in the function."),
+  tasks_errors: z484.z.boolean().describe("Whether any tasks encountered errors."),
   usage: AgentCompletionsResponseUsageSchema.describe("Aggregated token and cost usage.")
 }).describe("A complete function execution response (non-streaming).").meta({ title: "functions.profiles.computations.response.unary.FunctionExecution" });
-var FunctionsProfilesComputationsResponseUnaryObjectSchema = z485.z.literal("function.profile.computation").meta({ title: "functions.profiles.computations.response.unary.Object" });
+var FunctionsProfilesComputationsResponseUnaryObjectSchema = z484.z.literal("function.profile.computation").meta({ title: "functions.profiles.computations.response.unary.Object" });
 
 // src/functions/profiles/computations/response/unary/functionProfileComputation.ts
-var FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema = z485.z.object({
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
-  executions: z485.z.array(FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema),
-  executions_errors: z485.z.boolean(),
+var FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema = z484.z.object({
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
+  executions: z484.z.array(FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema),
+  executions_errors: z484.z.boolean(),
   fitting_stats: FunctionsProfilesComputationsResponseFittingStatsSchema,
   function: RemotePathSchema.nullable().optional(),
-  id: z485.z.string(),
+  id: z484.z.string(),
   object: FunctionsProfilesComputationsResponseUnaryObjectSchema,
   profile: FunctionsInlineTasksProfileSchema,
-  retry_token: z485.z.string().nullable().optional(),
+  retry_token: z484.z.string().nullable().optional(),
   usage: AgentCompletionsResponseUsageSchema
 }).meta({ title: "functions.profiles.computations.response.unary.FunctionProfileComputation" });
-var FunctionsProfilesComputationsRetryTokenSchema = z485.z.array(z485.z.string().nullable()).meta({ title: "functions.profiles.computations.RetryToken" });
+var FunctionsProfilesComputationsRetryTokenSchema = z484.z.array(z484.z.string().nullable()).meta({ title: "functions.profiles.computations.RetryToken" });
 
 // src/functions/profiles/computations/http.ts
 function functionsProfilesComputationsComputeProfile(client, body, options) {
@@ -4967,20 +4960,20 @@ function functionsProfilesComputationsComputeProfile(client, body, options) {
     options
   );
 }
-var FunctionsProfilesListProfileResponseSchema = z485.z.object({
-  data: z485.z.array(RemotePathSchema).describe("List of available profiles.")
+var FunctionsProfilesListProfileResponseSchema = z484.z.object({
+  data: z484.z.array(RemotePathSchema).describe("List of available profiles.")
 }).describe("Response from listing profiles.").meta({ title: "functions.profiles.ListProfileResponse" });
-var FunctionsProfilesListProfilesSourceSchema = z485.z.enum(["all", "mock", "filesystem", "objectiveai"]).describe("Source filter for listing profiles.").meta({ title: "functions.profiles.ListProfilesSource" });
+var FunctionsProfilesListProfilesSourceSchema = z484.z.enum(["all", "mock", "filesystem", "objectiveai"]).describe("Source filter for listing profiles.").meta({ title: "functions.profiles.ListProfilesSource" });
 
 // src/functions/profiles/listProfilesRequest.ts
-var FunctionsProfilesListProfilesRequestSchema = z485.z.object({
+var FunctionsProfilesListProfilesRequestSchema = z484.z.object({
   source: FunctionsProfilesListProfilesSourceSchema.nullable().describe("Optional source filter for listing profiles.").meta({ omitempty: true }).optional()
 }).describe("Query parameters for the list profiles endpoint.").meta({ title: "functions.profiles.ListProfilesRequest" });
-var FunctionsProfilesUsageProfileResponseSchema = z485.z.object({
-  completion_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total completion tokens used."),
-  prompt_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens used."),
-  requests: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this profile."),
-  total_cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
+var FunctionsProfilesUsageProfileResponseSchema = z484.z.object({
+  completion_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total completion tokens used."),
+  prompt_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens used."),
+  requests: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this profile."),
+  total_cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
 }).describe("Usage statistics for a profile.").meta({ title: "functions.profiles.UsageProfileResponse" });
 
 // src/functions/profiles/http.ts
@@ -4993,12 +4986,12 @@ function functionsProfilesGetProfile(client, params, options) {
 function functionsProfilesGetProfileUsage(client, params, options) {
   return client.post_unary("functions/profiles/usage", params, options);
 }
-var FunctionsPlaceholderScalarFunctionTaskSchema = z485.z.object({
+var FunctionsPlaceholderScalarFunctionTaskSchema = z484.z.object({
   input: FunctionsExpressionInputValueSchema.describe("The resolved input."),
   input_schema: FunctionsExpressionInputSchemaSchema.describe("JSON Schema defining the expected input structure."),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the fixed 0.5 output.")
 }).describe("A compiled placeholder scalar function task.\n\nAlways produces `Scalar(0.5)` before the output expression\nis applied.").meta({ title: "functions.PlaceholderScalarFunctionTask" });
-var FunctionsPlaceholderVectorFunctionTaskSchema = z485.z.object({
+var FunctionsPlaceholderVectorFunctionTaskSchema = z484.z.object({
   input: FunctionsExpressionInputValueSchema.describe("The resolved input."),
   input_merge: FunctionsExpressionExpressionSchema.describe("Expression merging sub-inputs back into one input."),
   input_schema: FunctionsExpressionInputSchemaSchema.describe("JSON Schema defining the expected input structure."),
@@ -5006,87 +4999,87 @@ var FunctionsPlaceholderVectorFunctionTaskSchema = z485.z.object({
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the equalized vector output."),
   output_length: FunctionsExpressionExpressionSchema.describe("Expression computing the expected output vector length.")
 }).describe("A compiled placeholder vector function task.\n\nAlways produces `Vector(vec![1/N; output_length])` before\nthe output expression is applied.").meta({ title: "functions.PlaceholderVectorFunctionTask" });
-var FunctionsScalarFunctionTaskSchema = RemotePathSchema.and(z485.z.object({
+var FunctionsScalarFunctionTaskSchema = RemotePathSchema.and(z484.z.object({
   input: FunctionsExpressionInputValueSchema.describe("The resolved input to pass to the function."),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the task result into a valid function output.\n\nReceives `output` as the nested function's result (Scalar or Vector).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`ScalarFunctionTaskExpression::output`] for full documentation.")
 })).describe("A compiled scalar function task ready for execution.").meta({ title: "functions.ScalarFunctionTask" });
-var FunctionsVectorCompletionTaskSchema = z485.z.object({
-  messages: z485.z.array(AgentCompletionsMessageMessageSchema).describe("The resolved conversation messages."),
+var FunctionsVectorCompletionTaskSchema = z484.z.object({
+  messages: z484.z.array(AgentCompletionsMessageMessageSchema).describe("The resolved conversation messages."),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the task result into a valid function output.\n\nReceives `output` as the task's raw result (typically `Vector(scores)`).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`VectorCompletionTaskExpression::output`] for full documentation."),
-  responses: z485.z.array(AgentCompletionsMessageRichContentSchema).describe("The resolved response options the LLMs can vote for.")
+  responses: z484.z.array(AgentCompletionsMessageRichContentSchema).describe("The resolved response options the LLMs can vote for.")
 }).describe("A compiled vector completion task ready for execution.").meta({ title: "functions.VectorCompletionTask" });
-var FunctionsVectorFunctionTaskSchema = RemotePathSchema.and(z485.z.object({
+var FunctionsVectorFunctionTaskSchema = RemotePathSchema.and(z484.z.object({
   input: FunctionsExpressionInputValueSchema.describe("The resolved input to pass to the function."),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the task result into a valid function output.\n\nReceives `output` as the nested function's result (Scalar or Vector).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`VectorFunctionTaskExpression::output`] for full documentation.")
 })).describe("A compiled vector function task ready for execution.").meta({ title: "functions.VectorFunctionTask" });
 
 // src/functions/task.ts
-var FunctionsTaskSchema = z485.z.union([FunctionsScalarFunctionTaskSchema.and(z485.z.object({
-  type: z485.z.literal("scalar.function")
-})).describe("Calls a scalar function (produces a single score).").meta({ "variantTitle": "ScalarFunction" }), FunctionsVectorFunctionTaskSchema.and(z485.z.object({
-  type: z485.z.literal("vector.function")
-})).describe("Calls a vector function (produces a vector of scores).").meta({ "variantTitle": "VectorFunction" }), FunctionsVectorCompletionTaskSchema.and(z485.z.object({
-  type: z485.z.literal("vector.completion")
-})).describe("Runs a vector completion.").meta({ "variantTitle": "VectorCompletion" }), FunctionsPlaceholderScalarFunctionTaskSchema.and(z485.z.object({
-  type: z485.z.literal("placeholder.scalar.function")
-})).describe("Placeholder scalar function (always outputs 0.5).").meta({ "variantTitle": "PlaceholderScalarFunction" }), FunctionsPlaceholderVectorFunctionTaskSchema.and(z485.z.object({
-  type: z485.z.literal("placeholder.vector.function")
+var FunctionsTaskSchema = z484.z.union([FunctionsScalarFunctionTaskSchema.and(z484.z.object({
+  type: z484.z.literal("scalar.function")
+})).describe("Calls a scalar function (produces a single score).").meta({ "variantTitle": "ScalarFunction" }), FunctionsVectorFunctionTaskSchema.and(z484.z.object({
+  type: z484.z.literal("vector.function")
+})).describe("Calls a vector function (produces a vector of scores).").meta({ "variantTitle": "VectorFunction" }), FunctionsVectorCompletionTaskSchema.and(z484.z.object({
+  type: z484.z.literal("vector.completion")
+})).describe("Runs a vector completion.").meta({ "variantTitle": "VectorCompletion" }), FunctionsPlaceholderScalarFunctionTaskSchema.and(z484.z.object({
+  type: z484.z.literal("placeholder.scalar.function")
+})).describe("Placeholder scalar function (always outputs 0.5).").meta({ "variantTitle": "PlaceholderScalarFunction" }), FunctionsPlaceholderVectorFunctionTaskSchema.and(z484.z.object({
+  type: z484.z.literal("placeholder.vector.function")
 })).describe("Placeholder vector function (always outputs equalized vector).").meta({ "variantTitle": "PlaceholderVectorFunction" })]).describe("A compiled task ready for execution.\n\nProduced by compiling a [`TaskExpression`] against input data. All\nexpressions have been resolved to concrete values.").meta({ title: "functions.Task" });
 
 // src/functions/compiledTask.ts
-var FunctionsCompiledTaskSchema = z485.z.union([FunctionsTaskSchema.describe("A single task (no mapping).").meta({ "title": "functions.Task", "variantTitle": "One" }), z485.z.array(FunctionsTaskSchema).describe("Multiple task instances from mapped execution.").meta({ "variantTitle": "Many" })]).describe("The result of compiling a task expression.\n\nTasks without a `map` field compile to a single task. Tasks with a `map`\nexpression are expanded into multiple tasks, one per integer index from\n0 to the evaluated count.").meta({ title: "functions.CompiledTask" });
-var FunctionsFullFunctionSchema = z485.z.union([FunctionsFullRemoteFunctionSchema.meta({ "title": "functions.FullRemoteFunction", "variantTitle": "Remote" }), FunctionsFullInlineFunctionSchema.meta({ "title": "functions.FullInlineFunction", "variantTitle": "Inline" })]).describe("A full function, either remote or inline.").meta({ title: "functions.FullFunction" });
-var FunctionsFunctionSchema = z485.z.union([FunctionsRemoteFunctionSchema.describe("A remote function with metadata (description, schema, etc.).").meta({ "title": "functions.RemoteFunction", "variantTitle": "Remote" }), FunctionsInlineFunctionSchema.describe("An inline function definition without metadata.").meta({ "title": "functions.InlineFunction", "variantTitle": "Inline" })]).describe("A Function definition, either remote or inline.\n\nFunctions are composable scoring pipelines that transform structured input\ninto scores. Each task has an `output` expression that transforms its raw result\ninto a `TaskOutputOwned`. The function's final output is the weighted average of\nall task outputs using profile weights.\n\nUse [`compile_tasks`](Self::compile_tasks) to preview how task expressions resolve\nfor given inputs.").meta({ title: "functions.Function" });
-var FunctionsFunctionTypeSchema = z485.z.union([z485.z.literal("scalar.function").meta({ "variantTitle": "Scalar" }), z485.z.literal("vector.function").meta({ "variantTitle": "Vector" })]).meta({ title: "functions.FunctionType" });
-var FunctionsGetFunctionProfilePairResponseSchema = z485.z.object({
+var FunctionsCompiledTaskSchema = z484.z.union([FunctionsTaskSchema.describe("A single task (no mapping).").meta({ "title": "functions.Task", "variantTitle": "One" }), z484.z.array(FunctionsTaskSchema).describe("Multiple task instances from mapped execution.").meta({ "variantTitle": "Many" })]).describe("The result of compiling a task expression.\n\nTasks without a `map` field compile to a single task. Tasks with a `map`\nexpression are expanded into multiple tasks, one per integer index from\n0 to the evaluated count.").meta({ title: "functions.CompiledTask" });
+var FunctionsFullFunctionSchema = z484.z.union([FunctionsFullRemoteFunctionSchema.meta({ "title": "functions.FullRemoteFunction", "variantTitle": "Remote" }), FunctionsFullInlineFunctionSchema.meta({ "title": "functions.FullInlineFunction", "variantTitle": "Inline" })]).describe("A full function, either remote or inline.").meta({ title: "functions.FullFunction" });
+var FunctionsFunctionSchema = z484.z.union([FunctionsRemoteFunctionSchema.describe("A remote function with metadata (description, schema, etc.).").meta({ "title": "functions.RemoteFunction", "variantTitle": "Remote" }), FunctionsInlineFunctionSchema.describe("An inline function definition without metadata.").meta({ "title": "functions.InlineFunction", "variantTitle": "Inline" })]).describe("A Function definition, either remote or inline.\n\nFunctions are composable scoring pipelines that transform structured input\ninto scores. Each task has an `output` expression that transforms its raw result\ninto a `TaskOutputOwned`. The function's final output is the weighted average of\nall task outputs using profile weights.\n\nUse [`compile_tasks`](Self::compile_tasks) to preview how task expressions resolve\nfor given inputs.").meta({ title: "functions.Function" });
+var FunctionsFunctionTypeSchema = z484.z.union([z484.z.literal("scalar.function").meta({ "variantTitle": "Scalar" }), z484.z.literal("vector.function").meta({ "variantTitle": "Vector" })]).meta({ title: "functions.FunctionType" });
+var FunctionsGetFunctionProfilePairResponseSchema = z484.z.object({
   function: FunctionsGetFunctionResponseSchema.describe("The function."),
   profile: FunctionsProfilesGetProfileResponseSchema.describe("The profile.")
 }).describe("Response from getting a function-profile pair.").meta({ title: "functions.GetFunctionProfilePairResponse" });
-var FunctionsGetFunctionProfilePairUsageRequestSchema = z485.z.object({
+var FunctionsGetFunctionProfilePairUsageRequestSchema = z484.z.object({
   function: RemotePathCommitOptionalSchema.describe("The function path."),
   profile: RemotePathCommitOptionalSchema.describe("The profile path.")
 }).describe("Request parameters for getting usage of a specific function-profile pair.").meta({ title: "functions.GetFunctionProfilePairUsageRequest" });
-var FunctionsListFunctionProfilePairResponseSchema = z485.z.object({
-  data: z485.z.array(FunctionsListFunctionProfilePairItemSchema).describe("List of available function-profile pairs.")
+var FunctionsListFunctionProfilePairResponseSchema = z484.z.object({
+  data: z484.z.array(FunctionsListFunctionProfilePairItemSchema).describe("List of available function-profile pairs.")
 }).describe("Response from listing function-profile pairs.").meta({ title: "functions.ListFunctionProfilePairResponse" });
-var FunctionsListFunctionProfilePairsSourceSchema = z485.z.literal("objectiveai").describe("Source filter for listing function-profile pairs.").meta({ title: "functions.ListFunctionProfilePairsSource" });
+var FunctionsListFunctionProfilePairsSourceSchema = z484.z.literal("objectiveai").describe("Source filter for listing function-profile pairs.").meta({ title: "functions.ListFunctionProfilePairsSource" });
 
 // src/functions/listFunctionProfilePairsRequest.ts
-var FunctionsListFunctionProfilePairsRequestSchema = z485.z.object({
+var FunctionsListFunctionProfilePairsRequestSchema = z484.z.object({
   source: FunctionsListFunctionProfilePairsSourceSchema.nullable().describe("Optional source filter for listing function-profile pairs.").meta({ omitempty: true }).optional()
 }).describe("Query parameters for the list function-profile pairs endpoint.").meta({ title: "functions.ListFunctionProfilePairsRequest" });
-var FunctionsListFunctionResponseSchema = z485.z.object({
-  data: z485.z.array(RemotePathSchema).describe("List of available functions.")
+var FunctionsListFunctionResponseSchema = z484.z.object({
+  data: z484.z.array(RemotePathSchema).describe("List of available functions.")
 }).describe("Response from listing functions.").meta({ title: "functions.ListFunctionResponse" });
-var FunctionsListFunctionsSourceSchema = z485.z.enum(["all", "mock", "filesystem", "objectiveai"]).describe("Source filter for listing functions.").meta({ title: "functions.ListFunctionsSource" });
+var FunctionsListFunctionsSourceSchema = z484.z.enum(["all", "mock", "filesystem", "objectiveai"]).describe("Source filter for listing functions.").meta({ title: "functions.ListFunctionsSource" });
 
 // src/functions/listFunctionsRequest.ts
-var FunctionsListFunctionsRequestSchema = z485.z.object({
+var FunctionsListFunctionsRequestSchema = z484.z.object({
   source: FunctionsListFunctionsSourceSchema.nullable().describe("Optional source filter for listing functions.").meta({ omitempty: true }).optional()
 }).describe("Query parameters for the list functions endpoint.").meta({ title: "functions.ListFunctionsRequest" });
-var FunctionsRemoteTasksProfileSchema = FunctionsInlineTasksProfileSchema.and(z485.z.object({
-  description: z485.z.string().describe("Human-readable description of the profile.")
+var FunctionsRemoteTasksProfileSchema = FunctionsInlineTasksProfileSchema.and(z484.z.object({
+  description: z484.z.string().describe("Human-readable description of the profile.")
 })).describe("A remote tasks-based profile with full metadata.\n\nStored as `profile.json` in repositories and referenced by\n`remote/owner/repository`.").meta({ title: "functions.RemoteTasksProfile" });
-var SwarmRemoteSwarmBaseSchema = SwarmInlineSwarmBaseSchema.and(z485.z.object({
-  description: z485.z.string().describe("Human-readable description of what this swarm does.")
+var SwarmRemoteSwarmBaseSchema = SwarmInlineSwarmBaseSchema.and(z484.z.object({
+  description: z484.z.string().describe("Human-readable description of what this swarm does.")
 })).describe("A remote swarm base definition with metadata (without computed ID).\n\nLike [`InlineSwarmBase`] but includes a description for remote storage.").meta({ title: "swarm.RemoteSwarmBase" });
 
 // src/functions/remoteProfile.ts
-var FunctionsRemoteProfileSchema = z485.z.union([FunctionsRemoteTasksProfileSchema.describe("Tasks-based profile with per-task configuration.").meta({ "title": "functions.RemoteTasksProfile", "variantTitle": "Tasks" }), SwarmRemoteSwarmBaseSchema.describe("Auto profile that applies a single swarm+weights to all vector completion tasks.").meta({ "title": "swarm.RemoteSwarmBase", "variantTitle": "Auto" })]).describe("A remote profile, either tasks-based or auto.").meta({ title: "functions.RemoteProfile" });
+var FunctionsRemoteProfileSchema = z484.z.union([FunctionsRemoteTasksProfileSchema.describe("Tasks-based profile with per-task configuration.").meta({ "title": "functions.RemoteTasksProfile", "variantTitle": "Tasks" }), SwarmRemoteSwarmBaseSchema.describe("Auto profile that applies a single swarm+weights to all vector completion tasks.").meta({ "title": "swarm.RemoteSwarmBase", "variantTitle": "Auto" })]).describe("A remote profile, either tasks-based or auto.").meta({ title: "functions.RemoteProfile" });
 
 // src/functions/profile.ts
-var FunctionsProfileSchema = z485.z.union([FunctionsRemoteProfileSchema.describe("A remote profile with metadata.").meta({ "title": "functions.RemoteProfile", "variantTitle": "Remote" }), FunctionsInlineProfileSchema.describe("An inline profile definition.").meta({ "title": "functions.InlineProfile", "variantTitle": "Inline" })]).describe("A Profile definition, either remote or inline.\n\nProfiles contain the weights and nested configurations needed to execute\na Function. They correspond to a Function's task structure.").meta({ title: "functions.Profile" });
-var FunctionsUsageFunctionProfilePairResponseSchema = z485.z.object({
-  completion_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total completion tokens used."),
-  prompt_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens used."),
-  requests: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this function-profile pair."),
-  total_cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
+var FunctionsProfileSchema = z484.z.union([FunctionsRemoteProfileSchema.describe("A remote profile with metadata.").meta({ "title": "functions.RemoteProfile", "variantTitle": "Remote" }), FunctionsInlineProfileSchema.describe("An inline profile definition.").meta({ "title": "functions.InlineProfile", "variantTitle": "Inline" })]).describe("A Profile definition, either remote or inline.\n\nProfiles contain the weights and nested configurations needed to execute\na Function. They correspond to a Function's task structure.").meta({ title: "functions.Profile" });
+var FunctionsUsageFunctionProfilePairResponseSchema = z484.z.object({
+  completion_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total completion tokens used."),
+  prompt_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens used."),
+  requests: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this function-profile pair."),
+  total_cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
 }).describe("Usage statistics for a function-profile pair.").meta({ title: "functions.UsageFunctionProfilePairResponse" });
-var FunctionsUsageFunctionResponseSchema = z485.z.object({
-  completion_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total completion tokens used."),
-  prompt_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens used."),
-  requests: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this function."),
-  total_cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
+var FunctionsUsageFunctionResponseSchema = z484.z.object({
+  completion_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total completion tokens used."),
+  prompt_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens used."),
+  requests: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this function."),
+  total_cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
 }).describe("Usage statistics for a function.").meta({ title: "functions.UsageFunctionResponse" });
 
 // src/functions/http.ts
@@ -5142,139 +5135,139 @@ function wasmFunctionsAlphaCheckBranchScalarFunction(fn, children) {
 function wasmFunctionsAlphaCheckBranchVectorFunction(fn, children) {
   alphaCheckBranchVectorFunction(fn, children);
 }
-var HttpViewerAgentCompletionCreateParamsSchema = z485.z.object({
+var HttpViewerAgentCompletionCreateParamsSchema = z484.z.object({
   agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema.describe("The agent to use (inline Agent or stored ID)."),
-  continuation: z485.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
-  id: z485.z.string(),
-  messages: z485.z.array(AgentCompletionsMessageMessageSchema).describe("The conversation messages."),
+  continuation: z484.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  messages: z484.z.array(AgentCompletionsMessageMessageSchema).describe("The conversation messages."),
   provider: AgentCompletionsRequestProviderSchema.nullable().describe("Provider routing preferences.").meta({ omitempty: true }).optional(),
   response_format: AgentCompletionsRequestResponseFormatParamSchema.nullable().describe("Output format constraints (text, JSON, or JSON schema).").meta({ omitempty: true }).optional(),
-  seed: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().describe("Random seed for deterministic generation.").meta({ omitempty: true }).optional(),
-  stream: z485.z.boolean().nullable().describe("Whether to stream the response.").meta({ omitempty: true }).optional()
+  seed: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().describe("Random seed for deterministic generation.").meta({ omitempty: true }).optional(),
+  stream: z484.z.boolean().nullable().describe("Whether to stream the response.").meta({ omitempty: true }).optional()
 }).describe("Parameters for creating a agent completion.").meta({ title: "http.viewer.AgentCompletionCreateParams" });
-var HttpViewerResponseErrorSchema = z485.z.object({
-  code: z485.z.number().int().min(0).max(65535).describe("The HTTP status code of the error response."),
-  id: z485.z.string(),
+var HttpViewerResponseErrorSchema = z484.z.object({
+  code: z484.z.number().int().min(0).max(65535).describe("The HTTP status code of the error response."),
+  id: z484.z.string(),
   message: JsonValueSchema.describe("The error message or details as a JSON value.")
 }).describe("An error returned by the ObjectiveAI API.\n\nThis struct represents an API error response containing an HTTP status\ncode and a message. The message can be any JSON value, allowing for\nboth simple string errors and structured error objects.").meta({ title: "http.viewer.ResponseError" });
 
 // src/http/viewer/agentCompletionRequest.ts
-var HttpViewerAgentCompletionRequestSchema = z485.z.union([HttpViewerAgentCompletionCreateParamsSchema.meta({ "title": "http.viewer.AgentCompletionCreateParams", "variantTitle": "Begin" }), AgentCompletionsResponseStreamingAgentCompletionChunkSchema.meta({ "title": "agent.completions.response.streaming.AgentCompletionChunk", "variantTitle": "Continue" }), HttpViewerResponseErrorSchema.meta({ "title": "http.viewer.ResponseError", "variantTitle": "Error" })]).meta({ title: "http.viewer.AgentCompletionRequest" });
-var HttpViewerFunctionExecutionCreateParamsSchema = z485.z.object({
-  continuation: z485.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
-  from_cache: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+var HttpViewerAgentCompletionRequestSchema = z484.z.union([HttpViewerAgentCompletionCreateParamsSchema.meta({ "title": "http.viewer.AgentCompletionCreateParams", "variantTitle": "Begin" }), AgentCompletionsResponseStreamingAgentCompletionChunkSchema.meta({ "title": "agent.completions.response.streaming.AgentCompletionChunk", "variantTitle": "Continue" }), HttpViewerResponseErrorSchema.meta({ "title": "http.viewer.ResponseError", "variantTitle": "Error" })]).meta({ title: "http.viewer.AgentCompletionRequest" });
+var HttpViewerFunctionExecutionCreateParamsSchema = z484.z.object({
+  continuation: z484.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
+  from_cache: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   function: FunctionsFullInlineFunctionOrRemoteCommitOptionalSchema.describe("The function to execute (inline definition or remote path)."),
-  id: z485.z.string(),
+  id: z484.z.string(),
   input: FunctionsExpressionInputValueSchema,
-  invert: z485.z.boolean().nullable().describe('If `true`, invert every output in the streamed response *after* the\ninner function has finished computing \u2014 scalar outputs become\n`1 - x`, vector outputs are reversed in place. The expression\nevaluator inside the function still sees the original scores; only\nthe chunks delivered to the client (and the aggregated response\npassed to the usage handler) are inverted. Useful when a function\nis naturally written to score "lower is better" but the consumer\nwants "higher is better", or vice versa.').meta({ omitempty: true }).optional(),
+  invert: z484.z.boolean().nullable().describe('If `true`, invert every output in the streamed response *after* the\ninner function has finished computing \u2014 scalar outputs become\n`1 - x`, vector outputs are reversed in place. The expression\nevaluator inside the function still sees the original scores; only\nthe chunks delivered to the client (and the aggregated response\npassed to the usage handler) are inverted. Useful when a function\nis naturally written to score "lower is better" but the consumer\nwants "higher is better", or vice versa.').meta({ omitempty: true }).optional(),
   profile: FunctionsInlineProfileOrRemoteCommitOptionalSchema.describe("The profile to use (inline definition or remote path)."),
   provider: AgentCompletionsRequestProviderSchema.nullable().meta({ omitempty: true }).optional(),
   reasoning: FunctionsExecutionsRequestReasoningSchema.nullable().meta({ omitempty: true }).optional(),
-  retry_token: z485.z.string().nullable().meta({ omitempty: true }).optional(),
-  seed: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
-  split: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  retry_token: z484.z.string().nullable().meta({ omitempty: true }).optional(),
+  seed: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
+  split: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   strategy: FunctionsExecutionsRequestStrategySchema.nullable().meta({ omitempty: true }).optional(),
-  stream: z485.z.boolean().nullable().meta({ omitempty: true }).optional()
+  stream: z484.z.boolean().nullable().meta({ omitempty: true }).optional()
 }).describe("Parameters for creating a function execution.").meta({ title: "http.viewer.FunctionExecutionCreateParams" });
-var HttpViewerFunctionExecutionRequestSchema = z485.z.union([HttpViewerFunctionExecutionCreateParamsSchema.meta({ "title": "http.viewer.FunctionExecutionCreateParams", "variantTitle": "Begin" }), FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema.meta({ "title": "functions.executions.response.streaming.FunctionExecutionChunk", "variantTitle": "Continue" }), HttpViewerResponseErrorSchema.meta({ "title": "http.viewer.ResponseError", "variantTitle": "Error" })]).meta({ title: "http.viewer.FunctionExecutionRequest" });
-var HttpViewerFunctionInventionRecursiveCreateParamsSchema = z485.z.object({
+var HttpViewerFunctionExecutionRequestSchema = z484.z.union([HttpViewerFunctionExecutionCreateParamsSchema.meta({ "title": "http.viewer.FunctionExecutionCreateParams", "variantTitle": "Begin" }), FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema.meta({ "title": "functions.executions.response.streaming.FunctionExecutionChunk", "variantTitle": "Continue" }), HttpViewerResponseErrorSchema.meta({ "title": "http.viewer.ResponseError", "variantTitle": "Error" })]).meta({ title: "http.viewer.FunctionExecutionRequest" });
+var HttpViewerFunctionInventionRecursiveCreateParamsSchema = z484.z.object({
   agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema,
-  continuation: z485.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
-  id: z485.z.string(),
-  max_step_retries: z485.z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.").meta({ omitempty: true }).optional(),
-  overwrite: z485.z.boolean().nullable().meta({ omitempty: true }).optional(),
+  continuation: z484.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  max_step_retries: z484.z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.").meta({ omitempty: true }).optional(),
+  overwrite: z484.z.boolean().nullable().meta({ omitempty: true }).optional(),
   prompt: FunctionsInventionsPromptsInlinePromptOrRemoteCommitOptionalSchema,
   provider: AgentCompletionsRequestProviderSchema.nullable().meta({ omitempty: true }).optional(),
   remote: RemoteSchema,
-  seed: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
+  seed: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
   state: FunctionsInventionsStateParamsStateOrRemoteCommitOptionalSchema,
-  stream: z485.z.boolean().nullable().meta({ omitempty: true }).optional()
+  stream: z484.z.boolean().nullable().meta({ omitempty: true }).optional()
 }).meta({ title: "http.viewer.FunctionInventionRecursiveCreateParams" });
-var HttpViewerFunctionInventionRecursiveRequestSchema = z485.z.union([HttpViewerFunctionInventionRecursiveCreateParamsSchema.meta({ "title": "http.viewer.FunctionInventionRecursiveCreateParams", "variantTitle": "Begin" }), FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema.meta({ "title": "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk", "variantTitle": "Continue" }), HttpViewerResponseErrorSchema.meta({ "title": "http.viewer.ResponseError", "variantTitle": "Error" })]).meta({ title: "http.viewer.FunctionInventionRecursiveRequest" });
-var HttpViewerLaboratoryExecutionCreateParamsSchema = z485.z.object({
-  builder_agents: z485.z.array(AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema).describe("Builder agents \u2014 at least one required."),
-  builder_continuation: z485.z.string().nullable().describe("Continuation from a previous builder completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
-  builder_messages: z485.z.array(AgentCompletionsMessageMessageSchema).describe("Messages for builder agents."),
-  docker_image: z485.z.string().describe("Docker image to use for builder containers."),
+var HttpViewerFunctionInventionRecursiveRequestSchema = z484.z.union([HttpViewerFunctionInventionRecursiveCreateParamsSchema.meta({ "title": "http.viewer.FunctionInventionRecursiveCreateParams", "variantTitle": "Begin" }), FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema.meta({ "title": "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk", "variantTitle": "Continue" }), HttpViewerResponseErrorSchema.meta({ "title": "http.viewer.ResponseError", "variantTitle": "Error" })]).meta({ title: "http.viewer.FunctionInventionRecursiveRequest" });
+var HttpViewerLaboratoryExecutionCreateParamsSchema = z484.z.object({
+  builder_agents: z484.z.array(AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema).describe("Builder agents \u2014 at least one required."),
+  builder_continuation: z484.z.string().nullable().describe("Continuation from a previous builder completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
+  builder_messages: z484.z.array(AgentCompletionsMessageMessageSchema).describe("Messages for builder agents."),
+  docker_image: z484.z.string().describe("Docker image to use for builder containers."),
   evaluation_agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema.nullable().describe("Evaluation agent for evaluating builder outputs. If not provided,\nno evaluation is performed.").meta({ omitempty: true }).optional(),
-  evaluation_continuation: z485.z.string().nullable().describe("Continuation from a previous evaluation completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
-  evaluation_messages: z485.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages for the evaluation agent.").meta({ omitempty: true }).optional(),
+  evaluation_continuation: z484.z.string().nullable().describe("Continuation from a previous evaluation completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
+  evaluation_messages: z484.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages for the evaluation agent.").meta({ omitempty: true }).optional(),
   evaluation_output_schema: FunctionsExpressionInputSchemaSchema.nullable().describe("Output schema for evaluation.").meta({ omitempty: true }).optional(),
-  id: z485.z.string(),
-  max_evaluation_retries: z485.z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of evaluation retries if validation fails.\nDefaults to 3 if not specified.").meta({ omitempty: true }).optional(),
-  persist: z485.z.boolean().nullable().describe("Whether to keep containers after execution. Defaults to false.").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  max_evaluation_retries: z484.z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of evaluation retries if validation fails.\nDefaults to 3 if not specified.").meta({ omitempty: true }).optional(),
+  persist: z484.z.boolean().nullable().describe("Whether to keep containers after execution. Defaults to false.").meta({ omitempty: true }).optional(),
   provider: AgentCompletionsRequestProviderSchema.nullable().meta({ omitempty: true }).optional(),
-  seed: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
-  stream: z485.z.boolean().nullable().meta({ omitempty: true }).optional()
+  seed: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
+  stream: z484.z.boolean().nullable().meta({ omitempty: true }).optional()
 }).describe("Parameters for creating a laboratory execution.").meta({ title: "http.viewer.LaboratoryExecutionCreateParams" });
-var LaboratoriesExecutionsResponseStreamingBuilderChunkSchema = z485.z.object({
-  agent_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Agent index (0-based)."),
-  continuation: z485.z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var LaboratoriesExecutionsResponseStreamingBuilderChunkSchema = z484.z.object({
+  agent_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Agent index (0-based)."),
+  continuation: z484.z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").meta({ omitempty: true }).optional(),
-  id: z485.z.string(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Builder index (0-based)."),
-  messages: z485.z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
-  messages_queued: z485.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. Only\nset when `continuation` is also set \u2014 the caller acts on it by\nissuing the continuation. Absent when nothing is queued, when\nthere is no continuation to act on, or when the peek failed\n(the failure is surfaced via `error`).").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Builder index (0-based)."),
+  messages: z484.z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
+  messages_queued: z484.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. Only\nset when `continuation` is also set \u2014 the caller acts on it by\nissuing the continuation. Absent when nothing is queued, when\nthere is no continuation to act on, or when the peek failed\n(the failure is surfaced via `error`).").meta({ omitempty: true }).optional(),
   object: AgentCompletionsResponseStreamingObjectSchema.describe('The object type (always "agent.completion.chunk").'),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema.nullable().describe("Token usage (only present in the final chunk).").meta({ omitempty: true }).optional()
 }).describe("Streaming chunk for a single builder agent completion within a laboratory execution.").meta({ title: "laboratories.executions.response.streaming.BuilderChunk" });
-var LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema = z485.z.object({
-  agent_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Agent index (0-based)."),
-  continuation: z485.z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema = z484.z.object({
+  agent_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Agent index (0-based)."),
+  continuation: z484.z.string().nullable().describe("Continuation state for multi-turn conversations (only present in the final chunk).").meta({ omitempty: true }).optional(),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").meta({ omitempty: true }).optional(),
-  id: z485.z.string(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Evaluation index (0-based)."),
-  messages: z485.z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
-  messages_queued: z485.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. Only\nset when `continuation` is also set \u2014 the caller acts on it by\nissuing the continuation. Absent when nothing is queued, when\nthere is no continuation to act on, or when the peek failed\n(the failure is surfaced via `error`).").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Evaluation index (0-based)."),
+  messages: z484.z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
+  messages_queued: z484.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. Only\nset when `continuation` is also set \u2014 the caller acts on it by\nissuing the continuation. Absent when nothing is queued, when\nthere is no continuation to act on, or when the peek failed\n(the failure is surfaced via `error`).").meta({ omitempty: true }).optional(),
   object: AgentCompletionsResponseStreamingObjectSchema.describe('The object type (always "agent.completion.chunk").'),
   output: FunctionsExpressionInputValueSchema.nullable().meta({ omitempty: true }).optional(),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema.nullable().describe("Token usage (only present in the final chunk).").meta({ omitempty: true }).optional()
 }).describe("Streaming chunk for a single evaluation agent completion within a laboratory execution.").meta({ title: "laboratories.executions.response.streaming.EvaluationChunk" });
-var LaboratoriesExecutionsResponseStreamingObjectSchema = z485.z.literal("laboratory.execution.chunk").meta({ title: "laboratories.executions.response.streaming.Object" });
+var LaboratoriesExecutionsResponseStreamingObjectSchema = z484.z.literal("laboratory.execution.chunk").meta({ title: "laboratories.executions.response.streaming.Object" });
 
 // src/laboratories/executions/response/streaming/laboratoryExecutionChunk.ts
-var LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema = z485.z.object({
-  builders: z485.z.array(LaboratoriesExecutionsResponseStreamingBuilderChunkSchema),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema = z484.z.object({
+  builders: z484.z.array(LaboratoriesExecutionsResponseStreamingBuilderChunkSchema),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().meta({ omitempty: true }).optional(),
-  evaluations: z485.z.array(LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema),
-  id: z485.z.string(),
+  evaluations: z484.z.array(LaboratoriesExecutionsResponseStreamingEvaluationChunkSchema),
+  id: z484.z.string(),
   object: LaboratoriesExecutionsResponseStreamingObjectSchema,
   usage: AgentCompletionsResponseUsageSchema.nullable().meta({ omitempty: true }).optional()
 }).describe("Streaming chunk for a laboratory execution.").meta({ title: "laboratories.executions.response.streaming.LaboratoryExecutionChunk" });
 
 // src/http/viewer/laboratoryExecutionRequest.ts
-var HttpViewerLaboratoryExecutionRequestSchema = z485.z.union([HttpViewerLaboratoryExecutionCreateParamsSchema.meta({ "title": "http.viewer.LaboratoryExecutionCreateParams", "variantTitle": "Begin" }), LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema.meta({ "title": "laboratories.executions.response.streaming.LaboratoryExecutionChunk", "variantTitle": "Continue" }), HttpViewerResponseErrorSchema.meta({ "title": "http.viewer.ResponseError", "variantTitle": "Error" })]).meta({ title: "http.viewer.LaboratoryExecutionRequest" });
-var HttpViewerRequestSchema = z485.z.union([HttpViewerAgentCompletionRequestSchema.meta({ "title": "http.viewer.AgentCompletionRequest", "variantTitle": "AgentCompletion" }), HttpViewerFunctionExecutionRequestSchema.meta({ "title": "http.viewer.FunctionExecutionRequest", "variantTitle": "FunctionExecution" }), HttpViewerFunctionInventionRecursiveRequestSchema.meta({ "title": "http.viewer.FunctionInventionRecursiveRequest", "variantTitle": "FunctionInventionRecursive" }), HttpViewerLaboratoryExecutionRequestSchema.meta({ "title": "http.viewer.LaboratoryExecutionRequest", "variantTitle": "LaboratoryExecution" }), AgentFavoritesChangedNotificationSchema.meta({ "title": "agent.favorites.ChangedNotification", "variantTitle": "AgentsFavoritesChanged" })]).meta({ title: "http.viewer.Request" });
-var LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema = z485.z.object({
-  builder_agents: z485.z.array(AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema).describe("Builder agents \u2014 at least one required."),
-  builder_continuation: z485.z.string().nullable().describe("Continuation from a previous builder completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
-  builder_messages: z485.z.array(AgentCompletionsMessageMessageSchema).describe("Messages for builder agents."),
-  docker_image: z485.z.string().describe("Docker image to use for builder containers."),
+var HttpViewerLaboratoryExecutionRequestSchema = z484.z.union([HttpViewerLaboratoryExecutionCreateParamsSchema.meta({ "title": "http.viewer.LaboratoryExecutionCreateParams", "variantTitle": "Begin" }), LaboratoriesExecutionsResponseStreamingLaboratoryExecutionChunkSchema.meta({ "title": "laboratories.executions.response.streaming.LaboratoryExecutionChunk", "variantTitle": "Continue" }), HttpViewerResponseErrorSchema.meta({ "title": "http.viewer.ResponseError", "variantTitle": "Error" })]).meta({ title: "http.viewer.LaboratoryExecutionRequest" });
+var HttpViewerRequestSchema = z484.z.union([HttpViewerAgentCompletionRequestSchema.meta({ "title": "http.viewer.AgentCompletionRequest", "variantTitle": "AgentCompletion" }), HttpViewerFunctionExecutionRequestSchema.meta({ "title": "http.viewer.FunctionExecutionRequest", "variantTitle": "FunctionExecution" }), HttpViewerFunctionInventionRecursiveRequestSchema.meta({ "title": "http.viewer.FunctionInventionRecursiveRequest", "variantTitle": "FunctionInventionRecursive" }), HttpViewerLaboratoryExecutionRequestSchema.meta({ "title": "http.viewer.LaboratoryExecutionRequest", "variantTitle": "LaboratoryExecution" }), AgentFavoritesChangedNotificationSchema.meta({ "title": "agent.favorites.ChangedNotification", "variantTitle": "AgentsFavoritesChanged" })]).meta({ title: "http.viewer.Request" });
+var LaboratoriesExecutionsRequestLaboratoryExecutionCreateParamsSchema = z484.z.object({
+  builder_agents: z484.z.array(AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema).describe("Builder agents \u2014 at least one required."),
+  builder_continuation: z484.z.string().nullable().describe("Continuation from a previous builder completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
+  builder_messages: z484.z.array(AgentCompletionsMessageMessageSchema).describe("Messages for builder agents."),
+  docker_image: z484.z.string().describe("Docker image to use for builder containers."),
   evaluation_agent: AgentInlineAgentBaseWithFallbacksOrRemoteCommitOptionalSchema.nullable().describe("Evaluation agent for evaluating builder outputs. If not provided,\nno evaluation is performed.").meta({ omitempty: true }).optional(),
-  evaluation_continuation: z485.z.string().nullable().describe("Continuation from a previous evaluation completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
-  evaluation_messages: z485.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages for the evaluation agent.").meta({ omitempty: true }).optional(),
+  evaluation_continuation: z484.z.string().nullable().describe("Continuation from a previous evaluation completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
+  evaluation_messages: z484.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages for the evaluation agent.").meta({ omitempty: true }).optional(),
   evaluation_output_schema: FunctionsExpressionInputSchemaSchema.nullable().describe("Output schema for evaluation.").meta({ omitempty: true }).optional(),
-  max_evaluation_retries: z485.z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of evaluation retries if validation fails.\nDefaults to 3 if not specified.").meta({ omitempty: true }).optional(),
-  persist: z485.z.boolean().nullable().describe("Whether to keep containers after execution. Defaults to false.").meta({ omitempty: true }).optional(),
+  max_evaluation_retries: z484.z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of evaluation retries if validation fails.\nDefaults to 3 if not specified.").meta({ omitempty: true }).optional(),
+  persist: z484.z.boolean().nullable().describe("Whether to keep containers after execution. Defaults to false.").meta({ omitempty: true }).optional(),
   provider: AgentCompletionsRequestProviderSchema.nullable().meta({ omitempty: true }).optional(),
-  seed: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
-  stream: z485.z.boolean().nullable().meta({ omitempty: true }).optional()
+  seed: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().meta({ omitempty: true }).optional(),
+  stream: z484.z.boolean().nullable().meta({ omitempty: true }).optional()
 }).describe("Parameters for creating a laboratory execution.").meta({ title: "laboratories.executions.request.LaboratoryExecutionCreateParams" });
-var LaboratoriesExecutionsResponseStreamingInnerErrorSchema = z485.z.union([z485.z.object({
-  agent_completion_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Agent completion index within the builder (matches `BuilderChunk::agent_index`)."),
-  builder_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Builder index (matches `BuilderChunk::index`)."),
+var LaboratoriesExecutionsResponseStreamingInnerErrorSchema = z484.z.union([z484.z.object({
+  agent_completion_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Agent completion index within the builder (matches `BuilderChunk::agent_index`)."),
+  builder_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Builder index (matches `BuilderChunk::index`)."),
   error: ErrorResponseErrorSchema.describe("The underlying error from the agent completion."),
-  type: z485.z.literal("builder")
-}).describe("An error from a [`BuilderChunk`](super::BuilderChunk).").meta({ "variantTitle": "Builder" }), z485.z.object({
-  agent_completion_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Agent completion index within the evaluation (matches `EvaluationChunk::agent_index`)."),
+  type: z484.z.literal("builder")
+}).describe("An error from a [`BuilderChunk`](super::BuilderChunk).").meta({ "variantTitle": "Builder" }), z484.z.object({
+  agent_completion_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Agent completion index within the evaluation (matches `EvaluationChunk::agent_index`)."),
   error: ErrorResponseErrorSchema.describe("The underlying error from the agent completion."),
-  evaluation_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Evaluation index (matches `EvaluationChunk::index`)."),
-  type: z485.z.literal("evaluation")
+  evaluation_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Evaluation index (matches `EvaluationChunk::index`)."),
+  type: z484.z.literal("evaluation")
 }).describe("An error from an [`EvaluationChunk`](super::EvaluationChunk).").meta({ "variantTitle": "Evaluation" })]).describe('An inner error from a [`LaboratoryExecutionChunk`](super::LaboratoryExecutionChunk).\n\nYielded by [`LaboratoryExecutionChunk::inner_errors`](super::LaboratoryExecutionChunk::inner_errors).\nThe variant identifies which child collection the failing agent\ncompletion came from; fields locate it by `index` (builder or\nevaluation index) and `agent_index` (agent slot within that builder\nor evaluation), with the underlying [`ResponseError`](error::ResponseError)\nheld as a `Cow` so iteration is zero-allocation while deserialization\nstill produces a self-owning value.\n\nWire shape (internally tagged on `"type"`):\n```json\n{ "type": "builder",    "builder_index": 0,    "agent_completion_index": 1, "error": { } }\n{ "type": "evaluation", "evaluation_index": 2, "agent_completion_index": 0, "error": { } }\n```\n\nDoes NOT include the lab chunk\'s own top-level `.error` \u2014 that\nfield is the chunk\'s own failure state and is reachable directly\nvia [`LaboratoryExecutionChunk::error`](super::LaboratoryExecutionChunk::error).').meta({ title: "laboratories.executions.response.streaming.InnerError" });
 
 // src/laboratories/executions/response/streaming/builderChunkMerged.ts
@@ -5448,42 +5441,42 @@ function wasmLaboratoriesExecutionsResponseStreamingGenerateLaboratoryExecutionC
 function wasmLaboratoriesExecutionsResponseStreamingNormalizeLaboratoryExecutionForTests(a) {
   return JSON.parse(normalizeLaboratoryExecutionForTests(a));
 }
-var LaboratoriesExecutionsResponseUnaryBuilderSchema = z485.z.object({
-  agent_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Agent index (0-based)."),
-  continuation: z485.z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var LaboratoriesExecutionsResponseUnaryBuilderSchema = z484.z.object({
+  agent_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Agent index (0-based)."),
+  continuation: z484.z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
-  id: z485.z.string(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Builder index (0-based)."),
-  messages: z485.z.array(AgentCompletionsResponseUnaryMessageSchema),
-  messages_queued: z485.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. See\n[`super::streaming::AgentCompletionChunk::messages_queued`].").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Builder index (0-based)."),
+  messages: z484.z.array(AgentCompletionsResponseUnaryMessageSchema),
+  messages_queued: z484.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. See\n[`super::streaming::AgentCompletionChunk::messages_queued`].").meta({ omitempty: true }).optional(),
   object: AgentCompletionsResponseUnaryObjectSchema.describe('The object type (always "agent.completion").'),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema
 }).describe("A single builder agent completion within a laboratory execution (non-streaming).").meta({ title: "laboratories.executions.response.unary.Builder" });
-var LaboratoriesExecutionsResponseUnaryEvaluationSchema = z485.z.object({
-  agent_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Agent index (0-based)."),
-  continuation: z485.z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
-  created: z485.z.number().int().min(0).max(18446744073709552e3),
+var LaboratoriesExecutionsResponseUnaryEvaluationSchema = z484.z.object({
+  agent_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Agent index (0-based)."),
+  continuation: z484.z.string().nullable().describe("Continuation state for multi-turn conversations.").optional(),
+  created: z484.z.number().int().min(0).max(18446744073709552e3),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
-  id: z485.z.string(),
-  index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Evaluation index (0-based)."),
-  messages: z485.z.array(AgentCompletionsResponseUnaryMessageSchema),
-  messages_queued: z485.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. See\n[`super::streaming::AgentCompletionChunk::messages_queued`].").meta({ omitempty: true }).optional(),
+  id: z484.z.string(),
+  index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Evaluation index (0-based)."),
+  messages: z484.z.array(AgentCompletionsResponseUnaryMessageSchema),
+  messages_queued: z484.z.boolean().nullable().describe("`true` when the MCP proxy holds queued messages that were not\ndelivered to the agent via a tool response on this turn. See\n[`super::streaming::AgentCompletionChunk::messages_queued`].").meta({ omitempty: true }).optional(),
   object: AgentCompletionsResponseUnaryObjectSchema.describe('The object type (always "agent.completion").'),
   output: FunctionsExpressionInputValueSchema.nullable().optional(),
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   usage: AgentCompletionsResponseUsageSchema
 }).describe("A single evaluation agent completion within a laboratory execution (non-streaming).").meta({ title: "laboratories.executions.response.unary.Evaluation" });
-var LaboratoriesExecutionsResponseUnaryObjectSchema = z485.z.literal("laboratory.execution").meta({ title: "laboratories.executions.response.unary.Object" });
+var LaboratoriesExecutionsResponseUnaryObjectSchema = z484.z.literal("laboratory.execution").meta({ title: "laboratories.executions.response.unary.Object" });
 
 // src/laboratories/executions/response/unary/laboratoryExecution.ts
-var LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema = z485.z.object({
-  builders: z485.z.array(LaboratoriesExecutionsResponseUnaryBuilderSchema).describe("Results from each builder agent completion."),
-  created: z485.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the execution was created."),
+var LaboratoriesExecutionsResponseUnaryLaboratoryExecutionSchema = z484.z.object({
+  builders: z484.z.array(LaboratoriesExecutionsResponseUnaryBuilderSchema).describe("Results from each builder agent completion."),
+  created: z484.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the execution was created."),
   error: ErrorResponseErrorSchema.nullable().describe("Error details if the execution failed.").optional(),
-  evaluations: z485.z.array(LaboratoriesExecutionsResponseUnaryEvaluationSchema).describe("Results from each evaluation agent completion."),
-  id: z485.z.string().describe("Unique identifier for this execution."),
+  evaluations: z484.z.array(LaboratoriesExecutionsResponseUnaryEvaluationSchema).describe("Results from each evaluation agent completion."),
+  id: z484.z.string().describe("Unique identifier for this execution."),
   object: LaboratoriesExecutionsResponseUnaryObjectSchema.describe("Object type identifier."),
   usage: AgentCompletionsResponseUsageSchema.describe("Aggregated token and cost usage.")
 }).describe("A complete laboratory execution response (non-streaming).").meta({ title: "laboratories.executions.response.unary.LaboratoryExecution" });
@@ -5503,241 +5496,241 @@ function laboratoriesExecutionsCreateLaboratoryExecution(client, body, options) 
     options
   );
 }
-var McpResourceListResourcesRequestSchema = z485.z.object({
-  cursor: z485.z.string().nullable().describe("An opaque cursor for pagination.").meta({ omitempty: true }).optional()
+var McpResourceListResourcesRequestSchema = z484.z.object({
+  cursor: z484.z.string().nullable().describe("An opaque cursor for pagination.").meta({ omitempty: true }).optional()
 }).describe("Parameters for a `resources/list` request.").meta({ title: "mcp.resource.ListResourcesRequest" });
-var McpSharedRoleSchema = z485.z.union([z485.z.literal("user").meta({ "variantTitle": "User" }), z485.z.literal("assistant").meta({ "variantTitle": "Assistant" })]).describe("The role of a message sender.").meta({ title: "mcp.shared.Role" });
+var McpSharedRoleSchema = z484.z.union([z484.z.literal("user").meta({ "variantTitle": "User" }), z484.z.literal("assistant").meta({ "variantTitle": "Assistant" })]).describe("The role of a message sender.").meta({ title: "mcp.shared.Role" });
 
 // src/mcp/shared/annotations.ts
-var McpSharedAnnotationsSchema = z485.z.object({
-  audience: z485.z.array(McpSharedRoleSchema).nullable().describe("Intended audience(s) for the content.").meta({ omitempty: true }).optional(),
-  lastModified: z485.z.string().nullable().describe("ISO 8601 timestamp for the most recent modification.").meta({ omitempty: true }).optional(),
-  priority: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Importance hint, from 0 (least) to 1 (most).").meta({ omitempty: true }).optional()
+var McpSharedAnnotationsSchema = z484.z.object({
+  audience: z484.z.array(McpSharedRoleSchema).nullable().describe("Intended audience(s) for the content.").meta({ omitempty: true }).optional(),
+  lastModified: z484.z.string().nullable().describe("ISO 8601 timestamp for the most recent modification.").meta({ omitempty: true }).optional(),
+  priority: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Importance hint, from 0 (least) to 1 (most).").meta({ omitempty: true }).optional()
 }).describe("Optional annotations providing clients additional context about content.").meta({ title: "mcp.shared.Annotations" });
-var McpSharedIconThemeSchema = z485.z.union([z485.z.literal("light").meta({ "variantTitle": "Light" }), z485.z.literal("dark").meta({ "variantTitle": "Dark" })]).describe("Theme preference for an icon.").meta({ title: "mcp.shared.IconTheme" });
+var McpSharedIconThemeSchema = z484.z.union([z484.z.literal("light").meta({ "variantTitle": "Light" }), z484.z.literal("dark").meta({ "variantTitle": "Dark" })]).describe("Theme preference for an icon.").meta({ title: "mcp.shared.IconTheme" });
 
 // src/mcp/shared/icon.ts
-var McpSharedIconSchema = z485.z.object({
-  mimeType: z485.z.string().nullable().describe("MIME type for the icon.").meta({ omitempty: true }).optional(),
-  sizes: z485.z.array(z485.z.string()).nullable().describe('Sizes at which the icon can be used (e.g., "48x48", "96x96", "any").').meta({ omitempty: true }).optional(),
-  src: z485.z.string().describe("URL or data URI for the icon."),
+var McpSharedIconSchema = z484.z.object({
+  mimeType: z484.z.string().nullable().describe("MIME type for the icon.").meta({ omitempty: true }).optional(),
+  sizes: z484.z.array(z484.z.string()).nullable().describe('Sizes at which the icon can be used (e.g., "48x48", "96x96", "any").').meta({ omitempty: true }).optional(),
+  src: z484.z.string().describe("URL or data URI for the icon."),
   theme: McpSharedIconThemeSchema.nullable().describe("Theme this icon is intended for.").meta({ omitempty: true }).optional()
 }).describe("An icon that can be displayed in a user interface.").meta({ title: "mcp.shared.Icon" });
 
 // src/mcp/resource/resource.ts
-var McpResourceResourceSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+var McpResourceResourceSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
-  description: z485.z.string().nullable().describe("A description of what this resource represents.").meta({ omitempty: true }).optional(),
-  icons: z485.z.array(McpSharedIconSchema).nullable().describe("Icons for the resource.").meta({ omitempty: true }).optional(),
-  mimeType: z485.z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
-  name: z485.z.string().describe("The programmatic name of the resource."),
-  title: z485.z.string().nullable().describe("A human-readable display name.").meta({ omitempty: true }).optional(),
-  uri: z485.z.string().describe("The URI of this resource.")
+  description: z484.z.string().nullable().describe("A description of what this resource represents.").meta({ omitempty: true }).optional(),
+  icons: z484.z.array(McpSharedIconSchema).nullable().describe("Icons for the resource.").meta({ omitempty: true }).optional(),
+  mimeType: z484.z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
+  name: z484.z.string().describe("The programmatic name of the resource."),
+  title: z484.z.string().nullable().describe("A human-readable display name.").meta({ omitempty: true }).optional(),
+  uri: z484.z.string().describe("The URI of this resource.")
 }).describe("A known resource that the server is capable of reading.").meta({ title: "mcp.resource.Resource" });
 
 // src/mcp/resource/listResourcesResult.ts
-var McpResourceListResourcesResultSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
-  nextCursor: z485.z.string().nullable().describe("An opaque cursor for fetching the next page.").meta({ omitempty: true }).optional(),
-  resources: z485.z.array(McpResourceResourceSchema).describe("The list of resources available on the server.")
+var McpResourceListResourcesResultSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  nextCursor: z484.z.string().nullable().describe("An opaque cursor for fetching the next page.").meta({ omitempty: true }).optional(),
+  resources: z484.z.array(McpResourceResourceSchema).describe("The list of resources available on the server.")
 }).describe("The server's response to a `resources/list` request.").meta({ title: "mcp.resource.ListResourcesResult" });
-var McpResourceReadResourceRequestParamsSchema = z485.z.object({
-  uri: z485.z.string().describe("The URI of the resource to read.")
+var McpResourceReadResourceRequestParamsSchema = z484.z.object({
+  uri: z484.z.string().describe("The URI of the resource to read.")
 }).describe("Parameters for a `resources/read` request.").meta({ title: "mcp.resource.ReadResourceRequestParams" });
-var McpSharedBlobResourceContentsSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
-  blob: z485.z.string().describe("A base64-encoded string representing the binary data."),
-  mimeType: z485.z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
-  uri: z485.z.string().describe("The URI of this resource.")
+var McpSharedBlobResourceContentsSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  blob: z484.z.string().describe("A base64-encoded string representing the binary data."),
+  mimeType: z484.z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
+  uri: z484.z.string().describe("The URI of this resource.")
 }).describe("Binary resource contents (base64-encoded).").meta({ title: "mcp.shared.BlobResourceContents" });
-var McpSharedTextResourceContentsSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
-  mimeType: z485.z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
-  text: z485.z.string().describe("The text of the item."),
-  uri: z485.z.string().describe("The URI of this resource.")
+var McpSharedTextResourceContentsSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  mimeType: z484.z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
+  text: z484.z.string().describe("The text of the item."),
+  uri: z484.z.string().describe("The URI of this resource.")
 }).describe("Text resource contents.").meta({ title: "mcp.shared.TextResourceContents" });
 
 // src/mcp/shared/resourceContentsUnion.ts
-var McpSharedResourceContentsUnionSchema = z485.z.union([McpSharedTextResourceContentsSchema.meta({ "title": "mcp.shared.TextResourceContents", "variantTitle": "Text" }), McpSharedBlobResourceContentsSchema.meta({ "title": "mcp.shared.BlobResourceContents", "variantTitle": "Blob" })]).describe("Either text or blob resource contents.").meta({ title: "mcp.shared.ResourceContentsUnion" });
+var McpSharedResourceContentsUnionSchema = z484.z.union([McpSharedTextResourceContentsSchema.meta({ "title": "mcp.shared.TextResourceContents", "variantTitle": "Text" }), McpSharedBlobResourceContentsSchema.meta({ "title": "mcp.shared.BlobResourceContents", "variantTitle": "Blob" })]).describe("Either text or blob resource contents.").meta({ title: "mcp.shared.ResourceContentsUnion" });
 
 // src/mcp/resource/readResourceResult.ts
-var McpResourceReadResourceResultSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
-  contents: z485.z.array(McpSharedResourceContentsUnionSchema).describe("The contents of the resource.")
+var McpResourceReadResourceResultSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  contents: z484.z.array(McpSharedResourceContentsUnionSchema).describe("The contents of the resource.")
 }).describe("The server's response to a `resources/read` request.").meta({ title: "mcp.resource.ReadResourceResult" });
-var McpSharedResourceContentsSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
-  mimeType: z485.z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
-  uri: z485.z.string().describe("The URI of this resource.")
+var McpSharedResourceContentsSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  mimeType: z484.z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
+  uri: z484.z.string().describe("The URI of this resource.")
 }).describe("Base fields shared by all resource contents.").meta({ title: "mcp.shared.ResourceContents" });
-var McpToolAudioContentSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+var McpToolAudioContentSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
-  data: z485.z.string().describe("The base64-encoded audio data."),
-  mimeType: z485.z.string().describe("The MIME type of the audio.")
+  data: z484.z.string().describe("The base64-encoded audio data."),
+  mimeType: z484.z.string().describe("The MIME type of the audio.")
 }).describe("Audio content (base64-encoded).").meta({ title: "mcp.tool.AudioContent" });
-var McpToolTaskMetadataSchema = z485.z.object({
-  ttl: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Time-to-live for the task, in seconds.").meta({ omitempty: true }).optional()
+var McpToolTaskMetadataSchema = z484.z.object({
+  ttl: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Time-to-live for the task, in seconds.").meta({ omitempty: true }).optional()
 }).describe("Metadata for a long-running task.").meta({ title: "mcp.tool.TaskMetadata" });
 
 // src/mcp/tool/callToolRequestParams.ts
-var McpToolCallToolRequestParamsSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
-  arguments: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Arguments to pass to the tool.").meta({ omitempty: true }).optional(),
-  name: z485.z.string().describe("The name of the tool to call."),
+var McpToolCallToolRequestParamsSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  arguments: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Arguments to pass to the tool.").meta({ omitempty: true }).optional(),
+  name: z484.z.string().describe("The name of the tool to call."),
   task: McpToolTaskMetadataSchema.nullable().describe("If specified, the caller is requesting task-augmented execution.").meta({ omitempty: true }).optional()
 }).describe("Parameters for a `tools/call` request.").meta({ title: "mcp.tool.CallToolRequestParams" });
-var McpToolEmbeddedResourceSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+var McpToolEmbeddedResourceSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
   resource: McpSharedResourceContentsUnionSchema.describe("The embedded resource contents.")
 }).describe("The contents of a resource, embedded into a prompt or tool call result.").meta({ title: "mcp.tool.EmbeddedResource" });
-var McpToolImageContentSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+var McpToolImageContentSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
-  data: z485.z.string().describe("The base64-encoded image data."),
-  mimeType: z485.z.string().describe("The MIME type of the image.")
+  data: z484.z.string().describe("The base64-encoded image data."),
+  mimeType: z484.z.string().describe("The MIME type of the image.")
 }).describe("Image content (base64-encoded).").meta({ title: "mcp.tool.ImageContent" });
-var McpToolResourceLinkSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+var McpToolResourceLinkSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
-  description: z485.z.string().nullable().describe("A description of what this resource represents.").meta({ omitempty: true }).optional(),
-  icons: z485.z.array(McpSharedIconSchema).nullable().describe("Icons for the resource link.").meta({ omitempty: true }).optional(),
-  mimeType: z485.z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
-  name: z485.z.string().describe("The programmatic name of the resource."),
-  title: z485.z.string().nullable().describe("A human-readable display name.").meta({ omitempty: true }).optional(),
-  uri: z485.z.string().describe("The URI of this resource.")
+  description: z484.z.string().nullable().describe("A description of what this resource represents.").meta({ omitempty: true }).optional(),
+  icons: z484.z.array(McpSharedIconSchema).nullable().describe("Icons for the resource link.").meta({ omitempty: true }).optional(),
+  mimeType: z484.z.string().nullable().describe("The MIME type of this resource, if known.").meta({ omitempty: true }).optional(),
+  name: z484.z.string().describe("The programmatic name of the resource."),
+  title: z484.z.string().nullable().describe("A human-readable display name.").meta({ omitempty: true }).optional(),
+  uri: z484.z.string().describe("The URI of this resource.")
 }).describe("A resource link included in a prompt or tool call result.").meta({ title: "mcp.tool.ResourceLink" });
-var McpToolTextContentSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+var McpToolTextContentSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   annotations: McpSharedAnnotationsSchema.nullable().describe("Optional annotations for the client.").meta({ omitempty: true }).optional(),
-  text: z485.z.string().describe("The text content of the message.")
+  text: z484.z.string().describe("The text content of the message.")
 }).describe("Text content.").meta({ title: "mcp.tool.TextContent" });
 
 // src/mcp/tool/contentBlock.ts
-var McpToolContentBlockSchema = z485.z.union([McpToolTextContentSchema.and(z485.z.object({
-  type: z485.z.literal("text")
-})).describe("Text content.").meta({ "variantTitle": "Text" }), McpToolImageContentSchema.and(z485.z.object({
-  type: z485.z.literal("image")
-})).describe("Image content (base64-encoded).").meta({ "variantTitle": "Image" }), McpToolAudioContentSchema.and(z485.z.object({
-  type: z485.z.literal("audio")
-})).describe("Audio content (base64-encoded).").meta({ "variantTitle": "Audio" }), McpToolResourceLinkSchema.and(z485.z.object({
-  type: z485.z.literal("resource_link")
-})).describe("A resource link.").meta({ "variantTitle": "ResourceLink" }), McpToolEmbeddedResourceSchema.and(z485.z.object({
-  type: z485.z.literal("resource")
+var McpToolContentBlockSchema = z484.z.union([McpToolTextContentSchema.and(z484.z.object({
+  type: z484.z.literal("text")
+})).describe("Text content.").meta({ "variantTitle": "Text" }), McpToolImageContentSchema.and(z484.z.object({
+  type: z484.z.literal("image")
+})).describe("Image content (base64-encoded).").meta({ "variantTitle": "Image" }), McpToolAudioContentSchema.and(z484.z.object({
+  type: z484.z.literal("audio")
+})).describe("Audio content (base64-encoded).").meta({ "variantTitle": "Audio" }), McpToolResourceLinkSchema.and(z484.z.object({
+  type: z484.z.literal("resource_link")
+})).describe("A resource link.").meta({ "variantTitle": "ResourceLink" }), McpToolEmbeddedResourceSchema.and(z484.z.object({
+  type: z484.z.literal("resource")
 })).describe("An embedded resource.").meta({ "variantTitle": "EmbeddedResource" })]).describe("A content block that can be used in prompts and tool results.").meta({ title: "mcp.tool.ContentBlock" });
 
 // src/mcp/tool/callToolResult.ts
-var McpToolCallToolResultSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
-  content: z485.z.array(McpToolContentBlockSchema).default([]).describe("Content blocks representing the result of the tool call."),
-  isError: z485.z.boolean().nullable().describe("Whether the tool call ended in an error.").meta({ omitempty: true }).optional(),
-  structuredContent: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Structured tool output matching the tool's `outputSchema`.").meta({ omitempty: true }).optional()
+var McpToolCallToolResultSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  content: z484.z.array(McpToolContentBlockSchema).default([]).describe("Content blocks representing the result of the tool call."),
+  isError: z484.z.boolean().nullable().describe("Whether the tool call ended in an error.").meta({ omitempty: true }).optional(),
+  structuredContent: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Structured tool output matching the tool's `outputSchema`.").meta({ omitempty: true }).optional()
 }).describe("The server's response to a `tools/call` request.").meta({ title: "mcp.tool.CallToolResult" });
-var McpToolListToolsRequestSchema = z485.z.object({
-  cursor: z485.z.string().nullable().describe("An opaque cursor for pagination.").meta({ omitempty: true }).optional()
+var McpToolListToolsRequestSchema = z484.z.object({
+  cursor: z484.z.string().nullable().describe("An opaque cursor for pagination.").meta({ omitempty: true }).optional()
 }).describe("Parameters for a `tools/list` request.").meta({ title: "mcp.tool.ListToolsRequest" });
-var McpToolToolAnnotationsSchema = z485.z.object({
-  destructiveHint: z485.z.boolean().nullable().describe("If true, the tool may perform destructive updates.").meta({ omitempty: true }).optional(),
-  idempotentHint: z485.z.boolean().nullable().describe("If true, calling the tool repeatedly with the same arguments\nhas no additional effect.").meta({ omitempty: true }).optional(),
-  openWorldHint: z485.z.boolean().nullable().describe("If true, the tool interacts with the external world.").meta({ omitempty: true }).optional(),
-  readOnlyHint: z485.z.boolean().nullable().describe("If true, the tool does not modify its environment.").meta({ omitempty: true }).optional(),
-  title: z485.z.string().nullable().describe("A human-readable title for the tool.").meta({ omitempty: true }).optional()
+var McpToolToolAnnotationsSchema = z484.z.object({
+  destructiveHint: z484.z.boolean().nullable().describe("If true, the tool may perform destructive updates.").meta({ omitempty: true }).optional(),
+  idempotentHint: z484.z.boolean().nullable().describe("If true, calling the tool repeatedly with the same arguments\nhas no additional effect.").meta({ omitempty: true }).optional(),
+  openWorldHint: z484.z.boolean().nullable().describe("If true, the tool interacts with the external world.").meta({ omitempty: true }).optional(),
+  readOnlyHint: z484.z.boolean().nullable().describe("If true, the tool does not modify its environment.").meta({ omitempty: true }).optional(),
+  title: z484.z.string().nullable().describe("A human-readable title for the tool.").meta({ omitempty: true }).optional()
 }).describe("Additional metadata about a tool to help clients decide how to display\nor control its use.").meta({ title: "mcp.tool.ToolAnnotations" });
-var McpToolTaskSupportSchema = z485.z.union([z485.z.literal("required").describe("Clients MUST invoke the tool as a task.").meta({ "variantTitle": "Required" }), z485.z.literal("optional").describe("Clients MAY invoke the tool as a task or normal request.").meta({ "variantTitle": "Optional" }), z485.z.literal("forbidden").describe("Clients MUST NOT attempt to invoke the tool as a task.").meta({ "variantTitle": "Forbidden" })]).describe("The tool's preference for task-augmented execution.").meta({ title: "mcp.tool.TaskSupport" });
+var McpToolTaskSupportSchema = z484.z.union([z484.z.literal("required").describe("Clients MUST invoke the tool as a task.").meta({ "variantTitle": "Required" }), z484.z.literal("optional").describe("Clients MAY invoke the tool as a task or normal request.").meta({ "variantTitle": "Optional" }), z484.z.literal("forbidden").describe("Clients MUST NOT attempt to invoke the tool as a task.").meta({ "variantTitle": "Forbidden" })]).describe("The tool's preference for task-augmented execution.").meta({ title: "mcp.tool.TaskSupport" });
 
 // src/mcp/tool/toolExecution.ts
-var McpToolToolExecutionSchema = z485.z.object({
+var McpToolToolExecutionSchema = z484.z.object({
   taskSupport: McpToolTaskSupportSchema.nullable().describe(`Indicates the tool's preference for task-augmented execution.
 Defaults to "forbidden" if not present.`).meta({ omitempty: true }).optional()
 }).describe("Execution-related properties for a tool.").meta({ title: "mcp.tool.ToolExecution" });
-var McpToolToolSchemaTypeSchema = z485.z.literal("object").describe("The type of a JSON Schema used by MCP tools.").meta({ title: "mcp.tool.ToolSchemaType" });
+var McpToolToolSchemaTypeSchema = z484.z.literal("object").describe("The type of a JSON Schema used by MCP tools.").meta({ title: "mcp.tool.ToolSchemaType" });
 
 // src/mcp/tool/toolSchemaObject.ts
-var McpToolToolSchemaObjectSchema = z485.z.object({
-  properties: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Property definitions.").meta({ omitempty: true }).optional(),
-  required: z485.z.array(z485.z.string()).nullable().describe("Required property names.").meta({ omitempty: true }).optional(),
+var McpToolToolSchemaObjectSchema = z484.z.object({
+  properties: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Property definitions.").meta({ omitempty: true }).optional(),
+  required: z484.z.array(z484.z.string()).nullable().describe("Required property names.").meta({ omitempty: true }).optional(),
   type: McpToolToolSchemaTypeSchema.describe('Always "object".')
 }).loose().describe('JSON Schema for tool input/output. Must have `type: "object"`.').meta({ title: "mcp.tool.ToolSchemaObject" });
 
 // src/mcp/tool/tool.ts
-var McpToolToolSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+var McpToolToolSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   annotations: McpToolToolAnnotationsSchema.nullable().describe("Additional tool metadata.").meta({ omitempty: true }).optional(),
-  description: z485.z.string().nullable().describe("A human-readable description of the tool.").meta({ omitempty: true }).optional(),
+  description: z484.z.string().nullable().describe("A human-readable description of the tool.").meta({ omitempty: true }).optional(),
   execution: McpToolToolExecutionSchema.nullable().describe("Execution-related properties.").meta({ omitempty: true }).optional(),
-  icons: z485.z.array(McpSharedIconSchema).nullable().describe("Icons for the tool.").meta({ omitempty: true }).optional(),
+  icons: z484.z.array(McpSharedIconSchema).nullable().describe("Icons for the tool.").meta({ omitempty: true }).optional(),
   inputSchema: McpToolToolSchemaObjectSchema.describe('JSON Schema defining the expected input parameters.\nMust have `type: "object"` at the root level.'),
-  name: z485.z.string().describe("The programmatic name of the tool."),
+  name: z484.z.string().describe("The programmatic name of the tool."),
   outputSchema: McpToolToolSchemaObjectSchema.nullable().describe("JSON Schema defining the structure of the tool's output\n(returned in `structuredContent`).").meta({ omitempty: true }).optional(),
-  title: z485.z.string().nullable().describe("A human-readable display name.").meta({ omitempty: true }).optional()
+  title: z484.z.string().nullable().describe("A human-readable display name.").meta({ omitempty: true }).optional()
 }).describe("A tool that an MCP server exposes for invocation.").meta({ title: "mcp.tool.Tool" });
 
 // src/mcp/tool/listToolsResult.ts
-var McpToolListToolsResultSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
-  nextCursor: z485.z.string().nullable().describe("An opaque cursor for fetching the next page.").meta({ omitempty: true }).optional(),
-  tools: z485.z.array(McpToolToolSchema).describe("The list of tools available on the server.")
+var McpToolListToolsResultSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  nextCursor: z484.z.string().nullable().describe("An opaque cursor for fetching the next page.").meta({ omitempty: true }).optional(),
+  tools: z484.z.array(McpToolToolSchema).describe("The list of tools available on the server.")
 }).describe("The server's response to a `tools/list` request.").meta({ title: "mcp.tool.ListToolsResult" });
-var McpToolToolResultContentSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
-  content: z485.z.array(McpToolContentBlockSchema).default([]).describe("Content blocks from the tool result."),
-  isError: z485.z.boolean().nullable().describe("Whether this result represents an error.").meta({ omitempty: true }).optional(),
-  structuredContent: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Structured content from the tool result.").meta({ omitempty: true }).optional(),
-  toolUseId: z485.z.string().describe("The unique identifier for the corresponding tool call.")
+var McpToolToolResultContentSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  content: z484.z.array(McpToolContentBlockSchema).default([]).describe("Content blocks from the tool result."),
+  isError: z484.z.boolean().nullable().describe("Whether this result represents an error.").meta({ omitempty: true }).optional(),
+  structuredContent: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Structured content from the tool result.").meta({ omitempty: true }).optional(),
+  toolUseId: z484.z.string().describe("The unique identifier for the corresponding tool call.")
 }).describe("The result of a tool invocation.").meta({ title: "mcp.tool.ToolResultContent" });
-var McpToolToolUseContentSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
-  id: z485.z.string().describe("Unique identifier for this tool call."),
-  input: z485.z.record(z485.z.string(), JsonValueSchema).describe("Arguments to pass to the tool."),
-  name: z485.z.string().describe("The name of the tool to invoke.")
+var McpToolToolUseContentSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+  id: z484.z.string().describe("Unique identifier for this tool call."),
+  input: z484.z.record(z484.z.string(), JsonValueSchema).describe("Arguments to pass to the tool."),
+  name: z484.z.string().describe("The name of the tool to invoke.")
 }).describe("A tool call request from an assistant.").meta({ title: "mcp.tool.ToolUseContent" });
-var McpCompletionsCapabilitySchema = z485.z.object({}).strict().describe("Marker capability for completions support. Presence indicates the server\nsupports argument value completions.").meta({ title: "mcp.CompletionsCapability" });
-var McpImplementationSchema = z485.z.object({
-  description: z485.z.string().nullable().describe("Optional description.").meta({ omitempty: true }).optional(),
-  icons: z485.z.array(McpSharedIconSchema).nullable().describe("Optional icons for UI display.").meta({ omitempty: true }).optional(),
-  name: z485.z.string().describe("The implementation name."),
-  title: z485.z.string().nullable().describe("Human-readable title.").meta({ omitempty: true }).optional(),
-  version: z485.z.string().describe("The implementation version."),
-  websiteUrl: z485.z.string().nullable().describe("Optional website URL.").meta({ omitempty: true }).optional()
+var McpCompletionsCapabilitySchema = z484.z.object({}).strict().describe("Marker capability for completions support. Presence indicates the server\nsupports argument value completions.").meta({ title: "mcp.CompletionsCapability" });
+var McpImplementationSchema = z484.z.object({
+  description: z484.z.string().nullable().describe("Optional description.").meta({ omitempty: true }).optional(),
+  icons: z484.z.array(McpSharedIconSchema).nullable().describe("Optional icons for UI display.").meta({ omitempty: true }).optional(),
+  name: z484.z.string().describe("The implementation name."),
+  title: z484.z.string().nullable().describe("Human-readable title.").meta({ omitempty: true }).optional(),
+  version: z484.z.string().describe("The implementation version."),
+  websiteUrl: z484.z.string().nullable().describe("Optional website URL.").meta({ omitempty: true }).optional()
 }).describe("Information about a client or server implementation.").meta({ title: "mcp.Implementation" });
-var McpLoggingCapabilitySchema = z485.z.object({}).strict().describe("Marker capability for logging support. Presence indicates the server\nsupports sending log messages to the client.").meta({ title: "mcp.LoggingCapability" });
-var McpPromptsCapabilitySchema = z485.z.object({
-  listChanged: z485.z.boolean().nullable().describe("Whether the server emits notifications when the prompt list changes.").meta({ omitempty: true }).optional()
+var McpLoggingCapabilitySchema = z484.z.object({}).strict().describe("Marker capability for logging support. Presence indicates the server\nsupports sending log messages to the client.").meta({ title: "mcp.LoggingCapability" });
+var McpPromptsCapabilitySchema = z484.z.object({
+  listChanged: z484.z.boolean().nullable().describe("Whether the server emits notifications when the prompt list changes.").meta({ omitempty: true }).optional()
 }).describe("Capabilities for prompt templates.").meta({ title: "mcp.PromptsCapability" });
-var McpResourcesCapabilitySchema = z485.z.object({
-  listChanged: z485.z.boolean().nullable().describe("Whether the server emits notifications when the resource list changes.").meta({ omitempty: true }).optional(),
-  subscribe: z485.z.boolean().nullable().describe("Whether the server supports resource subscriptions.").meta({ omitempty: true }).optional()
+var McpResourcesCapabilitySchema = z484.z.object({
+  listChanged: z484.z.boolean().nullable().describe("Whether the server emits notifications when the resource list changes.").meta({ omitempty: true }).optional(),
+  subscribe: z484.z.boolean().nullable().describe("Whether the server supports resource subscriptions.").meta({ omitempty: true }).optional()
 }).describe("Capabilities for resources.").meta({ title: "mcp.ResourcesCapability" });
-var McpTasksCancelCapabilitySchema = z485.z.object({}).strict().describe("Marker capability for task cancellation support.").meta({ title: "mcp.TasksCancelCapability" });
-var McpTasksListCapabilitySchema = z485.z.object({}).strict().describe("Marker capability for task listing support.").meta({ title: "mcp.TasksListCapability" });
-var McpTasksToolsCallCapabilitySchema = z485.z.object({}).strict().describe("Marker capability for tools/call task creation support.").meta({ title: "mcp.TasksToolsCallCapability" });
+var McpTasksCancelCapabilitySchema = z484.z.object({}).strict().describe("Marker capability for task cancellation support.").meta({ title: "mcp.TasksCancelCapability" });
+var McpTasksListCapabilitySchema = z484.z.object({}).strict().describe("Marker capability for task listing support.").meta({ title: "mcp.TasksListCapability" });
+var McpTasksToolsCallCapabilitySchema = z484.z.object({}).strict().describe("Marker capability for tools/call task creation support.").meta({ title: "mcp.TasksToolsCallCapability" });
 
 // src/mcp/tasksToolsCapability.ts
-var McpTasksToolsCapabilitySchema = z485.z.object({
+var McpTasksToolsCapabilitySchema = z484.z.object({
   call: McpTasksToolsCallCapabilitySchema.nullable().describe("Present if tools/call supports task creation.").meta({ omitempty: true }).optional()
 }).describe("Task capabilities for tool requests.").meta({ title: "mcp.TasksToolsCapability" });
 
 // src/mcp/tasksRequestsCapability.ts
-var McpTasksRequestsCapabilitySchema = z485.z.object({
+var McpTasksRequestsCapabilitySchema = z484.z.object({
   tools: McpTasksToolsCapabilitySchema.nullable().describe("Task support for tool-related requests.").meta({ omitempty: true }).optional()
 }).describe("Task creation capabilities scoped to request types.").meta({ title: "mcp.TasksRequestsCapability" });
 
 // src/mcp/tasksCapability.ts
-var McpTasksCapabilitySchema = z485.z.object({
+var McpTasksCapabilitySchema = z484.z.object({
   cancel: McpTasksCancelCapabilitySchema.nullable().describe("Present if the server supports cancelling tasks.").meta({ omitempty: true }).optional(),
   list: McpTasksListCapabilitySchema.nullable().describe("Present if the server supports listing tasks.").meta({ omitempty: true }).optional(),
   requests: McpTasksRequestsCapabilitySchema.nullable().describe("Task creation capabilities for specific request types.").meta({ omitempty: true }).optional()
 }).describe("Capabilities for task creation and management.").meta({ title: "mcp.TasksCapability" });
-var McpToolsCapabilitySchema = z485.z.object({
-  listChanged: z485.z.boolean().nullable().describe("Whether the server emits notifications when the tool list changes.").meta({ omitempty: true }).optional()
+var McpToolsCapabilitySchema = z484.z.object({
+  listChanged: z484.z.boolean().nullable().describe("Whether the server emits notifications when the tool list changes.").meta({ omitempty: true }).optional()
 }).describe("Capabilities for tools.").meta({ title: "mcp.ToolsCapability" });
 
 // src/mcp/serverCapabilities.ts
-var McpServerCapabilitiesSchema = z485.z.object({
+var McpServerCapabilitiesSchema = z484.z.object({
   completions: McpCompletionsCapabilitySchema.nullable().describe("Completions support. Presence indicates the server supports completions.").meta({ omitempty: true }).optional(),
-  experimental: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Non-standard experimental capabilities.").meta({ omitempty: true }).optional(),
+  experimental: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Non-standard experimental capabilities.").meta({ omitempty: true }).optional(),
   logging: McpLoggingCapabilitySchema.nullable().describe("Logging support. Presence indicates the server supports sending log messages.").meta({ omitempty: true }).optional(),
   prompts: McpPromptsCapabilitySchema.nullable().describe("Prompt template capabilities.").meta({ omitempty: true }).optional(),
   resources: McpResourcesCapabilitySchema.nullable().describe("Resource capabilities.").meta({ omitempty: true }).optional(),
@@ -5746,54 +5739,54 @@ var McpServerCapabilitiesSchema = z485.z.object({
 }).describe("Capabilities that an MCP server may support.").meta({ title: "mcp.ServerCapabilities" });
 
 // src/mcp/initializeResult.ts
-var McpInitializeResultSchema = z485.z.object({
-  _meta: z485.z.record(z485.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
+var McpInitializeResultSchema = z484.z.object({
+  _meta: z484.z.record(z484.z.string(), JsonValueSchema).nullable().describe("Extension metadata.").meta({ omitempty: true }).optional(),
   capabilities: McpServerCapabilitiesSchema.describe("The server's supported capabilities."),
-  instructions: z485.z.string().nullable().describe("Optional instructions for LLM integration.").meta({ omitempty: true }).optional(),
-  protocolVersion: z485.z.string().describe("The MCP protocol version the server wants to use."),
+  instructions: z484.z.string().nullable().describe("Optional instructions for LLM integration.").meta({ omitempty: true }).optional(),
+  protocolVersion: z484.z.string().describe("The MCP protocol version the server wants to use."),
   serverInfo: McpImplementationSchema.describe("Information about the server implementation.")
 }).describe("The server's response to an `initialize` request.").meta({ title: "mcp.InitializeResult" });
-var McpJsonRpcErrorSchema = z485.z.object({
-  code: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3),
+var McpJsonRpcErrorSchema = z484.z.object({
+  code: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3),
   data: JsonValueSchema.meta({ omitempty: true }),
-  message: z485.z.string()
+  message: z484.z.string()
 }).describe("JSON-RPC 2.0 error object.").meta({ title: "mcp.JsonRpcError" });
-var McpJsonRpcNotificationSchema = z485.z.object({
-  jsonrpc: z485.z.string(),
-  method: z485.z.string(),
+var McpJsonRpcNotificationSchema = z484.z.object({
+  jsonrpc: z484.z.string(),
+  method: z484.z.string(),
   params: JsonValueSchema.meta({ omitempty: true })
 }).describe("JSON-RPC 2.0 notification (no `id` field).").meta({ title: "mcp.JsonRpcNotification" });
-var McpJsonRpcRequestSchema = z485.z.object({
+var McpJsonRpcRequestSchema = z484.z.object({
   id: JsonValueSchema,
-  jsonrpc: z485.z.string(),
-  method: z485.z.string(),
+  jsonrpc: z484.z.string(),
+  method: z484.z.string(),
   params: JsonValueSchema.default(null)
 }).describe("JSON-RPC 2.0 inbound request.").meta({ title: "mcp.JsonRpcRequest" });
-var SwarmInlineSwarmSchema = z485.z.object({
-  agents: z485.z.array(AgentAgentWithFallbacksWithCountSchema).describe("The validated and deduplicated LLMs, sorted by full_id."),
-  id: z485.z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
+var SwarmInlineSwarmSchema = z484.z.object({
+  agents: z484.z.array(AgentAgentWithFallbacksWithCountSchema).describe("The validated and deduplicated LLMs, sorted by full_id."),
+  id: z484.z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
   weights: WeightsSchema.describe("The aligned weights for each agent.")
 }).describe("A validated inline Swarm with its computed content-addressed ID.\n\nCreated by converting from [`InlineSwarmBase`] via [`InlineSwarmBase::convert`].\nThe conversion:\n1. Validates and normalizes each agent\n2. Merges duplicate LLMs (by full_id) and sums their counts\n3. Sorts LLMs by full_id for deterministic ordering\n4. Computes the swarm ID from the sorted (full_id, count) pairs\n5. Aligns weights (merging duplicates by weighted average)\n\n# Constraints\n\n- Individual LLMs with `count: 0` are skipped\n- Total agent count (sum of all counts) must be between 1 and 128").meta({ title: "swarm.InlineSwarm" });
-var SwarmInlineSwarmBaseOrRemoteSchema = z485.z.union([SwarmInlineSwarmBaseSchema.meta({ "title": "swarm.InlineSwarmBase", "variantTitle": "SwarmBase" }), RemotePathSchema.meta({ "title": "RemotePath", "variantTitle": "Remote" })]).describe("A swarm specification that is either an inline swarm base\nor a remote path reference.").meta({ title: "swarm.InlineSwarmBaseOrRemote" });
-var SwarmListSwarmResponseSchema = z485.z.object({
-  data: z485.z.array(RemotePathSchema).describe("The list of Swarm summaries.")
+var SwarmInlineSwarmBaseOrRemoteSchema = z484.z.union([SwarmInlineSwarmBaseSchema.meta({ "title": "swarm.InlineSwarmBase", "variantTitle": "SwarmBase" }), RemotePathSchema.meta({ "title": "RemotePath", "variantTitle": "Remote" })]).describe("A swarm specification that is either an inline swarm base\nor a remote path reference.").meta({ title: "swarm.InlineSwarmBaseOrRemote" });
+var SwarmListSwarmResponseSchema = z484.z.object({
+  data: z484.z.array(RemotePathSchema).describe("The list of Swarm summaries.")
 }).describe("Response containing a list of Swarms.").meta({ title: "swarm.ListSwarmResponse" });
-var SwarmListSwarmsSourceSchema = z485.z.enum(["all", "mock", "filesystem", "objectiveai"]).describe("Source filter for listing swarms.").meta({ title: "swarm.ListSwarmsSource" });
+var SwarmListSwarmsSourceSchema = z484.z.enum(["all", "mock", "filesystem", "objectiveai"]).describe("Source filter for listing swarms.").meta({ title: "swarm.ListSwarmsSource" });
 
 // src/swarm/listSwarmsRequest.ts
-var SwarmListSwarmsRequestSchema = z485.z.object({
+var SwarmListSwarmsRequestSchema = z484.z.object({
   source: SwarmListSwarmsSourceSchema.nullable().describe("Optional source filter for listing swarms.").meta({ omitempty: true }).optional()
 }).describe("Query parameters for the list swarms endpoint.").meta({ title: "swarm.ListSwarmsRequest" });
-var SwarmRemoteSwarmSchema = SwarmInlineSwarmSchema.and(z485.z.object({
-  description: z485.z.string()
+var SwarmRemoteSwarmSchema = SwarmInlineSwarmSchema.and(z484.z.object({
+  description: z484.z.string()
 })).describe("A validated remote Swarm with metadata and computed content-addressed ID.").meta({ title: "swarm.RemoteSwarm" });
-var SwarmSwarmSchema = z485.z.union([SwarmRemoteSwarmSchema.meta({ "title": "swarm.RemoteSwarm", "variantTitle": "Remote" }), SwarmInlineSwarmSchema.meta({ "title": "swarm.InlineSwarm", "variantTitle": "Inline" })]).describe("A validated Swarm, either remote (with metadata) or inline.").meta({ title: "swarm.Swarm" });
-var SwarmSwarmBaseSchema = z485.z.union([SwarmRemoteSwarmBaseSchema.meta({ "title": "swarm.RemoteSwarmBase", "variantTitle": "Remote" }), SwarmInlineSwarmBaseSchema.meta({ "title": "swarm.InlineSwarmBase", "variantTitle": "Inline" })]).describe("A swarm base definition, either remote (with metadata) or inline.").meta({ title: "swarm.SwarmBase" });
-var SwarmUsageSwarmResponseSchema = z485.z.object({
-  completion_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total completion tokens generated across all agents."),
-  prompt_tokens: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens processed across all agents."),
-  requests: z485.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this Swarm."),
-  total_cost: z485.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
+var SwarmSwarmSchema = z484.z.union([SwarmRemoteSwarmSchema.meta({ "title": "swarm.RemoteSwarm", "variantTitle": "Remote" }), SwarmInlineSwarmSchema.meta({ "title": "swarm.InlineSwarm", "variantTitle": "Inline" })]).describe("A validated Swarm, either remote (with metadata) or inline.").meta({ title: "swarm.Swarm" });
+var SwarmSwarmBaseSchema = z484.z.union([SwarmRemoteSwarmBaseSchema.meta({ "title": "swarm.RemoteSwarmBase", "variantTitle": "Remote" }), SwarmInlineSwarmBaseSchema.meta({ "title": "swarm.InlineSwarmBase", "variantTitle": "Inline" })]).describe("A swarm base definition, either remote (with metadata) or inline.").meta({ title: "swarm.SwarmBase" });
+var SwarmUsageSwarmResponseSchema = z484.z.object({
+  completion_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total completion tokens generated across all agents."),
+  prompt_tokens: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total prompt tokens processed across all agents."),
+  requests: z484.z.number().int().min(0).max(18446744073709552e3).describe("Total number of requests made with this Swarm."),
+  total_cost: z484.z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("Total cost incurred.")
 }).describe("Usage statistics for a Swarm.").meta({ title: "swarm.UsageSwarmResponse" });
 
 // src/swarm/http.ts
@@ -5811,19 +5804,19 @@ function swarmGetSwarmUsage(client, params, options) {
 function wasmSwarmValidateSwarm(swarm, remoteAgents) {
   return JSON.parse(validateSwarm(swarm, remoteAgents));
 }
-var VectorCompletionsCacheCacheVoteSchema = z485.z.object({
+var VectorCompletionsCacheCacheVoteSchema = z484.z.object({
   vote: VectorCompletionsResponseVoteSchema.nullable().optional()
 }).meta({ title: "vector.completions.cache.CacheVote" });
-var VectorCompletionsCacheCacheVoteRequestSchema = z485.z.object({
+var VectorCompletionsCacheCacheVoteRequestSchema = z484.z.object({
   agent: AgentInlineAgentBaseWithFallbacksOrRemoteSchema,
-  messages: z485.z.array(AgentCompletionsMessageMessageSchema),
-  responses: z485.z.array(AgentCompletionsMessageRichContentSchema)
+  messages: z484.z.array(AgentCompletionsMessageMessageSchema),
+  responses: z484.z.array(AgentCompletionsMessageRichContentSchema)
 }).meta({ title: "vector.completions.cache.CacheVoteRequest" });
-var VectorCompletionsCacheCompletionVotesSchema = z485.z.object({
-  data: z485.z.array(VectorCompletionsResponseVoteSchema).nullable().optional()
+var VectorCompletionsCacheCompletionVotesSchema = z484.z.object({
+  data: z484.z.array(VectorCompletionsResponseVoteSchema).nullable().optional()
 }).meta({ title: "vector.completions.cache.CompletionVotes" });
-var VectorCompletionsCacheGetCompletionVotesRequestSchema = z485.z.object({
-  id: z485.z.string().describe("The vector completion ID.")
+var VectorCompletionsCacheGetCompletionVotesRequestSchema = z484.z.object({
+  id: z484.z.string().describe("The vector completion ID.")
 }).describe("Request body for retrieving completion votes by vector completion ID.").meta({ title: "vector.completions.cache.GetCompletionVotesRequest" });
 
 // src/vector/completions/cache/http.ts
@@ -5841,31 +5834,31 @@ function vectorCompletionsCacheGetCacheVote(client, body, options) {
     options
   );
 }
-var VectorCompletionsRequestVectorCompletionCreateParamsSchema = z485.z.object({
-  continuation: z485.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
-  from_cache: z485.z.boolean().nullable().describe("If true, uses cached votes when available.").meta({ omitempty: true }).optional(),
-  messages: z485.z.array(AgentCompletionsMessageMessageSchema).describe("The conversation messages (the prompt)."),
+var VectorCompletionsRequestVectorCompletionCreateParamsSchema = z484.z.object({
+  continuation: z484.z.string().nullable().describe("Continuation from a previous completion, as a base64-encoded string.").meta({ omitempty: true }).optional(),
+  from_cache: z484.z.boolean().nullable().describe("If true, uses cached votes when available.").meta({ omitempty: true }).optional(),
+  messages: z484.z.array(AgentCompletionsMessageMessageSchema).describe("The conversation messages (the prompt)."),
   provider: AgentCompletionsRequestProviderSchema.nullable().describe("Provider routing preferences.").meta({ omitempty: true }).optional(),
-  responses: z485.z.array(AgentCompletionsMessageRichContentSchema).describe("The possible responses the LLMs can vote for."),
-  retry: z485.z.string().nullable().describe("If present, reuses votes from a previous request with this ID.").meta({ omitempty: true }).optional(),
-  seed: z485.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().describe("Random seed for deterministic results.").meta({ omitempty: true }).optional(),
-  stream: z485.z.boolean().nullable().describe("Whether to stream the response.").meta({ omitempty: true }).optional(),
+  responses: z484.z.array(AgentCompletionsMessageRichContentSchema).describe("The possible responses the LLMs can vote for."),
+  retry: z484.z.string().nullable().describe("If present, reuses votes from a previous request with this ID.").meta({ omitempty: true }).optional(),
+  seed: z484.z.number().int().min(-9223372036854776e3).max(9223372036854776e3).nullable().describe("Random seed for deterministic results.").meta({ omitempty: true }).optional(),
+  stream: z484.z.boolean().nullable().describe("Whether to stream the response.").meta({ omitempty: true }).optional(),
   swarm: SwarmInlineSwarmBaseOrRemoteCommitOptionalSchema.describe("The Swarm of agents to use.")
 }).describe("Parameters for creating a vector completion.\n\nVector completions run multiple agent completions (one per LLM in the\nswarm), force each to vote for one of the predefined responses, and\ncombine votes using the provided profile weights to produce final scores.").meta({ title: "vector.completions.request.VectorCompletionCreateParams" });
-var VectorCompletionsResponseStreamingInnerErrorSchema = z485.z.object({
-  agent_completion_index: z485.z.number().int().min(0).max(18446744073709552e3).describe("Index of the failing completion (matches `AgentCompletionChunk::index`)."),
+var VectorCompletionsResponseStreamingInnerErrorSchema = z484.z.object({
+  agent_completion_index: z484.z.number().int().min(0).max(18446744073709552e3).describe("Index of the failing completion (matches `AgentCompletionChunk::index`)."),
   error: ErrorResponseErrorSchema.describe("The underlying error from the agent completion.")
 }).describe('An error from a single agent completion inside a [`VectorCompletionChunk`](super::VectorCompletionChunk).\n\nYielded by [`VectorCompletionChunk::inner_errors`](super::VectorCompletionChunk::inner_errors).\nIdentifies the failing completion by its `index` (matching\n[`AgentCompletionChunk::index`](super::AgentCompletionChunk::index)) and\ncarries the underlying [`ResponseError`](error::ResponseError) as a `Cow`\nso iteration is zero-allocation (`Cow::Borrowed`) while deserialization\nalways lands in `Cow::Owned`.\n\nWire shape:\n```json\n{ "agent_completion_index": 1, "error": { ... } }\n```').meta({ title: "vector.completions.response.streaming.InnerError" });
-var VectorCompletionsResponseStreamingVectorCompletionChunkSchema = z485.z.object({
-  completions: z485.z.array(VectorCompletionsResponseStreamingAgentCompletionChunkSchema).describe("Incremental agent completion chunks from each agent."),
-  created: z485.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the completion was created."),
-  id: z485.z.string().describe("Unique identifier for this vector completion."),
+var VectorCompletionsResponseStreamingVectorCompletionChunkSchema = z484.z.object({
+  completions: z484.z.array(VectorCompletionsResponseStreamingAgentCompletionChunkSchema).describe("Incremental agent completion chunks from each agent."),
+  created: z484.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the completion was created."),
+  id: z484.z.string().describe("Unique identifier for this vector completion."),
   object: VectorCompletionsResponseStreamingObjectSchema.describe('Object type identifier (`"vector.completion.chunk"`).'),
-  scores: z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Current weighted scores. Updated as new votes arrive."),
-  swarm: z485.z.string().describe("ID of the swarm used for this completion."),
+  scores: z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Current weighted scores. Updated as new votes arrive."),
+  swarm: z484.z.string().describe("ID of the swarm used for this completion."),
   usage: AgentCompletionsResponseUsageSchema.nullable().describe("Aggregated usage statistics. Typically present only in the final chunk.").meta({ omitempty: true }).optional(),
-  votes: z485.z.array(VectorCompletionsResponseVoteSchema).describe("Votes received so far. New votes are appended in subsequent chunks."),
-  weights: z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Current weight distribution across responses. Updated as new votes arrive.")
+  votes: z484.z.array(VectorCompletionsResponseVoteSchema).describe("Votes received so far. New votes are appended in subsequent chunks."),
+  weights: z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Current weight distribution across responses. Updated as new votes arrive.")
 }).describe("A chunk in a streaming vector completion response.\n\nEach chunk contains incremental updates to the completion. Use the\n[`push`](Self::push) method to accumulate chunks into a complete response.").meta({ title: "vector.completions.response.streaming.VectorCompletionChunk" });
 
 // src/vector/completions/response/streaming/vectorCompletionChunkMerged.ts
@@ -5918,23 +5911,23 @@ function wasmVectorCompletionsResponseStreamingGenerateVectorCompletionChunk(see
 function wasmVectorCompletionsResponseStreamingNormalizeVectorCompletionForTests(a) {
   return JSON.parse(normalizeVectorCompletionForTests(a));
 }
-var VectorCompletionsResponseUnaryVectorCompletionSchema = z485.z.object({
-  completions: z485.z.array(VectorCompletionsResponseUnaryAgentCompletionSchema).describe("The underlying agent completions from each agent in the swarm."),
-  created: z485.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the completion was created."),
-  id: z485.z.string().describe("Unique identifier for this vector completion."),
+var VectorCompletionsResponseUnaryVectorCompletionSchema = z484.z.object({
+  completions: z484.z.array(VectorCompletionsResponseUnaryAgentCompletionSchema).describe("The underlying agent completions from each agent in the swarm."),
+  created: z484.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the completion was created."),
+  id: z484.z.string().describe("Unique identifier for this vector completion."),
   object: VectorCompletionsResponseUnaryObjectSchema.describe('Object type identifier (`"vector.completion"`).'),
-  scores: z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Final weighted scores for each response option. Sums to 1."),
-  swarm: z485.z.string().describe("ID of the swarm used for this completion."),
+  scores: z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Final weighted scores for each response option. Sums to 1."),
+  swarm: z484.z.string().describe("ID of the swarm used for this completion."),
   usage: AgentCompletionsResponseUsageSchema.describe("Aggregated token and cost usage across all completions."),
-  votes: z485.z.array(VectorCompletionsResponseVoteSchema).describe("Individual votes from each agent, showing their selections."),
-  weights: z485.z.array(z485.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Total weight allocated to each response option. Same length as `scores`.\nFor discrete votes, an LLM's full weight goes to its selected response.\nFor probabilistic votes, the weight is divided according to the distribution.")
+  votes: z484.z.array(VectorCompletionsResponseVoteSchema).describe("Individual votes from each agent, showing their selections."),
+  weights: z484.z.array(z484.z.number().min(-34028234663852886e22).max(34028234663852886e22)).describe("Total weight allocated to each response option. Same length as `scores`.\nFor discrete votes, an LLM's full weight goes to its selected response.\nFor probabilistic votes, the weight is divided according to the distribution.")
 }).describe("A complete vector completion response (non-streaming).\n\nContains the final scores, all votes from the swarm, and the underlying\nagent completions that produced those votes.").meta({ title: "vector.completions.response.unary.VectorCompletion" });
-var VectorCompletionsVectorResponsesSchema = z485.z.array(AgentCompletionsMessageRichContentSchema).describe('The list of response options in a vector completion request.\n\nEach element is a [`RichContent`] value that an LLM can vote for.\nResponses can be plain text strings or multi-part content containing\ntext, images, audio, video, or files.\n\n# Minimum Length\n\nA vector completion requires at least 2 responses to vote between.\n\n# Examples\n\nPlain text responses:\n```json\n["Yes", "No", "Maybe"]\n```\n\nMultimodal responses:\n```json\n[\n  [{"type": "text", "text": "Option A"}, {"type": "image_url", "image_url": {"url": "https://example.com/a.png"}}],\n  [{"type": "text", "text": "Option B"}, {"type": "image_url", "image_url": {"url": "https://example.com/b.png"}}]\n]\n```').meta({ title: "vector.completions.VectorResponses" });
+var VectorCompletionsVectorResponsesSchema = z484.z.array(AgentCompletionsMessageRichContentSchema).describe('The list of response options in a vector completion request.\n\nEach element is a [`RichContent`] value that an LLM can vote for.\nResponses can be plain text strings or multi-part content containing\ntext, images, audio, video, or files.\n\n# Minimum Length\n\nA vector completion requires at least 2 responses to vote between.\n\n# Examples\n\nPlain text responses:\n```json\n["Yes", "No", "Maybe"]\n```\n\nMultimodal responses:\n```json\n[\n  [{"type": "text", "text": "Option A"}, {"type": "image_url", "image_url": {"url": "https://example.com/a.png"}}],\n  [{"type": "text", "text": "Option B"}, {"type": "image_url", "image_url": {"url": "https://example.com/b.png"}}]\n]\n```').meta({ title: "vector.completions.VectorResponses" });
 var VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema = VectorCompletionsRequestVectorCompletionCreateParamsSchema.extend({
-  stream: z485__default.default.literal(true)
+  stream: z484__default.default.literal(true)
 });
 var VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema = VectorCompletionsRequestVectorCompletionCreateParamsSchema.extend({
-  stream: z485__default.default.literal(false).optional().nullable()
+  stream: z484__default.default.literal(false).optional().nullable()
 });
 function vectorCompletionsCreateVectorCompletion(client, body, options) {
   if (body.stream) {
@@ -6199,14 +6192,14 @@ async function viewerApiCallUnaryNoResponse(method, path, body) {
 function viewerApiCallStream(method, path, body) {
   return Stream.fromAsyncIterable(viewerApiCallChunks(method, path, body));
 }
-var ViewerEventSchema = z485.z.union([z485.z.object({
-  destination: z485.z.string(),
-  sub_type: z485.z.string(),
-  type: z485.z.literal("inbound"),
+var ViewerEventSchema = z484.z.union([z484.z.object({
+  destination: z484.z.string(),
+  sub_type: z484.z.string(),
+  type: z484.z.literal("inbound"),
   value: JsonValueSchema
-}).describe("Host \u2192 iframe. Carries data into the plugin (the existing\npath). `sub_type` is the snake_case discriminator the plugin\nlistens on (built-ins: `agent_completions` /\n`functions_executions` / `functions_inventions_recursive` /\n`laboratories_executions`; plugins: whatever they declared in\ntheir manifest's `viewer_routes[i].type`).").meta({ "variantTitle": "Inbound" }), z485.z.object({
-  destination: z485.z.string(),
-  type: z485.z.literal("cli_command"),
+}).describe("Host \u2192 iframe. Carries data into the plugin (the existing\npath). `sub_type` is the snake_case discriminator the plugin\nlistens on (built-ins: `agent_completions` /\n`functions_executions` / `functions_inventions_recursive` /\n`laboratories_executions`; plugins: whatever they declared in\ntheir manifest's `viewer_routes[i].type`).").meta({ "variantTitle": "Inbound" }), z484.z.object({
+  destination: z484.z.string(),
+  type: z484.z.literal("cli_command"),
   value: JsonValueSchema
 }).describe("Host \u2192 iframe. One JSON line of cli output emitted by an\nin-process `objectiveai_cli::run()` invocation started by\nthis iframe via `invokeCli`. `value` is the cli's `Output<T>`\nenvelope. No sub_type \u2014 a single invocation produces a single\nstream of lines.").meta({ "variantTitle": "CliCommand" })]).describe("Every event the viewer emits to the JS side. Serde-tagged on\n`type` so the JS bridge can pattern-match and decide how to\nrepackage each variant for the destination iframe.\n\n`destination` is `\"objectiveai\"` for built-in events, or the\nplugin's repository name otherwise. For `CliCommand` it's the\nrepository name of whichever iframe invoked the CLI \u2014 the bridge\nderives it from `MessageEvent.source`, the plugin author never\nsets it.").meta({ title: "viewer.Event" });
 
@@ -6351,35 +6344,35 @@ function isTruthyEnv(value) {
   const v = value.toLowerCase();
   return v === "1" || v === "true" || v === "yes" || v === "on";
 }
-var ObjectiveAIOptionsSchema = z485__default.default.object({
-  address: z485__default.default.string().nullish().describe(
+var ObjectiveAIOptionsSchema = z484__default.default.object({
+  address: z484__default.default.string().nullish().describe(
     "Base URL for the API. Falls back to OBJECTIVEAI_ADDRESS env var, then https://api.objectiveai.dev"
   ),
-  authorization: z485__default.default.string().nullish().describe("API key for authentication. Falls back to OBJECTIVEAI_AUTHORIZATION env var."),
-  userAgent: z485__default.default.string().nullish().describe("User-Agent header. Falls back to USER_AGENT env var."),
-  httpReferer: z485__default.default.string().nullish().describe("HTTP-Referer header. Falls back to HTTP_REFERER env var."),
-  xTitle: z485__default.default.string().nullish().describe("X-Title header. Falls back to X_TITLE env var."),
-  xGithubAuthorization: z485__default.default.string().nullish().describe("X-GITHUB-AUTHORIZATION header for GitHub-hosted function/profile access."),
-  xOpenrouterAuthorization: z485__default.default.string().nullish().describe("X-OPENROUTER-AUTHORIZATION header for BYOK (Bring Your Own Key) support."),
-  xMcpAuthorization: z485__default.default.record(z485__default.default.string(), z485__default.default.string()).nullish().describe("X-MCP-AUTHORIZATION header (JSON-encoded map of MCP authorization headers)."),
-  xViewerSignature: z485__default.default.string().nullish().describe("X-VIEWER-SIGNATURE header for viewer authentication."),
-  xViewerAddress: z485__default.default.string().nullish().describe("X-VIEWER-ADDRESS header for viewer address."),
-  xCommitAuthorName: z485__default.default.string().nullish().describe("X-COMMIT-AUTHOR-NAME header for commit author name."),
-  xCommitAuthorEmail: z485__default.default.string().nullish().describe("X-COMMIT-AUTHOR-EMAIL header for commit author email."),
-  agentId: z485__default.default.string().nullish().describe(
+  authorization: z484__default.default.string().nullish().describe("API key for authentication. Falls back to OBJECTIVEAI_AUTHORIZATION env var."),
+  userAgent: z484__default.default.string().nullish().describe("User-Agent header. Falls back to USER_AGENT env var."),
+  httpReferer: z484__default.default.string().nullish().describe("HTTP-Referer header. Falls back to HTTP_REFERER env var."),
+  xTitle: z484__default.default.string().nullish().describe("X-Title header. Falls back to X_TITLE env var."),
+  xGithubAuthorization: z484__default.default.string().nullish().describe("X-GITHUB-AUTHORIZATION header for GitHub-hosted function/profile access."),
+  xOpenrouterAuthorization: z484__default.default.string().nullish().describe("X-OPENROUTER-AUTHORIZATION header for BYOK (Bring Your Own Key) support."),
+  xMcpAuthorization: z484__default.default.record(z484__default.default.string(), z484__default.default.string()).nullish().describe("X-MCP-AUTHORIZATION header (JSON-encoded map of MCP authorization headers)."),
+  xViewerSignature: z484__default.default.string().nullish().describe("X-VIEWER-SIGNATURE header for viewer authentication."),
+  xViewerAddress: z484__default.default.string().nullish().describe("X-VIEWER-ADDRESS header for viewer address."),
+  xCommitAuthorName: z484__default.default.string().nullish().describe("X-COMMIT-AUTHOR-NAME header for commit author name."),
+  xCommitAuthorEmail: z484__default.default.string().nullish().describe("X-COMMIT-AUTHOR-EMAIL header for commit author email."),
+  agentId: z484__default.default.string().nullish().describe(
     "X-OBJECTIVEAI-AGENT-ID header. Falls back to OBJECTIVEAI_AGENT_ID env var."
   ),
-  viewer: z485__default.default.boolean().nullish().describe(
+  viewer: z484__default.default.boolean().nullish().describe(
     "Route every HTTP request through the host viewer's `cli_run` Tauri command (via the `cli-invoke` postMessage) instead of `fetch()`. Requires running inside an objectiveai-viewer plugin iframe; the host spawns `objectiveai api \u2026` and streams its JSONL output back. Falls back to OBJECTIVEAI_VIEWER env var (any truthy value enables it)."
   )
 }).describe("Options for the ObjectiveAI client.");
-var RequestOptionsSchema = z485__default.default.object({
-  headers: z485__default.default.union([
-    z485__default.default.instanceof(Headers),
-    z485__default.default.record(z485__default.default.string(), z485__default.default.string()),
-    z485__default.default.array(z485__default.default.tuple([z485__default.default.string(), z485__default.default.string()]))
+var RequestOptionsSchema = z484__default.default.object({
+  headers: z484__default.default.union([
+    z484__default.default.instanceof(Headers),
+    z484__default.default.record(z484__default.default.string(), z484__default.default.string()),
+    z484__default.default.array(z484__default.default.tuple([z484__default.default.string(), z484__default.default.string()]))
   ]).nullish().describe("Additional headers to include in the request."),
-  signal: z485__default.default.instanceof(AbortSignal).nullish().describe("AbortSignal for cancelling the request.")
+  signal: z484__default.default.instanceof(AbortSignal).nullish().describe("AbortSignal for cancelling the request.")
 }).describe("Options for individual requests.");
 var ObjectiveAI = class {
   constructor(options) {
@@ -6808,7 +6801,6 @@ exports.CliPluginsPluginOutputSchema = CliPluginsPluginOutputSchema;
 exports.ClientObjectiveaiMcpClientRequestPayloadSchema = ClientObjectiveaiMcpClientRequestPayloadSchema;
 exports.ClientObjectiveaiMcpClientRequestRequestSchema = ClientObjectiveaiMcpClientRequestRequestSchema;
 exports.ClientObjectiveaiMcpClientResponseResponseSchema = ClientObjectiveaiMcpClientResponseResponseSchema;
-exports.ClientObjectiveaiMcpClientResponseResultSchema = ClientObjectiveaiMcpClientResponseResultSchema;
 exports.ClientObjectiveaiMcpServerRequestRequestSchema = ClientObjectiveaiMcpServerRequestRequestSchema;
 exports.ClientObjectiveaiMcpServerResponseResponseSchema = ClientObjectiveaiMcpServerResponseResponseSchema;
 exports.ErrorErrorCreateParamsSchema = ErrorErrorCreateParamsSchema;

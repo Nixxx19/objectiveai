@@ -19,17 +19,13 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
-    Result {
-        #[command(subcommand)]
-        command: GetCommand,
-    },
 }
 
 impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["Response", "Result"];
+                const NAMES: &[&str] = &["Response"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         agent_id: None,
@@ -43,18 +39,6 @@ impl Commands {
             Commands::Response { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/client_objectiveai_mcp.client_response.Response.json"),
-                ).expect("embedded JSON Schema must parse");
-                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
-                        value: objectiveai_sdk::cli::output::Schema { schema },
-                    },
-                ).emit(handle).await;
-                Ok(())
-            }
-            Commands::Result { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../../objectiveai-json-schema/client_objectiveai_mcp.client_response.Result.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
                     objectiveai_sdk::cli::output::Notification {

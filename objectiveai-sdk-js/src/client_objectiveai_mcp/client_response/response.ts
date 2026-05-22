@@ -4,12 +4,12 @@ import { z } from "zod";
 import { JsonValueSchema } from "../../jsonValue";
 
 export const ClientObjectiveaiMcpClientResponseResponseSchema = z.union([z.object({
+  id: z.string().describe("Matches the `id` of the\n[`super::super::client_request::Request`] this response is for."),
   type: z.literal("ok"),
-}).describe("Empty success — the request was accepted."), z.object({
+}).describe("Empty success — the request was accepted.").meta({"variantTitle":"client_objectiveai_mcp.client_response.Response.Ok"}), z.object({
   code: z.number().int().min(0).max(65535),
+  id: z.string().describe("Matches the `id` of the\n[`super::super::client_request::Request`] this response is for."),
   message: JsonValueSchema,
   type: z.literal("error"),
-}).describe("The request failed. With internally-tagged + struct-variant\nserde flattens the inner fields alongside the `type` tag —\ne.g. `{\"id\":\"…\",\"type\":\"error\",\"code\":404,\"message\":…}`.")]).and(z.object({
-  id: z.string().describe("Matches the `id` of the\n[`super::super::client_request::Request`] this response is for."),
-}).loose()).describe("Envelope: correlation `id` + tagged [`super::Result`]. Wire shape:\n\n```json\n{\"id\":\"…\",\"type\":\"ok\"}                         // empty success\n{\"id\":\"…\",\"type\":\"error\",\"code\":404,\"message\":…}  // failure\n```").meta({ title: "client_objectiveai_mcp.client_response.Response" });
+}).describe("The request failed.").meta({"variantTitle":"client_objectiveai_mcp.client_response.Response.Error"})]).describe("Reply to a [`super::super::client_request::Request`]. Wire shape:\n\n```json\n{\"id\":\"…\",\"type\":\"ok\"}                              // success\n{\"id\":\"…\",\"type\":\"error\",\"code\":404,\"message\":…}    // failure\n```\n\nThe internally-tagged enum keeps the wire flat — `id`, `type`,\nand any extra fields sit side-by-side on the JSON object — while\nkeeping the schema clean (no `anyOf`-with-sibling-properties\nstructural quirk that flattening an inner Result enum would\notherwise produce).").meta({ title: "client_objectiveai_mcp.client_response.Response" });
 export type ClientObjectiveaiMcpClientResponseResponse = z.infer<typeof ClientObjectiveaiMcpClientResponseResponseSchema>;

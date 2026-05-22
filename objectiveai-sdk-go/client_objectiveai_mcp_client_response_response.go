@@ -7,38 +7,127 @@ import (
 	"fmt"
 )
 
-// Envelope: correlation `id` + tagged [`super::Result`]. Wire shape:
-//
-// ```json
-// {"id":"…","type":"ok"}                         // empty success
-// {"id":"…","type":"error","code":404,"message":…}  // failure
-// ```
-type ClientObjectiveaiMcpClientResponseResponse struct {
+// Empty success — the request was accepted.
+type ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok struct {
 	// Matches the `id` of the
 	// [`super::super::client_request::Request`] this response is for.
 	ID string `json:"id"`
+	Type string `json:"type" validate:"oneof=ok"`
 }
 
-func (ClientObjectiveaiMcpClientResponseResponse) SchemaTitle() string { return "client_objectiveai_mcp.client_response.Response" }
-func (v ClientObjectiveaiMcpClientResponseResponse) Validate() error {
-	return variantValidator.Struct(v)
-}
-
-func (v *ClientObjectiveaiMcpClientResponseResponse) UnmarshalJSON(data []byte) error {
+func (v *ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok) UnmarshalJSON(data []byte) error {
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"id"} {
+	for _, key := range []string{"id", "type"} {
 		if _, ok := raw[key]; !ok {
-			return fmt.Errorf("ClientObjectiveaiMcpClientResponseResponse: missing required field %q", key)
+			return fmt.Errorf("ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok: missing required field %q", key)
 		}
 	}
-	type Alias ClientObjectiveaiMcpClientResponseResponse
+	type Alias ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok
 	var alias Alias
 	if err := json.Unmarshal(data, &alias); err != nil {
 		return err
 	}
-	*v = ClientObjectiveaiMcpClientResponseResponse(alias)
+	*v = ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok(alias)
 	return nil
 }
+func (ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok) SchemaVariantTitle() string { return "client_objectiveai_mcp.client_response.Response.Ok" }
+
+// The request failed.
+type ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error struct {
+	Code uint32 `json:"code" validate:"min=0,max=65535"`
+	// Matches the `id` of the
+	// [`super::super::client_request::Request`] this response is for.
+	ID string `json:"id"`
+	Message JsonValue `json:"message"`
+	Type string `json:"type" validate:"oneof=error"`
+}
+
+func (v *ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"code", "id", "message", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error: missing required field %q", key)
+		}
+	}
+	type Alias ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error(alias)
+	return nil
+}
+func (ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error) SchemaVariantTitle() string { return "client_objectiveai_mcp.client_response.Response.Error" }
+
+// Reply to a [`super::super::client_request::Request`]. Wire shape:
+//
+// ```json
+// {"id":"…","type":"ok"}                              // success
+// {"id":"…","type":"error","code":404,"message":…}    // failure
+// ```
+//
+// The internally-tagged enum keeps the wire flat — `id`, `type`,
+// and any extra fields sit side-by-side on the JSON object — while
+// keeping the schema clean (no `anyOf`-with-sibling-properties
+// structural quirk that flattening an inner Result enum would
+// otherwise produce).
+type ClientObjectiveaiMcpClientResponseResponse struct {
+	// Empty success — the request was accepted.
+	ClientObjectiveaiMcp.clientResponse.Response.Ok *ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok 
+	// The request failed.
+	ClientObjectiveaiMcp.clientResponse.Response.Error *ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error 
+}
+
+func (v ClientObjectiveaiMcpClientResponseResponse) MarshalJSON() ([]byte, error) {
+	if v.ClientObjectiveaiMcp.clientResponse.Response.Ok != nil {
+		return json.Marshal(v.ClientObjectiveaiMcp.clientResponse.Response.Ok)
+	}
+	if v.ClientObjectiveaiMcp.clientResponse.Response.Error != nil {
+		return json.Marshal(v.ClientObjectiveaiMcp.clientResponse.Response.Error)
+	}
+	return []byte("null"), nil
+}
+
+func (v *ClientObjectiveaiMcpClientResponseResponse) UnmarshalJSON(data []byte) error {
+	{
+		var try ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := ClientObjectiveaiMcpClientResponseResponse{}
+			candidate.ClientObjectiveaiMcp.clientResponse.Response.Ok = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := ClientObjectiveaiMcpClientResponseResponse{}
+			candidate.ClientObjectiveaiMcp.clientResponse.Response.Error = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	return fmt.Errorf("data did not match any variant of ClientObjectiveaiMcpClientResponseResponse")
+}
+
+func (v ClientObjectiveaiMcpClientResponseResponse) Validate() error {
+	count := 0
+	if v.ClientObjectiveaiMcp.clientResponse.Response.Ok != nil { count++ }
+	if v.ClientObjectiveaiMcp.clientResponse.Response.Error != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("ClientObjectiveaiMcpClientResponseResponse: exactly one variant must be set, got %d", count)
+	}
+	return variantValidator.Struct(v)
+}
+func (ClientObjectiveaiMcpClientResponseResponse) SchemaTitle() string { return "client_objectiveai_mcp.client_response.Response" }
+
