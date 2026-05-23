@@ -671,7 +671,9 @@ where
                     Result<
                         (
                             objectiveai_sdk::mcp::Connection,
-                            std::sync::Arc<Vec<objectiveai_sdk::mcp::tool::Tool>>,
+                            Option<
+                                std::sync::Arc<Vec<objectiveai_sdk::mcp::tool::Tool>>,
+                            >,
                         ),
                         std::sync::Arc<objectiveai_sdk::mcp::Error>,
                     >,
@@ -818,12 +820,20 @@ where
                 let session_id = internal_conn_for_resume
                     .as_ref()
                     .map(|c| c.session_id.clone());
+                // Only agents that declared `client_objectiveai_mcp`
+                // need a `list_tools` round-trip — they're the ones
+                // we have a declaration to validate against. Agents
+                // with only `mcp_servers` / `extra_mcp_servers` skip
+                // it and pay one fewer round-trip.
+                let needs_list_tools = agent.base().client_objectiveai_mcp().is_some();
                 // Combine connect + list_tools into one spawned task:
-                // the agent will need the tool list anyway to validate
-                // its `client_objectiveai_mcp` declaration, and doing
-                // it here lets all 20 agents' list_tools calls run
-                // concurrently. The filter-url header scopes the
-                // returned tools to the synthetic upstream only.
+                // every agent's task runs concurrently with every
+                // other agent's, so connects fan out in parallel
+                // AND (for agents that need it) list_tools fan out
+                // in parallel too — each task pipelines list_tools
+                // immediately after its own connect completes. The
+                // filter-url header scopes the returned tools to the
+                // synthetic upstream only.
                 //
                 // Error type is `Arc<mcp::Error>` because the SDK's
                 // `list_tools` returns shared-ref errors (the cached
@@ -835,7 +845,11 @@ where
                         .connect(proxy_url, session_id, Some(proxy_request_headers))
                         .await
                         .map_err(std::sync::Arc::new)?;
-                    let tools = conn.list_tools().await?;
+                    let tools = if needs_list_tools {
+                        Some(conn.list_tools().await?)
+                    } else {
+                        None
+                    };
                     Ok::<_, std::sync::Arc<objectiveai_sdk::mcp::Error>>((conn, tools))
                 }))
             })
@@ -852,8 +866,10 @@ where
                     Result<
                         (
                             objectiveai_sdk::mcp::Connection,
-                            std::sync::Arc<
-                                Vec<objectiveai_sdk::mcp::tool::Tool>,
+                            Option<
+                                std::sync::Arc<
+                                    Vec<objectiveai_sdk::mcp::tool::Tool>,
+                                >,
                             >,
                         ),
                         std::sync::Arc<objectiveai_sdk::mcp::Error>,
@@ -918,18 +934,25 @@ where
                     attempt_connect_done[idx] = true;
                     if let Some(handle) = attempt.connect_handle.take() {
                         match handle.await.unwrap() {
-                            Ok((conn, tools)) => {
+                            Ok((conn, tools_opt)) => {
                                 // Validate the agent's
                                 // `client_objectiveai_mcp.tools`
                                 // declaration against the actual
                                 // upstream tool list. Missing any
                                 // declared tool fails this attempt.
+                                // `tools_opt` is `Some` iff the agent
+                                // declared `client_objectiveai_mcp`
+                                // (we only paid for the round-trip
+                                // when there was a declaration to
+                                // validate).
                                 let declaration =
                                     attempt.agent.base().client_objectiveai_mcp();
                                 let mut missing: Option<
                                     objectiveai_sdk::agent::ClientObjectiveaiMcpEntry,
                                 > = None;
-                                if let Some(client_mcp) = declaration {
+                                if let (Some(client_mcp), Some(tools)) =
+                                    (declaration, tools_opt.as_ref())
+                                {
                                     let returned: Vec<&str> = tools
                                         .iter()
                                         .map(|t| t.name.as_ref())
