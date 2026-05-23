@@ -9,19 +9,14 @@
 //! JsonSchema output mode where every agent declares 10 entries in
 //! `client_objectiveai_mcp.tools` (no plugins, `objectiveai` field
 //! omitted). Driven through the CLI's `objectiveai api vector
-//! completions post --body-inline …` command with `stream: true` so
-//! the SSE-stamped CLI path is taken; deserializes each emitted
-//! JSONL chunk as a `VectorCompletionChunk`, aggregates via the
-//! SDK's `push` method, converts to the unary `VectorCompletion`
-//! shape, and `normalize_for_tests`-es to zero `id` / `created` and
-//! sort completions+votes for determinism.
-//!
-//! `client_objectiveai_mcp.tools` is content-hash-only metadata
-//! today — it influences the agent ID but does NOT instantiate a
-//! runtime MCP source, so `tool_calls` stays `null` on every
-//! completion. Wiring it into a live `mcp_connection` (via the
-//! `/objectiveai-mcp/{session_id}` reverse-attach endpoint) is
-//! deferred; see the plan in `.claude/plans/`.
+//! completions post --body-inline …` command. Streaming requests
+//! always go over WebSocket so the API can synthesize the per-agent
+//! `client_objectiveai_mcp` reverse-attach URLs and bridge MCP
+//! proxy traffic back to the CLI's `ConduitMcpHandler`.
+//! Deserializes each emitted JSONL chunk as a `VectorCompletionChunk`,
+//! aggregates via the SDK's `push` method, converts to the unary
+//! `VectorCompletion` shape, and `normalize_for_tests`-es to zero
+//! `id` / `created` and sort completions+votes for determinism.
 //!
 //! Set `UPDATE_VECTOR_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS=1` to (re)write
 //! the snapshot, matching the API integration suite's convention.
@@ -73,10 +68,8 @@ fn test_twenty_agents_json_schema_10x_tools_seed_42() {
         "responses": ["A", "B"],
         "swarm": {"remote": "mock", "name": "twenty-agents-json-schema-10x-tools"},
         "seed": 42,
-        // Streaming so the CLI takes the `send_streaming` path that
-        // stamps `X-Transport: sse` — the API's `/vector/completions`
-        // route only accepts that branch over HTTP (the other branch
-        // is the WS upgrade).
+        // `--ws` overrides this anyway, but kept for clarity since
+        // the WS path is conceptually streaming.
         "stream": true,
     })
     .to_string();

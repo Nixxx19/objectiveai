@@ -40,6 +40,7 @@ pub fn resolve_continuation(fields: ContinuationFields) -> Result<Option<String>
                 upstream: objectiveai_sdk::agent::openrouter::Upstream::Openrouter,
                 messages,
                 mcp_sessions: Default::default(),
+                ws_session_id: None,
             },
         );
         return Ok(Some(cont.to_string()));
@@ -52,6 +53,7 @@ pub fn resolve_continuation(fields: ContinuationFields) -> Result<Option<String>
                 upstream: objectiveai_sdk::agent::openrouter::Upstream::Openrouter,
                 messages,
                 mcp_sessions: Default::default(),
+                ws_session_id: None,
             },
         );
         return Ok(Some(cont.to_string()));
@@ -64,6 +66,7 @@ pub fn resolve_continuation(fields: ContinuationFields) -> Result<Option<String>
                 upstream: objectiveai_sdk::agent::openrouter::Upstream::Openrouter,
                 messages,
                 mcp_sessions: Default::default(),
+                ws_session_id: None,
             },
         );
         return Ok(Some(cont.to_string()));
@@ -81,6 +84,7 @@ pub fn resolve_continuation(fields: ContinuationFields) -> Result<Option<String>
                 upstream: objectiveai_sdk::agent::mock::Upstream::Mock,
                 messages,
                 mcp_sessions: Default::default(),
+                ws_session_id: None,
             },
         );
         return Ok(Some(cont.to_string()));
@@ -93,6 +97,7 @@ pub fn resolve_continuation(fields: ContinuationFields) -> Result<Option<String>
                 upstream: objectiveai_sdk::agent::mock::Upstream::Mock,
                 messages,
                 mcp_sessions: Default::default(),
+                ws_session_id: None,
             },
         );
         return Ok(Some(cont.to_string()));
@@ -105,6 +110,7 @@ pub fn resolve_continuation(fields: ContinuationFields) -> Result<Option<String>
                 upstream: objectiveai_sdk::agent::mock::Upstream::Mock,
                 messages,
                 mcp_sessions: Default::default(),
+                ws_session_id: None,
             },
         );
         return Ok(Some(cont.to_string()));
@@ -117,6 +123,7 @@ pub fn resolve_continuation(fields: ContinuationFields) -> Result<Option<String>
                 upstream: objectiveai_sdk::agent::claude_agent_sdk::Upstream::ClaudeAgentSdk,
                 session_id,
                 mcp_sessions: Default::default(),
+                ws_session_id: None,
             },
         );
         return Ok(Some(cont.to_string()));

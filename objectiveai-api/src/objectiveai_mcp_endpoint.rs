@@ -112,18 +112,18 @@ pub async fn handle_request(
     };
 
     // Translate the server_response::Response into an HTTP response.
+    // The URL path `session_id` is the WS reverse-channel routing
+    // key only — it is NOT the MCP session id. Each agent's MCP
+    // connection has its own remote-minted `Mcp-Session-Id` that
+    // flows transparently through the conduit's response back to
+    // the proxy. We pass the header through verbatim so the proxy's
+    // SDK client adopts the right id on `initialize` and stamps it
+    // on subsequent requests.
     let status = StatusCode::from_u16(server_resp.status)
         .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR);
     let mut builder = axum::response::Response::builder().status(status);
     let mut has_content_type = false;
     for (k, v) in &server_resp.headers {
-        // Drop any Mcp-Session-Id the handler returned — it belongs
-        // to a different layer (the CLI's local objectiveai-mcp
-        // session). We stamp our own below, derived from the URL
-        // path segment so the proxy gets the id it expects.
-        if k.eq_ignore_ascii_case("mcp-session-id") {
-            continue;
-        }
         if let Ok(value) = HeaderValue::from_str(v) {
             if k.eq_ignore_ascii_case("content-type") {
                 has_content_type = true;
@@ -135,13 +135,6 @@ pub async fn handle_request(
     // present and the handler didn't supply one of its own.
     if !has_content_type && server_resp.body.is_some() {
         builder = builder.header("Content-Type", "application/json");
-    }
-    // Always stamp `Mcp-Session-Id` with the URL session segment.
-    // The proxy's SDK client reads this on the initialize response;
-    // for subsequent requests the value doesn't change, but always
-    // sending it keeps the wire shape uniform.
-    if let Ok(value) = HeaderValue::from_str(&session_id) {
-        builder = builder.header("Mcp-Session-Id", value);
     }
 
     let body_bytes: Vec<u8> = match server_resp.body {

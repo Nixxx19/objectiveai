@@ -195,6 +195,19 @@ pub async fn fatal_setup_error(socket: &mut WebSocket, err: &ResponseError) {
     send_error_and_close(socket, err, close_code::ERROR).await;
 }
 
+/// Split-sink variant of [`fatal_setup_error`]. Used after the
+/// socket has already been split (which is the order the WS
+/// handlers now use so the reverse-attach guard can be built
+/// before stream creation).
+pub async fn fatal_setup_error_split(sink: &SharedSink, err: &ResponseError) {
+    let frame = serde_json::to_string(err).unwrap_or_else(|_| String::from("{}"));
+    {
+        let mut guard = sink.lock().await;
+        let _ = guard.send(Message::Text(frame.into())).await;
+    }
+    send_close_split(sink, close_code::ERROR).await;
+}
+
 // ────────────────────────────────────────────────────────────────────
 // Split-sink variants. Used by `_ws` handlers after splitting the
 // socket so the send-side (chunk forwarder) and recv-side (notify
@@ -277,14 +290,52 @@ pub struct ReverseAttachConfig {
     pub api_port: u16,
 }
 
-/// RAII guard: registers a fresh session_id -> [`ReverseChannel`]
-/// mapping on construction, removes it on drop. The `session_id` is
-/// owned by the guard so callers can clone it into URLs (e.g. the
-/// localhost objectiveai-mcp URL the agent client hands to the
-/// proxy) without worrying about lifetime.
-pub struct ReverseAttachGuard {
+/// Arc-shareable handle the agent client uses to register per-agent
+/// `ws_session_id`s against the current WS [`ReverseChannel`]. Many
+/// ids may map to one channel — one CLI WS upgrade can serve a swarm
+/// of N agents, each declaring `client_objectiveai_mcp` with its own
+/// stable `ws_session_id` (minted fresh for new agents, recovered
+/// from continuation for resuming ones). The owning
+/// [`ReverseAttachGuard`] removes every registered id on drop.
+pub struct ReverseAttachHandle {
     registry: ReverseChannelRegistry,
-    pub session_id: String,
+    channel: ReverseChannel,
+    registered: std::sync::Mutex<Vec<String>>,
+}
+
+impl std::fmt::Debug for ReverseAttachHandle {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let count = self
+            .registered
+            .try_lock()
+            .map(|g| g.len())
+            .unwrap_or(usize::MAX);
+        f.debug_struct("ReverseAttachHandle")
+            .field("registered_count", &count)
+            .finish_non_exhaustive()
+    }
+}
+
+impl ReverseAttachHandle {
+    /// Inserts `id -> channel` into the registry and tracks the id
+    /// for cleanup when the owning guard drops. Calling with the same
+    /// id twice is harmless (the registry just overwrites).
+    pub fn register(&self, id: String) {
+        self.registry
+            .insert(id.clone(), self.channel.clone());
+        self.registered.lock().unwrap().push(id);
+    }
+}
+
+/// RAII guard for one CLI WS upgrade. Owns the registration handle;
+/// when it drops, every id registered via the handle is removed from
+/// the [`ReverseChannelRegistry`]. `Arc` clones of the handle may
+/// outlive the guard (e.g. background usage-tracker tasks holding
+/// onto a copy of the ctx) — they observe a drained registration
+/// list and any further `register()` calls leak harmlessly until the
+/// last `Arc` drops.
+pub struct ReverseAttachGuard {
+    handle: Arc<ReverseAttachHandle>,
 }
 
 impl ReverseAttachGuard {
@@ -293,21 +344,28 @@ impl ReverseAttachGuard {
         sink: SharedSink,
         pending: PendingRequests,
     ) -> Self {
-        let session_id = uuid::Uuid::new_v4().to_string();
-        registry.insert(
-            session_id.clone(),
-            ReverseChannel { sink, pending },
-        );
-        Self {
+        let handle = Arc::new(ReverseAttachHandle {
             registry,
-            session_id,
-        }
+            channel: ReverseChannel { sink, pending },
+            registered: std::sync::Mutex::new(Vec::new()),
+        });
+        Self { handle }
+    }
+
+    /// Returns the shared handle the agent client should stamp on
+    /// the per-request `Context` so it can register ids from inside
+    /// the swarm-iteration site.
+    pub fn handle(&self) -> Arc<ReverseAttachHandle> {
+        self.handle.clone()
     }
 }
 
 impl Drop for ReverseAttachGuard {
     fn drop(&mut self) {
-        self.registry.remove(&self.session_id);
+        let ids = std::mem::take(&mut *self.handle.registered.lock().unwrap());
+        for id in ids {
+            self.handle.registry.remove(&id);
+        }
     }
 }
 

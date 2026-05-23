@@ -31,6 +31,10 @@ cleanup() {
     kill "$CLI_TEST_API_PID" 2>/dev/null || true
     wait "$CLI_TEST_API_PID" 2>/dev/null || true
   fi
+  if [ -n "${CLI_TEST_MCP_PID:-}" ]; then
+    kill "$CLI_TEST_MCP_PID" 2>/dev/null || true
+    wait "$CLI_TEST_MCP_PID" 2>/dev/null || true
+  fi
 }
 trap cleanup EXIT INT TERM
 cleanup  # start from a clean slate as well
@@ -49,6 +53,15 @@ done
 if [ -z "${OBJECTIVEAI_TEST_PORT:-}" ]; then
   read -r PORT CLI_TEST_API_PID < <(bash "$REPO_ROOT/test-spawn-api-server.sh" 2>>"$LOG_FILE")
   export OBJECTIVEAI_TEST_PORT="$PORT"
+fi
+
+# Spawn the test MCP filesystem server only if not already provided.
+# Required for the snapshot tests that exercise `client_objectiveai_mcp`
+# reverse-attach: the CLI's `ConduitMcpHandler` dials this URL on every
+# inbound `server_request` from the API's MCP proxy.
+if [ -z "${OBJECTIVEAI_MCP_ADDRESS:-}" ]; then
+  read -r MCP_URL CLI_TEST_MCP_PID < <(bash "$REPO_ROOT/test-spawn-mcp-server.sh" 2>>"$LOG_FILE")
+  export OBJECTIVEAI_MCP_ADDRESS="$MCP_URL"
 fi
 
 # Run tests, capture all output

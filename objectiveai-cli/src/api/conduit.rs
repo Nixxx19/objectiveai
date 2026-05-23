@@ -6,30 +6,45 @@
 //! `OBJECTIVEAI_MCP_PORT`), parsed the same way
 //! `objectiveai-cli/src/api/client.rs` parses the API endpoint.
 //!
-//! On the first inbound `server_request` the handler dials the
-//! remote MCP via `objectiveai_sdk::mcp::Client::connect`, with
-//! that request's headers forwarded as-is. The resulting
-//! [`Connection`] is held in an Arc'd Mutex inside the handler and
-//! reused for every subsequent forwarded request — so all calls
-//! that share a handler instance share one MCP session.
+//! One handler instance serves one CLI WS connection. The handler
+//! keeps a [`DashMap`] of `Mcp-Session-Id` → [`Connection`] so that
+//! the proxy on the API side can run *multiple* independent MCP
+//! sessions over the single reverse-attach socket — one per agent
+//! in a swarm, since each agent owns its own MCP connection.
 //!
-//! Dispatch:
+//! Dispatch on an inbound `server_request`:
+//! - **No `Mcp-Session-Id` header (fresh `initialize`).** Dial the
+//!   remote with `session_id = None`; the remote mints one and we
+//!   key the new [`Connection`] under it. The synthesized
+//!   `initialize` response stamps that id back in the response
+//!   `Mcp-Session-Id` header so the proxy adopts it.
+//! - **Header present + already in the map.** Reuse the cached
+//!   [`Connection`].
+//! - **Header present + not in the map (continuation resume).**
+//!   Dial the remote with `session_id = Some(incoming)`. The SDK
+//!   handles the resume branch — many servers don't echo the
+//!   header back on resume, so the SDK falls back to the caller's
+//!   provided id. Key the new [`Connection`] under that id.
+//!
+//! Then:
 //! - `initialize` → synthesize from `connection.initialize_result`
-//!   (the SDK already handshook). Strip
+//!   (the SDK already handshook on `connect`). Strip
 //!   `{tools,resources}.listChanged` from advertised capabilities
 //!   so the proxy never subscribes — the chain stays single-shot.
+//!   Stamp `Mcp-Session-Id: <connection.session_id>` on the
+//!   response so the proxy picks up the remote-minted id.
 //! - notifications (no `id`) → 202 Accepted, no body, never round-trip.
 //! - everything else → raw POST through `connection.http_client` +
 //!   `connection.url` + `connection.session_id`. Response parsed by
 //!   [`parse_json_or_sse`] (rmcp's `StreamableHttpService` may pick
 //!   either shape).
 
+use dashmap::DashMap;
 use indexmap::IndexMap;
 use objectiveai_sdk::client_objectiveai_mcp::{server_request, server_response};
 use objectiveai_sdk::http::McpHandler;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::sync::Mutex;
 
 struct ConduitState {
     connection: objectiveai_sdk::mcp::Connection,
@@ -47,7 +62,11 @@ struct Inner {
     /// would.
     mcp_url: Option<String>,
     client: objectiveai_sdk::mcp::Client,
-    state: Mutex<Option<Arc<ConduitState>>>,
+    /// One [`Connection`] per remote MCP session id. Populated lazily
+    /// — fresh `initialize` requests mint a new entry; subsequent
+    /// requests look up by the `Mcp-Session-Id` header the proxy
+    /// stamps.
+    connections: DashMap<String, Arc<ConduitState>>,
 }
 
 impl ConduitMcpHandler {
@@ -75,7 +94,7 @@ impl ConduitMcpHandler {
             inner: Arc::new(Inner {
                 mcp_url,
                 client,
-                state: Mutex::new(None),
+                connections: DashMap::new(),
             }),
         }
     }
@@ -89,30 +108,51 @@ impl McpHandler for ConduitMcpHandler {
             return reject_no_mcp(id_for_err);
         };
 
-        // Lazy connect on first call.
-        let state = {
-            let mut guard = self.inner.state.lock().await;
-            match guard.as_ref() {
-                Some(s) => s.clone(),
-                None => {
-                    let mut connect_headers = request.headers.clone();
-                    // Hop-by-hop and layer-internal: don't propagate to MCP.
-                    for k in ["Host", "host", "Content-Length", "content-length",
-                              "Mcp-Session-Id", "mcp-session-id"] {
-                        connect_headers.shift_remove(k);
-                    }
-                    let connection = match self
-                        .inner
-                        .client
-                        .connect(mcp_url.clone(), None, Some(connect_headers))
+        // Case-insensitive lookup of the proxy-stamped Mcp-Session-Id.
+        let incoming_session_id: Option<String> = request
+            .headers
+            .iter()
+            .find_map(|(k, v)| {
+                k.eq_ignore_ascii_case("mcp-session-id").then(|| v.clone())
+            });
+
+        let state = match &incoming_session_id {
+            Some(sid) => {
+                if let Some(existing) = self.inner.connections.get(sid) {
+                    existing.clone()
+                } else {
+                    // Resume branch: the proxy already knew this
+                    // session id (e.g. from a stored continuation).
+                    // Dial the remote with it; the SDK accepts the
+                    // existing-session branch where the server
+                    // doesn't echo Mcp-Session-Id back.
+                    match self
+                        .dial(mcp_url.clone(), Some(sid.clone()), &request.headers)
                         .await
                     {
-                        Ok(c) => c,
-                        Err(e) => return conduit_error(id_for_err, format!("connect: {e}")),
-                    };
-                    let st = Arc::new(ConduitState { connection });
-                    *guard = Some(st.clone());
-                    st
+                        Ok(st) => {
+                            self.inner.connections.insert(sid.clone(), st.clone());
+                            st
+                        }
+                        Err(e) => {
+                            return conduit_error(id_for_err, format!("connect (resume): {e}"));
+                        }
+                    }
+                }
+            }
+            None => {
+                // Fresh branch: no session id from the proxy —
+                // remote mints one on initialize.
+                match self.dial(mcp_url.clone(), None, &request.headers).await {
+                    Ok(st) => {
+                        self.inner
+                            .connections
+                            .insert(st.connection.session_id.clone(), st.clone());
+                        st
+                    }
+                    Err(e) => {
+                        return conduit_error(id_for_err, format!("connect: {e}"));
+                    }
                 }
             }
         };
@@ -122,6 +162,41 @@ impl McpHandler for ConduitMcpHandler {
             Err(e) => conduit_error(id_for_err, e.to_string()),
         }
     }
+}
+
+impl ConduitMcpHandler {
+    async fn dial(
+        &self,
+        url: String,
+        session_id: Option<String>,
+        request_headers: &IndexMap<String, String>,
+    ) -> Result<Arc<ConduitState>, objectiveai_sdk::mcp::Error> {
+        let connect_headers = sanitize_connect_headers(request_headers);
+        let connection = self
+            .inner
+            .client
+            .connect(url, session_id, Some(connect_headers))
+            .await?;
+        Ok(Arc::new(ConduitState { connection }))
+    }
+}
+
+/// Hop-by-hop and layer-internal headers don't propagate to MCP.
+fn sanitize_connect_headers(
+    headers: &IndexMap<String, String>,
+) -> IndexMap<String, String> {
+    let mut out = headers.clone();
+    for k in [
+        "Host",
+        "host",
+        "Content-Length",
+        "content-length",
+        "Mcp-Session-Id",
+        "mcp-session-id",
+    ] {
+        out.shift_remove(k);
+    }
+    out
 }
 
 async fn forward(
@@ -150,7 +225,8 @@ async fn forward(
     }
 
     // `initialize`: synthesize from the SDK Connection's cached
-    // InitializeResult; don't re-handshake.
+    // InitializeResult; don't re-handshake. Stamp the remote-minted
+    // session id on the response so the proxy adopts it.
     if rpc_method.as_deref() == Some("initialize") {
         let mut init_value = serde_json::to_value(&state.connection.initialize_result)
             .map_err(ConduitError::Serialize)?;
@@ -171,10 +247,15 @@ async fn forward(
             "id": rpc_id.unwrap(),
             "result": init_value,
         });
+        let mut headers = IndexMap::new();
+        headers.insert(
+            "Mcp-Session-Id".to_string(),
+            state.connection.session_id.clone(),
+        );
         return Ok(server_response::Response {
             id: request.id,
             status: 200,
-            headers: IndexMap::new(),
+            headers,
             body: Some(body),
         });
     }

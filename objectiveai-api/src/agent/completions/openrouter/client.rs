@@ -411,6 +411,7 @@ impl UpstreamClient<objectiveai_sdk::agent::openrouter::Agent, objectiveai_sdk::
             upstream: objectiveai_sdk::agent::openrouter::Upstream::default(),
             messages: all_messages,
             mcp_sessions,
+            ws_session_id: None,
         }
     }
 }

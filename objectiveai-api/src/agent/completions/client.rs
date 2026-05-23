@@ -625,6 +625,46 @@ where
             })
             .collect();
 
+        // Resolve a per-agent `ws_session_id` for any agent that
+        // declares `client_objectiveai_mcp`. For the primary agent
+        // (the first in `filtered_agents`), if the incoming
+        // `request_continuation` carries a `ws_session_id` we reuse
+        // it — that keeps the proxy URL in `mcp_sessions` valid
+        // across resumes. For everything else (fallbacks, fresh
+        // primaries) we mint a UUID per agent so the proxy's
+        // URL-keyed session cache treats each agent as its own MCP
+        // connection. Each resolved id is registered against the
+        // current WS `ReverseAttachHandle` (when present) so the
+        // `/objectiveai-mcp/{ws_session_id}` endpoint routes to
+        // this in-flight WS.
+        let resumed_ws_session_id: Option<String> = request_continuation
+            .as_ref()
+            .and_then(|c| c.ws_session_id())
+            .map(|s| s.to_string());
+        let agent_ws_session_ids: Vec<Option<String>> = filtered_agents
+            .iter()
+            .enumerate()
+            .map(|(i, agent)| {
+                if agent.base().client_objectiveai_mcp().is_none() {
+                    return None;
+                }
+                let handle = match (ctx.api_port(), ctx.reverse_attach()) {
+                    (Some(_), Some(h)) => h.clone(),
+                    _ => return None,
+                };
+                let id = if i == 0 {
+                    resumed_ws_session_id
+                        .clone()
+                        .unwrap_or_else(|| uuid::Uuid::new_v4().to_string())
+                } else {
+                    uuid::Uuid::new_v4().to_string()
+                };
+                handle.register(id.clone());
+                Some(id)
+            })
+            .collect();
+        let api_port_for_synth = ctx.api_port();
+
         let connect_handles: Vec<
             Option<
                 tokio::task::JoinHandle<
@@ -634,7 +674,8 @@ where
         > = filtered_agents
             .iter()
             .zip(composite_agent_ids.iter())
-            .map(|(agent, composite_agent_id)| {
+            .zip(agent_ws_session_ids.iter())
+            .map(|((agent, composite_agent_id), agent_ws_session_id)| {
                 // Build the per-agent X-MCP-* header set: the agent's
                 // declared `mcp_servers` plus any caller-supplied
                 // `extra_mcp_servers` (e.g. the function-inventions
@@ -647,6 +688,27 @@ where
                     .map(|s| s.iter().map(|s| s.url.clone()).collect())
                     .unwrap_or_default();
                 urls.extend(extra_mcp_servers.iter().map(|s| s.url.clone()));
+
+                // If the agent declares `client_objectiveai_mcp`,
+                // append a synthetic URL that points back at this
+                // very API process's `/objectiveai-mcp/{ws_session_id}`
+                // endpoint. The proxy will dial it; the API forwards
+                // each request over the WS reverse channel registered
+                // under that ws_session_id; the CLI conduit on the
+                // other side picks per-agent MCP connections out of
+                // its `Mcp-Session-Id` DashMap.
+                let client_mcp_synthetic_url: Option<String> = match (
+                    agent_ws_session_id.as_deref(),
+                    api_port_for_synth,
+                ) {
+                    (Some(ws_session_id), Some(api_port)) => Some(format!(
+                        "http://127.0.0.1:{api_port}/objectiveai-mcp/{ws_session_id}"
+                    )),
+                    _ => None,
+                };
+                if let Some(ref url) = client_mcp_synthetic_url {
+                    urls.push(url.clone());
+                }
 
                 // No MCP servers → no proxy
                 // connection needed for this agent. Skipping the spawn
@@ -697,6 +759,27 @@ where
                             entry.insert(k.clone(), v.clone());
                         }
                     }
+                }
+                // For the synthetic `client_objectiveai_mcp` URL,
+                // attach the declaration as a header so the CLI's
+                // conduit (or any real client) can see what tools
+                // the agent expects the calling client to expose.
+                // Encoded as base64url-no-pad to keep it header-safe.
+                if let (Some(url), Some(client_mcp)) = (
+                    client_mcp_synthetic_url.as_ref(),
+                    agent.base().client_objectiveai_mcp(),
+                ) {
+                    use base64::Engine;
+                    let serialized = serde_json::to_string(client_mcp).unwrap_or_default();
+                    let encoded = base64::engine::general_purpose::URL_SAFE_NO_PAD
+                        .encode(serialized);
+                    let entry = per_url_headers
+                        .entry(url.clone())
+                        .or_insert_with(|| extra_mcp_headers.clone());
+                    entry.insert(
+                        "X-Objectiveai-Client-Mcp".to_string(),
+                        encoded,
+                    );
                 }
 
                 let proxy_request_headers: indexmap::IndexMap<String, String> =
@@ -795,7 +878,10 @@ where
                 // session needed); only skip when the agent declared
                 // servers and the connect failed.
                 let agent_needs_mcp = attempt.agent.base().mcp_servers().is_some()
-                    || !extra_mcp_servers.is_empty();
+                    || !extra_mcp_servers.is_empty()
+                    || (attempt.agent.base().client_objectiveai_mcp().is_some()
+                        && ctx.api_port().is_some()
+                        && ctx.reverse_attach().is_some());
                 let mcp_connection: Option<objectiveai_sdk::mcp::Connection> =
                     attempt_connections[idx].clone();
                 if agent_needs_mcp && mcp_connection.is_none() {

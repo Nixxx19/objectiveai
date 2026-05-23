@@ -124,7 +124,24 @@ pub(crate) async fn create_agent_completion_ws(
                     return;
                 }
             };
-        let ctx = crate::context(&headers, persistent_cache, suppress_output);
+        // Build the reverse-attach plumbing BEFORE the stream so the
+        // agent client can register per-agent `ws_session_id`s
+        // (synthesized for `client_objectiveai_mcp` URLs) against
+        // this WS's reverse channel from inside its swarm-iteration
+        // site. The guard is held for the entire `on_upgrade` async
+        // block — when it drops, all registered ids are removed.
+        let tracker = streaming_ws::SessionTracker::new();
+        let pending = streaming_ws::new_pending_requests();
+        let (tx, rx) = socket.split();
+        let sink: streaming_ws::SharedSink = Arc::new(tokio::sync::Mutex::new(tx));
+        let _attach_guard = streaming_ws::ReverseAttachGuard::new(
+            reverse_attach.registry.clone(),
+            sink.clone(),
+            pending.clone(),
+        );
+        let ctx = crate::context(&headers, persistent_cache, suppress_output)
+            .with_api_port(reverse_attach.api_port)
+            .with_reverse_attach(_attach_guard.handle());
         let notify_client = client.clone();
         let stream = match client
             .create_streaming_handle_usage(
@@ -145,20 +162,10 @@ pub(crate) async fn create_agent_completion_ws(
         {
             Ok(s) => s,
             Err(e) => {
-                streaming_ws::fatal_setup_error(&mut socket, &ResponseError::from(&e)).await;
+                streaming_ws::fatal_setup_error_split(&sink, &ResponseError::from(&e)).await;
                 return;
             }
         };
-
-        let tracker = streaming_ws::SessionTracker::new();
-        let pending = streaming_ws::new_pending_requests();
-        let (tx, rx) = socket.split();
-        let sink: streaming_ws::SharedSink = Arc::new(tokio::sync::Mutex::new(tx));
-        let _attach_guard = streaming_ws::ReverseAttachGuard::new(
-            reverse_attach.registry.clone(),
-            sink.clone(),
-            pending.clone(),
-        );
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -254,15 +261,6 @@ where
                     return;
                 }
             };
-        let ctx = crate::context(&headers, persistent_cache, suppress_output);
-        let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error(&mut socket, &ResponseError::from(&e)).await;
-                return;
-            }
-        };
-
         let tracker = streaming_ws::SessionTracker::new();
         let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
@@ -272,6 +270,16 @@ where
             sink.clone(),
             pending.clone(),
         );
+        let ctx = crate::context(&headers, persistent_cache, suppress_output)
+            .with_api_port(reverse_attach.api_port)
+            .with_reverse_attach(_attach_guard.handle());
+        let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
+            Ok(s) => s,
+            Err(e) => {
+                streaming_ws::fatal_setup_error_split(&sink, &ResponseError::from(&e)).await;
+                return;
+            }
+        };
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -367,15 +375,6 @@ where
                     return;
                 }
             };
-        let ctx = crate::context(&headers, persistent_cache, suppress_output);
-        let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error(&mut socket, &ResponseError::from(&e)).await;
-                return;
-            }
-        };
-
         let tracker = streaming_ws::SessionTracker::new();
         let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
@@ -385,6 +384,16 @@ where
             sink.clone(),
             pending.clone(),
         );
+        let ctx = crate::context(&headers, persistent_cache, suppress_output)
+            .with_api_port(reverse_attach.api_port)
+            .with_reverse_attach(_attach_guard.handle());
+        let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
+            Ok(s) => s,
+            Err(e) => {
+                streaming_ws::fatal_setup_error_split(&sink, &ResponseError::from(&e)).await;
+                return;
+            }
+        };
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -453,15 +462,6 @@ where
                     return;
                 }
             };
-        let ctx = crate::context(&headers, persistent_cache, suppress_output);
-        let stream = match client.create_streaming(ctx, Arc::new(body)).await {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error(&mut socket, &e).await;
-                return;
-            }
-        };
-
         let tracker = streaming_ws::SessionTracker::new();
         let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
@@ -471,6 +471,16 @@ where
             sink.clone(),
             pending.clone(),
         );
+        let ctx = crate::context(&headers, persistent_cache, suppress_output)
+            .with_api_port(reverse_attach.api_port)
+            .with_reverse_attach(_attach_guard.handle());
+        let stream = match client.create_streaming(ctx, Arc::new(body)).await {
+            Ok(s) => s,
+            Err(e) => {
+                streaming_ws::fatal_setup_error_split(&sink, &e).await;
+                return;
+            }
+        };
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -584,15 +594,6 @@ where
                     return;
                 }
             };
-        let ctx = crate::context(&headers, persistent_cache, suppress_output);
-        let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error(&mut socket, &ResponseError::from(&e)).await;
-                return;
-            }
-        };
-
         let tracker = streaming_ws::SessionTracker::new();
         let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
@@ -602,6 +603,16 @@ where
             sink.clone(),
             pending.clone(),
         );
+        let ctx = crate::context(&headers, persistent_cache, suppress_output)
+            .with_api_port(reverse_attach.api_port)
+            .with_reverse_attach(_attach_guard.handle());
+        let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
+            Ok(s) => s,
+            Err(e) => {
+                streaming_ws::fatal_setup_error_split(&sink, &ResponseError::from(&e)).await;
+                return;
+            }
+        };
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -698,15 +709,6 @@ where
                     return;
                 }
             };
-        let ctx = crate::context(&headers, persistent_cache, suppress_output);
-        let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error(&mut socket, &ResponseError::from(&e)).await;
-                return;
-            }
-        };
-
         let tracker = streaming_ws::SessionTracker::new();
         let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
@@ -716,6 +718,16 @@ where
             sink.clone(),
             pending.clone(),
         );
+        let ctx = crate::context(&headers, persistent_cache, suppress_output)
+            .with_api_port(reverse_attach.api_port)
+            .with_reverse_attach(_attach_guard.handle());
+        let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
+            Ok(s) => s,
+            Err(e) => {
+                streaming_ws::fatal_setup_error_split(&sink, &ResponseError::from(&e)).await;
+                return;
+            }
+        };
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
@@ -784,15 +796,6 @@ where
                     return;
                 }
             };
-        let ctx = crate::context(&headers, persistent_cache, suppress_output);
-        let stream = match client.create_streaming(&ctx, &body) {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error(&mut socket, &e).await;
-                return;
-            }
-        };
-
         // Error stream doesn't carry agent-completion ids; tracker stays
         // empty, every incoming notify will validation-fail with 404.
         let tracker = streaming_ws::SessionTracker::new();
@@ -804,6 +807,16 @@ where
             sink.clone(),
             pending.clone(),
         );
+        let ctx = crate::context(&headers, persistent_cache, suppress_output)
+            .with_api_port(reverse_attach.api_port)
+            .with_reverse_attach(_attach_guard.handle());
+        let stream = match client.create_streaming(&ctx, &body) {
+            Ok(s) => s,
+            Err(e) => {
+                streaming_ws::fatal_setup_error_split(&sink, &e).await;
+                return;
+            }
+        };
 
         let send_sink = sink.clone();
         let send = async move {
@@ -911,18 +924,6 @@ where
                     return;
                 }
             };
-        let ctx = crate::context(&headers, persistent_cache, suppress_output);
-        let stream = match client
-            .create_streaming_handle_usage(ctx, Arc::new(request))
-            .await
-        {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error(&mut socket, &ResponseError::from(&e)).await;
-                return;
-            }
-        };
-
         let tracker = streaming_ws::SessionTracker::new();
         let pending = streaming_ws::new_pending_requests();
         let (tx, rx) = socket.split();
@@ -932,6 +933,19 @@ where
             sink.clone(),
             pending.clone(),
         );
+        let ctx = crate::context(&headers, persistent_cache, suppress_output)
+            .with_api_port(reverse_attach.api_port)
+            .with_reverse_attach(_attach_guard.handle());
+        let stream = match client
+            .create_streaming_handle_usage(ctx, Arc::new(request))
+            .await
+        {
+            Ok(s) => s,
+            Err(e) => {
+                streaming_ws::fatal_setup_error_split(&sink, &ResponseError::from(&e)).await;
+                return;
+            }
+        };
 
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();

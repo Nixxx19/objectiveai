@@ -21,6 +21,7 @@ fn test_empty_messages_no_continuation() {
         upstream: objectiveai_sdk::agent::mock::Upstream::Mock,
         messages: vec![],
         mcp_sessions: indexmap::IndexMap::new(),
+        ws_session_id: None,
     });
 }
 
@@ -48,6 +49,7 @@ fn test_messages_only() {
             }),
         ],
         mcp_sessions: indexmap::IndexMap::new(),
+        ws_session_id: None,
     });
 }
 
@@ -93,6 +95,7 @@ fn test_messages_with_continuation() {
             }),
         ],
         mcp_sessions: indexmap::IndexMap::new(),
+        ws_session_id: None,
     });
 }
 
@@ -118,6 +121,7 @@ fn test_request_continuation_messages_come_first() {
             }),
         ],
         mcp_sessions: indexmap::IndexMap::new(),
+        ws_session_id: None,
     };
     let result = client.response_continuation(
         indexmap::IndexMap::new(),
@@ -142,6 +146,7 @@ fn test_request_continuation_messages_come_first() {
             }),
         ],
         mcp_sessions: indexmap::IndexMap::new(),
+        ws_session_id: None,
     });
 }
 

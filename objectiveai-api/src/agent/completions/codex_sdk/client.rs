@@ -511,6 +511,7 @@ impl
             upstream: objectiveai_sdk::agent::codex_sdk::Upstream::default(),
             thread_id,
             mcp_sessions,
+            ws_session_id: None,
         }
     }
 }

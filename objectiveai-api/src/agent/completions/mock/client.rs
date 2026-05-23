@@ -518,6 +518,7 @@ impl UpstreamClient<objectiveai_sdk::agent::mock::Agent, objectiveai_sdk::agent:
             upstream: objectiveai_sdk::agent::mock::Upstream::default(),
             messages: all_messages,
             mcp_sessions,
+            ws_session_id: None,
         }
     }
 }
