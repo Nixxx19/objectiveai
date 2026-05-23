@@ -165,3 +165,35 @@ impl Handle {
         }
     }
 }
+
+/// Reverse of [`Handle::emit`]'s `agent_id` stamping: walks each
+/// newline-delimited line in `text`, tries to parse it as a JSON
+/// object, and removes the top-level `"agent_id"` key. Lines that
+/// aren't valid JSON pass through unchanged. Preserves the trailing
+/// newline if the original had one (the emit envelope always ends
+/// with `\n`, so matching that keeps re-stripped bodies stable).
+///
+/// Used by test-mode response collectors (e.g. the MCP server's
+/// `TEST_MODE` strip) and snapshot normalizers to keep the racy
+/// `agent_id` counter out of test artefacts. **Never use this on
+/// production wire output** — callers depend on the agent_id stamp
+/// for cross-process correlation.
+pub fn strip_agent_id_lines(text: &str) -> String {
+    let mut out: String = text
+        .lines()
+        .map(|line| match serde_json::from_str::<serde_json::Value>(line) {
+            Ok(mut v) => {
+                if let Some(obj) = v.as_object_mut() {
+                    obj.remove("agent_id");
+                }
+                serde_json::to_string(&v).unwrap_or_else(|_| line.to_string())
+            }
+            Err(_) => line.to_string(),
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    if text.ends_with('\n') {
+        out.push('\n');
+    }
+    out
+}

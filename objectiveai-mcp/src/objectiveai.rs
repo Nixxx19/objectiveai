@@ -39,6 +39,10 @@ pub struct ToolRequest {
 pub struct ObjectiveAiMcpCli {
     pub tool_router: ToolRouter<Self>,
     pub cli_config: Arc<objectiveai_cli::Config>,
+    /// When `true`, [`run_cli_and_collect`] strips `agent_id` from
+    /// every JSON line in the response body. Set via the `TEST_MODE`
+    /// env var at startup. Off in production.
+    pub test_mode: bool,
 }
 
 #[tool_router]
@@ -58,6 +62,7 @@ impl ObjectiveAiMcpCli {
         cli_config: Arc<objectiveai_cli::Config>,
         plugins: Vec<PluginManifest>,
         tools: Vec<ToolManifest>,
+        test_mode: bool,
     ) -> Self {
         let mut tool_router = Self::tool_router();
         for plugin in plugins {
@@ -88,7 +93,7 @@ impl ObjectiveAiMcpCli {
                             .into_iter()
                             .chain(req.args.into_iter())
                             .collect();
-                    let buf = run_cli_and_collect(&cli_config, &parts, args).await;
+                    let buf = run_cli_and_collect(&cli_config, &parts, args, test_mode).await;
                     Ok(CallToolResult::success(vec![Content::text(buf)]))
                 }
                 .boxed()
@@ -122,7 +127,7 @@ impl ObjectiveAiMcpCli {
                             .into_iter()
                             .chain(req.args.into_iter())
                             .collect();
-                    let buf = run_cli_and_collect(&cli_config, &parts, args).await;
+                    let buf = run_cli_and_collect(&cli_config, &parts, args, test_mode).await;
                     Ok(CallToolResult::success(vec![Content::text(buf)]))
                 }
                 .boxed()
@@ -131,6 +136,7 @@ impl ObjectiveAiMcpCli {
         Self {
             tool_router,
             cli_config,
+            test_mode,
         }
     }
 
@@ -146,19 +152,24 @@ impl ObjectiveAiMcpCli {
         let args: Vec<String> = std::iter::once("objectiveai".to_string())
             .chain(req.command)
             .collect();
-        run_cli_and_collect(&self.cli_config, &parts, args).await
+        run_cli_and_collect(&self.cli_config, &parts, args, self.test_mode).await
     }
 }
 
 /// Run the ObjectiveAI CLI in-process with `args`, collecting every
 /// JSONL `Output` into a single response body. Applies the
 /// per-request `X-OBJECTIVEAI-AGENT-ID` header override (clones the
-/// server-wide `cli_config` so concurrent requests stay independent)
-/// and appends an `exit code: N` line when the CLI exits non-zero.
+/// server-wide `cli_config` so concurrent requests stay independent).
+///
+/// When `test_mode` is `true`, the final body has `agent_id`
+/// scrubbed from every JSON line — gated so production callers
+/// still see the cross-process correlation stamp. See the
+/// `TEST_MODE` env var in `run.rs`.
 async fn run_cli_and_collect(
     cli_config: &Arc<objectiveai_cli::Config>,
     parts: &Parts,
     args: Vec<String>,
+    test_mode: bool,
 ) -> String {
     // Per-request: if the caller sent X-OBJECTIVEAI-AGENT-ID,
     // override the server-wide cli_config.agent_id for this
@@ -197,6 +208,9 @@ async fn run_cli_and_collect(
             Err(e) => buf.push_str(&format!("error serializing output: {e}")),
         }
         buf.push('\n');
+    }
+    if test_mode {
+        buf = objectiveai_sdk::cli::output::strip_agent_id_lines(&buf);
     }
     buf
 }

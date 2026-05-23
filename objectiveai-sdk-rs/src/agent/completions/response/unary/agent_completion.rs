@@ -93,11 +93,11 @@ impl AgentCompletion {
     }
 }
 
-/// For each newline-delimited line in `text`, try to parse as a JSON
-/// object and remove the top-level `agent_id` key. Lines that aren't
-/// valid JSON are emitted unchanged. Preserves the trailing newline
-/// if the input had one — the CLI's emit envelope always terminates
-/// with `\n`, and matching that keeps re-stripped bodies stable.
+/// Private mirror of `cli::output::strip_agent_id_lines` for use inside
+/// `normalize_for_tests`. The shared public copy lives behind the
+/// `cli` feature flag and the SDK core builds without that feature,
+/// so we keep a small local duplicate here. ~15 lines, no shared
+/// state, no drift risk.
 fn strip_agent_id_lines(text: &str) -> String {
     let mut out: String = text
         .lines()
