@@ -3,7 +3,8 @@ use std::sync::Arc;
 
 use futures::FutureExt;
 use http::request::Parts;
-use objectiveai_sdk::filesystem::plugins::ManifestWithNameAndSource;
+use objectiveai_sdk::filesystem::plugins::ManifestWithNameAndSource as PluginManifest;
+use objectiveai_sdk::filesystem::tools::ManifestWithNameAndSource as ToolManifest;
 use rmcp::{
     ServerHandler,
     handler::server::router::tool::{ToolRoute, ToolRouter},
@@ -28,6 +29,12 @@ pub struct PluginRequest {
     pub args: Vec<String>,
 }
 
+#[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
+pub struct ToolRequest {
+    #[schemars(description = "Args forwarded to the tool's argv (prefixed automatically with `tools <name>` when invoking the CLI).")]
+    pub args: Vec<String>,
+}
+
 #[derive(Debug, Clone)]
 pub struct ObjectiveAiMcpCli {
     pub tool_router: ToolRouter<Self>,
@@ -36,20 +43,24 @@ pub struct ObjectiveAiMcpCli {
 
 #[tool_router]
 impl ObjectiveAiMcpCli {
-    /// Build a handler with one dynamic tool per discovered plugin in
-    /// addition to the static `ObjectiveAI` catch-all. Plugins are
-    /// listed once at server startup (see `run::setup`); this
-    /// constructor is not re-invoked when plugins are added later, so
-    /// hot reload is intentionally out of scope.
-    pub fn with_plugins(
+    /// Build a handler with one dynamic tool per discovered CLI plugin
+    /// and CLI tool, in addition to the static `ObjectiveAI` catch-all.
+    /// Plugins and tools are listed once at server startup (see
+    /// `run::setup`); this constructor is not re-invoked when either
+    /// is added later, so hot reload is intentionally out of scope.
+    ///
+    /// Name collisions: if a CLI plugin and a CLI tool happen to share
+    /// a name (or with `ObjectiveAI`), the plugin registers first and
+    /// the tool's `add_route` overwrites it (last-writer-wins) — but
+    /// `ObjectiveAI` itself is always skipped on both sides so the
+    /// built-in catch-all is never shadowed.
+    pub fn with_plugins_and_tools(
         cli_config: Arc<objectiveai_cli::Config>,
-        plugins: Vec<ManifestWithNameAndSource>,
+        plugins: Vec<PluginManifest>,
+        tools: Vec<ToolManifest>,
     ) -> Self {
         let mut tool_router = Self::tool_router();
         for plugin in plugins {
-            // Don't let a plugin literally named `ObjectiveAI` shadow
-            // the built-in catch-all tool (`add_route` is
-            // last-writer-wins).
             if plugin.name == "ObjectiveAI" {
                 continue;
             }
@@ -74,6 +85,40 @@ impl ObjectiveAiMcpCli {
                         .unwrap_or_else(|| http::Request::new(()).into_parts().0);
                     let args: Vec<String> =
                         ["objectiveai".to_string(), "plugins".to_string(), plugin_name]
+                            .into_iter()
+                            .chain(req.args.into_iter())
+                            .collect();
+                    let buf = run_cli_and_collect(&cli_config, &parts, args).await;
+                    Ok(CallToolResult::success(vec![Content::text(buf)]))
+                }
+                .boxed()
+            }));
+        }
+        for cli_tool in tools {
+            if cli_tool.name == "ObjectiveAI" {
+                continue;
+            }
+            let tool_name = cli_tool.name.clone();
+            let cli_config_for_route = cli_config.clone();
+            let tool = Tool::new(
+                Cow::Owned(cli_tool.name.clone()),
+                Cow::Owned(cli_tool.manifest.description.clone()),
+                schema_for_type::<ToolRequest>(),
+            );
+            tool_router.add_route(ToolRoute::new_dyn(tool, move |ctx| {
+                let cli_config = cli_config_for_route.clone();
+                let tool_name = tool_name.clone();
+                async move {
+                    let arguments = ctx.arguments.unwrap_or_default();
+                    let req: ToolRequest = parse_json_object(arguments)?;
+                    let parts = ctx
+                        .request_context
+                        .extensions
+                        .get::<Parts>()
+                        .cloned()
+                        .unwrap_or_else(|| http::Request::new(()).into_parts().0);
+                    let args: Vec<String> =
+                        ["objectiveai".to_string(), "tools".to_string(), tool_name]
                             .into_iter()
                             .chain(req.args.into_iter())
                             .collect();
@@ -142,7 +187,7 @@ async fn run_cli_and_collect(
         destination: objectiveai_sdk::cli::output::HandleDestination::Collect(collected.clone()),
         agent_id: cli_config.agent_id.clone(),
     };
-    let code = objectiveai_cli::run(args, &cli_config, handle).await;
+    let _ = objectiveai_cli::run(args, &cli_config, handle).await;
 
     let outputs = collected.lock().await;
     let mut buf = String::new();
@@ -152,9 +197,6 @@ async fn run_cli_and_collect(
             Err(e) => buf.push_str(&format!("error serializing output: {e}")),
         }
         buf.push('\n');
-    }
-    if code != 0 {
-        buf.push_str(&format!("exit code: {code}\n"));
     }
     buf
 }

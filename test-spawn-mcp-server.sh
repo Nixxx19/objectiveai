@@ -28,9 +28,10 @@ get_free_port() {
 PORT=$(get_free_port)
 REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 
-# Build the server binary, then run from a copy so the original is not locked.
-# Windows locks running executables, which blocks cargo test from relinking.
-cargo build --package objectiveai-mcp --quiet >&2
+# Build the server binary and the fixture tool binary, then run from a
+# copy so the originals are not locked. Windows locks running
+# executables, which blocks cargo test from relinking.
+cargo build --package objectiveai-mcp --package echo-arglen --quiet >&2
 BINARY="$REPO_ROOT/target/debug/objectiveai-mcp"
 if [ -f "$BINARY.exe" ]; then BINARY="$BINARY.exe"; fi
 TMPDIR="$(mktemp -d)"
@@ -44,19 +45,30 @@ cp "$BINARY" "$TMPBIN"
 # coherent within a single test run, and keeps the developer's real
 # config OUT of the test process.
 TEST_CONFIG_BASE_DIR="$REPO_ROOT/objectiveai-cli/tests/.objectiveai"
-mkdir -p "$TEST_CONFIG_BASE_DIR/plugins"
+mkdir -p "$TEST_CONFIG_BASE_DIR/tools"
 
-# Lay down fixture plugin manifests (tool0…tool9). objectiveai-mcp
-# reads these at startup via `filesystem::Client::list_plugins`, and
-# exposes one MCP tool per discovered plugin. The vector-completion
-# snapshot test's `json-schema-10x-tools` agent declares these exact
-# tools in `client_objectiveai_mcp.tools` — without them present the
-# agent-completions client's tool-validation step fails the agent
-# with `ClientObjectiveaiMcpToolMissing`.
-FIXTURES_DIR="$REPO_ROOT/objectiveai-cli/tests/fixtures/plugins"
-if [ -d "$FIXTURES_DIR" ]; then
-  cp "$FIXTURES_DIR"/*.json "$TEST_CONFIG_BASE_DIR/plugins/" 2>/dev/null || true
+# Lay down fixture tool manifests (tool0…tool9) backed by a single
+# shared executable (`echo-arglen`). objectiveai-mcp reads these at
+# startup via `filesystem::Client::list_tools` and exposes one MCP
+# tool per discovered CLI tool — invoked as
+# `objectiveai tools <name> <args>`. The vector-completion snapshot
+# test's `json-schema-10x-tools` agent declares these exact names
+# in `client_objectiveai_mcp.tools`; the agent-completions client's
+# tool-validation step requires them present.
+#
+# `echo-arglen` prints one line: `args.len() + sum(s.len() for s in args)`.
+ECHO_ARGLEN="$REPO_ROOT/target/debug/echo-arglen"
+EXEC_NAME="echo-arglen"
+if [ -f "$ECHO_ARGLEN.exe" ]; then
+  ECHO_ARGLEN="$ECHO_ARGLEN.exe"
+  EXEC_NAME="echo-arglen.exe"
 fi
+cp "$ECHO_ARGLEN" "$TEST_CONFIG_BASE_DIR/tools/$EXEC_NAME"
+for i in $(seq 0 9); do
+  printf '{"description":"Test fixture tool %d","version":"1.0.0","owner":"testorg","exec":"%s"}\n' \
+    "$i" "$EXEC_NAME" \
+    > "$TEST_CONFIG_BASE_DIR/tools/tool${i}.json"
+done
 
 ADDRESS=127.0.0.1 PORT="$PORT" SUPPRESS_OUTPUT=1 \
   CONFIG_BASE_DIR="$TEST_CONFIG_BASE_DIR" \

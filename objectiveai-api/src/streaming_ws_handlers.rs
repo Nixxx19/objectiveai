@@ -143,33 +143,41 @@ pub(crate) async fn create_agent_completion_ws(
             .with_api_port(reverse_attach.api_port)
             .with_reverse_attach(_attach_guard.handle());
         let notify_client = client.clone();
-        let stream = match client
-            .create_streaming_handle_usage(
-                ctx,
-                Arc::new(body),
-                None,
-                None,
-                vec![],
-                indexmap::IndexMap::new(),
-                None,
-                true,
-                None,
-                None,
-                None,
-                None,
-            )
-            .await
-        {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error_split(&sink, &ResponseError::from(&e)).await;
-                return;
-            }
-        };
 
+        // Stream setup lives INSIDE the `send` branch so the `recv_loop`
+        // is polled concurrently with `create_streaming_handle_usage`'s
+        // first-chunk await. See `create_vector_completion_ws` for the
+        // full rationale — same deadlock pattern, same fix.
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
         let send = async move {
+            let stream = match client
+                .create_streaming_handle_usage(
+                    ctx,
+                    Arc::new(body),
+                    None,
+                    None,
+                    vec![],
+                    indexmap::IndexMap::new(),
+                    None,
+                    true,
+                    None,
+                    None,
+                    None,
+                    None,
+                )
+                .await
+            {
+                Ok(s) => s,
+                Err(e) => {
+                    streaming_ws::fatal_setup_error_split(
+                        &send_sink,
+                        &ResponseError::from(&e),
+                    )
+                    .await;
+                    return;
+                }
+            };
             let mut stream = Box::pin(stream);
             while let Some(item) = stream.next().await {
                 let agent::completions::StreamItem::Chunk(chunk) = item else { continue };
@@ -398,17 +406,24 @@ where
         let ctx = crate::context(&headers, persistent_cache, suppress_output)
             .with_api_port(reverse_attach.api_port)
             .with_reverse_attach(_attach_guard.handle());
-        let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error_split(&sink, &ResponseError::from(&e)).await;
-                return;
-            }
-        };
 
+        // Stream setup lives INSIDE the `send` branch so `recv_loop`
+        // is polled concurrently with `create_streaming_handle_usage`.
+        // See `create_vector_completion_ws` for rationale.
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
         let send = async move {
+            let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
+                Ok(s) => s,
+                Err(e) => {
+                    streaming_ws::fatal_setup_error_split(
+                        &send_sink,
+                        &ResponseError::from(&e),
+                    )
+                    .await;
+                    return;
+                }
+            };
             let mut stream = Box::pin(stream);
             while let Some(chunk) = stream.next().await {
                 send_tracker.observe(&chunk);
@@ -485,17 +500,20 @@ where
         let ctx = crate::context(&headers, persistent_cache, suppress_output)
             .with_api_port(reverse_attach.api_port)
             .with_reverse_attach(_attach_guard.handle());
-        let stream = match client.create_streaming(ctx, Arc::new(body)).await {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error_split(&sink, &e).await;
-                return;
-            }
-        };
 
+        // Stream setup lives INSIDE the `send` branch so `recv_loop`
+        // is polled concurrently with `create_streaming`. See
+        // `create_vector_completion_ws` for rationale.
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
         let send = async move {
+            let stream = match client.create_streaming(ctx, Arc::new(body)).await {
+                Ok(s) => s,
+                Err(e) => {
+                    streaming_ws::fatal_setup_error_split(&send_sink, &e).await;
+                    return;
+                }
+            };
             let mut stream = Box::pin(stream);
             while let Some(item) = stream.next().await {
                 let frame = match &item {
@@ -617,17 +635,23 @@ where
         let ctx = crate::context(&headers, persistent_cache, suppress_output)
             .with_api_port(reverse_attach.api_port)
             .with_reverse_attach(_attach_guard.handle());
-        let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error_split(&sink, &ResponseError::from(&e)).await;
-                return;
-            }
-        };
-
+        // Stream setup lives INSIDE the `send` branch so `recv_loop`
+        // is polled concurrently with `create_streaming_handle_usage`.
+        // See `create_vector_completion_ws` for rationale.
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
         let send = async move {
+            let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
+                Ok(s) => s,
+                Err(e) => {
+                    streaming_ws::fatal_setup_error_split(
+                        &send_sink,
+                        &ResponseError::from(&e),
+                    )
+                    .await;
+                    return;
+                }
+            };
             let mut stream = Box::pin(stream);
             while let Some(chunk) = stream.next().await {
                 send_tracker.observe(&chunk);
@@ -732,17 +756,23 @@ where
         let ctx = crate::context(&headers, persistent_cache, suppress_output)
             .with_api_port(reverse_attach.api_port)
             .with_reverse_attach(_attach_guard.handle());
-        let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error_split(&sink, &ResponseError::from(&e)).await;
-                return;
-            }
-        };
-
+        // Stream setup lives INSIDE the `send` branch so `recv_loop`
+        // is polled concurrently with `create_streaming_handle_usage`.
+        // See `create_vector_completion_ws` for rationale.
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
         let send = async move {
+            let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
+                Ok(s) => s,
+                Err(e) => {
+                    streaming_ws::fatal_setup_error_split(
+                        &send_sink,
+                        &ResponseError::from(&e),
+                    )
+                    .await;
+                    return;
+                }
+            };
             let mut stream = Box::pin(stream);
             while let Some(chunk) = stream.next().await {
                 send_tracker.observe(&chunk);
@@ -947,20 +977,26 @@ where
         let ctx = crate::context(&headers, persistent_cache, suppress_output)
             .with_api_port(reverse_attach.api_port)
             .with_reverse_attach(_attach_guard.handle());
-        let stream = match client
-            .create_streaming_handle_usage(ctx, Arc::new(request))
-            .await
-        {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error_split(&sink, &ResponseError::from(&e)).await;
-                return;
-            }
-        };
-
+        // Stream setup lives INSIDE the `send` branch so `recv_loop`
+        // is polled concurrently with `create_streaming_handle_usage`.
+        // See `create_vector_completion_ws` for rationale.
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
         let send = async move {
+            let stream = match client
+                .create_streaming_handle_usage(ctx, Arc::new(request))
+                .await
+            {
+                Ok(s) => s,
+                Err(e) => {
+                    streaming_ws::fatal_setup_error_split(
+                        &send_sink,
+                        &ResponseError::from(&e),
+                    )
+                    .await;
+                    return;
+                }
+            };
             let mut stream = Box::pin(stream);
             while let Some(chunk) = stream.next().await {
                 send_tracker.observe(&chunk);

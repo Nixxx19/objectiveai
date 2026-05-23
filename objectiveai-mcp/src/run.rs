@@ -114,15 +114,17 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         agent_id: None,
     });
 
-    let plugins = objectiveai_sdk::filesystem::Client::new(
+    let fs_client = objectiveai_sdk::filesystem::Client::new(
         config_base_dir,
         commit_author_name,
         commit_author_email,
-    )
-    .list_plugins(0, usize::MAX)
-    .await;
+    );
+    let (plugins, tools) = tokio::join!(
+        fs_client.list_plugins(0, usize::MAX),
+        fs_client.list_tools(0, usize::MAX),
+    );
 
-    let server = ObjectiveAiMcpCli::with_plugins(cli_config, plugins);
+    let server = ObjectiveAiMcpCli::with_plugins_and_tools(cli_config, plugins, tools);
     let ct = CancellationToken::new();
 
     let service: StreamableHttpService<ObjectiveAiMcpCli, LocalSessionManager> =
