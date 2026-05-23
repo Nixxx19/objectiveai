@@ -6,7 +6,7 @@ from objectiveai_sdk.json_value import JsonValue
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 
-class Responseclient_objectiveai_mcp.client_response.Response.Ok(BaseModel):
+class Responseclient_objectiveai_mcpclient_responseResponseOk(BaseModel):
     """Empty success — the request was accepted."""
     model_config = ConfigDict(json_schema_extra={'_variant_title': 'client_objectiveai_mcp.client_response.Response.Ok'})
 
@@ -14,7 +14,7 @@ class Responseclient_objectiveai_mcp.client_response.Response.Ok(BaseModel):
     type_: Literal['ok'] = Field(..., alias='type')
 
 
-class Responseclient_objectiveai_mcp.client_response.Response.Error(BaseModel):
+class Responseclient_objectiveai_mcpclient_responseResponseError(BaseModel):
     """The request failed."""
     model_config = ConfigDict(json_schema_extra={'_variant_title': 'client_objectiveai_mcp.client_response.Response.Error'})
 
@@ -39,5 +39,5 @@ structural quirk that flattening an inner Result enum would
 otherwise produce)."""
     model_config = ConfigDict(title='client_objectiveai_mcp.client_response.Response')
 
-    root: Union[Responseclient_objectiveai_mcp.client_response.Response.Ok, Responseclient_objectiveai_mcp.client_response.Response.Error]
+    root: Union[Responseclient_objectiveai_mcpclient_responseResponseOk, Responseclient_objectiveai_mcpclient_responseResponseError]
 

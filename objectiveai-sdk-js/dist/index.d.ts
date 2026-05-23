@@ -197,6 +197,7 @@ declare const AgentClaudeAgentSdkContinuationSchema: z.ZodObject<{
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     session_id: z.ZodString;
     upstream: z.ZodLiteral<"claude_agent_sdk">;
+    ws_session_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
 type AgentClaudeAgentSdkContinuation = z.infer<typeof AgentClaudeAgentSdkContinuationSchema>;
 
@@ -402,6 +403,7 @@ declare const AgentCodexSdkContinuationSchema: z.ZodObject<{
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     thread_id: z.ZodString;
     upstream: z.ZodLiteral<"codex_sdk">;
+    ws_session_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
 type AgentCodexSdkContinuation = z.infer<typeof AgentCodexSdkContinuationSchema>;
 
@@ -8167,6 +8169,7 @@ declare const AgentMockContinuationSchema: z.ZodObject<{
         role: z.ZodLiteral<"tool">;
     }, z.core.$strip>>]>>;
     upstream: z.ZodLiteral<"mock">;
+    ws_session_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
 type AgentMockContinuation = z.infer<typeof AgentMockContinuationSchema>;
 
@@ -9281,6 +9284,7 @@ declare const AgentOpenrouterContinuationSchema: z.ZodObject<{
         role: z.ZodLiteral<"tool">;
     }, z.core.$strip>>]>>;
     upstream: z.ZodLiteral<"openrouter">;
+    ws_session_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>;
 type AgentOpenrouterContinuation = z.infer<typeof AgentOpenrouterContinuationSchema>;
 
@@ -17779,14 +17783,17 @@ declare const AgentContinuationSchema: z.ZodUnion<readonly [z.ZodObject<{
         role: z.ZodLiteral<"tool">;
     }, z.core.$strip>>]>>;
     upstream: z.ZodLiteral<"openrouter">;
+    ws_session_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>, z.ZodObject<{
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     session_id: z.ZodString;
     upstream: z.ZodLiteral<"claude_agent_sdk">;
+    ws_session_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>, z.ZodObject<{
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     thread_id: z.ZodString;
     upstream: z.ZodLiteral<"codex_sdk">;
+    ws_session_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>, z.ZodObject<{
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     messages: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
@@ -17931,6 +17938,7 @@ declare const AgentContinuationSchema: z.ZodUnion<readonly [z.ZodObject<{
         role: z.ZodLiteral<"tool">;
     }, z.core.$strip>>]>>;
     upstream: z.ZodLiteral<"mock">;
+    ws_session_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>]>;
 type AgentContinuation = z.infer<typeof AgentContinuationSchema>;
 

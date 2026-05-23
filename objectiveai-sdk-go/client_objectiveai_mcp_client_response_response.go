@@ -8,35 +8,35 @@ import (
 )
 
 // Empty success — the request was accepted.
-type ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok struct {
+type ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseOk struct {
 	// Matches the `id` of the
 	// [`super::super::client_request::Request`] this response is for.
 	ID string `json:"id"`
 	Type string `json:"type" validate:"oneof=ok"`
 }
 
-func (v *ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok) UnmarshalJSON(data []byte) error {
+func (v *ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseOk) UnmarshalJSON(data []byte) error {
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
 	for _, key := range []string{"id", "type"} {
 		if _, ok := raw[key]; !ok {
-			return fmt.Errorf("ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok: missing required field %q", key)
+			return fmt.Errorf("ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseOk: missing required field %q", key)
 		}
 	}
-	type Alias ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok
+	type Alias ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseOk
 	var alias Alias
 	if err := json.Unmarshal(data, &alias); err != nil {
 		return err
 	}
-	*v = ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok(alias)
+	*v = ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseOk(alias)
 	return nil
 }
-func (ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok) SchemaVariantTitle() string { return "client_objectiveai_mcp.client_response.Response.Ok" }
+func (ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseOk) SchemaVariantTitle() string { return "client_objectiveai_mcp.client_response.Response.Ok" }
 
 // The request failed.
-type ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error struct {
+type ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseError struct {
 	Code uint32 `json:"code" validate:"min=0,max=65535"`
 	// Matches the `id` of the
 	// [`super::super::client_request::Request`] this response is for.
@@ -45,25 +45,25 @@ type ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientRespon
 	Type string `json:"type" validate:"oneof=error"`
 }
 
-func (v *ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error) UnmarshalJSON(data []byte) error {
+func (v *ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseError) UnmarshalJSON(data []byte) error {
 	var raw map[string]json.RawMessage
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
 	for _, key := range []string{"code", "id", "message", "type"} {
 		if _, ok := raw[key]; !ok {
-			return fmt.Errorf("ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error: missing required field %q", key)
+			return fmt.Errorf("ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseError: missing required field %q", key)
 		}
 	}
-	type Alias ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error
+	type Alias ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseError
 	var alias Alias
 	if err := json.Unmarshal(data, &alias); err != nil {
 		return err
 	}
-	*v = ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error(alias)
+	*v = ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseError(alias)
 	return nil
 }
-func (ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error) SchemaVariantTitle() string { return "client_objectiveai_mcp.client_response.Response.Error" }
+func (ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseError) SchemaVariantTitle() string { return "client_objectiveai_mcp.client_response.Response.Error" }
 
 // Reply to a [`super::super::client_request::Request`]. Wire shape:
 //
@@ -79,27 +79,27 @@ func (ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientRespo
 // otherwise produce).
 type ClientObjectiveaiMcpClientResponseResponse struct {
 	// Empty success — the request was accepted.
-	ClientObjectiveaiMcp.clientResponse.Response.Ok *ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok 
+	ClientObjectiveaiMCPClientResponseResponseOk *ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseOk 
 	// The request failed.
-	ClientObjectiveaiMcp.clientResponse.Response.Error *ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error 
+	ClientObjectiveaiMCPClientResponseResponseError *ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseError 
 }
 
 func (v ClientObjectiveaiMcpClientResponseResponse) MarshalJSON() ([]byte, error) {
-	if v.ClientObjectiveaiMcp.clientResponse.Response.Ok != nil {
-		return json.Marshal(v.ClientObjectiveaiMcp.clientResponse.Response.Ok)
+	if v.ClientObjectiveaiMCPClientResponseResponseOk != nil {
+		return json.Marshal(v.ClientObjectiveaiMCPClientResponseResponseOk)
 	}
-	if v.ClientObjectiveaiMcp.clientResponse.Response.Error != nil {
-		return json.Marshal(v.ClientObjectiveaiMcp.clientResponse.Response.Error)
+	if v.ClientObjectiveaiMCPClientResponseResponseError != nil {
+		return json.Marshal(v.ClientObjectiveaiMCPClientResponseResponseError)
 	}
 	return []byte("null"), nil
 }
 
 func (v *ClientObjectiveaiMcpClientResponseResponse) UnmarshalJSON(data []byte) error {
 	{
-		var try ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Ok
+		var try ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseOk
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := ClientObjectiveaiMcpClientResponseResponse{}
-			candidate.ClientObjectiveaiMcp.clientResponse.Response.Ok = &try
+			candidate.ClientObjectiveaiMCPClientResponseResponseOk = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -107,10 +107,10 @@ func (v *ClientObjectiveaiMcpClientResponseResponse) UnmarshalJSON(data []byte) 
 		}
 	}
 	{
-		var try ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMcp.clientResponse.Response.Error
+		var try ClientObjectiveaiMcpClientResponseResponseClientObjectiveaiMCPClientResponseResponseError
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := ClientObjectiveaiMcpClientResponseResponse{}
-			candidate.ClientObjectiveaiMcp.clientResponse.Response.Error = &try
+			candidate.ClientObjectiveaiMCPClientResponseResponseError = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -122,8 +122,8 @@ func (v *ClientObjectiveaiMcpClientResponseResponse) UnmarshalJSON(data []byte) 
 
 func (v ClientObjectiveaiMcpClientResponseResponse) Validate() error {
 	count := 0
-	if v.ClientObjectiveaiMcp.clientResponse.Response.Ok != nil { count++ }
-	if v.ClientObjectiveaiMcp.clientResponse.Response.Error != nil { count++ }
+	if v.ClientObjectiveaiMCPClientResponseResponseOk != nil { count++ }
+	if v.ClientObjectiveaiMCPClientResponseResponseError != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("ClientObjectiveaiMcpClientResponseResponse: exactly one variant must be set, got %d", count)
 	}
