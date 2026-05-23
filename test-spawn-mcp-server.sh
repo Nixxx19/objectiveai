@@ -44,7 +44,19 @@ cp "$BINARY" "$TMPBIN"
 # coherent within a single test run, and keeps the developer's real
 # config OUT of the test process.
 TEST_CONFIG_BASE_DIR="$REPO_ROOT/objectiveai-cli/tests/.objectiveai"
-mkdir -p "$TEST_CONFIG_BASE_DIR"
+mkdir -p "$TEST_CONFIG_BASE_DIR/plugins"
+
+# Lay down fixture plugin manifests (tool0…tool9). objectiveai-mcp
+# reads these at startup via `filesystem::Client::list_plugins`, and
+# exposes one MCP tool per discovered plugin. The vector-completion
+# snapshot test's `json-schema-10x-tools` agent declares these exact
+# tools in `client_objectiveai_mcp.tools` — without them present the
+# agent-completions client's tool-validation step fails the agent
+# with `ClientObjectiveaiMcpToolMissing`.
+FIXTURES_DIR="$REPO_ROOT/objectiveai-cli/tests/fixtures/plugins"
+if [ -d "$FIXTURES_DIR" ]; then
+  cp "$FIXTURES_DIR"/*.json "$TEST_CONFIG_BASE_DIR/plugins/" 2>/dev/null || true
+fi
 
 ADDRESS=127.0.0.1 PORT="$PORT" SUPPRESS_OUTPUT=1 \
   CONFIG_BASE_DIR="$TEST_CONFIG_BASE_DIR" \

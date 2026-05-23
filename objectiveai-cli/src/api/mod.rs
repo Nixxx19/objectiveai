@@ -16,6 +16,8 @@ pub mod spawn;
 pub mod kill;
 mod run;
 pub mod detach;
+#[macro_use]
+pub mod diagnostic_log;
 pub mod conduit;
 
 // Shared infrastructure for per-endpoint subcommands.

@@ -4,6 +4,8 @@
 //! spawn the proxy in-process; the binary at `main.rs` is a thin wrapper
 //! that reads `Config` from the environment and calls [`run`].
 
+#[macro_use]
+mod debug_log;
 mod mcp;
 mod run;
 mod session;

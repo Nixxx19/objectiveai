@@ -218,16 +218,54 @@ impl Session {
     /// order; downstream consumers (e.g. seeded mock agents) rely on
     /// this for deterministic output.
     pub async fn list_tools(&self) -> Result<ListToolsResult, Arc<objectiveai_sdk::mcp::Error>> {
-        let names: Vec<&String> = self.connections.keys().collect();
+        self.list_tools_filtered(None).await
+    }
+
+    /// Per-upstream variant of [`Self::list_tools`]: when `filter_url`
+    /// is `Some`, only fans out to the single upstream whose connection
+    /// `url` matches verbatim. When `None`, behaves identically to the
+    /// no-arg form (fan out to every upstream).
+    ///
+    /// An unmatched `filter_url` returns an empty `ListToolsResult`
+    /// (not an error) — the caller validates whether emptiness is
+    /// acceptable. The per-upstream allowlist (`X-MCP-Tools-Allow`)
+    /// is still applied to whichever upstream(s) participate.
+    pub async fn list_tools_filtered(
+        &self,
+        filter_url: Option<&str>,
+    ) -> Result<ListToolsResult, Arc<objectiveai_sdk::mcp::Error>> {
+        let pairs: Vec<(&String, &Connection)> = match filter_url {
+            Some(url) => self
+                .connections
+                .iter()
+                .filter(|(_, c)| c.url == url)
+                .collect(),
+            None => self.connections.iter().collect(),
+        };
+        proxy_log!(
+            "list_tools::fan_out::start",
+            count = pairs.len(),
+            filtered = filter_url.is_some(),
+        );
         let results = try_join_all(
-            self.connections
-                .values()
-                .map(|c| async move { c.list_tools().await }),
+            pairs
+                .iter()
+                .map(|(_, c)| async move {
+                    proxy_log!("upstream::list_tools::start", url = c.url.as_str());
+                    let r = c.list_tools().await;
+                    proxy_log!(
+                        "upstream::list_tools::end",
+                        url = c.url.as_str(),
+                        ok = r.is_ok(),
+                    );
+                    r
+                }),
         )
         .await?;
+        proxy_log!("list_tools::fan_out::end", count = results.len());
 
         let mut tools: Vec<Tool> = Vec::new();
-        for (server_name, arc) in names.into_iter().zip(results) {
+        for ((server_name, _), arc) in pairs.into_iter().zip(results) {
             let allowlist = self.tool_allowlists_by_server.get(server_name);
             for tool in arc.iter() {
                 // Filter against the per-upstream allowlist if one
@@ -260,16 +298,53 @@ impl Session {
     /// semantics as [`Session::list_tools`] — the first upstream error
     /// short-circuits and is returned to the caller.
     pub async fn list_resources(&self) -> Result<ListResourcesResult, Arc<objectiveai_sdk::mcp::Error>> {
-        let names: Vec<&String> = self.connections.keys().collect();
+        self.list_resources_filtered(None).await
+    }
+
+    /// Per-upstream variant of [`Self::list_resources`]: when
+    /// `filter_url` is `Some`, only fans out to the single upstream
+    /// whose connection `url` matches verbatim. When `None`, behaves
+    /// identically to the no-arg form (fan out to every upstream).
+    ///
+    /// An unmatched `filter_url` returns an empty `ListResourcesResult`
+    /// (not an error) — the caller validates whether emptiness is
+    /// acceptable.
+    pub async fn list_resources_filtered(
+        &self,
+        filter_url: Option<&str>,
+    ) -> Result<ListResourcesResult, Arc<objectiveai_sdk::mcp::Error>> {
+        let pairs: Vec<(&String, &Connection)> = match filter_url {
+            Some(url) => self
+                .connections
+                .iter()
+                .filter(|(_, c)| c.url == url)
+                .collect(),
+            None => self.connections.iter().collect(),
+        };
+        proxy_log!(
+            "list_resources::fan_out::start",
+            count = pairs.len(),
+            filtered = filter_url.is_some(),
+        );
         let results = try_join_all(
-            self.connections
-                .values()
-                .map(|c| async move { c.list_resources().await }),
+            pairs
+                .iter()
+                .map(|(_, c)| async move {
+                    proxy_log!("upstream::list_resources::start", url = c.url.as_str());
+                    let r = c.list_resources().await;
+                    proxy_log!(
+                        "upstream::list_resources::end",
+                        url = c.url.as_str(),
+                        ok = r.is_ok(),
+                    );
+                    r
+                }),
         )
         .await?;
+        proxy_log!("list_resources::fan_out::end", count = results.len());
 
         let mut resources: Vec<Resource> = Vec::new();
-        for (server_name, arc) in names.into_iter().zip(results) {
+        for ((server_name, _), arc) in pairs.into_iter().zip(results) {
             for resource in arc.iter() {
                 let mut prefixed = resource.clone();
                 prefixed.uri = prefix_name(server_name, &resource.uri);
@@ -305,7 +380,19 @@ impl Session {
             task: params.task.clone(),
             _meta: params._meta.clone(),
         };
-        Ok(connection.call_tool(&upstream_params).await?)
+        proxy_log!(
+            "upstream::call_tool::start",
+            url = connection.url.as_str(),
+            tool = upstream_params.name.as_str(),
+        );
+        let r = connection.call_tool(&upstream_params).await;
+        proxy_log!(
+            "upstream::call_tool::end",
+            url = connection.url.as_str(),
+            tool = upstream_params.name.as_str(),
+            ok = r.is_ok(),
+        );
+        Ok(r?)
     }
 
     /// Forward `resources/read` to whichever upstream owns the URI. Same
@@ -317,7 +404,19 @@ impl Session {
         let (connection, original_uri) = self
             .route(uri)
             .ok_or_else(|| ReadResourceError::ResourceNotFound(uri.to_string()))?;
-        Ok(connection.read_resource(&original_uri).await?)
+        proxy_log!(
+            "upstream::read_resource::start",
+            url = connection.url.as_str(),
+            uri = original_uri.as_str(),
+        );
+        let r = connection.read_resource(&original_uri).await;
+        proxy_log!(
+            "upstream::read_resource::end",
+            url = connection.url.as_str(),
+            uri = original_uri.as_str(),
+            ok = r.is_ok(),
+        );
+        Ok(r?)
     }
 
     /// Resolve a `<server-name>_<original>` prefixed identifier to the

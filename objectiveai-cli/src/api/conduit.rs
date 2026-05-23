@@ -103,8 +103,24 @@ impl ConduitMcpHandler {
 impl McpHandler for ConduitMcpHandler {
     async fn handle(&self, request: server_request::Request) -> server_response::Response {
         let id_for_err = request.id.clone();
+        let server_request_id = request.id.clone();
+        cli_log!(
+            "conduit::handle::entry",
+            server_request_id = server_request_id.as_str(),
+            method = request
+                .body
+                .as_ref()
+                .and_then(|v| v.get("method"))
+                .and_then(|v| v.as_str())
+                .unwrap_or(""),
+        );
 
         let Some(mcp_url) = self.inner.mcp_url.as_ref() else {
+            cli_log!(
+                "conduit::handle::exit",
+                server_request_id = server_request_id.as_str(),
+                branch = "no_mcp",
+            );
             return reject_no_mcp(id_for_err);
         };
 
@@ -119,6 +135,11 @@ impl McpHandler for ConduitMcpHandler {
         let state = match &incoming_session_id {
             Some(sid) => {
                 if let Some(existing) = self.inner.connections.get(sid) {
+                    cli_log!(
+                        "conduit::dispatch",
+                        server_request_id = server_request_id.as_str(),
+                        branch = "cached",
+                    );
                     existing.clone()
                 } else {
                     // Resume branch: the proxy already knew this
@@ -126,15 +147,37 @@ impl McpHandler for ConduitMcpHandler {
                     // Dial the remote with it; the SDK accepts the
                     // existing-session branch where the server
                     // doesn't echo Mcp-Session-Id back.
-                    match self
+                    cli_log!(
+                        "conduit::dispatch",
+                        server_request_id = server_request_id.as_str(),
+                        branch = "resume",
+                    );
+                    cli_log!(
+                        "conduit::dial::start",
+                        server_request_id = server_request_id.as_str(),
+                        url = mcp_url.as_str(),
+                        resume = true,
+                    );
+                    let dial_result = self
                         .dial(mcp_url.clone(), Some(sid.clone()), &request.headers)
-                        .await
-                    {
+                        .await;
+                    cli_log!(
+                        "conduit::dial::end",
+                        server_request_id = server_request_id.as_str(),
+                        url = mcp_url.as_str(),
+                        ok = dial_result.is_ok(),
+                    );
+                    match dial_result {
                         Ok(st) => {
                             self.inner.connections.insert(sid.clone(), st.clone());
                             st
                         }
                         Err(e) => {
+                            cli_log!(
+                                "conduit::handle::exit",
+                                server_request_id = server_request_id.as_str(),
+                                branch = "dial_resume_err",
+                            );
                             return conduit_error(id_for_err, format!("connect (resume): {e}"));
                         }
                     }
@@ -143,7 +186,25 @@ impl McpHandler for ConduitMcpHandler {
             None => {
                 // Fresh branch: no session id from the proxy —
                 // remote mints one on initialize.
-                match self.dial(mcp_url.clone(), None, &request.headers).await {
+                cli_log!(
+                    "conduit::dispatch",
+                    server_request_id = server_request_id.as_str(),
+                    branch = "fresh",
+                );
+                cli_log!(
+                    "conduit::dial::start",
+                    server_request_id = server_request_id.as_str(),
+                    url = mcp_url.as_str(),
+                    resume = false,
+                );
+                let dial_result = self.dial(mcp_url.clone(), None, &request.headers).await;
+                cli_log!(
+                    "conduit::dial::end",
+                    server_request_id = server_request_id.as_str(),
+                    url = mcp_url.as_str(),
+                    ok = dial_result.is_ok(),
+                );
+                match dial_result {
                     Ok(st) => {
                         self.inner
                             .connections
@@ -151,16 +212,37 @@ impl McpHandler for ConduitMcpHandler {
                         st
                     }
                     Err(e) => {
+                        cli_log!(
+                            "conduit::handle::exit",
+                            server_request_id = server_request_id.as_str(),
+                            branch = "dial_fresh_err",
+                        );
                         return conduit_error(id_for_err, format!("connect: {e}"));
                     }
                 }
             }
         };
 
-        match forward(&state, request).await {
+        cli_log!(
+            "conduit::forward::start",
+            server_request_id = server_request_id.as_str(),
+        );
+        let forward_result = forward(&state, request).await;
+        cli_log!(
+            "conduit::forward::end",
+            server_request_id = server_request_id.as_str(),
+            ok = forward_result.is_ok(),
+        );
+        let resp = match forward_result {
             Ok(resp) => resp,
             Err(e) => conduit_error(id_for_err, e.to_string()),
-        }
+        };
+        cli_log!(
+            "conduit::handle::exit",
+            server_request_id = server_request_id.as_str(),
+            status = resp.status,
+        );
+        resp
     }
 }
 
@@ -283,8 +365,26 @@ async fn forward(
         req = req.json(body);
     }
 
+    let rpc_id_str = rpc_id
+        .as_ref()
+        .map(|v| format!("{v}"))
+        .unwrap_or_default();
+    let method_str = rpc_method.as_deref().unwrap_or("");
+    cli_log!(
+        "conduit::upstream_post::start",
+        url = conn.url.as_str(),
+        method = method_str,
+        rpc_id = rpc_id_str.as_str(),
+    );
     let resp = req.send().await.map_err(ConduitError::Request)?;
     let status = resp.status().as_u16();
+    cli_log!(
+        "conduit::upstream_post::end",
+        url = conn.url.as_str(),
+        method = method_str,
+        rpc_id = rpc_id_str.as_str(),
+        status = status,
+    );
     let mut resp_headers = IndexMap::new();
     for (k, v) in resp.headers().iter() {
         if k.as_str().eq_ignore_ascii_case("mcp-session-id")

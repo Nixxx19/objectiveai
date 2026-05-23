@@ -512,11 +512,24 @@ pub async fn recv_loop<F, Fut>(
         }
 
         if let Ok(response) = serde_json::from_str::<ServerResponse>(text.as_str()) {
+            api_log!(
+                "recv_loop::server_response::received",
+                request_id = response.id.as_str(),
+                len = text.as_str().len(),
+            );
             match pending.remove(&response.id) {
                 Some((_, tx)) => {
+                    api_log!(
+                        "recv_loop::server_response::fired",
+                        request_id = response.id.as_str(),
+                    );
                     let _ = tx.send(response);
                 }
                 None => {
+                    api_log!(
+                        "recv_loop::server_response::orphan",
+                        request_id = response.id.as_str(),
+                    );
                     eprintln!(
                         "dropping server_response for unknown id {:?}",
                         response.id

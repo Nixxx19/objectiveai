@@ -15,6 +15,10 @@
 //! - [`util`] - Utility types for streaming and indexing
 //! - [`vector`] - Vector completions for scoring and ranking
 
+/// Temporary diagnostic logging for cross-layer concurrency probes.
+#[macro_use]
+mod diagnostic_log;
+
 /// Authentication and API key management.
 pub mod auth;
 /// Request context and extensions for dependency injection.

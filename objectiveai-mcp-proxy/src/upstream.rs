@@ -9,6 +9,12 @@ use objectiveai_sdk::mcp::{Client, Connection};
 const SERVERS_HEADER: &str = "X-MCP-Servers";
 const HEADERS_HEADER: &str = "X-MCP-Headers";
 const TOOLS_ALLOW_HEADER: &str = "X-MCP-Tools-Allow";
+/// Per-request header: when present on a `tools/list` or
+/// `resources/list` POST, restricts the fan-out to the single upstream
+/// whose URL matches verbatim. Absent → fan out to every upstream
+/// (existing behavior). Applies to both list operations so a caller
+/// that only knows about one upstream gets a single, focused view.
+pub const LIST_FILTER_HEADER: &str = "X-List-Filter";
 
 /// One upstream MCP server the proxy should connect to for a session.
 #[derive(Debug)]
@@ -106,13 +112,23 @@ pub async fn connect_all_fresh(
             if let Some(id) = &agent_id_owned {
                 headers.insert("X-OBJECTIVEAI-AGENT-ID".to_string(), id.clone());
             }
-            let conn = client
+            proxy_log!(
+                "upstream::connect::fresh::start",
+                url = url.as_str(),
+                resume = session_id.is_some(),
+            );
+            let conn_result = client
                 .connect(spec.url, session_id, Some(headers))
-                .await
-                .map_err(|source| BadInit::UpstreamConnectFailed {
-                    url: url.clone(),
-                    source,
-                })?;
+                .await;
+            proxy_log!(
+                "upstream::connect::fresh::end",
+                url = url.as_str(),
+                ok = conn_result.is_ok(),
+            );
+            let conn = conn_result.map_err(|source| BadInit::UpstreamConnectFailed {
+                url: url.clone(),
+                source,
+            })?;
             let payload_headers =
                 build_canonical_headers(&headers_for_payload, &conn.session_id);
             Ok::<_, BadInit>((conn, payload_headers))
@@ -163,13 +179,23 @@ pub async fn reconnect_from_payload(
         // `headers` and gets passed straight through to Client::connect.
         let payload_headers = headers.clone();
         async move {
-            let conn = client
+            proxy_log!(
+                "upstream::connect::resume::start",
+                url = url.as_str(),
+                resume = session_id.is_some(),
+            );
+            let conn_result = client
                 .connect(url.clone(), session_id, Some(headers))
-                .await
-                .map_err(|source| BadInit::UpstreamConnectFailed {
-                    url: url.clone(),
-                    source,
-                })?;
+                .await;
+            proxy_log!(
+                "upstream::connect::resume::end",
+                url = url.as_str(),
+                ok = conn_result.is_ok(),
+            );
+            let conn = conn_result.map_err(|source| BadInit::UpstreamConnectFailed {
+                url: url.clone(),
+                source,
+            })?;
             let canonical = build_canonical_headers(&payload_headers, &conn.session_id);
             Ok::<_, BadInit>((conn, canonical))
         }
