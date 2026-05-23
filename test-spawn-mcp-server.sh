@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
-# Spawns objectiveai-mcp-filesystem on a random free port for testing.
+# Spawns objectiveai-mcp on a random free port for testing.
+#
+# IMPORTANT: this is the *production* MCP server binary the CLI's
+# `ConduitMcpHandler` is designed to talk to (not `objectiveai-mcp-filesystem`,
+# which is a different crate that exposes raw filesystem tools).
+#
+# CONFIG_BASE_DIR is forced to the CLI test scratch dir
+# (`objectiveai-cli/tests/.objectiveai`) so the spawned server never
+# reads or writes the developer's real `~/.objectiveai` config.
 #
 # Prints "URL PID" to stdout once the server is ready, then exits.
 # The server continues running as a background process.
@@ -18,17 +26,29 @@ get_free_port() {
 }
 
 PORT=$(get_free_port)
+REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
 
 # Build the server binary, then run from a copy so the original is not locked.
 # Windows locks running executables, which blocks cargo test from relinking.
-cargo build --package objectiveai-mcp-filesystem --quiet >&2
-REPO_ROOT="$(cd "$(dirname "$0")" && pwd)"
-BINARY="$REPO_ROOT/target/debug/objectiveai-mcp-filesystem"
+cargo build --package objectiveai-mcp --quiet >&2
+BINARY="$REPO_ROOT/target/debug/objectiveai-mcp"
 if [ -f "$BINARY.exe" ]; then BINARY="$BINARY.exe"; fi
 TMPDIR="$(mktemp -d)"
 TMPBIN="$TMPDIR/$(basename "$BINARY")"
 cp "$BINARY" "$TMPBIN"
-ADDRESS=127.0.0.1 PORT="$PORT" SUPPRESS_OUTPUT=1 "$TMPBIN" &
+
+# CONFIG_BASE_DIR is the CLI test scratch dir — the same dir
+# `cli_test_util::tests_dir()` returns and `cli_command()` stamps on
+# every CLI subprocess. Sharing this between the CLI and the MCP
+# server keeps the two views of config / plugins / authorization
+# coherent within a single test run, and keeps the developer's real
+# config OUT of the test process.
+TEST_CONFIG_BASE_DIR="$REPO_ROOT/objectiveai-cli/tests/.objectiveai"
+mkdir -p "$TEST_CONFIG_BASE_DIR"
+
+ADDRESS=127.0.0.1 PORT="$PORT" SUPPRESS_OUTPUT=1 \
+  CONFIG_BASE_DIR="$TEST_CONFIG_BASE_DIR" \
+  "$TMPBIN" &
 SERVER_PID=$!
 
 # Wait for the server to accept connections (up to 60s)
