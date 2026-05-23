@@ -31,12 +31,38 @@ pub struct AgentCompletion {
 impl AgentCompletion {
     /// Normalize non-deterministic fields for test snapshot comparison.
     pub fn normalize_for_tests(&mut self) {
+        use crate::agent::completions::message::{RichContent, RichContentPart};
+
         self.id = String::new();
         self.created = 0;
         for msg in &mut self.messages {
-            if let super::Message::Assistant(asst) = msg {
-                asst.upstream_id = String::new();
-                asst.created = 0;
+            match msg {
+                super::Message::Assistant(asst) => {
+                    asst.upstream_id = String::new();
+                    asst.created = 0;
+                }
+                super::Message::Tool(tool) => {
+                    // Strip the `agent_id` key the CLI's
+                    // `cli::output::Handle::emit` stamps on every
+                    // emitted JSON line. The value is the racy
+                    // `next_agent_index` counter — the order-of-task
+                    // assignment varies run-to-run, so leaving it in
+                    // would break snapshot determinism. Walk text
+                    // payloads, parse each line, drop `agent_id`,
+                    // re-serialize.
+                    match &mut tool.inner.content {
+                        RichContent::Text(s) => {
+                            *s = strip_agent_id_lines(s);
+                        }
+                        RichContent::Parts(parts) => {
+                            for p in parts {
+                                if let RichContentPart::Text { text } = p {
+                                    *text = strip_agent_id_lines(text);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -65,6 +91,31 @@ impl AgentCompletion {
             }
         }
     }
+}
+
+/// For each newline-delimited line in `text`, try to parse as a JSON
+/// object and remove the top-level `agent_id` key. Lines that aren't
+/// valid JSON are emitted unchanged. Preserves the trailing newline
+/// if the input had one — the CLI's emit envelope always terminates
+/// with `\n`, and matching that keeps re-stripped bodies stable.
+fn strip_agent_id_lines(text: &str) -> String {
+    let mut out: String = text
+        .lines()
+        .map(|line| match serde_json::from_str::<serde_json::Value>(line) {
+            Ok(mut v) => {
+                if let Some(obj) = v.as_object_mut() {
+                    obj.remove("agent_id");
+                }
+                serde_json::to_string(&v).unwrap_or_else(|_| line.to_string())
+            }
+            Err(_) => line.to_string(),
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    if text.ends_with('\n') {
+        out.push('\n');
+    }
+    out
 }
 
 impl From<response::streaming::AgentCompletionChunk> for AgentCompletion {
