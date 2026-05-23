@@ -389,9 +389,21 @@ async fn forward(
     for (k, v) in resp.headers().iter() {
         if k.as_str().eq_ignore_ascii_case("mcp-session-id")
             || k.as_str().eq_ignore_ascii_case("content-type")
+            || k.as_str().eq_ignore_ascii_case("transfer-encoding")
+            || k.as_str().eq_ignore_ascii_case("content-length")
         {
-            // Local-layer session id + the content-type the API
-            // will re-set verbatim. Stripped.
+            // Strip:
+            // - mcp-session-id: local-layer; the API uses the conduit's
+            //   real session id stamped elsewhere.
+            // - content-type: the API re-sets it on body presence.
+            // - transfer-encoding / content-length: framing headers
+            //   scoped to the conduit↔objectiveai-mcp TCP connection.
+            //   axum's `Body::from(Vec)` will compute its own
+            //   Content-Length, and forwarding `Transfer-Encoding: chunked`
+            //   alongside it produces an illegal HTTP/1.1 message
+            //   (RFC 7230 §3.3.2) that hyper closes with
+            //   `SendRequest: connection closed before message completed`
+            //   on the next pooled-connection reuse.
             continue;
         }
         if let Ok(value) = v.to_str() {

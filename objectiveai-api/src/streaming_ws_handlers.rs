@@ -273,17 +273,28 @@ where
         let ctx = crate::context(&headers, persistent_cache, suppress_output)
             .with_api_port(reverse_attach.api_port)
             .with_reverse_attach(_attach_guard.handle());
-        let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
-            Ok(s) => s,
-            Err(e) => {
-                streaming_ws::fatal_setup_error_split(&sink, &ResponseError::from(&e)).await;
-                return;
-            }
-        };
 
+        // `create_streaming_handle_usage` lives INSIDE the `send`
+        // branch so the `recv_loop` (which dispatches incoming
+        // `server_response` frames to the MCP-endpoint pending
+        // oneshots) is polled concurrently with stream setup. If we
+        // awaited stream creation OUTSIDE the select, agents would
+        // deadlock waiting on responses the recv_loop wasn't draining
+        // yet — see the 60s WS-cascade bug fix.
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
         let send = async move {
+            let stream = match client.create_streaming_handle_usage(ctx, Arc::new(body)).await {
+                Ok(s) => s,
+                Err(e) => {
+                    streaming_ws::fatal_setup_error_split(
+                        &send_sink,
+                        &ResponseError::from(&e),
+                    )
+                    .await;
+                    return;
+                }
+            };
             let mut stream = Box::pin(stream);
             while let Some(chunk) = stream.next().await {
                 send_tracker.observe(&chunk);

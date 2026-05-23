@@ -553,16 +553,37 @@ impl HttpClient {
         tokio::spawn(async move {
             let mut rx_stream = rx_stream;
             let mut chunk_tx = chunk_tx;
-            while let Some(msg) = rx_stream.next().await {
+            loop {
+                sdk_log!("demux::next_frame::start");
+                let msg = match rx_stream.next().await {
+                    Some(m) => m,
+                    None => {
+                        sdk_log!("demux::loop_exit", reason = "stream_end");
+                        break;
+                    }
+                };
                 let text = match msg {
-                    Ok(tungstenite::Message::Text(t)) => t.to_string(),
-                    Ok(tungstenite::Message::Binary(_)) => continue,
+                    Ok(tungstenite::Message::Text(t)) => {
+                        let s = t.to_string();
+                        sdk_log!("demux::next_frame::end", kind = "text", len = s.len());
+                        s
+                    }
+                    Ok(tungstenite::Message::Binary(_)) => {
+                        sdk_log!("demux::next_frame::end", kind = "binary");
+                        continue;
+                    }
                     Ok(
                         tungstenite::Message::Ping(_) | tungstenite::Message::Pong(_),
                     ) => continue,
-                    Ok(tungstenite::Message::Close(_)) => break,
+                    Ok(tungstenite::Message::Close(_)) => {
+                        sdk_log!("demux::loop_exit", reason = "close_frame");
+                        break;
+                    }
                     Ok(tungstenite::Message::Frame(_)) => continue,
-                    Err(_) => break,
+                    Err(_) => {
+                        sdk_log!("demux::loop_exit", reason = "ws_error");
+                        break;
+                    }
                 };
 
                 // Classification: try client_response, then
@@ -571,26 +592,66 @@ impl HttpClient {
                 // distinctive `id` + tagged `type`.
                 if let Ok(response) = serde_json::from_str::<ClientResponse>(&text) {
                     let id = response.id().to_string();
+                    sdk_log!("demux::client_response::matched", id = id.as_str());
                     if let Some((_, tx)) = demux_pending.remove(&id) {
                         let _ = tx.send(response);
                     }
                     continue;
                 }
                 if let Ok(request) = serde_json::from_str::<ServerRequest>(&text) {
+                    let id = request.id.clone();
+                    let method = request
+                        .body
+                        .as_ref()
+                        .and_then(|v| v.get("method"))
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .to_string();
+                    sdk_log!(
+                        "demux::server_request::spawn",
+                        id = id.as_str(),
+                        method = method.as_str(),
+                    );
                     let handler = handler.clone();
                     let demux_sink = demux_sink.clone();
                     tokio::spawn(async move {
+                        let id = id;
+                        sdk_log!("demux::handler::call::start", id = id.as_str());
                         // Handler returns the full response (incl.
                         // matching id); we just frame + write it.
                         let response = handler.handle(request).await;
+                        sdk_log!(
+                            "demux::handler::call::end",
+                            id = id.as_str(),
+                            status = response.status,
+                        );
                         let frame = match serde_json::to_string(&response) {
                             Ok(s) => s,
-                            Err(_) => return,
+                            Err(_) => {
+                                sdk_log!(
+                                    "demux::sink::write::end",
+                                    id = id.as_str(),
+                                    ok = false,
+                                    reason = "serialize_err",
+                                );
+                                return;
+                            }
                         };
+                        sdk_log!(
+                            "demux::sink::lock::wait",
+                            id = id.as_str(),
+                            frame_len = frame.len(),
+                        );
                         let mut guard = demux_sink.lock().await;
-                        let _ = guard
+                        sdk_log!("demux::sink::lock::acquired", id = id.as_str());
+                        let send_result = guard
                             .send(tungstenite::Message::Text(frame.into()))
                             .await;
+                        sdk_log!(
+                            "demux::sink::write::end",
+                            id = id.as_str(),
+                            ok = send_result.is_ok(),
+                        );
                     });
                     continue;
                 }
@@ -599,7 +660,9 @@ impl HttpClient {
                 let mut de = serde_json::Deserializer::from_str(&text);
                 match serde_path_to_error::deserialize::<_, Chunk>(&mut de) {
                     Ok(chunk) => {
+                        sdk_log!("demux::chunk::received");
                         if chunk_tx.unbounded_send(Ok(chunk)).is_err() {
+                            sdk_log!("demux::loop_exit", reason = "chunk_tx_closed");
                             break;
                         }
                     }
@@ -610,6 +673,7 @@ impl HttpClient {
                             Ok(api_err) => super::HttpError::ApiError(api_err),
                             Err(_) => super::HttpError::DeserializationError(e),
                         };
+                        sdk_log!("demux::loop_exit", reason = "deserialize_err");
                         let _ = chunk_tx.unbounded_send(Err(err));
                         break;
                     }
