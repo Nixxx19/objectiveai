@@ -242,27 +242,15 @@ impl Session {
                 .collect(),
             None => self.connections.iter().collect(),
         };
-        proxy_log!(
-            "list_tools::fan_out::start",
-            count = pairs.len(),
-            filtered = filter_url.is_some(),
-        );
         let results = try_join_all(
             pairs
                 .iter()
                 .map(|(_, c)| async move {
-                    proxy_log!("upstream::list_tools::start", url = c.url.as_str());
                     let r = c.list_tools().await;
-                    proxy_log!(
-                        "upstream::list_tools::end",
-                        url = c.url.as_str(),
-                        ok = r.is_ok(),
-                    );
                     r
                 }),
         )
         .await?;
-        proxy_log!("list_tools::fan_out::end", count = results.len());
 
         let mut tools: Vec<Tool> = Vec::new();
         for ((server_name, _), arc) in pairs.into_iter().zip(results) {
@@ -321,27 +309,15 @@ impl Session {
                 .collect(),
             None => self.connections.iter().collect(),
         };
-        proxy_log!(
-            "list_resources::fan_out::start",
-            count = pairs.len(),
-            filtered = filter_url.is_some(),
-        );
         let results = try_join_all(
             pairs
                 .iter()
                 .map(|(_, c)| async move {
-                    proxy_log!("upstream::list_resources::start", url = c.url.as_str());
                     let r = c.list_resources().await;
-                    proxy_log!(
-                        "upstream::list_resources::end",
-                        url = c.url.as_str(),
-                        ok = r.is_ok(),
-                    );
                     r
                 }),
         )
         .await?;
-        proxy_log!("list_resources::fan_out::end", count = results.len());
 
         let mut resources: Vec<Resource> = Vec::new();
         for ((server_name, _), arc) in pairs.into_iter().zip(results) {
@@ -380,18 +356,7 @@ impl Session {
             task: params.task.clone(),
             _meta: params._meta.clone(),
         };
-        proxy_log!(
-            "upstream::call_tool::start",
-            url = connection.url.as_str(),
-            tool = upstream_params.name.as_str(),
-        );
         let r = connection.call_tool(&upstream_params).await;
-        proxy_log!(
-            "upstream::call_tool::end",
-            url = connection.url.as_str(),
-            tool = upstream_params.name.as_str(),
-            ok = r.is_ok(),
-        );
         Ok(r?)
     }
 
@@ -404,18 +369,7 @@ impl Session {
         let (connection, original_uri) = self
             .route(uri)
             .ok_or_else(|| ReadResourceError::ResourceNotFound(uri.to_string()))?;
-        proxy_log!(
-            "upstream::read_resource::start",
-            url = connection.url.as_str(),
-            uri = original_uri.as_str(),
-        );
         let r = connection.read_resource(&original_uri).await;
-        proxy_log!(
-            "upstream::read_resource::end",
-            url = connection.url.as_str(),
-            uri = original_uri.as_str(),
-            ok = r.is_ok(),
-        );
         Ok(r?)
     }
 

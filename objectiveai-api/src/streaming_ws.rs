@@ -2,13 +2,15 @@
 //!
 //! Each streaming endpoint (`/agent/completions`, `/vector/completions`,
 //! etc.) lives behind a single `axum::routing::any(...)` route. The
-//! handler inspects the `X-Transport` request header via the
-//! [`Transport`] extractor and forks:
+//! handler inspects the request via the [`Transport`] extractor and
+//! forks based on whether the client is actually upgrading to WS:
 //!
-//! - `X-Transport: sse` → POST + JSON body, response is `text/event-stream`
-//!   (the existing SSE handler).
-//! - Anything else (including missing header) → GET + `Upgrade: websocket`,
+//! - `Upgrade: websocket` header present → GET + WS handshake,
 //!   response is a WebSocket text-frame stream (the `_ws` handler).
+//! - Anything else (POST + JSON body, with or without `stream: true`)
+//!   → the existing SSE handler. That handler returns `text/event-stream`
+//!   when `body.stream` is true and a unary `application/json` when
+//!   it's false — same dispatch the endpoint had before WS landed.
 //!
 //! WS wire protocol after the upgrade:
 //!
@@ -81,8 +83,14 @@ impl SessionTracker {
     }
 }
 
-/// Transport the client wants. Set via the `X-Transport` request
-/// header; missing or unknown values default to [`Transport::WebSocket`].
+/// Transport the client wants. Inferred from the request itself: an
+/// `Upgrade: websocket` header → [`Transport::WebSocket`], anything
+/// else → [`Transport::Sse`]. The SSE handler covers both
+/// streamed-SSE and unary-collected responses internally (selected
+/// by `body.stream`); we only need to detect an actual WS upgrade
+/// here. POST + JSON for unary or SSE never carries `Upgrade`, so
+/// it always falls to the SSE branch — which is what unary callers
+/// expect.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Transport {
     Sse,
@@ -95,15 +103,16 @@ where
 {
     type Rejection = std::convert::Infallible;
     async fn from_request_parts(parts: &mut Parts, _: &S) -> Result<Self, Self::Rejection> {
-        let header = parts
+        let is_ws_upgrade = parts
             .headers
-            .get("X-Transport")
+            .get(axum::http::header::UPGRADE)
             .and_then(|v| v.to_str().ok())
-            .unwrap_or("");
-        Ok(if header.eq_ignore_ascii_case("sse") {
-            Transport::Sse
-        } else {
+            .map(|v| v.eq_ignore_ascii_case("websocket"))
+            .unwrap_or(false);
+        Ok(if is_ws_upgrade {
             Transport::WebSocket
+        } else {
+            Transport::Sse
         })
     }
 }
@@ -221,14 +230,11 @@ pub async fn send_chunk_split<C: Serialize>(sink: &SharedSink, chunk: &C) -> Res
         Ok(s) => s,
         Err(_) => return Ok(()), // chunk types are infallible to serialize in practice
     };
-    api_log!("send_chunk::lock::wait", len = json.len());
     let mut guard = sink.lock().await;
-    api_log!("send_chunk::lock::acquired");
     let result = guard
         .send(Message::Text(json.into()))
         .await
         .map_err(|_| ());
-    api_log!("send_chunk::write::end", ok = result.is_ok());
     result
 }
 
@@ -390,7 +396,6 @@ pub async fn send_server_request(
     let id = request.id.clone();
     let (tx, rx) = oneshot::channel();
     pending.insert(id.clone(), tx);
-    api_log!("send_server_request::pending::inserted", id = id.as_str());
 
     let frame = match serde_json::to_string(&request) {
         Ok(s) => s,
@@ -399,19 +404,8 @@ pub async fn send_server_request(
             return Err(());
         }
     };
-    api_log!(
-        "send_server_request::lock::wait",
-        id = id.as_str(),
-        frame_len = frame.len(),
-    );
     let mut guard = sink.lock().await;
-    api_log!("send_server_request::lock::acquired", id = id.as_str());
     let send_result = guard.send(Message::Text(frame.into())).await;
-    api_log!(
-        "send_server_request::write::end",
-        id = id.as_str(),
-        ok = send_result.is_ok(),
-    );
     if send_result.is_err() {
         drop(guard);
         pending.remove(&id);
@@ -464,31 +458,25 @@ pub async fn recv_loop<F, Fut>(
     let notify_fn = Arc::new(notify_fn);
 
     loop {
-        api_log!("recv_loop::next_frame::start");
         let msg = match rx.next().await {
             Some(m) => m,
             None => {
-                api_log!("recv_loop::loop_exit", reason = "stream_end");
                 return;
             }
         };
         let text = match msg {
             Ok(Message::Text(t)) => {
-                api_log!("recv_loop::next_frame::end", kind = "text", len = t.as_str().len());
                 t
             }
             Ok(Message::Binary(_)) => {
-                api_log!("recv_loop::next_frame::end", kind = "binary");
                 eprintln!("ignoring binary frame on streaming WS recv side");
                 continue;
             }
             Ok(Message::Ping(_) | Message::Pong(_)) => continue,
             Ok(Message::Close(_)) => {
-                api_log!("recv_loop::loop_exit", reason = "close_frame");
                 return;
             }
             Err(e) => {
-                api_log!("recv_loop::loop_exit", reason = "ws_error");
                 eprintln!("streaming WS recv error: {e}");
                 return;
             }
@@ -499,7 +487,6 @@ pub async fn recv_loop<F, Fut>(
         // share the `id` field but differ everywhere else), then
         // server_response, then drop.
         if let Ok(request) = serde_json::from_str::<ClientRequest>(text.as_str()) {
-            api_log!("recv_loop::client_request::received", id = request.id.as_str());
             let ClientRequest { id, payload } = request;
             match payload {
                 ClientPayload::AgentCompletionNotify(params) => {
@@ -546,24 +533,11 @@ pub async fn recv_loop<F, Fut>(
         }
 
         if let Ok(response) = serde_json::from_str::<ServerResponse>(text.as_str()) {
-            api_log!(
-                "recv_loop::server_response::received",
-                request_id = response.id.as_str(),
-                len = text.as_str().len(),
-            );
             match pending.remove(&response.id) {
                 Some((_, tx)) => {
-                    api_log!(
-                        "recv_loop::server_response::fired",
-                        request_id = response.id.as_str(),
-                    );
                     let _ = tx.send(response);
                 }
                 None => {
-                    api_log!(
-                        "recv_loop::server_response::orphan",
-                        request_id = response.id.as_str(),
-                    );
                     eprintln!(
                         "dropping server_response for unknown id {:?}",
                         response.id

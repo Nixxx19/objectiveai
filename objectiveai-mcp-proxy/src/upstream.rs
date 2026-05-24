@@ -112,19 +112,9 @@ pub async fn connect_all_fresh(
             if let Some(id) = &agent_id_owned {
                 headers.insert("X-OBJECTIVEAI-AGENT-ID".to_string(), id.clone());
             }
-            proxy_log!(
-                "upstream::connect::fresh::start",
-                url = url.as_str(),
-                resume = session_id.is_some(),
-            );
             let conn_result = client
                 .connect(spec.url, session_id, Some(headers))
                 .await;
-            proxy_log!(
-                "upstream::connect::fresh::end",
-                url = url.as_str(),
-                ok = conn_result.is_ok(),
-            );
             let conn = conn_result.map_err(|source| BadInit::UpstreamConnectFailed {
                 url: url.clone(),
                 source,
@@ -179,19 +169,9 @@ pub async fn reconnect_from_payload(
         // `headers` and gets passed straight through to Client::connect.
         let payload_headers = headers.clone();
         async move {
-            proxy_log!(
-                "upstream::connect::resume::start",
-                url = url.as_str(),
-                resume = session_id.is_some(),
-            );
             let conn_result = client
                 .connect(url.clone(), session_id, Some(headers))
                 .await;
-            proxy_log!(
-                "upstream::connect::resume::end",
-                url = url.as_str(),
-                ok = conn_result.is_ok(),
-            );
             let conn = conn_result.map_err(|source| BadInit::UpstreamConnectFailed {
                 url: url.clone(),
                 source,

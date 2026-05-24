@@ -80,9 +80,7 @@ pub async fn handle_post(
         .get(SESSION_ID_HEADER)
         .and_then(|v| v.to_str().ok())
         .unwrap_or("");
-    proxy_log!("post::entry", session = session_in);
     if let Err(resp) = require_streamable_http_accept(&headers) {
-        proxy_log!("post::exit::accept_406", session = session_in);
         return resp;
     }
 
@@ -115,12 +113,6 @@ pub async fn handle_post(
 
     let method = request.method.clone();
     let rpc_id_str = format!("{}", request.id);
-    proxy_log!(
-        "post::dispatch",
-        session = session_in,
-        method = method.as_str(),
-        rpc_id = rpc_id_str.as_str(),
-    );
     let response = match request.method.as_str() {
         "initialize" => handle_initialize(&state, &headers, request).await,
         "ping" => handle_ping(request),
@@ -130,13 +122,6 @@ pub async fn handle_post(
         "resources/read" => handle_resources_read(&state.sessions, &headers, request).await,
         other => method_not_found_response(request.id, other),
     };
-    proxy_log!(
-        "post::exit",
-        session = session_in,
-        method = method.as_str(),
-        rpc_id = rpc_id_str.as_str(),
-        status = response.status().as_u16(),
-    );
     response
 }
 
@@ -259,11 +244,6 @@ async fn handle_initialize(
         .and_then(|v| v.to_str().ok())
         .unwrap_or("");
     let rpc_id_str = format!("{}", request.id);
-    proxy_log!(
-        "initialize::entry",
-        session = session_in,
-        rpc_id = rpc_id_str.as_str(),
-    );
     // Validate the client's requested protocolVersion. We don't care
     // about anything else in `params` (clientInfo / capabilities) — they
     // don't change our routing or our advertised feature set.
@@ -336,20 +316,9 @@ async fn handle_initialize(
             // response header.
             let new_id = state.sessions.mint_id(&session.payload);
             let _ = (new_id, session);
-            proxy_log!(
-                "initialize::exit",
-                branch = "alive",
-                session = sid.as_str(),
-                rpc_id = rpc_id_str.as_str(),
-            );
             return ok_response_resume_sse(request.id);
         }
         // Branch 2 — decrypt and reconnect strictly from the payload.
-        proxy_log!(
-            "initialize::resume::fan_out::start",
-            session = sid.as_str(),
-            rpc_id = rpc_id_str.as_str(),
-        );
         let (connections_with_headers, decoded_agent_id, decoded_tool_allowlists) = match state.sessions.decode_session_id(sid) {
             Some(payload) => {
                 let agent_id = payload.agent_id.clone();
@@ -357,11 +326,6 @@ async fn handle_initialize(
                 match crate::upstream::reconnect_from_payload(&state.client, &payload).await {
                     Ok(pairs) => (pairs, agent_id, tool_allowlists),
                     Err(e @ BadInit::UpstreamConnectFailed { .. }) => {
-                        proxy_log!(
-                            "initialize::resume::fan_out::error",
-                            session = sid.as_str(),
-                            rpc_id = rpc_id_str.as_str(),
-                        );
                         return internal_error_response(request.id, e.to_string());
                     }
                     Err(e) => {
@@ -379,12 +343,6 @@ async fn handle_initialize(
                     .into_response();
             }
         };
-        proxy_log!(
-            "initialize::resume::fan_out::end",
-            session = sid.as_str(),
-            rpc_id = rpc_id_str.as_str(),
-            count = connections_with_headers.len(),
-        );
         // Register the just-reconnected session in memory. The minted
         // id is deterministic and matches what the client already
         // holds; we discard the return value because the resume path
@@ -393,12 +351,6 @@ async fn handle_initialize(
             connections_with_headers,
             decoded_agent_id,
             decoded_tool_allowlists,
-        );
-        proxy_log!(
-            "initialize::exit",
-            branch = "resume",
-            session = sid.as_str(),
-            rpc_id = rpc_id_str.as_str(),
         );
         ok_response_resume_sse(request.id)
     } else {
@@ -417,11 +369,6 @@ async fn handle_initialize(
             .or_else(|| headers.get("OBJECTIVEAI-AGENT-ID"))
             .and_then(|v| v.to_str().ok())
             .map(str::to_owned);
-        proxy_log!(
-            "initialize::fresh::fan_out::start",
-            agent_id = agent_id.as_deref().unwrap_or(""),
-            rpc_id = rpc_id_str.as_str(),
-        );
         let (connections_with_headers, tool_allowlists) = match crate::upstream::connect_all_fresh(
             &state.client,
             headers,
@@ -429,33 +376,13 @@ async fn handle_initialize(
         ).await {
             Ok(pair) => pair,
             Err(e @ (BadInit::NotUtf8 { .. } | BadInit::NotJson { .. })) => {
-                proxy_log!(
-                    "initialize::fresh::fan_out::bad_init",
-                    rpc_id = rpc_id_str.as_str(),
-                );
                 return invalid_request_response(request.id, e.to_string());
             }
             Err(e @ BadInit::UpstreamConnectFailed { .. }) => {
-                proxy_log!(
-                    "initialize::fresh::fan_out::connect_failed",
-                    rpc_id = rpc_id_str.as_str(),
-                );
                 return internal_error_response(request.id, e.to_string());
             }
         };
-        proxy_log!(
-            "initialize::fresh::fan_out::end",
-            agent_id = agent_id.as_deref().unwrap_or(""),
-            rpc_id = rpc_id_str.as_str(),
-            count = connections_with_headers.len(),
-        );
         let session_id = state.sessions.add(connections_with_headers, agent_id, tool_allowlists);
-        proxy_log!(
-            "initialize::exit",
-            branch = "fresh",
-            session = session_id.as_str(),
-            rpc_id = rpc_id_str.as_str(),
-        );
         ok_response_fresh_sse(request.id, session_id)
     }
 }

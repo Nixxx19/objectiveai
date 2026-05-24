@@ -30,10 +30,6 @@
 //! - [`HttpClient`] - HTTP client for API requests
 //! - [`HttpError`] - HTTP error types
 
-/// Temporary diagnostic logging for cross-layer concurrency probes.
-/// Activated by `OBJECTIVEAI_DIAGNOSTIC_LOG` env var; no-op otherwise.
-#[macro_use]
-mod diagnostic_log;
 pub mod agent;
 pub mod arbitrary_util;
 pub mod auth;

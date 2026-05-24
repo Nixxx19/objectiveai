@@ -181,14 +181,25 @@ impl Handle {
 pub fn strip_agent_id_lines(text: &str) -> String {
     let mut out: String = text
         .lines()
-        .map(|line| match serde_json::from_str::<serde_json::Value>(line) {
-            Ok(mut v) => {
-                if let Some(obj) = v.as_object_mut() {
-                    obj.remove("agent_id");
-                }
-                serde_json::to_string(&v).unwrap_or_else(|_| line.to_string())
+        .map(|line| {
+            // Only rewrite lines that parse as a JSON *object* AND
+            // actually contain an `agent_id` top-level key. Other
+            // JSON-valid lines (strings, numbers, arrays, or
+            // objects without agent_id) pass through verbatim —
+            // otherwise we'd re-serialize an indented JSON-string
+            // line like `    "object"` (a schema's enum value) as
+            // `"object"`, destroying the surrounding pretty-printed
+            // indentation that downstream consumers depend on.
+            let Ok(serde_json::Value::Object(mut obj)) =
+                serde_json::from_str::<serde_json::Value>(line)
+            else {
+                return line.to_string();
+            };
+            if obj.remove("agent_id").is_none() {
+                return line.to_string();
             }
-            Err(_) => line.to_string(),
+            serde_json::to_string(&serde_json::Value::Object(obj))
+                .unwrap_or_else(|_| line.to_string())
         })
         .collect::<Vec<_>>()
         .join("\n");

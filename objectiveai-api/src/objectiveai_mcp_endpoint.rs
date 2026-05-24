@@ -41,16 +41,9 @@ pub async fn handle_request(
     headers: HeaderMap,
     body: Bytes,
 ) -> Response {
-    api_log!(
-        "endpoint::entry",
-        session = session_id.as_str(),
-        method = method.as_str(),
-        body_len = body.len(),
-    );
     let rc = match registry.get(&session_id) {
         Some(rc) => rc.clone(),
         None => {
-            api_log!("endpoint::registry::miss", session = session_id.as_str());
             return (
                 StatusCode::SERVICE_UNAVAILABLE,
                 format!("no reverse channel for session_id {session_id:?}"),
@@ -90,28 +83,11 @@ pub async fn handle_request(
         body: body_value,
     };
 
-    api_log!(
-        "endpoint::ws_send::start",
-        session = session_id.as_str(),
-        request_id = request_id.as_str(),
-    );
     let rx = match send_server_request(&rc.sink, &rc.pending, request).await {
         Ok(rx) => {
-            api_log!(
-                "endpoint::ws_send::end",
-                session = session_id.as_str(),
-                request_id = request_id.as_str(),
-                ok = true,
-            );
             rx
         }
         Err(()) => {
-            api_log!(
-                "endpoint::ws_send::end",
-                session = session_id.as_str(),
-                request_id = request_id.as_str(),
-                ok = false,
-            );
             return (
                 StatusCode::SERVICE_UNAVAILABLE,
                 "reverse channel closed before request could be sent",
@@ -120,28 +96,11 @@ pub async fn handle_request(
         }
     };
 
-    api_log!(
-        "endpoint::rx_wait::start",
-        session = session_id.as_str(),
-        request_id = request_id.as_str(),
-    );
     let server_resp = match tokio::time::timeout(REVERSE_CHANNEL_TIMEOUT, rx).await {
         Ok(Ok(r)) => {
-            api_log!(
-                "endpoint::rx_wait::end",
-                session = session_id.as_str(),
-                request_id = request_id.as_str(),
-                outcome = "ok",
-            );
             r
         }
         Ok(Err(_)) => {
-            api_log!(
-                "endpoint::rx_wait::end",
-                session = session_id.as_str(),
-                request_id = request_id.as_str(),
-                outcome = "dropped",
-            );
             return (
                 StatusCode::SERVICE_UNAVAILABLE,
                 "reverse channel dropped before response arrived",
@@ -149,12 +108,6 @@ pub async fn handle_request(
                 .into_response();
         }
         Err(_) => {
-            api_log!(
-                "endpoint::rx_wait::end",
-                session = session_id.as_str(),
-                request_id = request_id.as_str(),
-                outcome = "timeout",
-            );
             return (
                 StatusCode::GATEWAY_TIMEOUT,
                 "reverse channel timed out waiting for response",
@@ -197,11 +150,5 @@ pub async fn handle_request(
     let resp = builder
         .body(axum::body::Body::from(body_bytes))
         .unwrap_or_else(|_| StatusCode::INTERNAL_SERVER_ERROR.into_response());
-    api_log!(
-        "endpoint::exit",
-        session = session_id.as_str(),
-        request_id = request_id.as_str(),
-        status = resp.status().as_u16(),
-    );
     resp
 }
