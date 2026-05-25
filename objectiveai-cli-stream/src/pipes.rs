@@ -1,24 +1,25 @@
 //! Per-agent named-pipe notify bridge.
 //!
 //! When the WS stream surfaces a new agent completion `response_id`,
-//! we bind a named pipe (Windows) / Unix domain socket (POSIX) for it
-//! under `${config_base_dir}/pipes/<agent_id>`. External processes
-//! that want to push a notification at that agent connect to the
-//! pipe and write NDJSON lines, one [`RichContent`] per line.
-//! The reader task wraps each into an [`AgentCompletionNotifyParams`]
-//! (with `response_id` set to the pipe's agent id) and dispatches
-//! through the shared [`Notifier`].
+//! we bind a socket for it at `${config_base_dir}/pipes/<agent_id>`.
+//! External processes that want to push a notification at that agent
+//! connect to the socket and write NDJSON lines, one [`RichContent`]
+//! per line. The reader task wraps each into an
+//! [`AgentCompletionNotifyParams`] (with `response_id` set to the
+//! pipe's agent id) and dispatches through the shared [`Notifier`].
 //!
 //! ## Path semantics
 //!
-//! - **POSIX**: full filesystem path. Slashes in the agent id stay
-//!   as slashes — they become real subdirectories under
-//!   `${config_base_dir}/pipes/`. The final segment is the UDS file
-//!   name. Parent directories are auto-created.
-//! - **Windows**: named pipes live in the flat `\\.\pipe\` namespace
-//!   and can't be hierarchical, so slashes in the agent id are
-//!   re-encoded as `_` and the whole encoded value becomes the
-//!   pipe name (`\\.\pipe\objectiveai_<encoded-agent-id>`).
+//! Same layout on every platform: a filesystem path under
+//! `${config_base_dir}/pipes/`. Slashes in the agent id become real
+//! subdirectories; the final segment is the socket file name. On
+//! POSIX this is a Unix domain socket; on Windows it's `AF_UNIX`
+//! (supported since Windows 10 1803), which is also addressed by a
+//! filesystem path, so we use `interprocess`'s `GenericFilePath` /
+//! `tokio` generic socket code uniformly on both platforms — no
+//! cfg-gating. Parent directories are auto-created. Stale socket
+//! files left behind by a previous abnormal exit are unlinked on
+//! bind.
 //!
 //! ## Lifecycle
 //!
@@ -26,18 +27,14 @@
 //! [`ensure_pipe`] is idempotent — calling it again for an already-
 //! tracked id is a no-op. [`PipeRegistry::shutdown`] fires every
 //! cancel sender; each reader task drops its listener (which unlinks
-//! the FS entry on POSIX) and returns.
+//! the filesystem entry) and returns.
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use dashmap::DashMap;
 use interprocess::local_socket::tokio::{Listener, prelude::*};
-#[cfg(unix)]
-use interprocess::local_socket::ToFsName;
-#[cfg(windows)]
-use interprocess::local_socket::ToNsName;
-use interprocess::local_socket::{ListenerOptions, Name};
+use interprocess::local_socket::{GenericFilePath, ListenerOptions, Name, ToFsName};
 use objectiveai_sdk::Notifier;
 use objectiveai_sdk::agent::completions::message::RichContent;
 use objectiveai_sdk::agent::completions::request::AgentCompletionNotifyParams;
@@ -47,50 +44,27 @@ use tokio::sync::oneshot;
 
 /// Compute the pipe address for `agent_id` under `pipes_root`.
 ///
-/// `pipes_root` is `${config_base_dir}/pipes`. The returned
-/// [`Name`] uses a filesystem path on POSIX and a namespaced
-/// name on Windows (see module-level docs).
-///
-/// On POSIX, also returns the parent directory + filesystem path
-/// so the caller can pre-create dirs and best-effort unlink stale
-/// socket files left behind by a previous abnormal exit.
+/// Same layout on every platform: a filesystem path. `pipes_root` is
+/// `${config_base_dir}/pipes`; the returned [`PipeAddress`] carries
+/// both the `interprocess` [`Name`] used to bind and the underlying
+/// [`PathBuf`] so the caller can pre-create parent dirs and unlink
+/// stale socket files.
 pub struct PipeAddress {
     pub name: Name<'static>,
-    /// `Some(path)` on POSIX (filesystem-addressed); `None` on Windows.
-    pub fs_path: Option<PathBuf>,
+    pub fs_path: PathBuf,
 }
 
 pub fn pipe_address_for_agent(
     pipes_root: &Path,
     agent_id: &str,
 ) -> Result<PipeAddress, String> {
-    #[cfg(unix)]
-    {
-        let fs_path = pipes_root.join(agent_id);
-        let name = fs_path
-            .clone()
-            .to_fs_name::<interprocess::local_socket::GenericFilePath>()
-            .map_err(|e| format!("invalid pipe path for agent {agent_id:?}: {e}"))?
-            .into_owned();
-        Ok(PipeAddress {
-            name,
-            fs_path: Some(fs_path),
-        })
-    }
-    #[cfg(windows)]
-    {
-        let _ = pipes_root; // not used on Windows — pipes are in a flat namespace
-        let encoded = agent_id.replace(['/', '\\', ':'], "_");
-        let ns_name = format!("objectiveai_{encoded}");
-        let name = ns_name
-            .to_ns_name::<interprocess::local_socket::GenericNamespaced>()
-            .map_err(|e| format!("invalid pipe name for agent {agent_id:?}: {e}"))?
-            .into_owned();
-        Ok(PipeAddress {
-            name,
-            fs_path: None,
-        })
-    }
+    let fs_path = pipes_root.join(agent_id);
+    let name = fs_path
+        .clone()
+        .to_fs_name::<GenericFilePath>()
+        .map_err(|e| format!("invalid pipe path for agent {agent_id:?}: {e}"))?
+        .into_owned();
+    Ok(PipeAddress { name, fs_path })
 }
 
 /// Tracks active per-agent pipe listener tasks. Clone-cheap.
@@ -132,24 +106,20 @@ impl PipeRegistry {
             }
         };
 
-        #[cfg(unix)]
-        if let Some(fs_path) = &address.fs_path {
-            if let Some(parent) = fs_path.parent() {
-                if let Err(e) = tokio::fs::create_dir_all(parent).await {
-                    emit_error(
-                        handle,
-                        format!("mkdir parent for {}: {e}", fs_path.display()),
-                    )
-                    .await;
-                    return;
-                }
+        if let Some(parent) = address.fs_path.parent() {
+            if let Err(e) = tokio::fs::create_dir_all(parent).await {
+                emit_error(
+                    handle,
+                    format!("mkdir parent for {}: {e}", address.fs_path.display()),
+                )
+                .await;
+                return;
             }
-            // Best-effort unlink — recover from a stale socket left
-            // behind by a previous `kill -9`. `EEXIST` and the like
-            // are silently swallowed; the real failure surfaces from
-            // the bind below.
-            let _ = tokio::fs::remove_file(fs_path).await;
         }
+        // Best-effort unlink — recover from a stale socket left
+        // behind by a previous `kill -9`. Real failures surface from
+        // the bind below.
+        let _ = tokio::fs::remove_file(&address.fs_path).await;
 
         let listener = match ListenerOptions::new().name(address.name).create_tokio() {
             Ok(l) => l,
@@ -157,12 +127,8 @@ impl PipeRegistry {
                 emit_error(
                     handle,
                     format!(
-                        "bind pipe for {agent_id:?}{}: {e}",
-                        address
-                            .fs_path
-                            .as_ref()
-                            .map(|p| format!(" at {}", p.display()))
-                            .unwrap_or_default()
+                        "bind pipe for {agent_id:?} at {}: {e}",
+                        address.fs_path.display()
                     ),
                 )
                 .await;
@@ -187,7 +153,7 @@ impl PipeRegistry {
 
     /// Fire every cancel and drop the registry. Reader tasks wake
     /// from their `tokio::select!`, drop their listeners (which
-    /// unlinks the FS entry on POSIX), and return.
+    /// unlinks the filesystem entry), and return.
     pub fn shutdown(&self) {
         // Drain into a Vec so we don't hold dashmap shard locks while
         // sending on the oneshots.
