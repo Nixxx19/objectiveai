@@ -77,6 +77,8 @@ pub enum Error {
     SpawnNoListeningLine { name: String },
     #[error("spawn {0}: {1}")]
     Spawn(String, std::io::Error),
+    #[error("cli-stream subprocess exited with code {code}:\n{stderr_tail}")]
+    CliStreamSubprocess { code: i32, stderr_tail: String },
 }
 
 impl Error {

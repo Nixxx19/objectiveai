@@ -1,5 +1,4 @@
 use clap::{Args, Subcommand};
-use futures::StreamExt;
 
 crate::define_inline_or_ref!(AgentArg, "agent", objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional, Remote);
 
@@ -92,52 +91,54 @@ impl Commands {
             continuation,
         };
 
-        let fs_client = objectiveai_sdk::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
-        let log_writer = fs_client.write_agent_completion();
+        // Delegate the actual streaming to cli-stream. cli-stream
+        // opens the WS, runs the MCP conduit, manages per-agent
+        // pipes, writes coalesced log files under
+        // `${config_base_dir}/logs/`, and emits LogStreamReady. We
+        // consume its chunk-NDJSON, build the same in-memory
+        // aggregate the old `consume_with_coalesced_writes` returned,
+        // then do the same final-content extraction + emit.
+        let aggregate = crate::api::stream_subprocess::run::<
+            objectiveai_sdk::agent::completions::response::streaming::AgentCompletionChunk,
+        >(
+            cli_config,
+            &["agents", "completions", "create"],
+            &params,
+            handle,
+            |_chunk| Vec::new(),  // agent completions have no per-chunk inner errors
+            |agg, c| agg.push(c),
+        ).await?;
+        let mut accumulated = aggregate.ok_or(crate::error::Error::EmptyStream)?;
 
-        let handle = handle.clone();
-        crate::api::run_with_conduit(cli_config, Box::new(|http_client, conduit| Box::pin(async move {
-            let (stream, _notifier) = objectiveai_sdk::agent::completions::create_agent_completion_streaming(
-                &http_client, params, conduit,
-            ).await?;
+        if let Some(error) = accumulated.error.take() {
+            return Err(crate::error::Error::ResponseError(error));
+        }
 
-            let mut accumulated = crate::log_stream::consume_with_coalesced_writes(
-                stream.map(|r| r.map_err(crate::error::Error::from)),
-                log_writer,
-                |agg: &mut objectiveai_sdk::agent::completions::response::streaming::AgentCompletionChunk, c| agg.push(c),
-                handle.clone(),
-            ).await?;
+        let completion: objectiveai_sdk::agent::completions::response::unary::AgentCompletion = accumulated.into();
 
-            if let Some(error) = accumulated.error.take() {
-                return Err(crate::error::Error::ResponseError(error));
-            }
+        // Extract the last assistant message content
+        let content = completion.messages.iter().rev()
+            .find_map(|msg| {
+                if let objectiveai_sdk::agent::completions::response::unary::Message::Assistant(asst) = msg {
+                    asst.content.as_ref().map(|c| match c {
+                        objectiveai_sdk::agent::completions::message::RichContent::Text(t) => t.clone(),
+                        objectiveai_sdk::agent::completions::message::RichContent::Parts(parts) => {
+                            parts.iter().filter_map(|p| match p {
+                                objectiveai_sdk::agent::completions::message::RichContentPart::Text { text } => Some(text.as_str()),
+                                _ => None,
+                            }).collect::<Vec<_>>().join("")
+                        }
+                    })
+                } else {
+                    None
+                }
+            })
+            .unwrap_or_default();
 
-            let completion: objectiveai_sdk::agent::completions::response::unary::AgentCompletion = accumulated.into();
-
-            // Extract the last assistant message content
-            let content = completion.messages.iter().rev()
-                .find_map(|msg| {
-                    if let objectiveai_sdk::agent::completions::response::unary::Message::Assistant(asst) = msg {
-                        asst.content.as_ref().map(|c| match c {
-                            objectiveai_sdk::agent::completions::message::RichContent::Text(t) => t.clone(),
-                            objectiveai_sdk::agent::completions::message::RichContent::Parts(parts) => {
-                                parts.iter().filter_map(|p| match p {
-                                    objectiveai_sdk::agent::completions::message::RichContentPart::Text { text } => Some(text.as_str()),
-                                    _ => None,
-                                }).collect::<Vec<_>>().join("")
-                            }
-                        })
-                    } else {
-                        None
-                    }
-                })
-                .unwrap_or_default();
-
-            objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Content>::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: 
-                objectiveai_sdk::cli::output::Content { content },
-             })
-            .emit(&handle).await;
-            Ok(())
-        }))).await
+        objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Content>::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value:
+            objectiveai_sdk::cli::output::Content { content },
+         })
+        .emit(handle).await;
+        Ok(())
     }
 }

@@ -1,4 +1,3 @@
-use futures::StreamExt;
 use objectiveai_sdk::cli::output::{LabResultItem, Laboratory};
 
 use super::create_args::CreateArgs;
@@ -63,122 +62,90 @@ pub async fn handle(
         stream: Some(true),
     };
 
-    let fs_client = objectiveai_sdk::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
-    let log_writer = fs_client.write_laboratory_execution();
-
-    let handle = handle.clone();
-    crate::api::run_with_conduit(
+    // Delegate to cli-stream. Per-evaluation inner errors stream out
+    // as Output::Error(Warn) via the closure below.
+    let aggregate = crate::api::stream_subprocess::run::<
+        objectiveai_sdk::laboratories::executions::response::streaming::LaboratoryExecutionChunk,
+    >(
         cli_config,
-        Box::new(move |http_client, conduit| Box::pin(async move {
-            let (stream, _notifier) =
-                objectiveai_sdk::laboratories::executions::create_laboratory_execution_streaming(
-                    &http_client, params, conduit,
-                )
-                .await?;
+        &["laboratories", "executions", "create"],
+        &params,
+        handle,
+        |chunk| chunk.inner_errors().map(|e| serde_json::to_value(&e).unwrap()).collect(),
+        |agg, c| agg.push(c),
+    ).await?;
+    let mut accumulated = aggregate.ok_or(crate::error::Error::EmptyStream)?;
 
-            // Emit each chunk's inner errors live (Warn) before pushing.
-            let emit_handle = handle.clone();
-            let stream = stream.then(move |result| {
-                let handle = emit_handle.clone();
-                async move {
-                    if let Ok(chunk) = &result {
-                        for inner in chunk.inner_errors() {
-                            objectiveai_sdk::cli::output::Output::<serde_json::Value>::Error(
-                                objectiveai_sdk::cli::output::Error {
-                                    level: objectiveai_sdk::cli::output::Level::Warn,
-                                    fatal: false,
-                                    message: serde_json::to_value(&inner).unwrap(),
-                                    agent_id: None,
-                                },
-                            )
-                            .emit(&handle)
-                            .await;
-                        }
-                    }
-                    result.map_err(crate::error::Error::from)
-                }
-            });
+    if let Some(error) = accumulated.error.take() {
+        return Err(crate::error::Error::ResponseError(error));
+    }
 
-            let mut accumulated = crate::log_stream::consume_with_coalesced_writes(
-                stream,
-                log_writer,
-                |agg: &mut objectiveai_sdk::laboratories::executions::response::streaming::LaboratoryExecutionChunk, c| agg.push(c),
-                handle.clone(),
-            ).await?;
+    let execution: objectiveai_sdk::laboratories::executions::response::unary::LaboratoryExecution =
+        accumulated.into();
 
-            if let Some(error) = accumulated.error.take() {
-                return Err(crate::error::Error::ResponseError(error));
+    // Collect evaluation outputs indexed by agent_index. Per-evaluation
+    // errors were already streamed as Output::Error during the stream,
+    // so we only need outputs here.
+    let mut eval_map: std::collections::HashMap<u64, Option<&objectiveai_sdk::functions::expression::InputValue>> =
+        std::collections::HashMap::new();
+    for eval in &execution.evaluations {
+        eval_map.insert(eval.agent_index, eval.output.as_ref());
+    }
+
+    // Collect non-None outputs in agent_index order, tracking which indices have outputs
+    let mut outputs_with_indices: Vec<(u64, &objectiveai_sdk::functions::expression::InputValue)> = Vec::new();
+    for agent_index in 0..num_agents as u64 {
+        if let Some(Some(output)) = eval_map.get(&agent_index) {
+            outputs_with_indices.push((agent_index, output));
+        }
+    }
+
+    // Run python scoring if there are any outputs and a script was provided
+    let mut score_map: std::collections::HashMap<u64, f64> = std::collections::HashMap::new();
+    if !outputs_with_indices.is_empty() {
+        if let Some(ref script) = python_code {
+            // Pass evaluations as sys.argv[1], script reads via:
+            //   import json, sys; evaluations = json.loads(sys.argv[1])
+            let evaluations_json = serde_json::to_string(
+                &outputs_with_indices
+                    .iter()
+                    .map(|(_, output)| serde_json::to_value(output).unwrap())
+                    .collect::<Vec<_>>(),
+            )
+            .unwrap();
+
+            let scores: Vec<f64> = crate::python::exec_code_with_args(
+                script,
+                &[evaluations_json],
+            )?;
+
+            if scores.len() < outputs_with_indices.len() {
+                return Err(crate::error::Error::MissingArgs(
+                    "python script returned fewer scores than evaluation outputs",
+                ));
             }
 
-            let execution: objectiveai_sdk::laboratories::executions::response::unary::LaboratoryExecution =
-                accumulated.into();
-
-            // Collect evaluation outputs indexed by agent_index. Per-evaluation
-            // errors were already streamed as Output::Error during the stream,
-            // so we only need outputs here.
-            let mut eval_map: std::collections::HashMap<u64, Option<&objectiveai_sdk::functions::expression::InputValue>> =
-                std::collections::HashMap::new();
-            for eval in &execution.evaluations {
-                eval_map.insert(eval.agent_index, eval.output.as_ref());
+            for (i, (agent_index, _)) in outputs_with_indices.iter().enumerate() {
+                score_map.insert(*agent_index, scores[i]);
             }
+        }
+    }
 
-            // Collect non-None outputs in agent_index order, tracking which indices have outputs
-            let mut outputs_with_indices: Vec<(u64, &objectiveai_sdk::functions::expression::InputValue)> = Vec::new();
-            for agent_index in 0..num_agents as u64 {
-                if let Some(Some(output)) = eval_map.get(&agent_index) {
-                    outputs_with_indices.push((agent_index, output));
-                }
-            }
+    // Build results in original argument order. Per-evaluation
+    // failures already surfaced as Output::Error during streaming;
+    // `score: None` covers both "failed" and "no scoreable output."
+    let results: Vec<LabResultItem> = (0..num_agents)
+        .map(|i| {
+            let agent_index = i as u64;
+            let agent = original_agents[i].clone();
+            let score = score_map.get(&agent_index).copied();
+            LabResultItem { agent, score }
+        })
+        .collect();
 
-            // Run python scoring if there are any outputs and a script was provided
-            let mut score_map: std::collections::HashMap<u64, f64> = std::collections::HashMap::new();
-            if !outputs_with_indices.is_empty() {
-                if let Some(ref script) = python_code {
-                    // Pass evaluations as sys.argv[1], script reads via:
-                    //   import json, sys; evaluations = json.loads(sys.argv[1])
-                    let evaluations_json = serde_json::to_string(
-                        &outputs_with_indices
-                            .iter()
-                            .map(|(_, output)| serde_json::to_value(output).unwrap())
-                            .collect::<Vec<_>>(),
-                    )
-                    .unwrap();
-
-                    let scores: Vec<f64> = crate::python::exec_code_with_args(
-                        script,
-                        &[evaluations_json],
-                    )?;
-
-                    if scores.len() < outputs_with_indices.len() {
-                        return Err(crate::error::Error::MissingArgs(
-                            "python script returned fewer scores than evaluation outputs",
-                        ));
-                    }
-
-                    for (i, (agent_index, _)) in outputs_with_indices.iter().enumerate() {
-                        score_map.insert(*agent_index, scores[i]);
-                    }
-                }
-            }
-
-            // Build results in original argument order. Per-evaluation
-            // failures already surfaced as Output::Error during streaming;
-            // `score: None` covers both "failed" and "no scoreable output."
-            let results: Vec<LabResultItem> = (0..num_agents)
-                .map(|i| {
-                    let agent_index = i as u64;
-                    let agent = original_agents[i].clone();
-                    let score = score_map.get(&agent_index).copied();
-                    LabResultItem { agent, score }
-                })
-                .collect();
-
-            objectiveai_sdk::cli::output::Output::<Laboratory>::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: 
-                Laboratory { laboratory: results },
-             })
-            .emit(&handle).await;
-            Ok(())
-        })),
-    )
-    .await
+    objectiveai_sdk::cli::output::Output::<Laboratory>::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value:
+        Laboratory { laboratory: results },
+     })
+    .emit(handle).await;
+    Ok(())
 }

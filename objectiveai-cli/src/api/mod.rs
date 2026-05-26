@@ -16,7 +16,7 @@ pub mod spawn;
 pub mod kill;
 mod run;
 pub mod detach;
-pub mod conduit;
+pub mod stream_subprocess;
 
 // Shared infrastructure for per-endpoint subcommands.
 pub mod agent_id_arg;

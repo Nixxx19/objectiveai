@@ -1,18 +1,12 @@
-//! Streaming "log file is ready" handshake between the streaming `create`
-//! commands and the `--detach` parent process. The parent watches the
-//! child's stdout for a [`LogStreamReady`] JSONL notification and exits
-//! cleanly once it sees one.
+//! Streaming "log file is ready" handshake helpers + log-content
+//! emission shared between the `logs` subcommands and `detach.rs`.
+//!
+//! The actual `emit_log_stream_ready` lives in `objectiveai-cli-stream`
+//! now; the cli only PARSES the handshake (via [`parse_log_stream_ready`])
+//! when its `detach.rs` parent watches an orphan's stdout for the
+//! ready-line.
 
 use objectiveai_sdk::cli::output::{Cleared, Handle, Items, LogContent, LogStreamReady, Output};
-
-/// Emit the log-stream-ready notification with the given log id.
-pub async fn emit_log_stream_ready(id: &str, handle: &Handle) {
-    Output::<LogStreamReady>::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: LogStreamReady {
-        log_stream_ready: id.to_string(),
-    } })
-    .emit(handle)
-    .await;
-}
 
 /// Returns the log id if `line` is a log-stream-ready notification.
 pub fn parse_log_stream_ready(line: &str) -> Option<String> {
