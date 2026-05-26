@@ -15,15 +15,23 @@ pub struct LogFile {
     pub extension: String,
     /// File content bytes.
     pub content: Vec<u8>,
+    /// Optional role suffix appended to the stem with a leading `-`,
+    /// e.g. `"response"` → `acc-1-response`. Only the root file at
+    /// each endpoint sets this; nested child files leave it `None`.
+    pub suffix: Option<&'static str>,
 }
 
 impl LogFile {
     /// The filename stem without extension, e.g. `"acc-1"`, `"acc-1_0"`, `"acc-1_0_2"`.
     pub fn stem(&self) -> String {
-        match (self.message_index, self.media_index) {
+        let base = match (self.message_index, self.media_index) {
             (None, _) => self.id.clone(),
             (Some(mi), None) => format!("{}_{mi}", self.id),
             (Some(mi), Some(mdi)) => format!("{}_{mi}_{mdi}", self.id),
+        };
+        match self.suffix {
+            Some(s) => format!("{base}-{s}"),
+            None => base,
         }
     }
 

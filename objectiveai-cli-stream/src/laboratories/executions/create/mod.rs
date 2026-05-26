@@ -27,7 +27,9 @@ pub async fn handle(
         None::<String>,
         None::<String>,
     );
-    let log_writer = fs_client.write_laboratory_execution();
+    let log_writer = fs_client
+        .write_laboratory_execution(&params)
+        .map_err(|e| format!("failed to build laboratory-execution log writer: {e}"))?;
 
     let (stream, notifier) =
         objectiveai_sdk::laboratories::executions::create_laboratory_execution_streaming(

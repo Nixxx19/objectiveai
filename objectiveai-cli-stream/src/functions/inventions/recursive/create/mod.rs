@@ -27,7 +27,9 @@ pub async fn handle(
         None::<String>,
         None::<String>,
     );
-    let log_writer = fs_client.write_function_invention_recursive();
+    let log_writer = fs_client
+        .write_function_invention_recursive(&params)
+        .map_err(|e| format!("failed to build function-invention-recursive log writer: {e}"))?;
 
     let (stream, notifier) =
         objectiveai_sdk::functions::inventions::recursive::create_function_invention_recursive_streaming(

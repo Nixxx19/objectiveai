@@ -46,7 +46,13 @@ impl Client {
                 continue;
             }
             let stem = match path.file_stem().and_then(|s| s.to_str()) {
-                Some(s) => s.to_string(),
+                Some(s) => s,
+                None => continue,
+            };
+            // Only the `-response` root file represents a listable entry;
+            // strip the suffix and skip `-request` (and any other) files.
+            let id = match stem.strip_suffix("-response") {
+                Some(id) => id.to_string(),
                 None => continue,
             };
             let metadata = tokio::fs::metadata(&path)
@@ -58,7 +64,7 @@ impl Client {
                 .duration_since(std::time::SystemTime::UNIX_EPOCH)
                 .unwrap_or_default()
                 .as_secs();
-            items.push(ListItem { id: stem, created });
+            items.push(ListItem { id, created });
         }
         items.sort_by(|a, b| b.created.cmp(&a.created));
         if offset > 0 || limit < usize::MAX {
@@ -163,23 +169,47 @@ impl Client {
 
     // -- Write methods (LogWriter constructors) -----------------------------
 
-    pub fn write_agent_completion(&self) -> super::LogWriter<crate::agent::completions::response::streaming::AgentCompletionChunk> {
+    pub fn write_agent_completion(
+        &self,
+        request: &crate::agent::completions::request::AgentCompletionCreateParams,
+    ) -> Result<super::LogWriter<crate::agent::completions::response::streaming::AgentCompletionChunk>, Error> {
         super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+            .with_request("agents/completions", request)
     }
-    pub fn write_vector_completion(&self) -> super::LogWriter<crate::vector::completions::response::streaming::VectorCompletionChunk> {
+    pub fn write_vector_completion(
+        &self,
+        request: &crate::vector::completions::request::VectorCompletionCreateParams,
+    ) -> Result<super::LogWriter<crate::vector::completions::response::streaming::VectorCompletionChunk>, Error> {
         super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+            .with_request("vector/completions", request)
     }
-    pub fn write_function_execution(&self) -> super::LogWriter<crate::functions::executions::response::streaming::FunctionExecutionChunk> {
+    pub fn write_function_execution(
+        &self,
+        request: &crate::functions::executions::request::FunctionExecutionCreateParams,
+    ) -> Result<super::LogWriter<crate::functions::executions::response::streaming::FunctionExecutionChunk>, Error> {
         super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+            .with_request("functions/executions", request)
     }
-    pub fn write_function_invention(&self) -> super::LogWriter<crate::functions::inventions::response::streaming::FunctionInventionChunk> {
+    pub fn write_function_invention(
+        &self,
+        request: &crate::functions::inventions::request::FunctionInventionCreateParams,
+    ) -> Result<super::LogWriter<crate::functions::inventions::response::streaming::FunctionInventionChunk>, Error> {
         super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+            .with_request("functions/inventions", request)
     }
-    pub fn write_function_invention_recursive(&self) -> super::LogWriter<crate::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk> {
+    pub fn write_function_invention_recursive(
+        &self,
+        request: &crate::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams,
+    ) -> Result<super::LogWriter<crate::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk>, Error> {
         super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+            .with_request("functions/inventions/recursive", request)
     }
-    pub fn write_laboratory_execution(&self) -> super::LogWriter<crate::laboratories::executions::response::streaming::LaboratoryExecutionChunk> {
+    pub fn write_laboratory_execution(
+        &self,
+        request: &crate::laboratories::executions::request::LaboratoryExecutionCreateParams,
+    ) -> Result<super::LogWriter<crate::laboratories::executions::response::streaming::LaboratoryExecutionChunk>, Error> {
         super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+            .with_request("laboratories/executions", request)
     }
 
     // -- Read helpers + methods ---------------------------------------------
@@ -229,7 +259,10 @@ impl Client {
     }
 
     pub async fn read_agent_completion(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions", id, jq).await
+        self.read_json("agents/completions", &format!("{id}-response"), jq).await
+    }
+    pub async fn read_agent_completion_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+        self.read_json("agents/completions", &format!("{id}-request"), jq).await
     }
     pub async fn read_agent_completion_continuation(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
         self.read_json("agents/completions/continuation", id, jq).await
@@ -253,22 +286,37 @@ impl Client {
         self.read_data_url_by_stem("agents/completions/messages/file", &format!("{id}_{message_index}_{media_index}")).await
     }
     pub async fn read_vector_completion(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("vector/completions", id, jq).await
+        self.read_json("vector/completions", &format!("{id}-response"), jq).await
+    }
+    pub async fn read_vector_completion_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+        self.read_json("vector/completions", &format!("{id}-request"), jq).await
     }
     pub async fn read_function_execution(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/executions", id, jq).await
+        self.read_json("functions/executions", &format!("{id}-response"), jq).await
+    }
+    pub async fn read_function_execution_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+        self.read_json("functions/executions", &format!("{id}-request"), jq).await
     }
     pub async fn read_function_execution_retry_token(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
         self.read_json("functions/executions/retry_token", id, jq).await
     }
     pub async fn read_function_invention(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/inventions", id, jq).await
+        self.read_json("functions/inventions", &format!("{id}-response"), jq).await
+    }
+    pub async fn read_function_invention_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+        self.read_json("functions/inventions", &format!("{id}-request"), jq).await
     }
     pub async fn read_function_invention_recursive(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/inventions/recursive", id, jq).await
+        self.read_json("functions/inventions/recursive", &format!("{id}-response"), jq).await
+    }
+    pub async fn read_function_invention_recursive_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+        self.read_json("functions/inventions/recursive", &format!("{id}-request"), jq).await
     }
     pub async fn read_laboratory_execution(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("laboratories/executions", id, jq).await
+        self.read_json("laboratories/executions", &format!("{id}-response"), jq).await
+    }
+    pub async fn read_laboratory_execution_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+        self.read_json("laboratories/executions", &format!("{id}-request"), jq).await
     }
 
     // -- Subscribe helpers + methods ----------------------------------------
@@ -354,7 +402,10 @@ impl Client {
     }
 
     pub async fn subscribe_agent_completion(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions", id, timeout, require_modification, jq).await
+        self.subscribe_json("agents/completions", &format!("{id}-response"), timeout, require_modification, jq).await
+    }
+    pub async fn subscribe_agent_completion_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json("agents/completions", &format!("{id}-request"), timeout, require_modification, jq).await
     }
     pub async fn subscribe_agent_completion_continuation(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
         self.subscribe_json("agents/completions/continuation", id, timeout, require_modification, jq).await
@@ -378,22 +429,37 @@ impl Client {
         self.subscribe_data_url_by_stem("agents/completions/messages/file", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
     }
     pub async fn subscribe_vector_completion(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("vector/completions", id, timeout, require_modification, jq).await
+        self.subscribe_json("vector/completions", &format!("{id}-response"), timeout, require_modification, jq).await
+    }
+    pub async fn subscribe_vector_completion_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json("vector/completions", &format!("{id}-request"), timeout, require_modification, jq).await
     }
     pub async fn subscribe_function_execution(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/executions", id, timeout, require_modification, jq).await
+        self.subscribe_json("functions/executions", &format!("{id}-response"), timeout, require_modification, jq).await
+    }
+    pub async fn subscribe_function_execution_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json("functions/executions", &format!("{id}-request"), timeout, require_modification, jq).await
     }
     pub async fn subscribe_function_execution_retry_token(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
         self.subscribe_json("functions/executions/retry_token", id, timeout, require_modification, jq).await
     }
     pub async fn subscribe_function_invention(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/inventions", id, timeout, require_modification, jq).await
+        self.subscribe_json("functions/inventions", &format!("{id}-response"), timeout, require_modification, jq).await
+    }
+    pub async fn subscribe_function_invention_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json("functions/inventions", &format!("{id}-request"), timeout, require_modification, jq).await
     }
     pub async fn subscribe_function_invention_recursive(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/inventions/recursive", id, timeout, require_modification, jq).await
+        self.subscribe_json("functions/inventions/recursive", &format!("{id}-response"), timeout, require_modification, jq).await
+    }
+    pub async fn subscribe_function_invention_recursive_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json("functions/inventions/recursive", &format!("{id}-request"), timeout, require_modification, jq).await
     }
     pub async fn subscribe_laboratory_execution(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("laboratories/executions", id, timeout, require_modification, jq).await
+        self.subscribe_json("laboratories/executions", &format!("{id}-response"), timeout, require_modification, jq).await
+    }
+    pub async fn subscribe_laboratory_execution_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json("laboratories/executions", &format!("{id}-request"), timeout, require_modification, jq).await
     }
 }
 

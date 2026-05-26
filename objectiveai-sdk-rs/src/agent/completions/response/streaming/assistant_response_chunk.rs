@@ -182,6 +182,7 @@ impl AssistantResponseChunk {
                 media_index: None,
                 extension: "json".to_string(),
                 content: serde_json::to_vec_pretty(logprobs).unwrap(),
+                suffix: None,
             };
             let r = LogReference::new(logprobs_file.path());
             files.push(logprobs_file);
@@ -222,6 +223,7 @@ impl AssistantResponseChunk {
             media_index: None,
             extension: "json".to_string(),
             content: serde_json::to_vec_pretty(&log).unwrap(),
+            suffix: None,
         };
         let reference = LogReference::new(msg_file.path());
         files.push(msg_file);

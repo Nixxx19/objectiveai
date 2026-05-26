@@ -171,6 +171,7 @@ impl RichContent {
                         media_index: Some(part_idx as u64),
                         extension: fc.extension.to_string(),
                         content: decoded,
+                        suffix: None,
                     };
                     log_parts.push(RichContentLogPart::Reference(
                         LogReference::new(log_file.path()),

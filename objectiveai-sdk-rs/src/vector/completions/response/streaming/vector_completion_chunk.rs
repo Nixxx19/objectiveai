@@ -192,6 +192,7 @@ impl VectorCompletionChunk {
             media_index: None,
             extension: "json".to_string(),
             content: serde_json::to_vec_pretty(&log).unwrap(),
+            suffix: Some("response"),
         };
         let reference = LogReference::new(root_file.path());
         files.push(root_file);

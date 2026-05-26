@@ -42,7 +42,9 @@ pub async fn handle(
         None::<String>,
         None::<String>,
     );
-    let log_writer = fs_client.write_function_execution();
+    let log_writer = fs_client
+        .write_function_execution(&params)
+        .map_err(|e| format!("failed to build function-execution log writer: {e}"))?;
 
     let (stream, notifier) =
         objectiveai_sdk::functions::executions::create_function_execution_streaming(

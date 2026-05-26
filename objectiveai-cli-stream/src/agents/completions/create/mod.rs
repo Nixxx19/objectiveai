@@ -26,7 +26,9 @@ pub async fn handle(
         None::<String>,
         None::<String>,
     );
-    let log_writer = fs_client.write_agent_completion();
+    let log_writer = fs_client
+        .write_agent_completion(&params)
+        .map_err(|e| format!("failed to build agent-completion log writer: {e}"))?;
 
     let (stream, notifier) =
         objectiveai_sdk::agent::completions::create_agent_completion_streaming(

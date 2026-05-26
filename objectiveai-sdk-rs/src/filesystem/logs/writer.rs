@@ -15,6 +15,10 @@ pub struct LogWriter<C> {
     produce: fn(&C) -> Option<Vec<LogFile>>,
     primary_id: Option<String>,
     buffer: HashMap<String, Vec<u8>>,
+    /// A pre-serialized request body waiting to be written once the
+    /// response ID becomes known. Carries `(route, bytes)`. Cleared
+    /// after the first chunk is written.
+    pending_request: Option<(String, Vec<u8>)>,
 }
 
 impl<C> LogWriter<C> {
@@ -27,7 +31,24 @@ impl<C> LogWriter<C> {
             produce,
             primary_id: None,
             buffer: HashMap::new(),
+            pending_request: None,
         }
+    }
+
+    /// Attach a request body that will be written alongside the first
+    /// response chunk. The request is serialized eagerly, but its
+    /// filename depends on the response ID which is only learned from
+    /// the first chunk — so the on-disk write is deferred to that
+    /// moment.
+    pub fn with_request<R: serde::Serialize>(
+        mut self,
+        route: impl Into<String>,
+        request: &R,
+    ) -> Result<Self, super::super::Error> {
+        let bytes = serde_json::to_vec_pretty(request)
+            .map_err(super::super::Error::Serialize)?;
+        self.pending_request = Some((route.into(), bytes));
+        Ok(self)
     }
 
     /// The ID of the primary (root) log entry.
@@ -40,7 +61,7 @@ impl<C> LogWriter<C> {
     /// Write a chunk to disk. Files whose content hasn't changed since the
     /// last write are skipped.
     pub async fn write(&mut self, chunk: &C) -> Result<(), super::super::Error> {
-        let files = match (self.produce)(chunk) {
+        let mut files = match (self.produce)(chunk) {
             Some(files) => files,
             None => return Ok(()),
         };
@@ -49,6 +70,18 @@ impl<C> LogWriter<C> {
         if self.primary_id.is_none() {
             if let Some(last) = files.last() {
                 self.primary_id = Some(last.id.clone());
+                // Flush any pending request file alongside this first chunk.
+                if let Some((route, bytes)) = self.pending_request.take() {
+                    files.push(LogFile {
+                        route,
+                        id: last.id.clone(),
+                        message_index: None,
+                        media_index: None,
+                        extension: "json".to_string(),
+                        content: bytes,
+                        suffix: Some("request"),
+                    });
+                }
             }
         }
 
