@@ -67,4 +67,12 @@ impl FunctionExecutionTaskChunk {
         reference.split_index = self.split_index;
         (reference, files)
     }
+
+    /// Delegates to the inner function execution.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_message_rows(
+        &self,
+    ) -> Vec<crate::filesystem::logs::MessageRow> {
+        self.inner.produce_message_rows()
+    }
 }

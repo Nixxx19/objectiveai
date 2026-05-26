@@ -26,6 +26,19 @@ impl AgentCompletionIds for FunctionInventionRecursiveChunk {
 }
 
 impl FunctionInventionRecursiveChunk {
+    /// Flat-maps message rows from every wrapped non-recursive invention.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_message_rows(
+        &self,
+    ) -> Vec<crate::filesystem::logs::MessageRow> {
+        self.inventions
+            .iter()
+            .flat_map(|i| i.produce_message_rows())
+            .collect()
+    }
+}
+
+impl FunctionInventionRecursiveChunk {
     /// Yields each inner error from the recursive chunk's wrapped
     /// non-recursive `FunctionInventionChunk`s.
     ///

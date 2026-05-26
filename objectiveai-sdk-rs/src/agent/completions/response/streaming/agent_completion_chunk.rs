@@ -142,6 +142,39 @@ impl AgentCompletionChunk {
         Some((reference, files))
     }
 
+    /// Yields one [`MessageRow`] per `MessageChunk` for the SQLite
+    /// `messages` table. `agent_id` is this chunk's `id`; `path`
+    /// points at the per-message log file under `agents/completions/messages/`.
+    ///
+    /// [`MessageRow`]: crate::filesystem::logs::MessageRow
+    #[cfg(feature = "filesystem")]
+    pub fn produce_message_rows(
+        &self,
+    ) -> Vec<crate::filesystem::logs::MessageRow> {
+        use crate::filesystem::logs::{MessageKind, MessageRow};
+        const ROUTE: &str = "agents/completions";
+        if self.id.is_empty() {
+            return Vec::new();
+        }
+        self.messages
+            .iter()
+            .map(|m| {
+                let kind = match m {
+                    super::MessageChunk::Assistant(_) => MessageKind::AssistantResponse,
+                    super::MessageChunk::Tool(_) => MessageKind::ToolResponse,
+                };
+                let idx = m.index();
+                MessageRow {
+                    agent_id: self.id.clone(),
+                    kind,
+                    index: idx,
+                    path: format!("{ROUTE}/messages/{}_{idx}.json", self.id),
+                    timestamp: self.created,
+                }
+            })
+            .collect()
+    }
+
     fn push_messages(&mut self, other_choices: &[super::MessageChunk]) {
         fn push_message(
             messages: &mut Vec<super::MessageChunk>,

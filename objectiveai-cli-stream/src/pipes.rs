@@ -1,7 +1,7 @@
 //! Per-agent named-pipe notify bridge.
 //!
 //! When the WS stream surfaces a new agent completion `response_id`,
-//! we bind a socket for it at `${config_base_dir}/pipes/<agent_id>`.
+//! we bind a socket for it at `${config_base_dir}/pipes/<agent_id>/socket`.
 //! External processes that want to push a notification at that agent
 //! connect to the socket and write NDJSON lines, one [`RichContent`]
 //! per line. The reader task wraps each into an
@@ -11,15 +11,16 @@
 //! ## Path semantics
 //!
 //! Same layout on every platform: a filesystem path under
-//! `${config_base_dir}/pipes/`. Slashes in the agent id become real
-//! subdirectories; the final segment is the socket file name. On
-//! POSIX this is a Unix domain socket; on Windows it's `AF_UNIX`
-//! (supported since Windows 10 1803), which is also addressed by a
-//! filesystem path, so we use `interprocess`'s `GenericFilePath` /
-//! `tokio` generic socket code uniformly on both platforms — no
-//! cfg-gating. Parent directories are auto-created. Stale socket
-//! files left behind by a previous abnormal exit are unlinked on
-//! bind.
+//! `${config_base_dir}/pipes/`. Each agent gets a folder at
+//! `<agent_id>/` (slashes in the agent id become real subdirectories)
+//! containing both the socket (fixed name `socket`) and a sibling
+//! SQLite `db.sqlite` written by the log writer. On POSIX the socket
+//! is a Unix domain socket; on Windows it's `AF_UNIX` (supported
+//! since Windows 10 1803), which is also addressed by a filesystem
+//! path, so we use `interprocess`'s `GenericFilePath` / `tokio`
+//! generic socket code uniformly on both platforms — no cfg-gating.
+//! Parent directories are auto-created. Stale socket files left
+//! behind by a previous abnormal exit are unlinked on bind.
 //!
 //! ## Lifecycle
 //!
@@ -58,7 +59,7 @@ pub fn pipe_address_for_agent(
     pipes_root: &Path,
     agent_id: &str,
 ) -> Result<PipeAddress, String> {
-    let fs_path = pipes_root.join(agent_id);
+    let fs_path = pipes_root.join(agent_id).join("socket");
     let name = fs_path
         .clone()
         .to_fs_name::<GenericFilePath>()

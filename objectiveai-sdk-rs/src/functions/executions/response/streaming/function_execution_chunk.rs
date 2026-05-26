@@ -48,6 +48,26 @@ impl AgentCompletionIds for FunctionExecutionChunk {
 }
 
 impl FunctionExecutionChunk {
+    /// Flat-maps message rows from every task (mirrors
+    /// `agent_completion_ids()`'s traversal). Reasoning summary rows
+    /// are also included via the reasoning chunk's delegation.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_message_rows(
+        &self,
+    ) -> Vec<crate::filesystem::logs::MessageRow> {
+        let mut rows: Vec<crate::filesystem::logs::MessageRow> = self
+            .tasks
+            .iter()
+            .flat_map(|t| t.produce_message_rows())
+            .collect();
+        if let Some(r) = &self.reasoning {
+            rows.extend(r.produce_message_rows());
+        }
+        rows
+    }
+}
+
+impl FunctionExecutionChunk {
     /// Yields every inner error reachable from this chunk: nested function-task
     /// failures, vector-completion task failures (own + per-agent), and
     /// reasoning agent-completion failures. Each item carries the full

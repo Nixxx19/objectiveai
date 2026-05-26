@@ -61,4 +61,12 @@ impl VectorCompletionTaskChunk {
         }
         (reference, files)
     }
+
+    /// Delegates to the inner vector completion.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_message_rows(
+        &self,
+    ) -> Vec<crate::filesystem::logs::MessageRow> {
+        self.inner.produce_message_rows()
+    }
 }

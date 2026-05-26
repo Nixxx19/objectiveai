@@ -43,7 +43,7 @@ pub async fn handle(
         None::<String>,
     );
     let log_writer = fs_client
-        .write_function_execution(&params)
+        .write_function_execution(&params, pipes_root.clone())
         .map_err(|e| format!("failed to build function-execution log writer: {e}"))?;
 
     let (stream, notifier) =

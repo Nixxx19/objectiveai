@@ -48,6 +48,19 @@ impl AgentCompletionIds for VectorCompletionChunk {
 }
 
 impl VectorCompletionChunk {
+    /// Flat-maps inner agent-completion message rows.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_message_rows(
+        &self,
+    ) -> Vec<crate::filesystem::logs::MessageRow> {
+        self.completions
+            .iter()
+            .flat_map(|c| c.produce_message_rows())
+            .collect()
+    }
+}
+
+impl VectorCompletionChunk {
     /// Creates a default chunk with uniform scores for the given number of responses.
     pub fn default_from_request_responses_len(
         request_responses_len: usize,

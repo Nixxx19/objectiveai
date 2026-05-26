@@ -27,7 +27,7 @@ pub async fn handle(
         None::<String>,
     );
     let log_writer = fs_client
-        .write_agent_completion(&params)
+        .write_agent_completion(&params, pipes_root.clone())
         .map_err(|e| format!("failed to build agent-completion log writer: {e}"))?;
 
     let (stream, notifier) =

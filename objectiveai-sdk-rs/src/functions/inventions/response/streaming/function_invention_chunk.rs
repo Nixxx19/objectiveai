@@ -37,6 +37,19 @@ impl AgentCompletionIds for FunctionInventionChunk {
 }
 
 impl FunctionInventionChunk {
+    /// Flat-maps message rows from every inner agent completion.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_message_rows(
+        &self,
+    ) -> Vec<crate::filesystem::logs::MessageRow> {
+        self.completions
+            .iter()
+            .flat_map(|c| c.produce_message_rows())
+            .collect()
+    }
+}
+
+impl FunctionInventionChunk {
     /// Yields each inner error from this chunk's per-agent completions,
     /// tagged with the failing completion's `index`.
     ///

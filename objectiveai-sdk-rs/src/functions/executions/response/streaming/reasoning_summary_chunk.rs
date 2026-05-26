@@ -47,4 +47,12 @@ impl ReasoningSummaryChunk {
         }
         (reference, files)
     }
+
+    /// Delegates to the inner agent completion's message-row extractor.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_message_rows(
+        &self,
+    ) -> Vec<crate::filesystem::logs::MessageRow> {
+        self.inner.produce_message_rows()
+    }
 }

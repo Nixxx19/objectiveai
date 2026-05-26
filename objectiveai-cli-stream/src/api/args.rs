@@ -124,12 +124,14 @@ impl HttpArgs {
 #[derive(Args, Debug, Clone)]
 pub struct PipeArgs {
     /// Root directory under which per-agent pipes are bound and per-
-    /// run log files are written. Pipes live at
-    /// `${config_base_dir}/pipes/<agent_id>` (slashes in the agent id
-    /// become subdirectories — same filesystem path on every
-    /// platform, since cli-stream uses AF_UNIX everywhere). Logs go
-    /// into `${config_base_dir}/logs/...` with the same on-disk
-    /// layout the regular CLI produces. Maps to the existing CLI's
+    /// run log files are written. Each agent gets a folder at
+    /// `${config_base_dir}/pipes/<agent_id>/` (slashes in the agent
+    /// id become subdirectories — same filesystem path on every
+    /// platform, since cli-stream uses AF_UNIX everywhere) containing
+    /// both the socket (fixed name `socket`) and a sibling SQLite
+    /// `db.sqlite` written by the log writer. Logs go into
+    /// `${config_base_dir}/logs/...` with the same on-disk layout the
+    /// regular CLI produces. Maps to the existing CLI's
     /// `CONFIG_BASE_DIR`.
     #[arg(long, global = true)]
     pub config_base_dir: Option<PathBuf>,

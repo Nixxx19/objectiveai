@@ -31,6 +31,24 @@ impl AgentCompletionIds for LaboratoryExecutionChunk {
 }
 
 impl LaboratoryExecutionChunk {
+    /// Flat-maps message rows from every builder and evaluation.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_message_rows(
+        &self,
+    ) -> Vec<crate::filesystem::logs::MessageRow> {
+        let mut rows: Vec<crate::filesystem::logs::MessageRow> = self
+            .builders
+            .iter()
+            .flat_map(|b| b.produce_message_rows())
+            .collect();
+        for e in &self.evaluations {
+            rows.extend(e.produce_message_rows());
+        }
+        rows
+    }
+}
+
+impl LaboratoryExecutionChunk {
     /// Yields each inner error from this chunk's builders and evaluations,
     /// tagged with `(index, agent_index)` and discriminated by an
     /// [`InnerError`](super::InnerError) variant (`Builder` | `Evaluation`).

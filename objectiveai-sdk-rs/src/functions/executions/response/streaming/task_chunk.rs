@@ -110,4 +110,15 @@ impl TaskChunk {
             }
         }
     }
+
+    /// Delegates to whichever variant the task is.
+    #[cfg(feature = "filesystem")]
+    pub fn produce_message_rows(
+        &self,
+    ) -> Vec<crate::filesystem::logs::MessageRow> {
+        match self {
+            TaskChunk::FunctionExecution(chunk) => chunk.produce_message_rows(),
+            TaskChunk::VectorCompletion(chunk) => chunk.produce_message_rows(),
+        }
+    }
 }

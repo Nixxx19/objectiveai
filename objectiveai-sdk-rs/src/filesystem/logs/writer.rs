@@ -1,7 +1,7 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
 
-use super::LogFile;
+use super::{LogFile, MessageKind, MessageRow, messages_db};
 
 /// Writes streaming chunks to the log file structure on disk.
 ///
@@ -19,6 +19,25 @@ pub struct LogWriter<C> {
     /// response ID becomes known. Carries `(route, bytes)`. Cleared
     /// after the first chunk is written.
     pending_request: Option<(String, Vec<u8>)>,
+    /// Root under which `<agent_id>/db.sqlite` lives. `None` disables
+    /// per-agent SQLite writes entirely.
+    messages_db_root: Option<PathBuf>,
+    /// `kind` for the once-per-stream request row inserted into the
+    /// top-level agent's db. `None` skips the request row (used for
+    /// factories whose request kind isn't in the WORK.md list).
+    request_kind: Option<MessageKind>,
+    /// Function pointer that extracts [`MessageRow`]s from a chunk.
+    /// `None` disables row extraction even when `messages_db_root` is
+    /// set (factories always wire them as a pair, but this stays
+    /// optional to keep `LogWriter` usable without DB writes).
+    produce_rows: Option<fn(&C) -> Vec<MessageRow>>,
+    /// Per-agent open db connections; lazily populated on first use.
+    db_connections: HashMap<String, rusqlite::Connection>,
+    /// Tracks which `(agent_id, index, kind)` triples have already
+    /// been inserted, so chunk-level duplicates (same message in a
+    /// later chunk because the server re-broadcast it) don't produce
+    /// duplicate rows.
+    inserted_rows: HashSet<(String, u64, MessageKind)>,
 }
 
 impl<C> LogWriter<C> {
@@ -32,6 +51,11 @@ impl<C> LogWriter<C> {
             primary_id: None,
             buffer: HashMap::new(),
             pending_request: None,
+            messages_db_root: None,
+            request_kind: None,
+            produce_rows: None,
+            db_connections: HashMap::new(),
+            inserted_rows: HashSet::new(),
         }
     }
 
@@ -51,6 +75,27 @@ impl<C> LogWriter<C> {
         Ok(self)
     }
 
+    /// Attach the per-agent SQLite database root + a chunk-to-rows
+    /// extractor. Sets the writer up to insert a row per request
+    /// (kind given here) into the top-level agent's db on the first
+    /// chunk, and a row per `assistant_response` / `tool_response`
+    /// observed in any chunk.
+    ///
+    /// `messages_db_root` is the cli-stream `pipes_root`
+    /// (`${config_base_dir}/pipes`). The on-disk path is
+    /// `${messages_db_root}/<agent_id>/db.sqlite`.
+    pub fn with_messages_db(
+        mut self,
+        messages_db_root: impl Into<PathBuf>,
+        request_kind: Option<MessageKind>,
+        produce_rows: fn(&C) -> Vec<MessageRow>,
+    ) -> Self {
+        self.messages_db_root = Some(messages_db_root.into());
+        self.request_kind = request_kind;
+        self.produce_rows = Some(produce_rows);
+        self
+    }
+
     /// The ID of the primary (root) log entry.
     ///
     /// Returns `None` until at least one chunk has been written.
@@ -66,13 +111,16 @@ impl<C> LogWriter<C> {
             None => return Ok(()),
         };
 
-        // The last file is always the root — capture its id on first write
+        // The last file is always the root — capture its id on first write.
+        // This also flushes the pending request file (alongside the first
+        // chunk's files) and, when the messages-db is wired, inserts the
+        // once-per-stream request row.
+        let mut first_chunk_request_path: Option<String> = None;
         if self.primary_id.is_none() {
             if let Some(last) = files.last() {
                 self.primary_id = Some(last.id.clone());
-                // Flush any pending request file alongside this first chunk.
                 if let Some((route, bytes)) = self.pending_request.take() {
-                    files.push(LogFile {
+                    let request_file = LogFile {
                         route,
                         id: last.id.clone(),
                         message_index: None,
@@ -80,7 +128,9 @@ impl<C> LogWriter<C> {
                         extension: "json".to_string(),
                         content: bytes,
                         suffix: Some("request"),
-                    });
+                    };
+                    first_chunk_request_path = Some(request_file.path());
+                    files.push(request_file);
                 }
             }
         }
@@ -107,6 +157,54 @@ impl<C> LogWriter<C> {
             }
         })).await?;
 
+        // SQLite writes: one row per request (once) + rows per assistant /
+        // tool message (deduped). All inline-sync — matches `config/db.rs`.
+        if let Some(db_root) = self.messages_db_root.clone() {
+            // 1. Once-per-stream request row.
+            if let (Some(req_path), Some(req_kind), Some(primary)) = (
+                first_chunk_request_path,
+                self.request_kind,
+                self.primary_id.clone(),
+            ) {
+                let conn = self.open_or_get_conn(&db_root, &primary)?;
+                let next_idx = messages_db::max_index(conn)?.map(|m| m + 1).unwrap_or(0);
+                messages_db::insert(conn, req_kind, &req_path, now_secs(), next_idx)?;
+            }
+
+            // 2. Per-message rows from this chunk.
+            if let Some(rows_fn) = self.produce_rows {
+                let rows = rows_fn(chunk);
+                for row in rows {
+                    let key = (row.agent_id.clone(), row.index, row.kind);
+                    if !self.inserted_rows.insert(key) {
+                        continue;
+                    }
+                    let conn = self.open_or_get_conn(&db_root, &row.agent_id)?;
+                    messages_db::insert(conn, row.kind, &row.path, row.timestamp, row.index)?;
+                }
+            }
+        }
+
         Ok(())
     }
+
+    fn open_or_get_conn(
+        &mut self,
+        db_root: &std::path::Path,
+        agent_id: &str,
+    ) -> Result<&rusqlite::Connection, super::super::Error> {
+        if !self.db_connections.contains_key(agent_id) {
+            let agent_dir = db_root.join(agent_id);
+            let conn = messages_db::open(&agent_dir)?;
+            self.db_connections.insert(agent_id.to_string(), conn);
+        }
+        Ok(self.db_connections.get(agent_id).unwrap())
+    }
+}
+
+fn now_secs() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0)
 }
