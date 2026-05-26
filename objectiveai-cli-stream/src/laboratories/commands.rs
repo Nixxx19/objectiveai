@@ -5,15 +5,10 @@ use crate::api::{HttpArgs, PipeArgs};
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-    /// Function executions
+    /// Laboratory executions
     Executions {
         #[command(subcommand)]
         command: super::executions::Commands,
-    },
-    /// Function inventions
-    Inventions {
-        #[command(subcommand)]
-        command: super::inventions::Commands,
     },
 }
 
@@ -26,7 +21,6 @@ impl Commands {
     ) -> Result<(), String> {
         match self {
             Commands::Executions { command } => command.handle(http, pipes, handle).await,
-            Commands::Inventions { command } => command.handle(http, pipes, handle).await,
         }
     }
 }
