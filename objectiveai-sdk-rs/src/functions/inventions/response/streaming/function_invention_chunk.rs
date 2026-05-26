@@ -136,7 +136,8 @@ impl FunctionInventionChunk {
         }
 
         let mut files: Vec<LogFile> = Vec::new();
-        let mut completion_refs: Vec<LogReference> = Vec::new();
+        let mut completion_refs:
+            Vec<crate::filesystem::logs::indexed_reference::LogReference> = Vec::new();
 
         for completion in &self.completions {
             let (reference, completion_files) = completion.produce_files();

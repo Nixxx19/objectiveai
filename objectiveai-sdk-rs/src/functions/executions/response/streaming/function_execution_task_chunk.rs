@@ -40,34 +40,31 @@ impl FunctionExecutionTaskChunk {
 
     /// Produces log files for this nested function execution task.
     ///
-    /// Returns `(reference, files)` where `reference` carries
-    /// `index`, `task_index`, `task_path`, and optionally
+    /// Returns `(reference, files)` where `reference` is a
+    /// [`super::function_execution_task_log_reference::LogReference`]
+    /// carrying `index`, `task_index`, `task_path`, and optionally
     /// `swiss_pool_index`, `swiss_round`, `split_index`.
     /// Files under `functions/executions/`.
     #[cfg(feature = "filesystem")]
     pub fn produce_files(
         &self,
-    ) -> (crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>) {
-        use crate::filesystem::logs::LogReference;
-        let mut reference = match self.inner.produce_files() {
-            Some((reference, files)) => {
-                let mut r = reference;
-                r.index = Some(self.index);
-                r.task_index = Some(self.task_index);
-                r.task_path = Some(self.task_path.clone());
-                r.swiss_pool_index = self.swiss_pool_index;
-                r.swiss_round = self.swiss_round;
-                r.split_index = self.split_index;
-                return (r, files);
-            }
-            None => LogReference::new(String::new()),
+    ) -> (
+        super::function_execution_task_log_reference::LogReference,
+        Vec<crate::filesystem::logs::LogFile>,
+    ) {
+        let (path, files) = match self.inner.produce_files() {
+            Some((inner_ref, files)) => (inner_ref.path, files),
+            None => (String::new(), Vec::new()),
         };
-        reference.index = Some(self.index);
-        reference.task_index = Some(self.task_index);
-        reference.task_path = Some(self.task_path.clone());
+        let mut reference = super::function_execution_task_log_reference::LogReference::new(
+            path,
+            self.index,
+            self.task_index,
+            self.task_path.clone(),
+        );
         reference.swiss_pool_index = self.swiss_pool_index;
         reference.swiss_round = self.swiss_round;
         reference.split_index = self.split_index;
-        (reference, Vec::new())
+        (reference, files)
     }
 }

@@ -128,7 +128,8 @@ impl FunctionInventionRecursiveChunk {
         }
 
         let mut files: Vec<LogFile> = Vec::new();
-        let mut invention_refs: Vec<LogReference> = Vec::new();
+        let mut invention_refs:
+            Vec<crate::filesystem::logs::indexed_reference::LogReference> = Vec::new();
 
         for invention in &self.inventions {
             let (reference, invention_files) = invention.produce_files();

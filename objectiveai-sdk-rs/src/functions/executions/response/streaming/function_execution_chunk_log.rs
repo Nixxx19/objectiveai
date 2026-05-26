@@ -3,12 +3,14 @@
 //! Mirrors [`super::FunctionExecutionChunk`]'s field-by-field shape
 //! with three type swaps and one order tweak:
 //!
-//! - `tasks: Vec<TaskChunk>` → `Vec<LogReference>` (each task in
-//!   its own file)
-//! - `retry_token: Option<String>` → `Option<LogReference>` (token
+//! - `tasks: Vec<TaskChunk>` → `Vec<task_log_reference::LogReference>`
+//!   (untagged enum dispatching to function-execution or vector-completion
+//!   task references; each task in its own file)
+//! - `retry_token: Option<String>` →
+//!   `Option<LogReference>` (plain — token extracted to its own file)
+//! - `reasoning: Option<ReasoningSummaryChunk>` →
+//!   `Option<reasoning_summary_log_reference::LogReference>` (reasoning
 //!   extracted to its own file)
-//! - `reasoning: Option<ReasoningSummaryChunk>` → `Option<LogReference>`
-//!   (reasoning extracted to its own file)
 //!
 //! Field order matches what the legacy `to_value(&shell) +
 //! Map::insert` chain produced on disk — specifically, `reasoning`
@@ -24,11 +26,13 @@ use crate::error;
 use crate::filesystem::logs::LogReference;
 use crate::functions::executions::response;
 
+use super::{reasoning_summary_log_reference, task_log_reference};
+
 #[derive(Debug, Clone, Serialize, JsonSchema)]
 #[schemars(rename = "functions.executions.response.streaming.FunctionExecutionChunkLog")]
 pub struct FunctionExecutionChunkLog {
     pub id: String,
-    pub tasks: Vec<LogReference>,
+    pub tasks: Vec<task_log_reference::LogReference>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub tasks_errors: Option<bool>,
@@ -53,5 +57,5 @@ pub struct FunctionExecutionChunkLog {
     /// the shell fields, putting it at the tail of the object.
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
-    pub reasoning: Option<LogReference>,
+    pub reasoning: Option<reasoning_summary_log_reference::LogReference>,
 }

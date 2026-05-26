@@ -1,4 +1,5 @@
 mod client;
+pub mod indexed_reference;
 mod list;
 mod log_file;
 mod reference;

@@ -1,5 +1,5 @@
-//! `LogReference` — the on-disk pointer shape every produced log
-//! file uses to reference its children.
+//! `LogReference` — the plain on-disk pointer shape every produced
+//! log file uses to reference a single child file.
 //!
 //! On disk:
 //!
@@ -7,29 +7,24 @@
 //! { "type": "reference", "path": "agents/completions/messages/acc-1_0.json" }
 //! ```
 //!
-//! Used by every chunk type's `produce_files` to represent the
-//! parent → child relationship between fragmented log files. The
-//! `path` is the relative on-disk path (under `${config_base_dir}/
-//! logs/`) of the referenced child file.
+//! For references that carry additional per-context metadata (an
+//! `index`, a `task_path`, an inline `error` or `output`, etc.),
+//! each chunk that needs them defines its own `LogReference` struct
+//! in a sibling `*_log_reference.rs` file — same name (`LogReference`),
+//! different module path. See:
 //!
-//! Optional fields (`index`, `task_index`, `task_path`,
-//! `agent_index`, `swiss_pool_index`, `swiss_round`, `split_index`,
-//! `error`, `output`) carry per-context metadata that some parents
-//! attach to the reference. All optionals serialize-skip when `None`.
-//!
-//! Field declaration order matters: serde serializes in struct
-//! order, so the keys appear on disk in the order below. That order
-//! was chosen to match the legacy `serde_json::json!` / `Map::insert`
-//! output of every produce_files implementation byte-for-byte.
-//!
-//! `error` and `output` are `serde_json::Value` because they hold
-//! arbitrary task-output JSON whose schema isn't known at the SDK
-//! layer.
+//! - [`super::indexed_reference::LogReference`] — `{type, path, index}`
+//! - `laboratories::executions::response::streaming::builder_log_reference::LogReference`
+//! - `laboratories::executions::response::streaming::evaluation_log_reference::LogReference`
+//! - `functions::executions::response::streaming::reasoning_summary_log_reference::LogReference`
+//! - `functions::executions::response::streaming::function_execution_task_log_reference::LogReference`
+//! - `functions::executions::response::streaming::vector_completion_task_log_reference::LogReference`
+//! - `functions::executions::response::streaming::task_log_reference::LogReference` (untagged enum dispatch)
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-/// On-disk pointer from a parent log file to a child log file.
+/// Plain on-disk pointer (`type` + `path` only).
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "filesystem.logs.LogReference")]
 pub struct LogReference {
@@ -37,64 +32,24 @@ pub struct LogReference {
     pub r#type: LogReferenceTag,
     /// Relative on-disk path of the referenced file (under
     /// `${config_base_dir}/logs/`). Skipped when empty — the
-    /// no-data sentinel case used by upstream chunks that wrap an
-    /// optional inner (e.g. function-execution reasoning).
+    /// no-data sentinel case used by some wrappers when the inner
+    /// chunk has no content to log.
     #[serde(skip_serializing_if = "String::is_empty")]
     #[schemars(extend("omitempty" = true))]
     pub path: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub index: Option<u64>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub task_index: Option<u64>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub task_path: Option<Vec<u64>>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub agent_index: Option<u64>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub swiss_pool_index: Option<u64>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub swiss_round: Option<u64>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub split_index: Option<u64>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub error: Option<serde_json::Value>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub output: Option<serde_json::Value>,
 }
 
 impl LogReference {
-    /// Build a plain reference with just `path` set. Optional
-    /// metadata fields are populated by callers via direct field
-    /// assignment.
     pub fn new(path: String) -> Self {
         Self {
             r#type: LogReferenceTag::Reference,
             path,
-            index: None,
-            task_index: None,
-            task_path: None,
-            agent_index: None,
-            swiss_pool_index: None,
-            swiss_round: None,
-            split_index: None,
-            error: None,
-            output: None,
         }
     }
 }
 
-/// Constant `"reference"` discriminator — the `"type"` field on a
-/// `LogReference`. Exists as its own type so the wire shape can't
-/// drift to other strings.
+/// Constant `"reference"` discriminator — the `"type"` field on
+/// every `LogReference` variant.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "filesystem.logs.LogReferenceTag")]

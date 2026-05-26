@@ -59,7 +59,7 @@
       "description": "Appended at the end to match the legacy on-disk order: the\nold code inserted `reasoning` via `Map::insert` AFTER all\nthe shell fields, putting it at the tail of the object.",
       "anyOf": [
         {
-          "$ref": "filesystem.logs.LogReference"
+          "$ref": "functions.executions.response.streaming.reasoning_summary_log_reference.LogReference"
         },
         {
           "type": "null"
@@ -81,7 +81,7 @@
     "tasks": {
       "type": "array",
       "items": {
-        "$ref": "filesystem.logs.LogReference"
+        "$ref": "functions.executions.response.streaming.task_log_reference.LogReference"
       }
     },
     "tasks_errors": {

@@ -1,5 +1,9 @@
 mod builder_chunk;
+#[cfg(feature = "filesystem")]
+pub mod builder_log_reference;
 mod evaluation_chunk;
+#[cfg(feature = "filesystem")]
+pub mod evaluation_log_reference;
 mod inner_error;
 mod laboratory_execution_chunk;
 #[cfg(feature = "filesystem")]

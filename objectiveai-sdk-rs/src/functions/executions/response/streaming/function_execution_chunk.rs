@@ -224,7 +224,7 @@ impl FunctionExecutionChunk {
         }
 
         let mut files: Vec<LogFile> = Vec::new();
-        let mut task_refs: Vec<LogReference> = Vec::new();
+        let mut task_refs: Vec<super::task_log_reference::LogReference> = Vec::new();
 
         for task in &self.tasks {
             let (reference, task_files) = task.produce_files();

@@ -1,19 +1,21 @@
 //! On-disk shape of a `FunctionInventionRecursiveChunk` log file.
 //!
 //! Mirrors [`super::FunctionInventionRecursiveChunk`] field-for-field,
-//! with `inventions: Vec<FunctionInventionChunk>` → `Vec<LogReference>`.
+//! with `inventions: Vec<FunctionInventionChunk>` →
+//! `Vec<indexed_reference::LogReference>` (each wrapped invention
+//! carries its `index` at the reference level).
 
 use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::agent;
-use crate::filesystem::logs::LogReference;
+use crate::filesystem::logs::indexed_reference;
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
 #[schemars(rename = "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunkLog")]
 pub struct FunctionInventionRecursiveChunkLog {
     pub id: String,
-    pub inventions: Vec<LogReference>,
+    pub inventions: Vec<indexed_reference::LogReference>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub inventions_errors: Option<bool>,

@@ -124,8 +124,8 @@ impl LaboratoryExecutionChunk {
         }
 
         let mut files: Vec<LogFile> = Vec::new();
-        let mut builder_refs: Vec<LogReference> = Vec::new();
-        let mut evaluation_refs: Vec<LogReference> = Vec::new();
+        let mut builder_refs: Vec<super::builder_log_reference::LogReference> = Vec::new();
+        let mut evaluation_refs: Vec<super::evaluation_log_reference::LogReference> = Vec::new();
 
         for builder in &self.builders {
             let (reference, builder_files) = builder.produce_files();

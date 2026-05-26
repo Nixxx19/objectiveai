@@ -26,22 +26,25 @@ impl FunctionInventionChunk {
 
     /// Produces log files for this invention within a recursive invention.
     ///
-    /// Returns `(reference, files)` where `reference` carries `index`.
-    /// Files are written under `functions/inventions/`.
+    /// Returns `(reference, files)` where `reference` is an
+    /// [`indexed_reference::LogReference`] carrying `index`. Files
+    /// are written under `functions/inventions/`.
+    ///
+    /// [`indexed_reference::LogReference`]: crate::filesystem::logs::indexed_reference::LogReference
     #[cfg(feature = "filesystem")]
     pub fn produce_files(
         &self,
-    ) -> (crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>) {
-        use crate::filesystem::logs::LogReference;
-        let (mut reference, files) = match self.inner.produce_files() {
-            Some((reference, files)) => (reference, files),
-            None => {
-                let mut r = LogReference::new(String::new());
-                r.index = Some(self.index);
-                return (r, Vec::new());
-            }
+    ) -> (
+        crate::filesystem::logs::indexed_reference::LogReference,
+        Vec<crate::filesystem::logs::LogFile>,
+    ) {
+        let (path, files) = match self.inner.produce_files() {
+            Some((inner_ref, files)) => (inner_ref.path, files),
+            None => (String::new(), Vec::new()),
         };
-        reference.index = Some(self.index);
-        (reference, files)
+        (
+            crate::filesystem::logs::indexed_reference::LogReference::new(path, self.index),
+            files,
+        )
     }
 }

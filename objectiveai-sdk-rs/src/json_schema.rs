@@ -456,6 +456,15 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::filesystem::logs::ListItem),
             schemars::schema_for!(crate::filesystem::logs::LogReference),
             schemars::schema_for!(crate::filesystem::logs::LogReferenceTag),
+            schemars::schema_for!(crate::filesystem::logs::indexed_reference::LogReference),
+            // Per-site `LogReference` types (sibling to the chunk
+            // that produces them; same name, distinct module paths).
+            schemars::schema_for!(crate::functions::executions::response::streaming::function_execution_task_log_reference::LogReference),
+            schemars::schema_for!(crate::functions::executions::response::streaming::reasoning_summary_log_reference::LogReference),
+            schemars::schema_for!(crate::functions::executions::response::streaming::task_log_reference::LogReference),
+            schemars::schema_for!(crate::functions::executions::response::streaming::vector_completion_task_log_reference::LogReference),
+            schemars::schema_for!(crate::laboratories::executions::response::streaming::builder_log_reference::LogReference),
+            schemars::schema_for!(crate::laboratories::executions::response::streaming::evaluation_log_reference::LogReference),
             // *Log structs (on-disk log file shapes for every
             // chunk type that has a `produce_files` implementation).
             schemars::schema_for!(crate::agent::completions::message::RichContentLog),
