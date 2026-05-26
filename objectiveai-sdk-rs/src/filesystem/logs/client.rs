@@ -179,7 +179,7 @@ impl Client {
             .with_messages_db(
                 pipes_root,
                 Some(super::MessageKind::AgentCompletionRequest),
-                |chunk| chunk.produce_message_rows(),
+                |chunk| Box::new(chunk.produce_message_rows()),
             ))
     }
     pub fn write_vector_completion(
@@ -192,7 +192,7 @@ impl Client {
             .with_messages_db(
                 pipes_root,
                 None,
-                |chunk| chunk.produce_message_rows(),
+                |chunk| Box::new(chunk.produce_message_rows()),
             ))
     }
     pub fn write_function_execution(
@@ -218,7 +218,7 @@ impl Client {
             .with_messages_db(
                 pipes_root,
                 None,
-                |chunk| chunk.produce_message_rows(),
+                |chunk| Box::new(chunk.produce_message_rows()),
             ))
     }
     pub fn write_function_invention_recursive(
@@ -231,7 +231,7 @@ impl Client {
             .with_messages_db(
                 pipes_root,
                 Some(super::MessageKind::FunctionInventionRecursiveRequest),
-                |chunk| chunk.produce_message_rows(),
+                |chunk| Box::new(chunk.produce_message_rows()),
             ))
     }
     pub fn write_laboratory_execution(

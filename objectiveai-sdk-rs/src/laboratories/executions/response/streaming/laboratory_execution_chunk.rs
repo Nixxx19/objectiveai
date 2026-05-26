@@ -31,20 +31,19 @@ impl AgentCompletionIds for LaboratoryExecutionChunk {
 }
 
 impl LaboratoryExecutionChunk {
-    /// Flat-maps message rows from every builder and evaluation.
+    /// Flat-maps message rows from every builder and evaluation. Lazy
+    /// and `Box<dyn Iterator>`-erased because the two branches have
+    /// different concrete iterator types.
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> Vec<crate::filesystem::logs::MessageRow> {
-        let mut rows: Vec<crate::filesystem::logs::MessageRow> = self
-            .builders
+    ) -> Box<dyn Iterator<Item = crate::filesystem::logs::MessageRow> + Send + '_> {
+        let builder_rows = self.builders.iter().flat_map(|b| b.produce_message_rows());
+        let evaluation_rows = self
+            .evaluations
             .iter()
-            .flat_map(|b| b.produce_message_rows())
-            .collect();
-        for e in &self.evaluations {
-            rows.extend(e.produce_message_rows());
-        }
-        rows
+            .flat_map(|e| e.produce_message_rows());
+        Box::new(builder_rows.chain(evaluation_rows))
     }
 }
 

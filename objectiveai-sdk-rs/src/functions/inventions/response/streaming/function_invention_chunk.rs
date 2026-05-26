@@ -37,15 +37,14 @@ impl AgentCompletionIds for FunctionInventionChunk {
 }
 
 impl FunctionInventionChunk {
-    /// Flat-maps message rows from every inner agent completion.
+    /// Flat-maps message rows from every inner agent completion. Lazy.
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> Vec<crate::filesystem::logs::MessageRow> {
+    ) -> impl Iterator<Item = crate::filesystem::logs::MessageRow> + Send + '_ {
         self.completions
             .iter()
             .flat_map(|c| c.produce_message_rows())
-            .collect()
     }
 }
 

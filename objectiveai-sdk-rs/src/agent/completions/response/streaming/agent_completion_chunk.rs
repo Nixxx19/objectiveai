@@ -143,36 +143,41 @@ impl AgentCompletionChunk {
     }
 
     /// Yields one [`MessageRow`] per `MessageChunk` for the SQLite
-    /// `messages` table. `agent_id` is this chunk's `id`; `path`
-    /// points at the per-message log file under `agents/completions/messages/`.
+    /// `messages` table. Lazy: borrows from `self`, never collects.
+    ///
+    /// `agent_id` is this chunk's `id`; `path` points at the
+    /// per-message log file under `agents/completions/messages/`.
+    /// Returns an empty iterator when `id` is empty (the chunk hasn't
+    /// been assigned a response id yet — same gate `produce_files`
+    /// uses).
     ///
     /// [`MessageRow`]: crate::filesystem::logs::MessageRow
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> Vec<crate::filesystem::logs::MessageRow> {
+    ) -> impl Iterator<Item = crate::filesystem::logs::MessageRow> + Send + '_ {
         use crate::filesystem::logs::{MessageKind, MessageRow};
         const ROUTE: &str = "agents/completions";
-        if self.id.is_empty() {
-            return Vec::new();
-        }
-        self.messages
-            .iter()
-            .map(|m| {
-                let kind = match m {
-                    super::MessageChunk::Assistant(_) => MessageKind::AssistantResponse,
-                    super::MessageChunk::Tool(_) => MessageKind::ToolResponse,
-                };
-                let idx = m.index();
-                MessageRow {
-                    agent_id: self.id.clone(),
-                    kind,
-                    index: idx,
-                    path: format!("{ROUTE}/messages/{}_{idx}.json", self.id),
-                    timestamp: self.created,
-                }
+        let id = self.id.as_str();
+        let created = self.created;
+        let empty = self.id.is_empty();
+        self.messages.iter().filter_map(move |m| {
+            if empty {
+                return None;
+            }
+            let kind = match m {
+                super::MessageChunk::Assistant(_) => MessageKind::AssistantResponse,
+                super::MessageChunk::Tool(_) => MessageKind::ToolResponse,
+            };
+            let idx = m.index();
+            Some(MessageRow {
+                agent_id: id.to_string(),
+                kind,
+                index: idx,
+                path: format!("{ROUTE}/messages/{id}_{idx}.json"),
+                timestamp: created,
             })
-            .collect()
+        })
     }
 
     fn push_messages(&mut self, other_choices: &[super::MessageChunk]) {

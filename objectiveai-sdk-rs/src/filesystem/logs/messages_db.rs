@@ -13,7 +13,8 @@
 //! that resumes an existing agent picks up where the prior call's
 //! `MAX(index)` left off).
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use std::sync::{Arc, Mutex};
 
 use rusqlite::Connection;
 
@@ -103,4 +104,56 @@ pub fn insert(
         rusqlite::params![kind.as_str(), path, timestamp as i64, index as i64],
     )?;
     Ok(())
+}
+
+/// Async wrapper: open the agent's db on the blocking pool, return
+/// it wrapped in `Arc<Mutex<...>>` ready to be cloned and moved into
+/// further `spawn_blocking` ops.
+pub async fn open_async(
+    agent_dir: PathBuf,
+) -> Result<Arc<Mutex<Connection>>, super::super::Error> {
+    tokio::task::spawn_blocking(move || open(&agent_dir))
+        .await
+        .map_err(spawn_blocking_join_err)?
+        .map(|conn| Arc::new(Mutex::new(conn)))
+}
+
+/// Async wrapper: insert one message row on the blocking pool. Locks
+/// the connection only inside the blocking body so the lock never
+/// crosses an `.await`.
+pub async fn insert_async(
+    conn: Arc<Mutex<Connection>>,
+    kind: MessageKind,
+    path: String,
+    timestamp: u64,
+    index: u64,
+) -> Result<(), super::super::Error> {
+    tokio::task::spawn_blocking(move || {
+        let conn = conn.lock().expect("messages_db mutex poisoned");
+        insert(&conn, kind, &path, timestamp, index)
+    })
+    .await
+    .map_err(spawn_blocking_join_err)?
+}
+
+/// Async wrapper: atomically compute `MAX(index) + 1` and insert a
+/// row at that index. The `MAX → INSERT` pair runs under one mutex
+/// lock so concurrent writers to the same db get consistent indices.
+pub async fn insert_request_async(
+    conn: Arc<Mutex<Connection>>,
+    kind: MessageKind,
+    path: String,
+    timestamp: u64,
+) -> Result<(), super::super::Error> {
+    tokio::task::spawn_blocking(move || {
+        let conn = conn.lock().expect("messages_db mutex poisoned");
+        let next_idx = max_index(&conn)?.map(|m| m + 1).unwrap_or(0);
+        insert(&conn, kind, &path, timestamp, next_idx)
+    })
+    .await
+    .map_err(spawn_blocking_join_err)?
+}
+
+fn spawn_blocking_join_err(e: tokio::task::JoinError) -> super::super::Error {
+    super::super::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e))
 }

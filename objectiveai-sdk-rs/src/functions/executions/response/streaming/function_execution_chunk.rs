@@ -50,20 +50,19 @@ impl AgentCompletionIds for FunctionExecutionChunk {
 impl FunctionExecutionChunk {
     /// Flat-maps message rows from every task (mirrors
     /// `agent_completion_ids()`'s traversal). Reasoning summary rows
-    /// are also included via the reasoning chunk's delegation.
+    /// are also included via the reasoning chunk's delegation. Lazy
+    /// and `Box<dyn Iterator>`-erased at this boundary because tasks
+    /// and reasoning have different concrete iterator types.
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> Vec<crate::filesystem::logs::MessageRow> {
-        let mut rows: Vec<crate::filesystem::logs::MessageRow> = self
-            .tasks
+    ) -> Box<dyn Iterator<Item = crate::filesystem::logs::MessageRow> + Send + '_> {
+        let task_rows = self.tasks.iter().flat_map(|t| t.produce_message_rows());
+        let reasoning_rows = self
+            .reasoning
             .iter()
-            .flat_map(|t| t.produce_message_rows())
-            .collect();
-        if let Some(r) = &self.reasoning {
-            rows.extend(r.produce_message_rows());
-        }
-        rows
+            .flat_map(|r| r.produce_message_rows());
+        Box::new(task_rows.chain(reasoning_rows))
     }
 }
 

@@ -68,11 +68,12 @@ impl FunctionExecutionTaskChunk {
         (reference, files)
     }
 
-    /// Delegates to the inner function execution.
+    /// Delegates to the inner function execution. Returns a boxed
+    /// iterator to match the inner's type.
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> Vec<crate::filesystem::logs::MessageRow> {
+    ) -> Box<dyn Iterator<Item = crate::filesystem::logs::MessageRow> + Send + '_> {
         self.inner.produce_message_rows()
     }
 }

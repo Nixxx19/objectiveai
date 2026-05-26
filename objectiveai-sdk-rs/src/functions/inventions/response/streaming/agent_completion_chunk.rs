@@ -51,7 +51,7 @@ impl AgentCompletionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> Vec<crate::filesystem::logs::MessageRow> {
+    ) -> impl Iterator<Item = crate::filesystem::logs::MessageRow> + Send + '_ {
         self.inner.produce_message_rows()
     }
 }
