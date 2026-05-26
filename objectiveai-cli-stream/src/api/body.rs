@@ -8,15 +8,14 @@ use clap::Args;
 pub struct BodySource {
     /// Inline JSON body.
     #[arg(long)]
-    pub body_inline: String,
+    pub body: String,
 }
 
 impl BodySource {
     /// Parse the inline body into `T`.
     pub fn resolve<T: serde::de::DeserializeOwned>(self) -> Result<T, String> {
-        let mut de = serde_json::Deserializer::from_str(&self.body_inline);
-        serde_path_to_error::deserialize(&mut de).map_err(|e| {
-            format!("--body-inline parse error at `{}`: {}", e.path(), e.inner())
-        })
+        let mut de = serde_json::Deserializer::from_str(&self.body);
+        serde_path_to_error::deserialize(&mut de)
+            .map_err(|e| format!("--body parse error at `{}`: {}", e.path(), e.inner()))
     }
 }
