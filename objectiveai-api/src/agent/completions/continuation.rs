@@ -5,26 +5,29 @@ pub enum Continuation<OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK> {
     Openrouter {
         items: Vec<ContinuationItem<OPENROUTER>>,
         mcp_connection: Option<mcp::Connection>,
-        /// The agent completion's response id (the `id` field on the
-        /// response chunk / final completion). Reused across internal
-        /// continuation rounds so the composite X-OBJECTIVEAI-AGENT-ID
-        /// stays stable for the life of a single agent invocation.
-        response_id: String,
+        /// Full slash-separated lineage of the agent this continuation
+        /// belongs to (e.g. `A/B/agtcpl-<uuid>-<created>`). Minted on
+        /// the agent's first spawn and preserved verbatim across every
+        /// continuation round — server-side internal retries AND
+        /// client-side resume — so the agent's identity stays stable
+        /// regardless of who resumes the conversation. The trailing
+        /// segment is the local `id` used as `AgentCompletionChunk.id`.
+        agent_id: String,
     },
     ClaudeAgentSdk {
         items: Vec<ContinuationItem<CLAUDEAGENTSDK>>,
         mcp_connection: Option<mcp::Connection>,
-        response_id: String,
+        agent_id: String,
     },
     CodexSdk {
         items: Vec<ContinuationItem<CODEXSDK>>,
         mcp_connection: Option<mcp::Connection>,
-        response_id: String,
+        agent_id: String,
     },
     Mock {
         items: Vec<ContinuationItem<MOCK>>,
         mcp_connection: Option<mcp::Connection>,
-        response_id: String,
+        agent_id: String,
     },
 }
 
@@ -69,15 +72,15 @@ impl<OPENROUTER, CLAUDEAGENTSDK, CODEXSDK, MOCK>
         }
     }
 
-    /// The agent completion's response id, minted on first entry and
-    /// reused across server-side retry rounds. See the corresponding
-    /// doc on the enum variants.
-    pub fn response_id(&self) -> &str {
+    /// Full slash-separated lineage of the agent this continuation
+    /// belongs to. Stable across every continuation round. See the
+    /// per-variant field doc.
+    pub fn agent_id(&self) -> &str {
         match self {
-            Self::Openrouter { response_id, .. }
-            | Self::ClaudeAgentSdk { response_id, .. }
-            | Self::CodexSdk { response_id, .. }
-            | Self::Mock { response_id, .. } => response_id.as_str(),
+            Self::Openrouter { agent_id, .. }
+            | Self::ClaudeAgentSdk { agent_id, .. }
+            | Self::CodexSdk { agent_id, .. }
+            | Self::Mock { agent_id, .. } => agent_id.as_str(),
         }
     }
 }

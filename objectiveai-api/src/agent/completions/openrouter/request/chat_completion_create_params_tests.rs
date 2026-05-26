@@ -2257,6 +2257,7 @@ async fn test_request_continuation_messages_come_first() {
 
     let request_continuation = objectiveai_sdk::agent::openrouter::Continuation {
         upstream: objectiveai_sdk::agent::openrouter::Upstream::default(),
+        agent_id: String::new(),
         messages: vec![
             Message::User(UserMessage {
                 content: RichContent::Text("Previous turn".into()),

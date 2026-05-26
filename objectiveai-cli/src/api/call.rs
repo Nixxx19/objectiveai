@@ -42,7 +42,7 @@ where
     Resp: serde::de::DeserializeOwned + serde::Serialize + Send + 'static,
 {
     let (_client, mut config) = crate::config::read(cli_config).await?;
-    let mut http = super::client::build_http_client(&mut config);
+    let mut http = super::client::build_http_client(cli_config, &mut config);
     apply_agent_id_arg(&mut http, agent_id_arg);
     let response: Resp = http.send_unary(method, path, body).await?;
     Output::<Resp>::Notification(Notification { agent_id: None, value: response })
@@ -66,7 +66,7 @@ where
     Req: serde::Serialize + Send,
 {
     let (_client, mut config) = crate::config::read(cli_config).await?;
-    let mut http = super::client::build_http_client(&mut config);
+    let mut http = super::client::build_http_client(cli_config, &mut config);
     apply_agent_id_arg(&mut http, agent_id_arg);
     http.send_unary_no_response(method, path, body).await?;
     Output::<serde_json::Value>::Notification(Notification {
@@ -91,7 +91,7 @@ where
     Chunk: serde::de::DeserializeOwned + serde::Serialize + Send + 'static,
 {
     let (_client, mut config) = crate::config::read(cli_config).await?;
-    let mut http = super::client::build_http_client(&mut config);
+    let mut http = super::client::build_http_client(cli_config, &mut config);
     apply_agent_id_arg(&mut http, agent_id_arg);
     let stream = http
         .send_streaming::<Chunk, _, _>(method, path.to_string(), body)
@@ -126,7 +126,7 @@ where
     Chunk: serde::de::DeserializeOwned + serde::Serialize + Send + 'static,
 {
     let (_client, mut config) = crate::config::read(cli_config).await?;
-    let mut http = super::client::build_http_client(&mut config);
+    let mut http = super::client::build_http_client(cli_config, &mut config);
     apply_agent_id_arg(&mut http, agent_id_arg);
     let conduit = super::conduit::build_handler(&mut config);
     let (stream, _notifier) = http

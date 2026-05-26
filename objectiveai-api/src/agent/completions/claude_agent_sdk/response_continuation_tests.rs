@@ -16,6 +16,7 @@ fn test_no_continuation_no_request_continuation() {
     );
     assert_eq!(result, objectiveai_sdk::agent::claude_agent_sdk::Continuation {
         upstream: objectiveai_sdk::agent::claude_agent_sdk::Upstream::ClaudeAgentSdk,
+        agent_id: String::new(),
         session_id: String::new(),
         mcp_sessions: indexmap::IndexMap::new(),
         ws_session_id: None,
@@ -45,6 +46,7 @@ fn test_session_id_falls_back_to_request_continuation() {
     let client = make_client();
     let rc = objectiveai_sdk::agent::claude_agent_sdk::Continuation {
         upstream: objectiveai_sdk::agent::claude_agent_sdk::Upstream::ClaudeAgentSdk,
+        agent_id: String::new(),
         session_id: "req-sess-123".into(),
         mcp_sessions: indexmap::IndexMap::new(),
         ws_session_id: None,
@@ -69,6 +71,7 @@ fn test_internal_session_id_takes_precedence() {
     ];
     let rc = objectiveai_sdk::agent::claude_agent_sdk::Continuation {
         upstream: objectiveai_sdk::agent::claude_agent_sdk::Upstream::ClaudeAgentSdk,
+        agent_id: String::new(),
         session_id: "req-sess-456".into(),
         mcp_sessions: indexmap::IndexMap::new(),
         ws_session_id: None,
@@ -93,6 +96,7 @@ fn test_empty_internal_session_falls_back_to_request() {
     ];
     let rc = objectiveai_sdk::agent::claude_agent_sdk::Continuation {
         upstream: objectiveai_sdk::agent::claude_agent_sdk::Upstream::ClaudeAgentSdk,
+        agent_id: String::new(),
         session_id: "req-sess-fallback".into(),
         mcp_sessions: indexmap::IndexMap::new(),
         ws_session_id: None,

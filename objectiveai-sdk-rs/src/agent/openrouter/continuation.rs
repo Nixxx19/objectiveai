@@ -5,6 +5,15 @@ use serde::{Deserialize, Serialize};
 #[schemars(rename = "agent.openrouter.Continuation")]
 pub struct Continuation {
     pub upstream: super::Upstream,
+    /// Full slash-separated lineage of the agent this continuation
+    /// belongs to (e.g. `A/B/agtcpl-<uuid>-<created>`). Minted on the
+    /// agent's first spawn and preserved verbatim across every
+    /// continuation round so the agent's identity stays stable
+    /// regardless of who resumes the conversation. `#[serde(default)]`
+    /// so pre-field tokens deserialize as empty and get re-minted on
+    /// resume.
+    #[serde(default)]
+    pub agent_id: String,
     pub messages: Vec<super::super::completions::message::Message>,
     pub mcp_sessions: indexmap::IndexMap<String, String>,
     /// Per-agent reverse-attach session id baked into this agent's

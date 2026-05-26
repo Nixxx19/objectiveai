@@ -67,7 +67,11 @@ enum FunctionsCommand {
 #[tokio::main]
 async fn main() -> Result<(), String> {
     let cli = Cli::parse();
-    let handle = objectiveai_sdk::cli::output::Handle::stdout();
+    // Stamp the handle's agent_id from --objectiveai-agent-id so
+    // every emitted Notification/Error line carries it — mirrors
+    // objectiveai-cli/src/main.rs:16-17.
+    let mut handle = objectiveai_sdk::cli::output::Handle::stdout();
+    handle.agent_id = cli.http.objectiveai_agent_id.clone();
 
     match cli.command {
         TopCommand::Functions {

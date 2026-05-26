@@ -483,16 +483,47 @@ where
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        // On a server-side continuation round, reuse the response id
-        // baked into the internal `Continuation`; on a fresh entry,
-        // mint a new one. This is the same persistence semantic the
-        // old `agent_index` had — stable for the life of one logical
-        // agent invocation, including across the vector / laboratory
-        // layer's internal retries.
-        let id = match continuation.as_ref().map(|c| c.response_id()) {
-            Some(prev) => prev.to_string(),
-            None => response_id(created),
+        // Composite agent id — the agent's identity. Resolution order:
+        //   1. Internal `continuation` (server-side retry from the
+        //      vector / laboratory layer): reuse the composite baked
+        //      into the in-process state.
+        //   2. Wire `request_continuation` (client-side resume): reuse
+        //      the composite carried in the base64 token. This is what
+        //      keeps the agent's identity stable across separate
+        //      client requests, regardless of which caller's
+        //      `X-OBJECTIVEAI-AGENT-ID` header is on the resuming
+        //      request.
+        //   3. Fresh first call: mint a local id and prefix it with
+        //      the current request's `ctx.agent_id()` (the spawner's
+        //      full lineage). Empty parent is its own first-class
+        //      slot, yielding a root composite of just the local id.
+        //
+        // The local `id` (used as `AgentCompletionChunk.id`, viewer
+        // correlation, notify-target keys) is the trailing
+        // slash-separated segment of the composite — stable across
+        // every round for the same reason.
+        let request_composite = request_continuation
+            .as_ref()
+            .map(|c| c.agent_id())
+            .filter(|s| !s.is_empty());
+        let agent_id: String = match (
+            continuation.as_ref().map(|c| c.agent_id()),
+            request_composite,
+        ) {
+            (Some(s), _) => s.to_string(),
+            (None, Some(s)) => s.to_string(),
+            (None, None) => {
+                let local = response_id(created);
+                match ctx.agent_id() {
+                    Some(prefix) => format!("{prefix}/{local}"),
+                    None => local,
+                }
+            }
         };
+        let id: String = agent_id
+            .rsplit_once('/')
+            .map(|(_, tail)| tail.to_string())
+            .unwrap_or_else(|| agent_id.clone());
 
         // Send viewer begin.
         if viewer {
@@ -585,21 +616,14 @@ where
         // 6.5. Compose the `X-OBJECTIVEAI-AGENT-ID` header we forward
         //      to the proxy for every attempt.
         //
-        // The agent's identity is the response_id (`id`, minted above
-        // or reused from the continuation). All attempts (primary +
-        // fallbacks) within one `create_streaming` share the same
-        // composite — they're sequential alternatives and only one
-        // ever runs to completion. The parent prefix is whatever
-        // `X-OBJECTIVEAI-AGENT-ID` the caller sent us on the way in
-        // (None counts as its own first-class parent slot).
-        let parent_agent_id = ctx.agent_id().map(|s| s.to_string());
-        let composite_agent_id: String = match parent_agent_id.as_deref() {
-            Some(prefix) => format!("{prefix}/{id}"),
-            None => id.clone(),
-        };
-        let composite_agent_ids: Vec<String> = filtered_agents
+        // `agent_id` was resolved at the top of this fn
+        // (internal continuation > wire continuation > fresh build).
+        // All attempts (primary + fallbacks) within one
+        // `create_streaming` share the same composite — they're
+        // sequential alternatives and only one ever runs to completion.
+        let agent_ids: Vec<String> = filtered_agents
             .iter()
-            .map(|_| composite_agent_id.clone())
+            .map(|_| agent_id.clone())
             .collect();
 
         // Resolve a per-agent `ws_session_id` for any agent that
@@ -658,9 +682,9 @@ where
             >,
         > = filtered_agents
             .iter()
-            .zip(composite_agent_ids.iter())
+            .zip(agent_ids.iter())
             .zip(agent_ws_session_ids.iter())
-            .map(|((agent, composite_agent_id), agent_ws_session_id)| {
+            .map(|((agent, agent_id), agent_ws_session_id)| {
                 // Build the per-agent X-MCP-* header set: the agent's
                 // declared `mcp_servers` plus any caller-supplied
                 // `extra_mcp_servers` (e.g. the function-inventions
@@ -771,7 +795,7 @@ where
                     indexmap::indexmap! {
                         "X-MCP-Servers".to_string() => serde_json::to_string(&urls).unwrap(),
                         "X-MCP-Headers".to_string() => serde_json::to_string(&per_url_headers).unwrap(),
-                        "X-OBJECTIVEAI-AGENT-ID".to_string() => composite_agent_id.clone(),
+                        "X-OBJECTIVEAI-AGENT-ID".to_string() => agent_id.clone(),
                     };
                 // When the agent declares `client_objectiveai_mcp`, we
                 // want the post-connect `list_tools()` call to return
@@ -858,16 +882,16 @@ where
             /// `OBJECTIVEAI_AGENT_ID` in the env dict the runner hands
             /// to its child SDK subprocess. Derived from the response
             /// id (see step 6.5 above).
-            composite_agent_id: String,
+            agent_id: String,
         }
         let mut attempts: Vec<AgentAttempt> = filtered_agents
             .into_iter()
             .zip(connect_handles)
-            .zip(composite_agent_ids)
-            .map(|((agent, connect_handle), composite_agent_id)| AgentAttempt {
+            .zip(agent_ids)
+            .map(|((agent, connect_handle), agent_id)| AgentAttempt {
                 agent,
                 connect_handle,
-                composite_agent_id,
+                agent_id,
             })
             .collect();
         // Slot of resolved-or-None per attempt — populated lazily on
@@ -1011,9 +1035,9 @@ where
                                 &mut cont_items_or, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 {
-                                    let response_id = id.clone();
+                                    let agent_id = agent_id.clone();
                                     move |items| super::Continuation::Openrouter {
-                                        items, mcp_connection: c, response_id,
+                                        items, mcp_connection: c, agent_id,
                                     }
                                 },
                                 |e| super::Error::UpstreamOpenrouter(Box::new(e)),
@@ -1025,7 +1049,7 @@ where
                                 invention_step,
                                 invention_tasks_min,
                                 invention_input_schema.clone(),
-                                Some(attempt.composite_agent_id.as_str()),
+                                Some(attempt.agent_id.as_str()),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -1051,9 +1075,9 @@ where
                                 &mut cont_items_cas, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 {
-                                    let response_id = id.clone();
+                                    let agent_id = agent_id.clone();
                                     move |items| super::Continuation::ClaudeAgentSdk {
-                                        items, mcp_connection: c, response_id,
+                                        items, mcp_connection: c, agent_id,
                                     }
                                 },
                                 |e| super::Error::UpstreamClaudeAgentSdk(Box::new(e)),
@@ -1065,7 +1089,7 @@ where
                                 invention_step,
                                 invention_tasks_min,
                                 invention_input_schema.clone(),
-                                Some(attempt.composite_agent_id.as_str()),
+                                Some(attempt.agent_id.as_str()),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -1091,9 +1115,9 @@ where
                                 &mut cont_items_cdx, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 {
-                                    let response_id = id.clone();
+                                    let agent_id = agent_id.clone();
                                     move |items| super::Continuation::CodexSdk {
-                                        items, mcp_connection: c, response_id,
+                                        items, mcp_connection: c, agent_id,
                                     }
                                 },
                                 |e| super::Error::UpstreamCodexSdk(Box::new(e)),
@@ -1105,7 +1129,7 @@ where
                                 invention_step,
                                 invention_tasks_min,
                                 invention_input_schema.clone(),
-                                Some(attempt.composite_agent_id.as_str()),
+                                Some(attempt.agent_id.as_str()),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -1131,9 +1155,9 @@ where
                                 &mut cont_items_mock, &id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 {
-                                    let response_id = id.clone();
+                                    let agent_id = agent_id.clone();
                                     move |items| super::Continuation::Mock {
-                                        items, mcp_connection: c, response_id,
+                                        items, mcp_connection: c, agent_id,
                                     }
                                 },
                                 |e| super::Error::UpstreamMock(Box::new(e)),
@@ -1145,7 +1169,7 @@ where
                                 invention_step,
                                 invention_tasks_min,
                                 invention_input_schema.clone(),
-                                Some(attempt.composite_agent_id.as_str()),
+                                Some(attempt.agent_id.as_str()),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -1560,7 +1584,13 @@ where
                 &messages,
                 Some(&continuation_items),
             );
-            let continuation_token: objectiveai_sdk::agent::Continuation = response_cont.into();
+            let mut continuation_token: objectiveai_sdk::agent::Continuation = response_cont.into();
+            // Stamp the agent's full lineage on the outgoing wire
+            // continuation so the next round (whoever resumes — same
+            // caller or any other) reuses the same identity verbatim.
+            continuation_token.set_agent_id(
+                agent_id_header.clone().unwrap_or_default(),
+            );
             let continuation_token = continuation_token.to_string();
 
             // Set cancellation error if the stream was cancelled.

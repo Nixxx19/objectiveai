@@ -185,7 +185,7 @@ impl Commands {
         let log_writer = fs_client.write_function_invention_recursive();
 
         let handle = handle.clone();
-        crate::api::run_with_conduit(Box::new(|http_client, conduit| Box::pin(async move {
+        crate::api::run_with_conduit(cli_config, Box::new(|http_client, conduit| Box::pin(async move {
             let (stream, _notifier) = objectiveai_sdk::functions::inventions::recursive::create_function_invention_recursive_streaming(
                 &http_client, request, conduit,
             ).await?;

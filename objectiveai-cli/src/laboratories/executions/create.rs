@@ -68,6 +68,7 @@ pub async fn handle(
 
     let handle = handle.clone();
     crate::api::run_with_conduit(
+        cli_config,
         Box::new(move |http_client, conduit| Box::pin(async move {
             let (stream, _notifier) =
                 objectiveai_sdk::laboratories::executions::create_laboratory_execution_streaming(
