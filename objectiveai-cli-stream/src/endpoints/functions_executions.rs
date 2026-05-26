@@ -10,10 +10,15 @@ use crate::streaming;
 /// Run a function execution stream end-to-end.
 ///
 /// 1. Build the HTTP client + MCP conduit from the parsed args.
-/// 2. Open the streaming WS via the SDK.
-/// 3. Hand off to [`streaming::run_chunk_loop`] which prints each
-///    chunk as NDJSON, manages per-agent pipes, and accumulates.
-/// 4. On stream end, surface any root-level execution error.
+/// 2. Build a `LogWriter<FunctionExecutionChunk>` rooted at
+///    `${config_base_dir}/logs/` — same on-disk layout the regular
+///    CLI produces.
+/// 3. Open the streaming WS via the SDK.
+/// 4. Hand off to [`streaming::run_chunk_loop`] which prints each
+///    chunk as NDJSON, manages per-agent pipes, writes to the log on
+///    a separate coalescing task, emits `LogStreamReady` once the
+///    root log id is known, and accumulates.
+/// 5. On stream end, surface any root-level execution error.
 pub async fn run(
     http: &HttpArgs,
     pipes: &PipeArgs,
@@ -21,9 +26,21 @@ pub async fn run(
     handle: &Handle,
 ) -> Result<(), String> {
     let params: FunctionExecutionCreateParams = body.resolve()?;
+    let config_base_dir = pipes.config_base_dir()?.to_path_buf();
     let pipes_root = pipes.pipes_root()?;
     let client = http.build_http_client()?;
     let conduit = pipes.build_conduit();
+
+    // Build the on-disk log writer. `filesystem::Client::logs_dir()`
+    // = `${base_dir}/logs`, so this lands at
+    // `${config_base_dir}/logs/functions/executions/<fexc-id>/...` —
+    // byte-identical to `objectiveai-cli functions executions create`.
+    let fs_client = objectiveai_sdk::filesystem::Client::new(
+        Some(config_base_dir),
+        None::<String>,
+        None::<String>,
+    );
+    let log_writer = fs_client.write_function_execution();
 
     let (stream, notifier) =
         objectiveai_sdk::functions::executions::create_function_execution_streaming(
@@ -34,15 +51,15 @@ pub async fn run(
 
     let stream = Box::pin(stream);
 
-    let consumed = streaming::run_chunk_loop::<_, FunctionExecutionChunk, _>(
+    let consumed = streaming::run_chunk_loop::<_, FunctionExecutionChunk, _, _>(
         stream,
         notifier,
         pipes_root,
+        log_writer,
         handle,
-        |agg, chunk| agg.push(chunk),
+        |agg: &mut FunctionExecutionChunk, chunk: &FunctionExecutionChunk| agg.push(chunk),
     )
-    .await
-    .map_err(|e: objectiveai_sdk::HttpError| format!("stream error: {e}"))?;
+    .await?;
 
     if let Some(error) = consumed.aggregate.and_then(|a| a.error) {
         return Err(format!("function execution failed: {error:?}"));

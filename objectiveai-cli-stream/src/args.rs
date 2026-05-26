@@ -123,12 +123,14 @@ impl HttpArgs {
 /// MCP-conduit + pipe args.
 #[derive(Args, Debug, Clone)]
 pub struct PipeArgs {
-    /// Root directory under which per-agent pipes are bound. Pipes
-    /// live at `${config_base_dir}/pipes/<agent_id>` on POSIX (slashes
-    /// in the agent id become subdirectories; the final segment is
-    /// the socket file's name). On Windows the same logical name
-    /// goes into the flat `\\.\pipe\` namespace with `/` re-encoded
-    /// as `_`. Maps loosely to the existing CLI's `CONFIG_BASE_DIR`.
+    /// Root directory under which per-agent pipes are bound and per-
+    /// run log files are written. Pipes live at
+    /// `${config_base_dir}/pipes/<agent_id>` (slashes in the agent id
+    /// become subdirectories — same filesystem path on every
+    /// platform, since cli-stream uses AF_UNIX everywhere). Logs go
+    /// into `${config_base_dir}/logs/...` with the same on-disk
+    /// layout the regular CLI produces. Maps to the existing CLI's
+    /// `CONFIG_BASE_DIR`.
     #[arg(long, global = true)]
     pub config_base_dir: Option<PathBuf>,
 
@@ -148,15 +150,20 @@ impl PipeArgs {
         crate::conduit::ConduitMcpHandler::new(self.mcp_address.clone())
     }
 
-    /// `${config_base_dir}/pipes` — the root every per-agent pipe
-    /// is bound under. Required at the endpoint level; same Option
-    /// declaration rationale as `HttpArgs::api_address`.
-    pub fn pipes_root(&self) -> Result<PathBuf, String> {
-        let base = self
-            .config_base_dir
+    /// The raw `--config-base-dir`. Required at the endpoint level
+    /// (same Option declaration rationale as `HttpArgs::api_address`).
+    /// Used by the per-endpoint factory to build the `LogWriter`'s
+    /// `filesystem::Client` rooted at this dir.
+    pub fn config_base_dir(&self) -> Result<&std::path::Path, String> {
+        self.config_base_dir
             .as_deref()
-            .ok_or_else(|| "--config-base-dir is required for streaming endpoints".to_string())?;
-        Ok(base.join("pipes"))
+            .ok_or_else(|| "--config-base-dir is required for streaming endpoints".to_string())
+    }
+
+    /// `${config_base_dir}/pipes` — the root every per-agent pipe is
+    /// bound under.
+    pub fn pipes_root(&self) -> Result<PathBuf, String> {
+        Ok(self.config_base_dir()?.join("pipes"))
     }
 }
 
