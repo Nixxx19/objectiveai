@@ -26,10 +26,12 @@
 //! arbitrary task-output JSON whose schema isn't known at the SDK
 //! layer.
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// On-disk pointer from a parent log file to a child log file.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "filesystem.logs.LogReference")]
 pub struct LogReference {
     #[serde(rename = "type")]
     pub r#type: LogReferenceTag,
@@ -38,24 +40,34 @@ pub struct LogReference {
     /// no-data sentinel case used by upstream chunks that wrap an
     /// optional inner (e.g. function-execution reasoning).
     #[serde(skip_serializing_if = "String::is_empty")]
+    #[schemars(extend("omitempty" = true))]
     pub path: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub index: Option<u64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub task_index: Option<u64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub task_path: Option<Vec<u64>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub agent_index: Option<u64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub swiss_pool_index: Option<u64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub swiss_round: Option<u64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub split_index: Option<u64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub error: Option<serde_json::Value>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub output: Option<serde_json::Value>,
 }
 
@@ -83,8 +95,9 @@ impl LogReference {
 /// Constant `"reference"` discriminator — the `"type"` field on a
 /// `LogReference`. Exists as its own type so the wire shape can't
 /// drift to other strings.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "lowercase")]
+#[schemars(rename = "filesystem.logs.LogReferenceTag")]
 pub enum LogReferenceTag {
     Reference,
 }

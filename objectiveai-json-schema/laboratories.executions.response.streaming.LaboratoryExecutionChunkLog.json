@@ -1,0 +1,51 @@
+{
+  "title": "laboratories.executions.response.streaming.LaboratoryExecutionChunkLog",
+  "type": "object",
+  "properties": {
+    "builders": {
+      "type": "array",
+      "items": {
+        "$ref": "filesystem.logs.LogReference"
+      }
+    },
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "error.ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "evaluations": {
+      "type": "array",
+      "items": {
+        "$ref": "filesystem.logs.LogReference"
+      }
+    },
+    "id": {
+      "type": "string"
+    },
+    "object": {
+      "$ref": "laboratories.executions.response.streaming.Object"
+    },
+    "usage": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.Usage"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    }
+  }
+}

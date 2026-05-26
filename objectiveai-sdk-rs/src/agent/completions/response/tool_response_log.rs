@@ -5,13 +5,15 @@
 //! type swap: `content: RichContent` → `RichContentLog` so media
 //! parts can be replaced by references.
 
+use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::agent::completions::message::RichContentLog;
 
 use super::ToolRole;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[schemars(rename = "agent.completions.response.ToolResponseLog")]
 pub struct ToolResponseLog {
     pub role: ToolRole,
     pub index: u64,

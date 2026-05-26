@@ -11,22 +11,29 @@
 //!   the original [`super::RichContentPart`] (`{"type":"image_url",
 //!   "image_url":{...}}` etc.) for parts that stay inline.
 
+use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::filesystem::logs::LogReference;
 
 use super::RichContentPart;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "agent.completions.message.RichContentLog")]
 pub enum RichContentLog {
+    #[schemars(title = "Text")]
     Text(String),
+    #[schemars(title = "Parts")]
     Parts(Vec<RichContentLogPart>),
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "agent.completions.message.RichContentLogPart")]
 pub enum RichContentLogPart {
+    #[schemars(title = "Reference")]
     Reference(LogReference),
+    #[schemars(title = "Original")]
     Original(RichContentPart),
 }

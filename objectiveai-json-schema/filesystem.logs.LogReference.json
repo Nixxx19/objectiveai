@@ -1,0 +1,115 @@
+{
+  "title": "filesystem.logs.LogReference",
+  "description": "On-disk pointer from a parent log file to a child log file.",
+  "type": "object",
+  "properties": {
+    "agent_index": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "error": {
+      "omitempty": true
+    },
+    "index": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "output": {
+      "omitempty": true
+    },
+    "path": {
+      "description": "Relative on-disk path of the referenced file (under\n`${config_base_dir}/logs/`). Skipped when empty — the\nno-data sentinel case used by upstream chunks that wrap an\noptional inner (e.g. function-execution reasoning).",
+      "type": "string",
+      "omitempty": true
+    },
+    "split_index": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "swiss_pool_index": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "swiss_round": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "task_index": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "task_path": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 18446744073709551615
+          }
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "omitempty": true
+    },
+    "type": {
+      "$ref": "filesystem.logs.LogReferenceTag"
+    }
+  }
+}

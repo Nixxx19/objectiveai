@@ -11,25 +11,31 @@
 //! Field declaration order matches the wire chunk so today's
 //! `serde_json::to_value(&shell)` byte-shape is preserved.
 
+use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::agent;
 use crate::agent::completions::response;
 use crate::filesystem::logs::LogReference;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[schemars(rename = "agent.completions.response.streaming.AgentCompletionChunkLog")]
 pub struct AgentCompletionChunkLog {
     pub id: String,
     pub created: u64,
     pub messages: Vec<LogReference>,
     pub object: response::streaming::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub usage: Option<response::Usage>,
     pub upstream: agent::Upstream,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub error: Option<crate::error::ResponseError>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub continuation: Option<LogReference>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub messages_queued: Option<bool>,
 }

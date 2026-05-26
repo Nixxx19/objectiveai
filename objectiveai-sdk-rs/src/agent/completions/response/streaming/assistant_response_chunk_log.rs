@@ -15,13 +15,15 @@
 //! chunk does, except for `finish_reason` which is always serialized
 //! (even when `None` → JSON `null`) — same as the wire chunk.
 
+use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::agent::completions::message;
 use crate::agent::completions::response;
 use crate::filesystem::logs::LogReference;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[schemars(rename = "agent.completions.response.streaming.AssistantResponseChunkLog")]
 pub struct AssistantResponseChunkLog {
     pub role: response::AssistantRole,
     pub index: u64,
@@ -30,22 +32,31 @@ pub struct AssistantResponseChunkLog {
     pub model: String,
     pub upstream_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub reasoning: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub tool_calls: Option<Vec<message::AssistantToolCallDelta>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub content: Option<message::RichContentLog>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub refusal: Option<String>,
     pub finish_reason: Option<response::FinishReason>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub logprobs: Option<LogReference>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub service_tier: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub system_fingerprint: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub provider: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub usage: Option<response::UpstreamUsage>,
 }

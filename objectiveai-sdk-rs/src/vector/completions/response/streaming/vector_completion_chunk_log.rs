@@ -7,22 +7,27 @@
 //! order matches the wire chunk so the legacy on-disk byte-shape
 //! is preserved.
 
+use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::agent;
 use crate::filesystem::logs::LogReference;
 use crate::vector::completions::response;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[schemars(rename = "vector.completions.response.streaming.VectorCompletionChunkLog")]
 pub struct VectorCompletionChunkLog {
     pub id: String,
     pub completions: Vec<LogReference>,
     pub votes: Vec<response::Vote>,
+    #[schemars(with = "Vec<f64>")]
     pub scores: Vec<rust_decimal::Decimal>,
+    #[schemars(with = "Vec<f64>")]
     pub weights: Vec<rust_decimal::Decimal>,
     pub created: u64,
     pub swarm: String,
     pub object: response::streaming::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub usage: Option<agent::completions::response::Usage>,
 }

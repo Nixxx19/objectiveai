@@ -16,6 +16,7 @@
 //! NOT in the middle where the wire chunk's struct declaration puts
 //! it. Mirroring that order keeps the snapshot tests byte-identical.
 
+use schemars::JsonSchema;
 use serde::Serialize;
 
 use crate::agent;
@@ -23,27 +24,34 @@ use crate::error;
 use crate::filesystem::logs::LogReference;
 use crate::functions::executions::response;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[schemars(rename = "functions.executions.response.streaming.FunctionExecutionChunkLog")]
 pub struct FunctionExecutionChunkLog {
     pub id: String,
     pub tasks: Vec<LogReference>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub tasks_errors: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub output: Option<response::Output>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub error: Option<error::ResponseError>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub retry_token: Option<LogReference>,
     pub created: u64,
     pub function: Option<crate::RemotePath>,
     pub profile: Option<crate::RemotePath>,
     pub object: response::streaming::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub usage: Option<agent::completions::response::Usage>,
     /// Appended at the end to match the legacy on-disk order: the
     /// old code inserted `reasoning` via `Map::insert` AFTER all
     /// the shell fields, putting it at the tail of the object.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
     pub reasoning: Option<LogReference>,
 }

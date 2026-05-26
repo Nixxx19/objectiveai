@@ -1,0 +1,20 @@
+{
+  "title": "agent.completions.response.ToolResponseLog",
+  "type": "object",
+  "properties": {
+    "content": {
+      "$ref": "agent.completions.message.RichContentLog"
+    },
+    "index": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "role": {
+      "$ref": "agent.completions.response.ToolRole"
+    },
+    "tool_call_id": {
+      "type": "string"
+    }
+  }
+}
