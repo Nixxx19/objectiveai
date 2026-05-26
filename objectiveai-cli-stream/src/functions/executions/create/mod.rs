@@ -1,10 +1,12 @@
-//! `functions executions` streaming endpoint.
+//! `functions executions create` — open a function execution stream,
+//! emit each chunk as NDJSON to stdout, manage per-agent named pipes,
+//! and write coalesced log files to `${config_base_dir}/logs/`.
 
 use objectiveai_sdk::cli::output::Handle;
 use objectiveai_sdk::functions::executions::request::FunctionExecutionCreateParams;
 use objectiveai_sdk::functions::executions::response::streaming::FunctionExecutionChunk;
 
-use crate::args::{BodySource, HttpArgs, PipeArgs};
+use crate::api::{BodySource, HttpArgs, PipeArgs};
 use crate::streaming;
 
 /// Run a function execution stream end-to-end.
@@ -19,7 +21,7 @@ use crate::streaming;
 ///    a separate coalescing task, emits `LogStreamReady` once the
 ///    root log id is known, and accumulates.
 /// 5. On stream end, surface any root-level execution error.
-pub async fn run(
+pub async fn handle(
     http: &HttpArgs,
     pipes: &PipeArgs,
     body: BodySource,
