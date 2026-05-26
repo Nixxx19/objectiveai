@@ -12,8 +12,7 @@ pub type TransformMessages = HashMap<
 >;
 
 pub fn response_id(created: u64) -> String {
-    let uuid = uuid::Uuid::new_v4();
-    format!("agtcpl-{}-{created}", uuid.simple())
+    crate::util::response_id(None, created)
 }
 
 /// Per-response-id target set for `agent/completions/notify`. The
