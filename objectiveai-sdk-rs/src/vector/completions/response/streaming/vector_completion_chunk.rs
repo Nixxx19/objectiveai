@@ -152,8 +152,10 @@ impl VectorCompletionChunk {
     /// `{"type": "reference", "path": ...}` JSON value.
     /// All paths are relative to the `logs/` root directory.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<crate::filesystem::logs::LogFile>)> {
-        use crate::filesystem::logs::LogFile;
+    pub fn produce_files(
+        &self,
+    ) -> Option<(crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>)> {
+        use crate::filesystem::logs::{LogFile, LogReference};
         const ROUTE: &str = "vector/completions";
 
         let id = &self.id;
@@ -162,7 +164,7 @@ impl VectorCompletionChunk {
         }
 
         let mut files: Vec<LogFile> = Vec::new();
-        let mut completion_refs: Vec<serde_json::Value> = Vec::new();
+        let mut completion_refs: Vec<LogReference> = Vec::new();
 
         for completion in &self.completions {
             let (reference, completion_files) = completion.produce_files();
@@ -170,10 +172,9 @@ impl VectorCompletionChunk {
             files.extend(completion_files);
         }
 
-        // Serialize a shell without completions to avoid double-serialization
-        let shell = VectorCompletionChunk {
+        let log = super::VectorCompletionChunkLog {
             id: self.id.clone(),
-            completions: Vec::new(),
+            completions: completion_refs,
             votes: self.votes.clone(),
             scores: self.scores.clone(),
             weights: self.weights.clone(),
@@ -182,8 +183,6 @@ impl VectorCompletionChunk {
             object: self.object,
             usage: self.usage.clone(),
         };
-        let mut root = serde_json::to_value(&shell).unwrap();
-        root["completions"] = serde_json::Value::Array(completion_refs);
 
         let root_file = LogFile {
             route: ROUTE.to_string(),
@@ -191,9 +190,9 @@ impl VectorCompletionChunk {
             message_index: None,
             media_index: None,
             extension: "json".to_string(),
-            content: serde_json::to_vec_pretty(&root).unwrap(),
+            content: serde_json::to_vec_pretty(&log).unwrap(),
         };
-        let reference = serde_json::json!({ "type": "reference", "path": root_file.path() });
+        let reference = LogReference::new(root_file.path());
         files.push(root_file);
 
         Some((reference, files))

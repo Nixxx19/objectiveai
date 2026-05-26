@@ -160,38 +160,21 @@ impl AssistantResponseChunk {
     /// Produces log files for this assistant message.
     ///
     /// Returns `(reference, files)` where `reference` is a
-    /// `{"type": "reference", "path": ...}` JSON value pointing to this
-    /// message's file, and `files` contains all produced [`LogFile`]s including
-    /// the message itself, logprobs, and extracted media.
+    /// [`LogReference`] pointing to this message's file, and `files`
+    /// contains all produced [`LogFile`]s including the message itself,
+    /// logprobs, and extracted media.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self, id: &str, route_base: &str) -> (serde_json::Value, Vec<crate::filesystem::logs::LogFile>) {
-        use crate::filesystem::logs::LogFile;
+    pub fn produce_files(
+        &self,
+        id: &str,
+        route_base: &str,
+    ) -> (crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>) {
+        use crate::filesystem::logs::{LogFile, LogReference};
 
         let mut files = Vec::new();
 
-        // Serialize a shell without content/logprobs to avoid double-serialization
-        let shell = AssistantResponseChunk {
-            role: self.role,
-            index: self.index,
-            created: self.created,
-            agent: self.agent.clone(),
-            model: self.model.clone(),
-            upstream_id: self.upstream_id.clone(),
-            reasoning: self.reasoning.clone(),
-            tool_calls: self.tool_calls.clone(),
-            content: Some(message::RichContent::Text(String::new())),
-            refusal: self.refusal.clone(),
-            finish_reason: self.finish_reason.clone(),
-            logprobs: Some(response::Logprobs::default()),
-            service_tier: self.service_tier.clone(),
-            system_fingerprint: self.system_fingerprint.clone(),
-            provider: self.provider.clone(),
-            usage: self.usage.clone(),
-        };
-        let mut msg_json = serde_json::to_value(&shell).unwrap();
-
-        // Extract logprobs to a separate file, or remove placeholder
-        if let Some(logprobs) = &self.logprobs {
+        // Extract logprobs to a separate file (if present).
+        let logprobs_ref = self.logprobs.as_ref().map(|logprobs| {
             let logprobs_file = LogFile {
                 route: format!("{route_base}/messages/logprobs"),
                 id: id.to_string(),
@@ -200,24 +183,37 @@ impl AssistantResponseChunk {
                 extension: "json".to_string(),
                 content: serde_json::to_vec_pretty(logprobs).unwrap(),
             };
-            msg_json["logprobs"] = serde_json::json!({
-                "type": "reference",
-                "path": logprobs_file.path(),
-            });
+            let r = LogReference::new(logprobs_file.path());
             files.push(logprobs_file);
-        } else if let Some(map) = msg_json.as_object_mut() {
-            map.remove("logprobs");
-        }
+            r
+        });
 
-        // Extract media from content, or remove placeholder
-        if let Some(mut content) = self.content.clone() {
+        // Extract media from content (if present).
+        let content_log = self.content.clone().map(|mut content| {
             content.prepare();
-            let (content_json, media_files) = content.extract_media(route_base, id, self.index);
-            msg_json["content"] = content_json;
+            let (content_log, media_files) = content.extract_media(route_base, id, self.index);
             files.extend(media_files);
-        } else if let Some(map) = msg_json.as_object_mut() {
-            map.remove("content");
-        }
+            content_log
+        });
+
+        let log = super::AssistantResponseChunkLog {
+            role: self.role,
+            index: self.index,
+            created: self.created,
+            agent: self.agent.clone(),
+            model: self.model.clone(),
+            upstream_id: self.upstream_id.clone(),
+            reasoning: self.reasoning.clone(),
+            tool_calls: self.tool_calls.clone(),
+            content: content_log,
+            refusal: self.refusal.clone(),
+            finish_reason: self.finish_reason.clone(),
+            logprobs: logprobs_ref,
+            service_tier: self.service_tier.clone(),
+            system_fingerprint: self.system_fingerprint.clone(),
+            provider: self.provider.clone(),
+            usage: self.usage.clone(),
+        };
 
         let msg_file = LogFile {
             route: format!("{route_base}/messages"),
@@ -225,9 +221,9 @@ impl AssistantResponseChunk {
             message_index: Some(self.index),
             media_index: None,
             extension: "json".to_string(),
-            content: serde_json::to_vec_pretty(&msg_json).unwrap(),
+            content: serde_json::to_vec_pretty(&log).unwrap(),
         };
-        let reference = serde_json::json!({ "type": "reference", "path": msg_file.path() });
+        let reference = LogReference::new(msg_file.path());
         files.push(msg_file);
 
         (reference, files)

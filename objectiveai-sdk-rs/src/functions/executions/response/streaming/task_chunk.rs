@@ -85,7 +85,9 @@ impl TaskChunk {
     ///
     /// Returns `(reference, files)`.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self) -> (serde_json::Value, Vec<crate::filesystem::logs::LogFile>) {
+    pub fn produce_files(
+        &self,
+    ) -> (crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>) {
         match self {
             TaskChunk::FunctionExecution(chunk) => chunk.produce_files(),
             TaskChunk::VectorCompletion(chunk) => chunk.produce_files(),

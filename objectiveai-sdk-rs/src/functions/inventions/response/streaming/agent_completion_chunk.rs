@@ -28,14 +28,19 @@ impl AgentCompletionChunk {
     /// Returns `(reference, files)` where `reference` includes `"index"`.
     /// Files are written under `agent/completions/`.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self) -> (serde_json::Value, Vec<crate::filesystem::logs::LogFile>) {
+    pub fn produce_files(
+        &self,
+    ) -> (crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>) {
+        use crate::filesystem::logs::LogReference;
         let (mut reference, files) = match self.inner.produce_files() {
             Some((reference, files)) => (reference, files),
-            None => return (serde_json::json!({ "type": "reference", "index": self.index }), Vec::new()),
+            None => {
+                let mut r = LogReference::new(String::new());
+                r.index = Some(self.index);
+                return (r, Vec::new());
+            }
         };
-        if let Some(map) = reference.as_object_mut() {
-            map.insert("index".to_string(), serde_json::json!(self.index));
-        }
+        reference.index = Some(self.index);
         (reference, files)
     }
 }

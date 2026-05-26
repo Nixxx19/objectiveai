@@ -31,15 +31,16 @@ impl ReasoningSummaryChunk {
     ///
     /// Returns `(reference, files)`. Files under `agent/completions/`.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self) -> (serde_json::Value, Vec<crate::filesystem::logs::LogFile>) {
+    pub fn produce_files(
+        &self,
+    ) -> (crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>) {
+        use crate::filesystem::logs::LogReference;
         let (mut reference, files) = match self.inner.produce_files() {
             Some((reference, files)) => (reference, files),
-            None => return (serde_json::json!({ "type": "reference" }), Vec::new()),
+            None => return (LogReference::new(String::new()), Vec::new()),
         };
         if let Some(error) = &self.error {
-            if let Some(map) = reference.as_object_mut() {
-                map.insert("error".to_string(), serde_json::to_value(error).unwrap());
-            }
+            reference.error = Some(serde_json::to_value(error).unwrap());
         }
         (reference, files)
     }

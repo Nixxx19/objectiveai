@@ -40,30 +40,34 @@ impl FunctionExecutionTaskChunk {
 
     /// Produces log files for this nested function execution task.
     ///
-    /// Returns `(reference, files)` where `reference` includes
-    /// `"index"`, `"task_index"`, `"task_path"`, and optionally
-    /// `"swiss_pool_index"` and `"swiss_round"`.
+    /// Returns `(reference, files)` where `reference` carries
+    /// `index`, `task_index`, `task_path`, and optionally
+    /// `swiss_pool_index`, `swiss_round`, `split_index`.
     /// Files under `functions/executions/`.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self) -> (serde_json::Value, Vec<crate::filesystem::logs::LogFile>) {
-        let (mut reference, files) = match self.inner.produce_files() {
-            Some((reference, files)) => (reference, files),
-            None => return (serde_json::json!({ "type": "reference", "index": self.index, "task_index": self.task_index, "task_path": self.task_path }), Vec::new()),
+    pub fn produce_files(
+        &self,
+    ) -> (crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>) {
+        use crate::filesystem::logs::LogReference;
+        let mut reference = match self.inner.produce_files() {
+            Some((reference, files)) => {
+                let mut r = reference;
+                r.index = Some(self.index);
+                r.task_index = Some(self.task_index);
+                r.task_path = Some(self.task_path.clone());
+                r.swiss_pool_index = self.swiss_pool_index;
+                r.swiss_round = self.swiss_round;
+                r.split_index = self.split_index;
+                return (r, files);
+            }
+            None => LogReference::new(String::new()),
         };
-        if let Some(map) = reference.as_object_mut() {
-            map.insert("index".to_string(), serde_json::json!(self.index));
-            map.insert("task_index".to_string(), serde_json::json!(self.task_index));
-            map.insert("task_path".to_string(), serde_json::json!(self.task_path));
-            if let Some(v) = self.swiss_pool_index {
-                map.insert("swiss_pool_index".to_string(), serde_json::json!(v));
-            }
-            if let Some(v) = self.swiss_round {
-                map.insert("swiss_round".to_string(), serde_json::json!(v));
-            }
-            if let Some(v) = self.split_index {
-                map.insert("split_index".to_string(), serde_json::json!(v));
-            }
-        }
-        (reference, files)
+        reference.index = Some(self.index);
+        reference.task_index = Some(self.task_index);
+        reference.task_path = Some(self.task_path.clone());
+        reference.swiss_pool_index = self.swiss_pool_index;
+        reference.swiss_round = self.swiss_round;
+        reference.split_index = self.split_index;
+        (reference, Vec::new())
     }
 }

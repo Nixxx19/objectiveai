@@ -7,6 +7,8 @@ mod assistant_message;
 mod developer_message;
 mod file_content;
 mod rich_content;
+#[cfg(feature = "filesystem")]
+mod rich_content_log;
 mod simple_content;
 mod system_message;
 mod tool_message;
@@ -16,6 +18,8 @@ pub use assistant_message::*;
 pub use developer_message::*;
 pub use file_content::*;
 pub use rich_content::*;
+#[cfg(feature = "filesystem")]
+pub use rich_content_log::*;
 pub use simple_content::*;
 pub use system_message::*;
 pub use tool_message::*;

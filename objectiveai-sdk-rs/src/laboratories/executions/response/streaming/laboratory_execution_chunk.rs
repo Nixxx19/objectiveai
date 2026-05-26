@@ -112,8 +112,10 @@ impl LaboratoryExecutionChunk {
     ///
     /// Returns `(reference, files)`. All paths relative to `logs/`.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<crate::filesystem::logs::LogFile>)> {
-        use crate::filesystem::logs::LogFile;
+    pub fn produce_files(
+        &self,
+    ) -> Option<(crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>)> {
+        use crate::filesystem::logs::{LogFile, LogReference};
         const ROUTE: &str = "laboratories/executions";
 
         let id = &self.id;
@@ -122,8 +124,8 @@ impl LaboratoryExecutionChunk {
         }
 
         let mut files: Vec<LogFile> = Vec::new();
-        let mut builder_refs: Vec<serde_json::Value> = Vec::new();
-        let mut evaluation_refs: Vec<serde_json::Value> = Vec::new();
+        let mut builder_refs: Vec<LogReference> = Vec::new();
+        let mut evaluation_refs: Vec<LogReference> = Vec::new();
 
         for builder in &self.builders {
             let (reference, builder_files) = builder.produce_files();
@@ -137,19 +139,15 @@ impl LaboratoryExecutionChunk {
             files.extend(eval_files);
         }
 
-        // Serialize a shell without builders/evaluations to avoid double-serialization
-        let shell = LaboratoryExecutionChunk {
+        let log = super::LaboratoryExecutionChunkLog {
             id: self.id.clone(),
-            builders: Vec::new(),
-            evaluations: Vec::new(),
+            builders: builder_refs,
+            evaluations: evaluation_refs,
             error: self.error.clone(),
             created: self.created,
             object: self.object,
             usage: self.usage.clone(),
         };
-        let mut root = serde_json::to_value(&shell).unwrap();
-        root["builders"] = serde_json::Value::Array(builder_refs);
-        root["evaluations"] = serde_json::Value::Array(evaluation_refs);
 
         let root_file = LogFile {
             route: ROUTE.to_string(),
@@ -157,9 +155,9 @@ impl LaboratoryExecutionChunk {
             message_index: None,
             media_index: None,
             extension: "json".to_string(),
-            content: serde_json::to_vec_pretty(&root).unwrap(),
+            content: serde_json::to_vec_pretty(&log).unwrap(),
         };
-        let reference = serde_json::json!({ "type": "reference", "path": root_file.path() });
+        let reference = LogReference::new(root_file.path());
         files.push(root_file);
 
         Some((reference, files))

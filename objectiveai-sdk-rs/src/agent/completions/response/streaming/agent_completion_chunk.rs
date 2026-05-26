@@ -79,8 +79,10 @@ impl AgentCompletionChunk {
     /// Returns `None` if the chunk has no ID yet. All paths are relative
     /// to the `logs/` root directory, under `agents/completions/`.
     #[cfg(feature = "filesystem")]
-    pub fn produce_files(&self) -> Option<(serde_json::Value, Vec<crate::filesystem::logs::LogFile>)> {
-        use crate::filesystem::logs::LogFile;
+    pub fn produce_files(
+        &self,
+    ) -> Option<(crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>)> {
+        use crate::filesystem::logs::{LogFile, LogReference};
         const ROUTE: &str = "agents/completions";
 
         let id = &self.id;
@@ -89,7 +91,7 @@ impl AgentCompletionChunk {
         }
 
         let mut files: Vec<LogFile> = Vec::new();
-        let mut message_refs: Vec<serde_json::Value> = Vec::new();
+        let mut message_refs: Vec<LogReference> = Vec::new();
 
         for msg in &self.messages {
             let (reference, msg_files) = msg.produce_files(id, ROUTE);
@@ -97,23 +99,8 @@ impl AgentCompletionChunk {
             files.extend(msg_files);
         }
 
-        // Serialize a shell without messages/continuation to avoid double-serialization
-        let shell = AgentCompletionChunk {
-            id: self.id.clone(),
-            created: self.created,
-            messages: Vec::new(),
-            object: self.object,
-            usage: self.usage.clone(),
-            upstream: self.upstream,
-            error: self.error.clone(),
-            continuation: Some(String::new()),
-            messages_queued: self.messages_queued,
-        };
-        let mut root = serde_json::to_value(&shell).unwrap();
-        root["messages"] = serde_json::Value::Array(message_refs);
-
-        // Extract continuation to a separate file, or remove placeholder
-        if let Some(continuation) = &self.continuation {
+        // Extract continuation to a separate file (if present).
+        let continuation_ref = self.continuation.as_ref().map(|continuation| {
             let cont_file = LogFile {
                 route: format!("{ROUTE}/continuation"),
                 id: id.clone(),
@@ -122,14 +109,22 @@ impl AgentCompletionChunk {
                 extension: "json".to_string(),
                 content: serde_json::to_vec_pretty(continuation).unwrap(),
             };
-            root["continuation"] = serde_json::json!({
-                "type": "reference",
-                "path": cont_file.path(),
-            });
+            let r = LogReference::new(cont_file.path());
             files.push(cont_file);
-        } else if let Some(map) = root.as_object_mut() {
-            map.remove("continuation");
-        }
+            r
+        });
+
+        let log = super::AgentCompletionChunkLog {
+            id: self.id.clone(),
+            created: self.created,
+            messages: message_refs,
+            object: self.object,
+            usage: self.usage.clone(),
+            upstream: self.upstream,
+            error: self.error.clone(),
+            continuation: continuation_ref,
+            messages_queued: self.messages_queued,
+        };
 
         let root_file = LogFile {
             route: ROUTE.to_string(),
@@ -137,9 +132,9 @@ impl AgentCompletionChunk {
             message_index: None,
             media_index: None,
             extension: "json".to_string(),
-            content: serde_json::to_vec_pretty(&root).unwrap(),
+            content: serde_json::to_vec_pretty(&log).unwrap(),
         };
-        let reference = serde_json::json!({ "type": "reference", "path": root_file.path() });
+        let reference = LogReference::new(root_file.path());
         files.push(root_file);
 
         Some((reference, files))

@@ -119,9 +119,10 @@ impl RichContent {
 
     /// Extracts media files from this content.
     ///
-    /// Returns `(content_json, files)` where `content_json` is the content
-    /// with extractable media replaced by `{"type": "reference", "path": ...}`
-    /// references, and `files` is the list of [`LogFile`]s.
+    /// Returns `(content_log, files)` where `content_log` is a
+    /// [`super::RichContentLog`] mirroring the original content with
+    /// extractable media replaced by `LogReference` entries, and
+    /// `files` is the list of [`LogFile`]s.
     ///
     /// `route_base` is the route prefix (e.g. `"agents/completions"`).
     /// `id` and `message_index` identify the parent message.
@@ -131,13 +132,16 @@ impl RichContent {
         route_base: &str,
         id: &str,
         message_index: u64,
-    ) -> (serde_json::Value, Vec<crate::filesystem::logs::LogFile>) {
+    ) -> (super::RichContentLog, Vec<crate::filesystem::logs::LogFile>) {
+        use crate::filesystem::logs::LogReference;
+        use super::{RichContentLog, RichContentLogPart};
+
         let parts = match self {
-            RichContent::Text(text) => return (serde_json::Value::String(text), Vec::new()),
+            RichContent::Text(text) => return (RichContentLog::Text(text), Vec::new()),
             RichContent::Parts(parts) => parts,
         };
 
-        let mut json_parts = Vec::with_capacity(parts.len());
+        let mut log_parts = Vec::with_capacity(parts.len());
         let mut files = Vec::new();
 
         for (part_idx, part) in parts.into_iter().enumerate() {
@@ -168,20 +172,19 @@ impl RichContent {
                         extension: fc.extension.to_string(),
                         content: decoded,
                     };
-                    json_parts.push(serde_json::json!({
-                        "type": "reference",
-                        "path": log_file.path(),
-                    }));
+                    log_parts.push(RichContentLogPart::Reference(
+                        LogReference::new(log_file.path()),
+                    ));
                     files.push(log_file);
                 } else {
-                    json_parts.push(serde_json::to_value(&part).unwrap());
+                    log_parts.push(RichContentLogPart::Original(part));
                 }
             } else {
-                json_parts.push(serde_json::to_value(&part).unwrap());
+                log_parts.push(RichContentLogPart::Original(part));
             }
         }
 
-        (serde_json::Value::Array(json_parts), files)
+        (RichContentLog::Parts(log_parts), files)
     }
 
     /// Computes a content-addressed ID for this content.

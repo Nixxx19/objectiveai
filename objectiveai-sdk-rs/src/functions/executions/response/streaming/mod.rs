@@ -1,4 +1,6 @@
 mod function_execution_chunk;
+#[cfg(feature = "filesystem")]
+mod function_execution_chunk_log;
 mod function_execution_task_chunk;
 mod inner_error;
 mod object;
@@ -7,6 +9,8 @@ mod task_chunk;
 mod vector_completion_task_chunk;
 
 pub use function_execution_chunk::*;
+#[cfg(feature = "filesystem")]
+pub use function_execution_chunk_log::*;
 pub use function_execution_task_chunk::*;
 pub use inner_error::*;
 pub use object::*;
