@@ -136,19 +136,13 @@ pub async fn insert_async(
     .map_err(spawn_blocking_join_err)?
 }
 
-/// Async wrapper: atomically compute `MAX(index) + 1` and insert a
-/// row at that index. The `MAX → INSERT` pair runs under one mutex
-/// lock so concurrent writers to the same db get consistent indices.
-pub async fn insert_request_async(
+/// Async wrapper: `SELECT MAX("index") FROM messages` on the blocking pool.
+pub async fn max_index_async(
     conn: Arc<Mutex<Connection>>,
-    kind: MessageKind,
-    path: String,
-    timestamp: u64,
-) -> Result<(), super::super::Error> {
+) -> Result<Option<u64>, super::super::Error> {
     tokio::task::spawn_blocking(move || {
         let conn = conn.lock().expect("messages_db mutex poisoned");
-        let next_idx = max_index(&conn)?.map(|m| m + 1).unwrap_or(0);
-        insert(&conn, kind, &path, timestamp, next_idx)
+        max_index(&conn)
     })
     .await
     .map_err(spawn_blocking_join_err)?

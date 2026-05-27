@@ -4,6 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use futures::stream::{FuturesUnordered, StreamExt};
 
+use crate::agent::completions::message::RichContent;
 use crate::agent::completions::response::streaming::AgentCompletionIds;
 
 use super::{LogFile, MessageKind, MessageRow, messages_db};
@@ -14,9 +15,23 @@ use super::{LogFile, MessageKind, MessageRow, messages_db};
 pub type ProduceRows<C> =
     for<'a> fn(&'a C) -> Box<dyn Iterator<Item = MessageRow> + Send + 'a>;
 
+/// Handle to a notification whose log file has been written and whose
+/// per-agent DB index has been reserved by [`LogWriter::write_notification`].
+/// The cli-stream queues these locally and passes them back into
+/// [`LogWriter::write`] for DB insertion when the next tool response
+/// for the same agent comes in — or, at stream end, into
+/// [`LogWriter::finalize`].
+#[derive(Debug, Clone)]
+pub struct PendingNotification {
+    pub agent_id: String,
+    pub index: u64,
+    pub path: String,
+    pub timestamp: u64,
+}
+
 /// Writes streaming chunks to the log file structure on disk, and
-/// in parallel inserts request / assistant_response / tool_response
-/// rows into per-agent SQLite databases.
+/// in parallel inserts request / assistant_response / tool_response /
+/// agent_completion_notification rows into per-agent SQLite databases.
 ///
 /// `C` is the chunk type. The `produce` function pointer extracts
 /// [`LogFile`]s from each chunk; `produce_rows` extracts
@@ -24,6 +39,12 @@ pub type ProduceRows<C> =
 ///
 /// Maintains a buffer of previously written file contents so that
 /// unchanged files are not rewritten on every chunk.
+///
+/// The writer does NOT own the notification queue — that lives in the
+/// caller (cli-stream's writer task). Notifications enter via
+/// [`Self::write_notification`] (file is written immediately, index
+/// reserved), and the caller passes the resulting [`PendingNotification`]s
+/// back into [`Self::write`] / [`Self::finalize`] for DB insertion.
 pub struct LogWriter<C> {
     logs_dir: PathBuf,
     produce: fn(&C) -> Option<Vec<LogFile>>,
@@ -53,13 +74,19 @@ pub struct LogWriter<C> {
     request_file_path: Option<String>,
     /// Per-agent open db connections, shared across blocking tasks.
     db_connections: HashMap<String, Arc<Mutex<rusqlite::Connection>>>,
+    /// Per-agent next monotonic DB index. Seeded from `MAX(index)+1`
+    /// the first time an agent's connection is opened. All inserts —
+    /// requests, messages, notifications — reserve from this counter
+    /// so the `index` column is a single increasing sequence across
+    /// kinds (a prerequisite for "notification's index precedes the
+    /// tool response's index").
+    next_db_index: HashMap<String, u64>,
     /// Tracks which agents already had their request row inserted.
     db_request_inserted: HashSet<String>,
-    /// Tracks which `(agent_id, index, kind)` triples have already
-    /// been queued, so chunk-level duplicates (same message in a
-    /// later chunk because the server re-broadcast it) don't produce
-    /// duplicate rows.
-    inserted_rows: HashSet<(String, u64, MessageKind)>,
+    /// Dedup by path. Chunks may re-emit the same row across multiple
+    /// `write()` calls as the server amends a message; we only insert
+    /// each path once per stream.
+    inserted_paths: HashSet<String>,
 }
 
 impl<C> LogWriter<C> {
@@ -78,8 +105,9 @@ impl<C> LogWriter<C> {
             produce_rows: None,
             request_file_path: None,
             db_connections: HashMap::new(),
+            next_db_index: HashMap::new(),
             db_request_inserted: HashSet::new(),
-            inserted_rows: HashSet::new(),
+            inserted_paths: HashSet::new(),
         }
     }
 
@@ -127,11 +155,86 @@ impl<C> LogWriter<C> {
         self.primary_id.as_deref()
     }
 
+    /// Reserves the next per-agent DB index, writes the notification
+    /// content to `agents/completions/notifications/<id>_<idx>.json`
+    /// immediately, and returns a [`PendingNotification`] handle the
+    /// caller queues locally. The DB insert happens later — in the
+    /// next `write()` call for a tool response on the same agent, or
+    /// in `finalize()` at stream end.
+    ///
+    /// No-op (`Err` is never returned, file is not written, the
+    /// handle's `path` is empty) when the writer has no
+    /// `messages_db_root` configured — but this path is only reached
+    /// when the factory wired up `with_messages_db`, so in practice
+    /// the configured branch always runs.
+    pub async fn write_notification(
+        &mut self,
+        agent_id: &str,
+        content: &RichContent,
+    ) -> Result<PendingNotification, super::super::Error> {
+        let db_root = match self.messages_db_root.clone() {
+            Some(p) => p,
+            None => {
+                // No DB configured — nothing to reserve. Return a
+                // handle with an empty path so the caller can still
+                // queue it harmlessly; the eventual insert is also a
+                // no-op (write/finalize gate on messages_db_root).
+                return Ok(PendingNotification {
+                    agent_id: agent_id.to_string(),
+                    index: 0,
+                    path: String::new(),
+                    timestamp: now_secs(),
+                });
+            }
+        };
+        self.ensure_conn_async(&db_root, agent_id).await?;
+        let index = self.reserve_index(agent_id);
+        let file = LogFile {
+            route: "agents/completions/notifications".to_string(),
+            id: agent_id.to_string(),
+            message_index: Some(index),
+            media_index: None,
+            extension: "json".to_string(),
+            content: serde_json::to_vec_pretty(content)
+                .map_err(super::super::Error::Serialize)?,
+            suffix: None,
+        };
+        let path = file.path();
+        let full_path = self.logs_dir.join(&path);
+        if let Some(parent) = full_path.parent() {
+            tokio::fs::create_dir_all(parent).await.map_err(|e| {
+                super::super::Error::Write(parent.to_path_buf(), e)
+            })?;
+        }
+        tokio::fs::write(&full_path, file.content)
+            .await
+            .map_err(|e| super::super::Error::Write(full_path, e))?;
+        Ok(PendingNotification {
+            agent_id: agent_id.to_string(),
+            index,
+            path,
+            timestamp: now_secs(),
+        })
+    }
+
     /// Write a chunk to disk. Files whose content hasn't changed since the
     /// last write are skipped. All file writes plus all per-agent DB
-    /// inserts run concurrently — only operations targeting the same
-    /// agent's db serialise (via that agent's mutex).
-    pub async fn write(&mut self, chunk: &C) -> Result<(), super::super::Error>
+    /// inserts (requests, messages, and any drained notifications)
+    /// run concurrently — only operations targeting the same agent's
+    /// db serialise (via that agent's mutex).
+    ///
+    /// `pending` is the caller's local notification queue. For each
+    /// tool-response row encountered, every queued notification with
+    /// the matching `agent_id` is removed from `pending` and its
+    /// `INSERT` is pushed into the same concurrent op set (at its
+    /// already-reserved index — so the notification's index precedes
+    /// the tool response's reserved index). Notifications for agents
+    /// not in this chunk remain in `pending` for the next call.
+    pub async fn write(
+        &mut self,
+        chunk: &C,
+        pending: &mut Vec<PendingNotification>,
+    ) -> Result<(), super::super::Error>
     where
         C: AgentCompletionIds,
     {
@@ -180,7 +283,7 @@ impl<C> LogWriter<C> {
             .collect();
 
         // Build the concurrent op set: file writes + per-agent request
-        // rows + per-message rows. Everything joins at the bottom.
+        // rows + per-message rows + drained notification rows.
         let mut ops: FuturesUnordered<
             std::pin::Pin<
                 Box<
@@ -206,51 +309,79 @@ impl<C> LogWriter<C> {
             }));
         }
 
-        // SQLite ops, if wired. The chunk-borrowing iterators
-        // (`agent_completion_ids()` and `produce_message_rows()`)
-        // only borrow `chunk`, not `self`, so we mutate `self`
-        // (ensure_conn, insert into the dedup sets) inside the loops
-        // without holding a self-borrow.
+        // SQLite ops, if wired.
         if let Some(db_root) = self.messages_db_root.clone() {
-            // 1. Per-agent request rows. One per newly-seen agent;
-            //    discovered via `agent_completion_ids()` which already
-            //    walks the chunk tree (function executions surface
-            //    every inner agent's id).
+            // 1. Per-agent request rows. One per newly-seen agent.
             if let (Some(kind), Some(req_path)) =
                 (self.request_kind, self.request_file_path.clone())
             {
                 let now = now_secs();
-                for agent_id in chunk.agent_completion_ids() {
-                    if self.db_request_inserted.contains(agent_id) {
-                        continue;
-                    }
-                    let conn = self.ensure_conn(&db_root, agent_id)?;
-                    self.db_request_inserted.insert(agent_id.to_string());
-                    ops.push(Box::pin(messages_db::insert_request_async(
+                // Collect new agents to avoid borrowing `chunk` across the
+                // `&mut self` method call inside the loop body.
+                let new_agents: Vec<String> = chunk
+                    .agent_completion_ids()
+                    .filter(|aid| !self.db_request_inserted.contains(*aid))
+                    .map(String::from)
+                    .collect();
+                for agent_id in new_agents {
+                    let conn = self.ensure_conn_async(&db_root, &agent_id).await?;
+                    self.db_request_inserted.insert(agent_id.clone());
+                    let index = self.reserve_index(&agent_id);
+                    ops.push(Box::pin(messages_db::insert_async(
                         conn,
                         kind,
                         req_path.clone(),
                         now,
+                        index,
                     )));
                 }
             }
 
-            // 2. Per-message rows. Iterate the chunk's
-            //    `produce_message_rows()` lazily and stream straight
-            //    into the ops queue — no Vec<MessageRow>.
+            // 2. Per-message rows + per-tool-response notification drain.
             if let Some(rows_fn) = self.produce_rows {
-                for row in rows_fn(chunk) {
-                    let key = (row.agent_id.clone(), row.index, row.kind);
-                    if !self.inserted_rows.insert(key) {
+                // Same borrow-checker pattern: collect to a small Vec.
+                let rows: Vec<MessageRow> = rows_fn(chunk).collect();
+                for row in rows {
+                    if !self.inserted_paths.insert(row.path.clone()) {
                         continue;
                     }
-                    let conn = self.ensure_conn(&db_root, &row.agent_id)?;
+                    let conn = self
+                        .ensure_conn_async(&db_root, &row.agent_id)
+                        .await?;
+
+                    // Tool-response rows trigger a notification drain
+                    // for that agent. Notifications insert FIRST (at
+                    // their reserved indices, all earlier than the
+                    // index the tool-response is about to reserve).
+                    if matches!(row.kind, MessageKind::ToolResponse) {
+                        let agent = row.agent_id.clone();
+                        let mut i = 0;
+                        while i < pending.len() {
+                            if pending[i].agent_id == agent
+                                && !pending[i].path.is_empty()
+                            {
+                                let notif = pending.remove(i);
+                                let conn = Arc::clone(&conn);
+                                ops.push(Box::pin(messages_db::insert_async(
+                                    conn,
+                                    MessageKind::AgentCompletionNotification,
+                                    notif.path,
+                                    notif.timestamp,
+                                    notif.index,
+                                )));
+                            } else {
+                                i += 1;
+                            }
+                        }
+                    }
+
+                    let index = self.reserve_index(&row.agent_id);
                     ops.push(Box::pin(messages_db::insert_async(
                         conn,
                         row.kind,
                         row.path,
                         row.timestamp,
-                        row.index,
+                        index,
                     )));
                 }
             }
@@ -264,7 +395,53 @@ impl<C> LogWriter<C> {
         Ok(())
     }
 
-    fn ensure_conn(
+    /// Drain any remaining notifications into their respective per-
+    /// agent dbs. Called by the cli-stream writer task after the chunk
+    /// channel closes and any in-flight notifications have been pulled
+    /// off the wire. Each surviving notification is inserted at its
+    /// already-reserved index.
+    pub async fn finalize(
+        &mut self,
+        pending: &mut Vec<PendingNotification>,
+    ) -> Result<(), super::super::Error> {
+        let db_root = match self.messages_db_root.clone() {
+            Some(p) => p,
+            None => {
+                pending.clear();
+                return Ok(());
+            }
+        };
+        let mut ops: FuturesUnordered<
+            std::pin::Pin<
+                Box<
+                    dyn std::future::Future<Output = Result<(), super::super::Error>>
+                        + Send,
+                >,
+            >,
+        > = FuturesUnordered::new();
+        for notif in pending.drain(..) {
+            if notif.path.is_empty() {
+                continue;
+            }
+            let conn = self.ensure_conn_async(&db_root, &notif.agent_id).await?;
+            ops.push(Box::pin(messages_db::insert_async(
+                conn,
+                MessageKind::AgentCompletionNotification,
+                notif.path,
+                notif.timestamp,
+                notif.index,
+            )));
+        }
+        while let Some(result) = ops.next().await {
+            result?;
+        }
+        Ok(())
+    }
+
+    /// Open + cache the conn for an agent if not already cached, and
+    /// seed `next_db_index` from `MAX(index) + 1` for the agent on
+    /// first use.
+    async fn ensure_conn_async(
         &mut self,
         db_root: &std::path::Path,
         agent_id: &str,
@@ -274,8 +451,26 @@ impl<C> LogWriter<C> {
         }
         let conn = messages_db::open(&db_root.join(agent_id))?;
         let conn = Arc::new(Mutex::new(conn));
-        self.db_connections.insert(agent_id.to_string(), Arc::clone(&conn));
+        self.db_connections
+            .insert(agent_id.to_string(), Arc::clone(&conn));
+        // Seed next_db_index for this agent.
+        let max = messages_db::max_index_async(Arc::clone(&conn)).await?;
+        let next = max.map(|m| m + 1).unwrap_or(0);
+        self.next_db_index.insert(agent_id.to_string(), next);
         Ok(conn)
+    }
+
+    /// Reserve and return the next DB index for `agent_id`. The
+    /// per-agent counter must already be seeded (callers always
+    /// invoke `ensure_conn_async` first).
+    fn reserve_index(&mut self, agent_id: &str) -> u64 {
+        let slot = self
+            .next_db_index
+            .get_mut(agent_id)
+            .expect("next_db_index seeded by ensure_conn_async");
+        let cur = *slot;
+        *slot += 1;
+        cur
     }
 }
 

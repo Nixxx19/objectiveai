@@ -88,11 +88,19 @@ impl PipeRegistry {
     /// if a pipe for this id is already tracked. Errors during bind
     /// surface via `handle` and prevent the id from being inserted,
     /// so a later `ensure_pipe` call will retry.
+    ///
+    /// `notif_tx` is a side-channel sender into the cli-stream's
+    /// writer task. Every line the reader successfully parses as
+    /// `RichContent` is fanned out to the API server via `notifier`
+    /// (existing) AND pushed onto `notif_tx` so the writer task can
+    /// log it under `agents/completions/notifications/...` and queue
+    /// the matching DB row.
     pub async fn ensure_pipe(
         &self,
         agent_id: &str,
         pipes_root: &Path,
         notifier: Notifier,
+        notif_tx: tokio::sync::mpsc::UnboundedSender<(String, RichContent)>,
         handle: &Handle,
     ) {
         if self.inner.cancellers.contains_key(agent_id) {
@@ -146,9 +154,18 @@ impl PipeRegistry {
 
         let task_agent_id = agent_id.to_string();
         let task_notifier = notifier;
+        let task_notif_tx = notif_tx;
         let task_handle = handle.clone();
         tokio::spawn(async move {
-            run_listener(listener, task_agent_id, task_notifier, task_handle, cancel_rx).await;
+            run_listener(
+                listener,
+                task_agent_id,
+                task_notifier,
+                task_notif_tx,
+                task_handle,
+                cancel_rx,
+            )
+            .await;
         });
     }
 
@@ -180,6 +197,7 @@ async fn run_listener(
     listener: Listener,
     agent_id: String,
     notifier: Notifier,
+    notif_tx: tokio::sync::mpsc::UnboundedSender<(String, RichContent)>,
     handle: Handle,
     mut cancel: oneshot::Receiver<()>,
 ) {
@@ -190,9 +208,10 @@ async fn run_listener(
                 match accept {
                     Ok(conn) => {
                         let notifier = notifier.clone();
+                        let notif_tx = notif_tx.clone();
                         let agent_id = agent_id.clone();
                         let handle = handle.clone();
-                        tokio::spawn(handle_connection(conn, agent_id, notifier, handle));
+                        tokio::spawn(handle_connection(conn, agent_id, notifier, notif_tx, handle));
                     }
                     Err(e) => {
                         emit_error(
@@ -214,6 +233,7 @@ async fn handle_connection(
     conn: interprocess::local_socket::tokio::Stream,
     agent_id: String,
     notifier: Notifier,
+    notif_tx: tokio::sync::mpsc::UnboundedSender<(String, RichContent)>,
     handle: Handle,
 ) {
     let reader = tokio::io::BufReader::new(conn);
@@ -249,6 +269,10 @@ async fn handle_connection(
                 continue;
             }
         };
+        // Side-channel into the cli-stream writer task so the
+        // notification gets a log file + queued DB row. Best-effort —
+        // if the writer task is gone, drop silently.
+        let _ = notif_tx.send((agent_id.clone(), content.clone()));
         let params = AgentCompletionNotifyParams {
             response_id: agent_id.clone(),
             content,

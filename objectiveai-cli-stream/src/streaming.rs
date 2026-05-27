@@ -11,6 +11,20 @@
 //! soon as the first write completes. On stream end fires every
 //! pipe canceller.
 //!
+//! ## Notifications
+//!
+//! The per-agent pipe readers (in [`crate::pipes`]) forward each
+//! received `RichContent` line into the writer task via a side-channel
+//! mpsc, in addition to the existing fan-out to the API server via
+//! `notifier`. The writer task owns a local `Vec<PendingNotification>`:
+//! each arrival immediately writes the corresponding log file under
+//! `agents/completions/notifications/<id>_<idx>.json` and reserves a
+//! DB index; the row itself goes into the queue and is flushed to the
+//! db when the next tool-response chunk for that agent comes in (so
+//! the notification's index naturally precedes the tool response's).
+//! Anything still queued at stream end is flushed by
+//! [`LogWriter::finalize`].
+//!
 //! ## Order on stdout
 //!
 //! 1. NDJSON `Notification`s wrapping each streaming chunk, in
@@ -27,9 +41,10 @@ use std::path::PathBuf;
 
 use futures::{Stream, StreamExt};
 use objectiveai_sdk::Notifier;
+use objectiveai_sdk::agent::completions::message::RichContent;
 use objectiveai_sdk::agent::completions::response::streaming::AgentCompletionIds;
 use objectiveai_sdk::cli::output::{Handle, LogStreamReady, Notification, Output};
-use objectiveai_sdk::filesystem::logs::LogWriter;
+use objectiveai_sdk::filesystem::logs::{LogWriter, PendingNotification};
 use serde::Serialize;
 
 use crate::pipes::PipeRegistry;
@@ -67,12 +82,16 @@ where
     // Spawn the coalescing writer task. Main loop sends each chunk
     // via the unbounded channel; the writer task batches them up
     // (merging via `push`), writes one batch at a time, and emits
-    // `LogStreamReady` once the root log id is known.
+    // `LogStreamReady` once the root log id is known. A separate
+    // notification channel carries `RichContent` notifications from
+    // the pipe readers into the writer task's local pending queue.
     let (tx, rx) = tokio::sync::mpsc::unbounded_channel::<Chunk>();
+    let (notif_tx, notif_rx) =
+        tokio::sync::mpsc::unbounded_channel::<(String, RichContent)>();
     let writer_push = push.clone();
     let writer_handle = handle.clone();
     let writer_task = tokio::spawn(async move {
-        writer_loop(rx, log_writer, writer_push, writer_handle).await
+        writer_loop(rx, notif_rx, log_writer, writer_push, writer_handle).await
     });
 
     let mut stream_err: Option<String> = None;
@@ -87,7 +106,13 @@ where
                 //    repeat ids are no-ops.
                 for agent_id in chunk.agent_completion_ids() {
                     registry
-                        .ensure_pipe(agent_id, &pipes_root, notifier.clone(), handle)
+                        .ensure_pipe(
+                            agent_id,
+                            &pipes_root,
+                            notifier.clone(),
+                            notif_tx.clone(),
+                            handle,
+                        )
                         .await;
                 }
 
@@ -116,8 +141,11 @@ where
     drop(tx);
 
     // Tear down every pipe. Reader tasks wake from their
-    // tokio::select! and unlink the FS entry.
+    // tokio::select! and unlink the FS entry. Once every listener
+    // drops its `notif_tx` clone, the writer task's notif_rx will
+    // start returning None and writer_loop can finalize.
     registry.shutdown();
+    drop(notif_tx);
 
     // Collect the writer task's outcome. A JoinError means the
     // writer panicked; a writer Err means a disk write failed.
@@ -139,12 +167,22 @@ where
 
 /// Coalescing writer loop. Mirrors `objectiveai-cli/src/log_stream::writer_loop`.
 ///
-/// Blocks on the next chunk, drains anything that piled up while we
-/// were blocked, merges the batch into the running aggregate via
-/// `push`, writes once. On the first successful write, emits a
-/// one-shot `LogStreamReady` carrying the root log id.
+/// Blocks on the next chunk OR notification via `tokio::select!`,
+/// drains anything that piled up while we were blocked, merges the
+/// batch into the running aggregate via `push`, writes once. On the
+/// first successful write, emits a one-shot `LogStreamReady` carrying
+/// the root log id.
+///
+/// Pending notifications live in a local `Vec<PendingNotification>`.
+/// Each arrival immediately calls `log_writer.write_notification`
+/// (writes the notif file and reserves a DB index); the resulting
+/// handle is queued. When a chunk's tool-response row is later
+/// written, the matching handles are passed back into `log_writer.write`
+/// for db insertion. Anything still queued when both channels close
+/// is flushed by `log_writer.finalize`.
 async fn writer_loop<Chunk, F>(
     mut rx: tokio::sync::mpsc::UnboundedReceiver<Chunk>,
+    mut notif_rx: tokio::sync::mpsc::UnboundedReceiver<(String, RichContent)>,
     mut log_writer: LogWriter<Chunk>,
     push: F,
     handle: Handle,
@@ -153,27 +191,71 @@ where
     F: Fn(&mut Chunk, &Chunk),
 {
     let mut agg: Option<Chunk> = None;
+    let mut pending: Vec<PendingNotification> = Vec::new();
     let mut logged_id = false;
-    while let Some(first) = rx.recv().await {
-        match &mut agg {
-            Some(a) => push(a, &first),
-            None => agg = Some(first),
-        }
-        while let Ok(next) = rx.try_recv() {
-            if let Some(a) = &mut agg {
-                push(a, &next);
+    let mut chunk_channel_open = true;
+    let mut notif_channel_open = true;
+
+    while chunk_channel_open || notif_channel_open {
+        // Block on whichever side has something next. `biased` makes
+        // chunks the default winner on tie so chunk processing —
+        // which includes draining queued notifs into the db — stays
+        // prompt under load.
+        tokio::select! {
+            biased;
+            chunk = rx.recv(), if chunk_channel_open => {
+                match chunk {
+                    Some(first) => {
+                        // Coalesce additional chunks waiting in the channel.
+                        match &mut agg {
+                            Some(a) => push(a, &first),
+                            None => agg = Some(first),
+                        }
+                        while let Ok(next) = rx.try_recv() {
+                            if let Some(a) = &mut agg {
+                                push(a, &next);
+                            }
+                        }
+                        // Drain any notifs that arrived in the same window.
+                        while let Ok((aid, content)) = notif_rx.try_recv() {
+                            let p = log_writer
+                                .write_notification(&aid, &content)
+                                .await?;
+                            pending.push(p);
+                        }
+                        if let Some(a) = &agg {
+                            log_writer.write(a, &mut pending).await?;
+                        }
+                        if !logged_id {
+                            if let Some(id) = log_writer.primary_id() {
+                                emit_log_stream_ready(id, &handle).await;
+                                logged_id = true;
+                            }
+                        }
+                    }
+                    None => {
+                        chunk_channel_open = false;
+                    }
+                }
             }
-        }
-        if let Some(a) = &agg {
-            log_writer.write(a).await?;
-        }
-        if !logged_id {
-            if let Some(id) = log_writer.primary_id() {
-                emit_log_stream_ready(id, &handle).await;
-                logged_id = true;
+            notif = notif_rx.recv(), if notif_channel_open => {
+                match notif {
+                    Some((aid, content)) => {
+                        let p = log_writer
+                            .write_notification(&aid, &content)
+                            .await?;
+                        pending.push(p);
+                    }
+                    None => {
+                        notif_channel_open = false;
+                    }
+                }
             }
         }
     }
+
+    // Both channels closed — flush any remaining queued notifications.
+    log_writer.finalize(&mut pending).await?;
     Ok(())
 }
 
