@@ -33,37 +33,4 @@ impl EvaluationChunk {
             self.output = Some(output.clone());
         }
     }
-
-    /// Produces log files for this evaluation completion.
-    ///
-    /// Returns `(reference, files)` where `reference` is a
-    /// [`super::evaluation_log_reference::LogReference`] carrying
-    /// `index`, `agent_index`, and optionally `output`. Files are
-    /// written under `agent/completions/`.
-    #[cfg(feature = "filesystem")]
-    pub fn produce_files(
-        &self,
-    ) -> (super::evaluation_log_reference::LogReference, Vec<crate::filesystem::logs::LogFile>) {
-        let (path, files) = match self.inner.produce_files() {
-            Some((inner_ref, files)) => (inner_ref.path, files),
-            None => (String::new(), Vec::new()),
-        };
-        let mut reference = super::evaluation_log_reference::LogReference::new(
-            path,
-            self.index,
-            self.agent_index,
-        );
-        if let Some(output) = &self.output {
-            reference.output = Some(serde_json::to_value(output).unwrap());
-        }
-        (reference, files)
-    }
-
-    /// Delegates to the inner agent completion's message-row extractor.
-    #[cfg(feature = "filesystem")]
-    pub fn produce_message_rows(
-        &self,
-    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_ {
-        self.inner.produce_message_rows()
-    }
 }

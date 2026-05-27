@@ -463,8 +463,6 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::functions::executions::response::streaming::reasoning_summary_log_reference::LogReference),
             schemars::schema_for!(crate::functions::executions::response::streaming::task_log_reference::LogReference),
             schemars::schema_for!(crate::functions::executions::response::streaming::vector_completion_task_log_reference::LogReference),
-            schemars::schema_for!(crate::laboratories::executions::response::streaming::builder_log_reference::LogReference),
-            schemars::schema_for!(crate::laboratories::executions::response::streaming::evaluation_log_reference::LogReference),
             // *Log structs (on-disk log file shapes for every
             // chunk type that has a `produce_files` implementation).
             schemars::schema_for!(crate::agent::completions::message::RichContentLog),
@@ -474,7 +472,6 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::functions::executions::response::streaming::FunctionExecutionChunkLog),
             schemars::schema_for!(crate::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunkLog),
             schemars::schema_for!(crate::functions::inventions::response::streaming::FunctionInventionChunkLog),
-            schemars::schema_for!(crate::laboratories::executions::response::streaming::LaboratoryExecutionChunkLog),
             schemars::schema_for!(crate::vector::completions::response::streaming::VectorCompletionChunkLog),
             schemars::schema_for!(crate::filesystem::plugins::Binaries),
             schemars::schema_for!(crate::filesystem::plugins::Manifest),

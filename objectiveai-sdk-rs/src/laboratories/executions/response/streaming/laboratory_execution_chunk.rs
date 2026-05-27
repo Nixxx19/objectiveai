@@ -31,23 +31,6 @@ impl AgentCompletionIds for LaboratoryExecutionChunk {
 }
 
 impl LaboratoryExecutionChunk {
-    /// Flat-maps message rows from every builder and evaluation. Lazy
-    /// and `Box<dyn Iterator>`-erased because the two branches have
-    /// different concrete iterator types.
-    #[cfg(feature = "filesystem")]
-    pub fn produce_message_rows(
-        &self,
-    ) -> Box<dyn Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_> {
-        let builder_rows = self.builders.iter().flat_map(|b| b.produce_message_rows());
-        let evaluation_rows = self
-            .evaluations
-            .iter()
-            .flat_map(|e| e.produce_message_rows());
-        Box::new(builder_rows.chain(evaluation_rows))
-    }
-}
-
-impl LaboratoryExecutionChunk {
     /// Yields each inner error from this chunk's builders and evaluations,
     /// tagged with `(index, agent_index)` and discriminated by an
     /// [`InnerError`](super::InnerError) variant (`Builder` | `Evaluation`).
@@ -125,59 +108,4 @@ impl LaboratoryExecutionChunk {
         }
     }
 
-    /// Produces the [`LogFile`]s for the log file structure.
-    ///
-    /// Returns `(reference, files)`. All paths relative to `logs/`.
-    #[cfg(feature = "filesystem")]
-    pub fn produce_files(
-        &self,
-    ) -> Option<(crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>)> {
-        use crate::filesystem::logs::{LogFile, LogReference};
-        const ROUTE: &str = "laboratories/executions";
-
-        let id = &self.id;
-        if id.is_empty() {
-            return None;
-        }
-
-        let mut files: Vec<LogFile> = Vec::new();
-        let mut builder_refs: Vec<super::builder_log_reference::LogReference> = Vec::new();
-        let mut evaluation_refs: Vec<super::evaluation_log_reference::LogReference> = Vec::new();
-
-        for builder in &self.builders {
-            let (reference, builder_files) = builder.produce_files();
-            builder_refs.push(reference);
-            files.extend(builder_files);
-        }
-
-        for evaluation in &self.evaluations {
-            let (reference, eval_files) = evaluation.produce_files();
-            evaluation_refs.push(reference);
-            files.extend(eval_files);
-        }
-
-        let log = super::LaboratoryExecutionChunkLog {
-            id: self.id.clone(),
-            builders: builder_refs,
-            evaluations: evaluation_refs,
-            error: self.error.clone(),
-            created: self.created,
-            object: self.object,
-            usage: self.usage.clone(),
-        };
-
-        let root_file = LogFile {
-            route: ROUTE.to_string(),
-            id: id.clone(),
-            message_index: None,
-            media_index: None,
-            extension: "json".to_string(),
-            content: serde_json::to_vec_pretty(&log).unwrap(),
-            suffix: Some("response"),
-        };
-        let reference = LogReference::new(root_file.path());
-        files.push(root_file);
-
-        Some((reference, files))
-    }
 }

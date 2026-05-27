@@ -90,9 +90,6 @@ impl Client {
     pub async fn list_function_inventions_recursive(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, Error> {
         self.list_endpoint("functions/inventions/recursive", offset, limit).await
     }
-    pub async fn list_laboratory_executions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, Error> {
-        self.list_endpoint("laboratories/executions", offset, limit).await
-    }
 
     // -- Clear helpers + methods --------------------------------------------
 
@@ -172,9 +169,6 @@ impl Client {
     pub async fn clear_function_inventions_recursive(&self) -> Result<u64, Error> {
         self.clear_endpoint("functions/inventions/recursive").await
     }
-    pub async fn clear_laboratory_executions(&self) -> Result<u64, Error> {
-        self.clear_endpoint("laboratories/executions").await
-    }
 
     // -- Write methods (LogWriter constructors) -----------------------------
 
@@ -251,21 +245,6 @@ impl Client {
                 queue,
                 Some(super::super::db::schema::MessageKind::FunctionInventionRecursiveRequest),
                 |chunk: &FunctionInventionRecursiveChunk| Box::new(chunk.produce_message_rows()),
-            ))
-    }
-    pub fn write_laboratory_execution(
-        &self,
-        request: &crate::laboratories::executions::request::LaboratoryExecutionCreateParams,
-    ) -> Result<super::LogWriter<crate::laboratories::executions::response::streaming::LaboratoryExecutionChunk>, Error> {
-        use crate::laboratories::executions::response::streaming::LaboratoryExecutionChunk;
-        let conn = super::super::db::connection::connection(self)?;
-        let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        Ok(super::LogWriter::new(self.logs_dir(), |chunk: &LaboratoryExecutionChunk| chunk.produce_files().map(|(_, files)| files))
-            .with_request("laboratories/executions", request)?
-            .with_queue(
-                queue,
-                None,
-                |chunk: &LaboratoryExecutionChunk| chunk.produce_message_rows(),
             ))
     }
 
@@ -377,12 +356,6 @@ impl Client {
     }
     pub async fn read_function_invention_recursive_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
         self.read_json("functions/inventions/recursive", &format!("{id}-request"), jq).await
-    }
-    pub async fn read_laboratory_execution(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("laboratories/executions", &format!("{id}-response"), jq).await
-    }
-    pub async fn read_laboratory_execution_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("laboratories/executions", &format!("{id}-request"), jq).await
     }
 
     // -- Subscribe helpers + methods ----------------------------------------
@@ -529,12 +502,6 @@ impl Client {
     }
     pub async fn subscribe_function_invention_recursive_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
         self.subscribe_json("functions/inventions/recursive", &format!("{id}-request"), timeout, require_modification, jq).await
-    }
-    pub async fn subscribe_laboratory_execution(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("laboratories/executions", &format!("{id}-response"), timeout, require_modification, jq).await
-    }
-    pub async fn subscribe_laboratory_execution_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("laboratories/executions", &format!("{id}-request"), timeout, require_modification, jq).await
     }
 }
 

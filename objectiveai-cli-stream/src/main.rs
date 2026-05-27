@@ -17,7 +17,6 @@
 mod agents;
 mod api;
 mod functions;
-mod laboratories;
 mod pipes;
 mod streaming;
 
@@ -56,11 +55,6 @@ enum Commands {
         #[command(subcommand)]
         command: functions::Commands,
     },
-    /// Laboratories management
-    Laboratories {
-        #[command(subcommand)]
-        command: laboratories::Commands,
-    },
 }
 
 impl Commands {
@@ -73,7 +67,6 @@ impl Commands {
         match self {
             Commands::Agents { command } => command.handle(http, pipes, handle).await,
             Commands::Functions { command } => command.handle(http, pipes, handle).await,
-            Commands::Laboratories { command } => command.handle(http, pipes, handle).await,
         }
     }
 }

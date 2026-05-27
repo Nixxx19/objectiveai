@@ -8,7 +8,6 @@ use crate::functions;
 use crate::viewer;
 use crate::mcp;
 use crate::schemas;
-use crate::laboratories;
 use crate::logs;
 use crate::plugins;
 use crate::tools;
@@ -150,11 +149,6 @@ enum Commands {
         #[command(subcommand)]
         command: schemas::Commands,
     },
-    /// Laboratories management
-    Laboratories {
-        #[command(subcommand)]
-        command: laboratories::Commands,
-    },
     /// Vector completions
     Vector {
         #[command(subcommand)]
@@ -206,7 +200,6 @@ impl Commands {
             Commands::Viewer { command } => command.handle(cli_config, handle).await,
             Commands::Mcp { command } => command.handle(cli_config, handle).await,
             Commands::Schemas { command } => command.handle(handle).await,
-            Commands::Laboratories { command } => command.handle(cli_config, handle).await,
             Commands::Vector { command } => command.handle(cli_config, handle).await,
             Commands::Logs { command } => command.handle(cli_config, handle).await,
             Commands::Instructions { command } => command.handle(cli_config, handle).await,
