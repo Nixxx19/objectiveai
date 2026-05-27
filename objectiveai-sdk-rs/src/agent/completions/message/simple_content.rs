@@ -47,6 +47,63 @@ impl SimpleContent {
         }
     }
 
+    /// Extract every chunk of this content into its own on-disk log
+    /// file, returning a [`super::SimpleContentLog`] of
+    /// [`LogReference`]s pointing at the written files. Parallel to
+    /// [`super::RichContent::extract_media`] (post-rewrite).
+    ///
+    /// - `SimpleContent::Text(text)` → one `.txt` at
+    ///   `<route_base>/messages/text/<id>-<idx>.txt` containing
+    ///   `text.into_bytes()`. Return `Reference(ref)`.
+    /// - `SimpleContent::Parts(parts)` → one `.txt` per part at
+    ///   `<route_base>/messages/text/<id>-<idx>-<part_idx>.txt`.
+    ///   Return `Parts(vec_of_refs)`.
+    #[cfg(feature = "filesystem")]
+    pub fn extract_media(
+        self,
+        route_base: &str,
+        id: &str,
+        message_index: u64,
+    ) -> (super::SimpleContentLog, Vec<crate::filesystem::logs::LogFile>) {
+        use crate::filesystem::logs::{LogFile, LogReference};
+        use super::SimpleContentLog;
+
+        match self {
+            SimpleContent::Text(text) => {
+                let log_file = LogFile {
+                    route: format!("{route_base}/messages/text"),
+                    id: id.to_string(),
+                    message_index: Some(message_index),
+                    media_index: None,
+                    extension: "txt".to_string(),
+                    content: text.into_bytes(),
+                    suffix: None,
+                };
+                let reference = LogReference::new(log_file.path());
+                (SimpleContentLog::Reference(reference), vec![log_file])
+            }
+            SimpleContent::Parts(parts) => {
+                let mut log_refs = Vec::with_capacity(parts.len());
+                let mut files = Vec::with_capacity(parts.len());
+                for (part_idx, part) in parts.into_iter().enumerate() {
+                    let SimpleContentPart::Text { text } = part;
+                    let log_file = LogFile {
+                        route: format!("{route_base}/messages/text"),
+                        id: id.to_string(),
+                        message_index: Some(message_index),
+                        media_index: Some(part_idx as u64),
+                        extension: "txt".to_string(),
+                        content: text.into_bytes(),
+                        suffix: None,
+                    };
+                    log_refs.push(LogReference::new(log_file.path()));
+                    files.push(log_file);
+                }
+                (SimpleContentLog::Parts(log_refs), files)
+            }
+        }
+    }
+
     /// Prepares the content by consolidating parts into a single text string.
     pub fn prepare(&mut self) {
         match self {

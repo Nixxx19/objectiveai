@@ -46,6 +46,29 @@ impl ToolMessage {
     pub fn prepare(&mut self) {
         self.content.prepare();
     }
+
+    /// Extract this message's content into per-leaf log files,
+    /// returning a [`super::ToolMessageLog`] (with
+    /// [`super::RichContentLog`] in place of `content`) plus the
+    /// [`crate::filesystem::logs::LogFile`]s the caller writes.
+    /// `tool_call_id` + `metadata` stay inline.
+    #[cfg(feature = "filesystem")]
+    pub fn extract(
+        self,
+        route_base: &str,
+        id: &str,
+        message_index: u64,
+    ) -> (super::ToolMessageLog, Vec<crate::filesystem::logs::LogFile>) {
+        let (content, files) = self.content.extract_media(route_base, id, message_index);
+        (
+            super::ToolMessageLog {
+                content,
+                tool_call_id: self.tool_call_id,
+                metadata: self.metadata,
+            },
+            files,
+        )
+    }
 }
 
 impl FromStarlarkValue for ToolMessage {

@@ -61,6 +61,35 @@ impl AssistantMessage {
             self.reasoning = None;
         }
     }
+
+    /// Extract this message's content into per-leaf log files,
+    /// returning an [`super::AssistantMessageLog`] (with
+    /// [`super::RichContentLog`] in place of `content` when present).
+    /// tool_calls / refusal / reasoning / name stay inline.
+    #[cfg(feature = "filesystem")]
+    pub fn extract(
+        self,
+        route_base: &str,
+        id: &str,
+        message_index: u64,
+    ) -> (super::AssistantMessageLog, Vec<crate::filesystem::logs::LogFile>) {
+        let mut files = Vec::new();
+        let content_log = self.content.map(|content| {
+            let (log, content_files) = content.extract_media(route_base, id, message_index);
+            files.extend(content_files);
+            log
+        });
+        (
+            super::AssistantMessageLog {
+                content: content_log,
+                name: self.name,
+                refusal: self.refusal,
+                tool_calls: self.tool_calls,
+                reasoning: self.reasoning,
+            },
+            files,
+        )
+    }
 }
 
 impl FromStarlarkValue for AssistantMessage {
