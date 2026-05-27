@@ -37,8 +37,8 @@ pub fn connection(client: &Client) -> Result<Arc<Mutex<Connection>>, Error> {
     // WAL journaling allows concurrent readers + writer — readers see
     // a snapshot, the single writer appends to the WAL without blocking.
     conn.execute_batch("PRAGMA journal_mode=WAL;")?;
-    // Ensure the `messages` table exists.
-    super::schema::init_messages_table(&conn)?;
+    // Ensure the `messages` and `messages_queue` tables exist.
+    super::schema::init_tables(&conn)?;
     let arc = Arc::new(Mutex::new(conn));
     *guard = Some(arc.clone());
     Ok(arc)

@@ -33,6 +33,25 @@ impl MessageKind {
         }
     }
 
+    /// Parse the TEXT representation produced by [`Self::as_str`]
+    /// back into a `MessageKind`. Errors with
+    /// `Error::InvalidPath(format!("unknown message kind: {}", s))`
+    /// on an unrecognised string — mainly a guard against
+    /// out-of-sync rows from a future schema.
+    pub fn from_str(s: &str) -> Result<Self, super::super::Error> {
+        match s {
+            "agent_completion_request" => Ok(MessageKind::AgentCompletionRequest),
+            "function_execution_request" => Ok(MessageKind::FunctionExecutionRequest),
+            "function_invention_recursive_request" => Ok(MessageKind::FunctionInventionRecursiveRequest),
+            "agent_completion_notification" => Ok(MessageKind::AgentCompletionNotification),
+            "assistant_response" => Ok(MessageKind::AssistantResponse),
+            "tool_response" => Ok(MessageKind::ToolResponse),
+            other => Err(super::super::Error::InvalidPath(format!(
+                "unknown message kind: {other}"
+            ))),
+        }
+    }
+
     /// Reconstruct the on-disk file path (relative to `logs_dir`)
     /// from a (kind, agent_id, path) row.
     ///
@@ -79,10 +98,17 @@ pub struct MessageRow {
     pub timestamp: u64,
 }
 
-/// Create the `messages` table + per-agent indexes if they don't
+/// Create every table the shared db uses if it doesn't already
 /// exist. Called from [`super::connection::connection`] on first
 /// open of `db.sqlite`.
-pub fn init_messages_table(conn: &Connection) -> Result<(), super::super::Error> {
+///
+/// Tables:
+/// - `messages` — one row per request / response / notification.
+/// - `messages_queue` — per-`(caller_agent_id, spawned_agent_id)`
+///   watermark of the highest `messages."index"` the caller has
+///   already consumed. One row per pair; the composite PRIMARY KEY
+///   doubles as the lookup index.
+pub fn init_tables(conn: &Connection) -> Result<(), super::super::Error> {
     conn.execute_batch(
         "CREATE TABLE IF NOT EXISTS messages (\
             id        INTEGER PRIMARY KEY AUTOINCREMENT, \
@@ -93,7 +119,13 @@ pub fn init_messages_table(conn: &Connection) -> Result<(), super::super::Error>
             \"index\" INTEGER NOT NULL\
         );\
         CREATE INDEX IF NOT EXISTS messages_agent_index_idx ON messages(agent_id, \"index\");\
-        CREATE INDEX IF NOT EXISTS messages_agent_idx ON messages(agent_id);",
+        CREATE INDEX IF NOT EXISTS messages_agent_idx ON messages(agent_id);\
+        CREATE TABLE IF NOT EXISTS messages_queue (\
+            caller_agent_id  TEXT NOT NULL, \
+            spawned_agent_id TEXT NOT NULL, \
+            \"index\"        INTEGER NOT NULL, \
+            PRIMARY KEY (caller_agent_id, spawned_agent_id)\
+        );",
     )?;
     Ok(())
 }
