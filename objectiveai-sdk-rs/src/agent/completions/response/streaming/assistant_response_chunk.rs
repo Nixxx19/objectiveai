@@ -189,6 +189,58 @@ impl AssistantResponseChunk {
             r
         });
 
+        // Extract reasoning to its own file (if present).
+        let reasoning_ref = self.reasoning.as_ref().map(|reasoning| {
+            let f = LogFile {
+                route: format!("{route_base}/messages/reasoning"),
+                id: id.to_string(),
+                message_index: Some(self.index),
+                media_index: None,
+                extension: "json".to_string(),
+                content: serde_json::to_vec_pretty(reasoning).unwrap(),
+                suffix: None,
+            };
+            let r = LogReference::new(f.path());
+            files.push(f);
+            r
+        });
+
+        // Extract refusal to its own file (if present).
+        let refusal_ref = self.refusal.as_ref().map(|refusal| {
+            let f = LogFile {
+                route: format!("{route_base}/messages/refusal"),
+                id: id.to_string(),
+                message_index: Some(self.index),
+                media_index: None,
+                extension: "json".to_string(),
+                content: serde_json::to_vec_pretty(refusal).unwrap(),
+                suffix: None,
+            };
+            let r = LogReference::new(f.path());
+            files.push(f);
+            r
+        });
+
+        // Extract each tool_call to its own file (if present).
+        let tool_call_refs = self.tool_calls.as_ref().map(|tcs| {
+            tcs.iter()
+                .map(|tc| {
+                    let f = LogFile {
+                        route: format!("{route_base}/messages/tool_calls"),
+                        id: id.to_string(),
+                        message_index: Some(self.index),
+                        media_index: Some(tc.index),
+                        extension: "json".to_string(),
+                        content: serde_json::to_vec_pretty(tc).unwrap(),
+                        suffix: None,
+                    };
+                    let r = LogReference::new(f.path());
+                    files.push(f);
+                    r
+                })
+                .collect::<Vec<_>>()
+        });
+
         // Extract media from content (if present).
         let content_log = self.content.clone().map(|mut content| {
             content.prepare();
@@ -204,10 +256,10 @@ impl AssistantResponseChunk {
             agent: self.agent.clone(),
             model: self.model.clone(),
             upstream_id: self.upstream_id.clone(),
-            reasoning: self.reasoning.clone(),
-            tool_calls: self.tool_calls.clone(),
+            reasoning: reasoning_ref,
+            tool_calls: tool_call_refs,
             content: content_log,
-            refusal: self.refusal.clone(),
+            refusal: refusal_ref,
             finish_reason: self.finish_reason.clone(),
             logprobs: logprobs_ref,
             service_tier: self.service_tier.clone(),

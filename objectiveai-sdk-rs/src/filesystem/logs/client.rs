@@ -136,6 +136,15 @@ impl Client {
     pub async fn clear_agent_completion_message_logprobs(&self) -> Result<u64, Error> {
         self.clear_endpoint("agent/completions/messages/logprobs").await
     }
+    pub async fn clear_agent_completion_message_reasoning(&self) -> Result<u64, Error> {
+        self.clear_endpoint("agent/completions/messages/reasoning").await
+    }
+    pub async fn clear_agent_completion_message_refusal(&self) -> Result<u64, Error> {
+        self.clear_endpoint("agent/completions/messages/refusal").await
+    }
+    pub async fn clear_agent_completion_message_tool_calls(&self) -> Result<u64, Error> {
+        self.clear_endpoint("agent/completions/messages/tool_calls").await
+    }
     pub async fn clear_agent_completion_message_images(&self) -> Result<u64, Error> {
         self.clear_endpoint("agent/completions/messages/image").await
     }
@@ -315,6 +324,15 @@ impl Client {
     pub async fn read_agent_completion_message_logprobs(&self, id: &str, message_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
         self.read_json("agents/completions/messages/logprobs", &format!("{id}_{message_index}"), jq).await
     }
+    pub async fn read_agent_completion_message_reasoning(&self, id: &str, message_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+        self.read_json("agents/completions/messages/reasoning", &format!("{id}_{message_index}"), jq).await
+    }
+    pub async fn read_agent_completion_message_refusal(&self, id: &str, message_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+        self.read_json("agents/completions/messages/refusal", &format!("{id}_{message_index}"), jq).await
+    }
+    pub async fn read_agent_completion_message_tool_call(&self, id: &str, message_index: u64, tool_call_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+        self.read_json("agents/completions/messages/tool_calls", &format!("{id}_{message_index}_{tool_call_index}"), jq).await
+    }
     pub async fn read_agent_completion_message_image(&self, id: &str, message_index: u64, media_index: u64) -> Result<String, Error> {
         self.read_data_url_by_stem("agents/completions/messages/image", &format!("{id}_{message_index}_{media_index}")).await
     }
@@ -457,6 +475,15 @@ impl Client {
     }
     pub async fn subscribe_agent_completion_message_logprobs(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
         self.subscribe_json("agents/completions/messages/logprobs", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
+    }
+    pub async fn subscribe_agent_completion_message_reasoning(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json("agents/completions/messages/reasoning", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
+    }
+    pub async fn subscribe_agent_completion_message_refusal(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json("agents/completions/messages/refusal", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
+    }
+    pub async fn subscribe_agent_completion_message_tool_call(&self, id: &str, message_index: u64, tool_call_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json("agents/completions/messages/tool_calls", &format!("{id}_{message_index}_{tool_call_index}"), timeout, require_modification, jq).await
     }
     pub async fn subscribe_agent_completion_message_image(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<String> {
         self.subscribe_data_url_by_stem("agents/completions/messages/image", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await

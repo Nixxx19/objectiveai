@@ -1,12 +1,20 @@
 //! On-disk shape of an `AssistantResponseChunk` log file.
 //!
 //! Mirrors [`super::AssistantResponseChunk`] field-for-field, with
-//! two type swaps:
+//! these type swaps:
 //!
 //! - `content: Option<RichContent>` → `Option<RichContentLog>` so
 //!   media parts can be replaced by references.
-//! - `logprobs: Option<Logprobs>` → `Option<LogReference>` since the
-//!   logprobs payload is extracted to its own file.
+//! - `logprobs: Option<Logprobs>` → `Option<LogReference>` (logprobs
+//!   payload extracted to its own file).
+//! - `reasoning: Option<String>` → `Option<LogReference>` (extracted
+//!   to its own file under `messages/reasoning/`).
+//! - `refusal: Option<String>` → `Option<LogReference>` (extracted to
+//!   its own file under `messages/refusal/`).
+//! - `tool_calls: Option<Vec<AssistantToolCallDelta>>` →
+//!   `Option<Vec<LogReference>>` (each tool call extracted to its
+//!   own file under `messages/tool_calls/`, named by message + tool
+//!   call index).
 //!
 //! Field declaration order matches the wire chunk's order so the
 //! on-disk JSON keys come out in the same sequence today's
@@ -33,16 +41,16 @@ pub struct AssistantResponseChunkLog {
     pub upstream_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
-    pub reasoning: Option<String>,
+    pub reasoning: Option<LogReference>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
-    pub tool_calls: Option<Vec<message::AssistantToolCallDelta>>,
+    pub tool_calls: Option<Vec<LogReference>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub content: Option<message::RichContentLog>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
-    pub refusal: Option<String>,
+    pub refusal: Option<LogReference>,
     pub finish_reason: Option<response::FinishReason>,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
