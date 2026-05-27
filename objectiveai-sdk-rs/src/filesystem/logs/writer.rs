@@ -6,10 +6,10 @@ use futures::stream::{FuturesUnordered, StreamExt};
 use crate::agent::completions::message::RichContent;
 use crate::agent::completions::response::streaming::AgentCompletionIds;
 
+use super::super::db::messages::Queue;
+use super::super::db::pending::PendingNotification;
+use super::super::db::schema::{MessageKind, MessageRow};
 use super::LogFile;
-use super::queue::handle::Queue;
-use super::queue::pending::PendingNotification;
-use super::queue::schema::{MessageKind, MessageRow};
 
 /// Function-pointer signature for `produce_message_rows()` erased
 /// across chunk types. The returned iterator borrows from the chunk;
@@ -29,7 +29,7 @@ pub type ProduceRows<C> =
 /// unchanged files are not rewritten on every chunk.
 ///
 /// All per-agent SQLite state lives in the shared
-/// [`Queue`](super::queue::handle::Queue) handle. The writer holds a
+/// [`Queue`](super::super::db::messages::Queue) handle. The writer holds a
 /// clone of it and delegates every db operation through it.
 pub struct LogWriter<C> {
     logs_dir: PathBuf,

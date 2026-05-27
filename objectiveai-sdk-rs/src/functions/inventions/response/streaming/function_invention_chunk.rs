@@ -41,7 +41,7 @@ impl FunctionInventionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> impl Iterator<Item = crate::filesystem::logs::queue::schema::MessageRow> + Send + '_ {
+    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_ {
         self.completions
             .iter()
             .flat_map(|c| c.produce_message_rows())

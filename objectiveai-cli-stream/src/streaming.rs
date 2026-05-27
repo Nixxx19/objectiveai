@@ -44,8 +44,8 @@ use objectiveai_sdk::Notifier;
 use objectiveai_sdk::agent::completions::message::RichContent;
 use objectiveai_sdk::agent::completions::response::streaming::AgentCompletionIds;
 use objectiveai_sdk::cli::output::{Handle, LogStreamReady, Notification, Output};
+use objectiveai_sdk::filesystem::db::pending::PendingNotification;
 use objectiveai_sdk::filesystem::logs::LogWriter;
-use objectiveai_sdk::filesystem::logs::queue::pending::PendingNotification;
 use serde::Serialize;
 
 use crate::pipes::PipeRegistry;

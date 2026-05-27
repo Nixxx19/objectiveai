@@ -1,19 +1,15 @@
-//! Lightweight SQLite helpers for the config module.
+//! Shared SQLite plumbing for the filesystem.
 //!
-//! Mirrors the shape of `objectiveai-api/src/ctx/persistent_cache/sqlite.rs`
-//! but lives alongside the filesystem config, so both crates use the
-//! same `rusqlite` version and connection conventions.
+//! One `db.sqlite` per `Client` at `<base_dir>/db.sqlite`, opened
+//! lazily on first use, WAL-enabled, with the `messages` table from
+//! [`super::schema`] ensured at open time.
 //!
-//! The database file is `<base_dir>/config.sqlite`. The connection is
-//! opened lazily on first use, WAL-enabled, and stored on the
-//! [`super::super::Client`] so subsequent calls (including from cloned
-//! clients) reuse the same handle.
+//! `Client` carries the lazy-init slot in `db_conn`; subsequent calls
+//! (including from cloned `Client` values) return the same
+//! `Arc<Mutex<Connection>>`.
 //!
-//! This module is intentionally minimal — just [`connection`],
-//! [`execute`], [`query_one`], [`query_all`], and a re-export of the
-//! `rusqlite::params!` macro. Domain-specific tables and queries
-//! belong in their own modules next to their owners; this one just
-//! owns the plumbing.
+//! A failed open leaves the slot empty so the next call can retry,
+//! rather than permanently poisoning the connection.
 
 use std::sync::{Arc, Mutex};
 
@@ -22,20 +18,12 @@ pub use rusqlite::{Connection, params};
 use super::super::{Client, Error};
 
 /// Returns the shared SQLite connection for this filesystem client,
-/// opening (and migrating) it if necessary.
-///
-/// First call per client: opens `<base_dir>/config.sqlite` (creating
-/// any missing parent directories), enables WAL journaling, and
-/// stashes the handle. Subsequent calls — including from cloned
-/// `Client` values — return the same `Arc<Mutex<Connection>>`.
-///
-/// A failed open leaves the slot empty so the next call can retry,
-/// rather than permanently poisoning the connection.
+/// opening (and initialising) it if necessary.
 pub fn connection(client: &Client) -> Result<Arc<Mutex<Connection>>, Error> {
     let mut guard = client
         .db_conn_slot()
         .lock()
-        .expect("config db mutex poisoned");
+        .expect("filesystem db mutex poisoned");
     if let Some(conn) = guard.as_ref() {
         return Ok(conn.clone());
     }
@@ -46,9 +34,11 @@ pub fn connection(client: &Client) -> Result<Arc<Mutex<Connection>>, Error> {
         std::fs::create_dir_all(parent).ok();
     }
     let conn = Connection::open(&db_path)?;
-    // WAL journaling allows concurrent readers + writer — matches what
-    // `SqlitePersistentCacheClient` sets for the cache db.
+    // WAL journaling allows concurrent readers + writer — readers see
+    // a snapshot, the single writer appends to the WAL without blocking.
     conn.execute_batch("PRAGMA journal_mode=WAL;")?;
+    // Ensure the `messages` table exists.
+    super::schema::init_messages_table(&conn)?;
     let arc = Arc::new(Mutex::new(conn));
     *guard = Some(arc.clone());
     Ok(arc)
@@ -62,7 +52,7 @@ pub fn execute(
     params: impl rusqlite::Params,
 ) -> Result<usize, Error> {
     let conn = connection(client)?;
-    let conn = conn.lock().expect("config db connection mutex poisoned");
+    let conn = conn.lock().expect("filesystem db connection mutex poisoned");
     Ok(conn.execute(sql, params)?)
 }
 
@@ -78,7 +68,7 @@ where
     F: FnOnce(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
 {
     let conn = connection(client)?;
-    let conn = conn.lock().expect("config db connection mutex poisoned");
+    let conn = conn.lock().expect("filesystem db connection mutex poisoned");
     let mut stmt = conn.prepare_cached(sql)?;
     use rusqlite::OptionalExtension as _;
     Ok(stmt.query_row(params, map).optional()?)
@@ -95,7 +85,7 @@ where
     F: FnMut(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
 {
     let conn = connection(client)?;
-    let conn = conn.lock().expect("config db connection mutex poisoned");
+    let conn = conn.lock().expect("filesystem db connection mutex poisoned");
     let mut stmt = conn.prepare_cached(sql)?;
     let rows = stmt.query_map(params, |row| map(row))?;
     let mut out = Vec::new();

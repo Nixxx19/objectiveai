@@ -28,7 +28,7 @@ pub async fn handle(
         None::<String>,
     );
     let log_writer = fs_client
-        .write_function_invention_recursive(&params, pipes_root.clone())
+        .write_function_invention_recursive(&params)
         .map_err(|e| format!("failed to build function-invention-recursive log writer: {e}"))?;
 
     let (stream, notifier) =

@@ -2,7 +2,6 @@ mod client;
 pub mod indexed_reference;
 mod list;
 mod log_file;
-pub mod queue;
 mod reference;
 mod writer;
 

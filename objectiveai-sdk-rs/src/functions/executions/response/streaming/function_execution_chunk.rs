@@ -56,7 +56,7 @@ impl FunctionExecutionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> Box<dyn Iterator<Item = crate::filesystem::logs::queue::schema::MessageRow> + Send + '_> {
+    ) -> Box<dyn Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_> {
         let task_rows = self.tasks.iter().flat_map(|t| t.produce_message_rows());
         let reasoning_rows = self
             .reasoning

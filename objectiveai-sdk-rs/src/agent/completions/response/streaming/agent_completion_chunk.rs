@@ -151,13 +151,12 @@ impl AgentCompletionChunk {
     /// been assigned a response id yet — same gate `produce_files`
     /// uses).
     ///
-    /// [`MessageRow`]: crate::filesystem::logs::queue::schema::MessageRow
+    /// [`MessageRow`]: crate::filesystem::db::schema::MessageRow
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> impl Iterator<Item = crate::filesystem::logs::queue::schema::MessageRow> + Send + '_ {
-        use crate::filesystem::logs::queue::schema::{MessageKind, MessageRow};
-        const ROUTE: &str = "agents/completions";
+    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_ {
+        use crate::filesystem::db::schema::{MessageKind, MessageRow};
         let id = self.id.as_str();
         let created = self.created;
         let empty = self.id.is_empty();
@@ -174,7 +173,8 @@ impl AgentCompletionChunk {
                 agent_id: id.to_string(),
                 kind,
                 index: idx,
-                path: format!("{ROUTE}/messages/{id}_{idx}.json"),
+                // Bare id — agent_id and route are reconstructed from columns + kind.
+                path: format!("{idx}"),
                 timestamp: created,
             })
         })

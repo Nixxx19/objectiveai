@@ -1,4 +1,4 @@
-//! Shared per-agent-id API for the SQLite `messages` databases.
+//! Shared per-agent-id API for the `messages` table.
 
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
@@ -9,28 +9,23 @@ use crate::agent::completions::message::RichContent;
 use super::pending::PendingNotification;
 use super::schema::{self, MessageKind};
 
-/// Shared per-agent-id API for the SQLite `messages` databases.
-///
-/// `Queue` is the single owner of:
-/// - per-agent rusqlite connections (`Arc<Mutex<Connection>>`),
+/// Per-stream handle to the shared `messages` table API. Owns:
 /// - the per-agent monotonic `next_index` counter,
 /// - the per-agent "request row inserted" once-flag,
 /// - the per-agent path-dedup set.
 ///
-/// Every workspace-wide read/write to a per-agent db funnels through
-/// this type. Cheap to clone — internal state is `Arc`-shared across
-/// clones, so the LogWriter, the cli-stream writer task, and any
-/// future readers can hold their own clone without contention beyond
-/// the per-agent mutex.
+/// All db reads/writes flow through this type. `Clone` is cheap —
+/// internal state is `Arc`-shared across clones, so the LogWriter,
+/// the cli-stream writer task, and any future readers can hold their
+/// own clone without contention beyond the per-agent mutex.
 #[derive(Clone)]
 pub struct Queue {
     inner: Arc<QueueInner>,
 }
 
 struct QueueInner {
-    /// `${pipes_root}` — every agent's db lives at
-    /// `{root}/<agent_id>/db.sqlite`.
-    root: PathBuf,
+    /// Shared SQLite connection (from [`super::connection::connection`]).
+    conn: Arc<StdMutex<rusqlite::Connection>>,
     /// `${logs_dir}` — base for any files the queue writes
     /// (notification log files today).
     logs_dir: PathBuf,
@@ -38,7 +33,6 @@ struct QueueInner {
 }
 
 struct AgentEntry {
-    conn: Arc<StdMutex<rusqlite::Connection>>,
     state: StdMutex<AgentMutableState>,
 }
 
@@ -49,13 +43,15 @@ struct AgentMutableState {
 }
 
 impl Queue {
+    /// Build a Queue backed by the shared SQLite connection.
+    /// `logs_dir` is still needed for the notification file write.
     pub fn new(
-        root: impl Into<PathBuf>,
+        conn: Arc<StdMutex<rusqlite::Connection>>,
         logs_dir: impl Into<PathBuf>,
     ) -> Self {
         Self {
             inner: Arc::new(QueueInner {
-                root: root.into(),
+                conn,
                 logs_dir: logs_dir.into(),
                 agents: StdMutex::new(HashMap::new()),
             }),
@@ -63,12 +59,12 @@ impl Queue {
     }
 
     /// Reserve and return the next monotonic db index for an agent.
-    /// Opens + seeds the agent's entry from `MAX(index)+1` on first
-    /// use.
+    /// Seeds the agent's entry from `MAX(index) WHERE agent_id = ?`
+    /// + 1 on first use.
     pub async fn reserve_index(
         &self,
         agent_id: &str,
-    ) -> Result<u64, super::super::super::Error> {
+    ) -> Result<u64, super::super::Error> {
         let entry = self.ensure_agent(agent_id).await?;
         let mut state = entry.state.lock().expect("agent state mutex poisoned");
         let idx = state.next_index;
@@ -84,9 +80,17 @@ impl Queue {
         path: String,
         timestamp: u64,
         index: u64,
-    ) -> Result<(), super::super::super::Error> {
-        let entry = self.ensure_agent(agent_id).await?;
-        schema::insert_async(Arc::clone(&entry.conn), kind, path, timestamp, index).await
+    ) -> Result<(), super::super::Error> {
+        self.ensure_agent(agent_id).await?;
+        schema::insert_async(
+            Arc::clone(&self.inner.conn),
+            agent_id.to_string(),
+            kind,
+            path,
+            timestamp,
+            index,
+        )
+        .await
     }
 
     /// Insert the per-stream request row at most once per agent.
@@ -99,7 +103,7 @@ impl Queue {
         kind: MessageKind,
         path: String,
         timestamp: u64,
-    ) -> Result<bool, super::super::super::Error> {
+    ) -> Result<bool, super::super::Error> {
         let entry = self.ensure_agent(agent_id).await?;
         let index = {
             let mut state = entry.state.lock().expect("agent state mutex poisoned");
@@ -111,7 +115,15 @@ impl Queue {
             state.next_index += 1;
             idx
         };
-        schema::insert_async(Arc::clone(&entry.conn), kind, path, timestamp, index).await?;
+        schema::insert_async(
+            Arc::clone(&self.inner.conn),
+            agent_id.to_string(),
+            kind,
+            path,
+            timestamp,
+            index,
+        )
+        .await?;
         Ok(true)
     }
 
@@ -121,22 +133,24 @@ impl Queue {
         &self,
         agent_id: &str,
         path: &str,
-    ) -> Result<bool, super::super::super::Error> {
+    ) -> Result<bool, super::super::Error> {
         let entry = self.ensure_agent(agent_id).await?;
         let mut state = entry.state.lock().expect("agent state mutex poisoned");
         Ok(state.inserted_paths.insert(path.to_string()))
     }
 
     /// Write a notification log file at
-    /// `agents/completions/notifications/<id>_<idx>.json`, reserve
-    /// the agent's next index, and return a [`PendingNotification`]
-    /// the caller queues locally for a later
-    /// [`Self::insert_notification`] call.
+    /// `agents/completions/notifications/<agent_id>_<idx>.json`,
+    /// reserve the agent's next index, and return a
+    /// [`PendingNotification`] the caller queues locally for a later
+    /// [`Self::insert_notification`] call. The row's `path` column
+    /// holds just `{idx}` — the agent_id is in its own column and
+    /// the route is implied by the kind.
     pub async fn write_notification(
         &self,
         agent_id: &str,
         content: &RichContent,
-    ) -> Result<PendingNotification, super::super::super::Error> {
+    ) -> Result<PendingNotification, super::super::Error> {
         let entry = self.ensure_agent(agent_id).await?;
         let index = {
             let mut state = entry.state.lock().expect("agent state mutex poisoned");
@@ -144,30 +158,27 @@ impl Queue {
             state.next_index += 1;
             idx
         };
-        let file = super::super::log_file::LogFile {
-            route: "agents/completions/notifications".to_string(),
-            id: agent_id.to_string(),
-            message_index: Some(index),
-            media_index: None,
-            extension: "json".to_string(),
-            content: serde_json::to_vec_pretty(content)
-                .map_err(super::super::super::Error::Serialize)?,
-            suffix: None,
-        };
-        let path = file.path();
-        let full_path = self.inner.logs_dir.join(&path);
+        // On-disk filename keeps its existing shape (so files from
+        // different agents don't collide in the same directory).
+        let rel_path = format!(
+            "agents/completions/notifications/{agent_id}_{index}.json"
+        );
+        let full_path = self.inner.logs_dir.join(&rel_path);
         if let Some(parent) = full_path.parent() {
             tokio::fs::create_dir_all(parent).await.map_err(|e| {
-                super::super::super::Error::Write(parent.to_path_buf(), e)
+                super::super::Error::Write(parent.to_path_buf(), e)
             })?;
         }
-        tokio::fs::write(&full_path, file.content)
+        let bytes = serde_json::to_vec_pretty(content)
+            .map_err(super::super::Error::Serialize)?;
+        tokio::fs::write(&full_path, bytes)
             .await
-            .map_err(|e| super::super::super::Error::Write(full_path, e))?;
+            .map_err(|e| super::super::Error::Write(full_path, e))?;
         Ok(PendingNotification {
             agent_id: agent_id.to_string(),
             index,
-            path,
+            // DB column stores just the bare index.
+            path: format!("{index}"),
             timestamp: now_secs(),
         })
     }
@@ -177,7 +188,7 @@ impl Queue {
     pub async fn insert_notification(
         &self,
         notification: PendingNotification,
-    ) -> Result<(), super::super::super::Error> {
+    ) -> Result<(), super::super::Error> {
         self.insert(
             &notification.agent_id,
             MessageKind::AgentCompletionNotification,
@@ -188,13 +199,14 @@ impl Queue {
         .await
     }
 
-    /// Internal: open the agent's conn + seed `next_index` the first
-    /// time this id is seen. Idempotent — losing-race callers see the
-    /// winner's entry.
+    /// Internal: ensure the agent's mutable state is initialised.
+    /// Seeds `next_index` from `MAX(index) WHERE agent_id = ?` + 1
+    /// the first time this id is seen. Idempotent — losing-race
+    /// callers see the winner's entry.
     async fn ensure_agent(
         &self,
         agent_id: &str,
-    ) -> Result<Arc<AgentEntry>, super::super::super::Error> {
+    ) -> Result<Arc<AgentEntry>, super::super::Error> {
         // Fast path.
         {
             let guard = self
@@ -206,14 +218,13 @@ impl Queue {
                 return Ok(Arc::clone(entry));
             }
         }
-        // Slow path: open the conn (sync but fast — fs + DDL), seed
-        // next_index via the blocking pool. If another caller wins
-        // the race we drop our build and use theirs.
-        let conn = schema::open(&self.inner.root.join(agent_id))?;
-        let conn = Arc::new(StdMutex::new(conn));
-        let max = schema::max_index_async(Arc::clone(&conn)).await?;
+        // Slow path: seed next_index via the blocking pool.
+        let max = schema::max_index_async(
+            Arc::clone(&self.inner.conn),
+            agent_id.to_string(),
+        )
+        .await?;
         let entry = Arc::new(AgentEntry {
-            conn,
             state: StdMutex::new(AgentMutableState {
                 next_index: max.map(|m| m + 1).unwrap_or(0),
                 request_inserted: false,
