@@ -1252,14 +1252,16 @@ where
         // --- Merge messages, drain proxy-queued notifications, prepare,
         // and apply transform. ---
         //
-        // The drain happens *before* `prepare` so the appended user
-        // message is folded into the single normalization pass (consecutive
-        // same-role messages get consolidated) and `transform_messages`
-        // sees the drained content like any other message. The proxy's
-        // tool-response path still drains in-flight notifications during
-        // a turn; this init-time drain covers the gap *between* turns —
-        // i.e. when the previous turn ended without a tool call, or when
-        // the user is starting a fresh continuation.
+        // The drained-notifications user message is inserted at the FRONT
+        // of `messages` (index 0) so the notifications lead the prompt —
+        // ahead of any system / developer / user content from the caller.
+        // The prepare pass that follows still folds redundant consecutive
+        // same-role messages, and `transform_messages` sees the drained
+        // content like any other message. The proxy's tool-response path
+        // still drains in-flight notifications during a turn; this
+        // init-time drain covers the gap *between* turns — i.e. when the
+        // previous turn ended without a tool call, or when the user is
+        // starting a fresh continuation.
         let mut messages = agent_base.merged_messages(params.messages.clone());
 
         if let Some(conn) = &mcp_connection {
@@ -1270,7 +1272,8 @@ where
                 }
             })?;
             if !blocks.is_empty() {
-                messages.push(
+                messages.insert(
+                    0,
                     objectiveai_sdk::agent::completions::message::Message::User(
                         build_drain_user_message(blocks),
                     ),
