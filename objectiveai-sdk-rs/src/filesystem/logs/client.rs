@@ -174,11 +174,12 @@ impl Client {
         request: &crate::agent::completions::request::AgentCompletionCreateParams,
         pipes_root: impl Into<std::path::PathBuf>,
     ) -> Result<super::LogWriter<crate::agent::completions::response::streaming::AgentCompletionChunk>, Error> {
+        let queue = super::queue::handle::Queue::new(pipes_root, self.logs_dir());
         Ok(super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("agents/completions", request)?
-            .with_messages_db(
-                pipes_root,
-                Some(super::MessageKind::AgentCompletionRequest),
+            .with_queue(
+                queue,
+                Some(super::queue::schema::MessageKind::AgentCompletionRequest),
                 |chunk| Box::new(chunk.produce_message_rows()),
             ))
     }
@@ -187,10 +188,11 @@ impl Client {
         request: &crate::vector::completions::request::VectorCompletionCreateParams,
         pipes_root: impl Into<std::path::PathBuf>,
     ) -> Result<super::LogWriter<crate::vector::completions::response::streaming::VectorCompletionChunk>, Error> {
+        let queue = super::queue::handle::Queue::new(pipes_root, self.logs_dir());
         Ok(super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("vector/completions", request)?
-            .with_messages_db(
-                pipes_root,
+            .with_queue(
+                queue,
                 None,
                 |chunk| Box::new(chunk.produce_message_rows()),
             ))
@@ -200,11 +202,12 @@ impl Client {
         request: &crate::functions::executions::request::FunctionExecutionCreateParams,
         pipes_root: impl Into<std::path::PathBuf>,
     ) -> Result<super::LogWriter<crate::functions::executions::response::streaming::FunctionExecutionChunk>, Error> {
+        let queue = super::queue::handle::Queue::new(pipes_root, self.logs_dir());
         Ok(super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("functions/executions", request)?
-            .with_messages_db(
-                pipes_root,
-                Some(super::MessageKind::FunctionExecutionRequest),
+            .with_queue(
+                queue,
+                Some(super::queue::schema::MessageKind::FunctionExecutionRequest),
                 |chunk| chunk.produce_message_rows(),
             ))
     }
@@ -213,10 +216,11 @@ impl Client {
         request: &crate::functions::inventions::request::FunctionInventionCreateParams,
         pipes_root: impl Into<std::path::PathBuf>,
     ) -> Result<super::LogWriter<crate::functions::inventions::response::streaming::FunctionInventionChunk>, Error> {
+        let queue = super::queue::handle::Queue::new(pipes_root, self.logs_dir());
         Ok(super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("functions/inventions", request)?
-            .with_messages_db(
-                pipes_root,
+            .with_queue(
+                queue,
                 None,
                 |chunk| Box::new(chunk.produce_message_rows()),
             ))
@@ -226,11 +230,12 @@ impl Client {
         request: &crate::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams,
         pipes_root: impl Into<std::path::PathBuf>,
     ) -> Result<super::LogWriter<crate::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk>, Error> {
+        let queue = super::queue::handle::Queue::new(pipes_root, self.logs_dir());
         Ok(super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("functions/inventions/recursive", request)?
-            .with_messages_db(
-                pipes_root,
-                Some(super::MessageKind::FunctionInventionRecursiveRequest),
+            .with_queue(
+                queue,
+                Some(super::queue::schema::MessageKind::FunctionInventionRecursiveRequest),
                 |chunk| Box::new(chunk.produce_message_rows()),
             ))
     }
@@ -239,10 +244,11 @@ impl Client {
         request: &crate::laboratories::executions::request::LaboratoryExecutionCreateParams,
         pipes_root: impl Into<std::path::PathBuf>,
     ) -> Result<super::LogWriter<crate::laboratories::executions::response::streaming::LaboratoryExecutionChunk>, Error> {
+        let queue = super::queue::handle::Queue::new(pipes_root, self.logs_dir());
         Ok(super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("laboratories/executions", request)?
-            .with_messages_db(
-                pipes_root,
+            .with_queue(
+                queue,
                 None,
                 |chunk| chunk.produce_message_rows(),
             ))
