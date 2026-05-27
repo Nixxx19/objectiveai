@@ -991,7 +991,7 @@ impl ConnectionInner {
         super::Error,
     > {
         use crate::agent::completions::message::{
-            File, ImageUrl, RichContentPart, ToolMessage,
+            File, ImageUrl, RichContentPart, ToolMessage, ToolResponseMetadata,
         };
         use super::shared::ResourceContentsUnion;
         use super::tool::ContentBlock;
@@ -1096,9 +1096,21 @@ impl ConnectionInner {
             }
         }
 
+        // Lossy-decode the MCP `_meta` extension bag into our typed
+        // `ToolResponseMetadata`. Unknown keys (set by non-objectiveai
+        // upstreams) are silently dropped. Decoding failure leaves
+        // metadata as `None`.
+        let metadata = result._meta.as_ref().and_then(|m| {
+            serde_json::from_value::<ToolResponseMetadata>(
+                serde_json::to_value(m).ok()?,
+            )
+            .ok()
+        });
+
         Ok(ToolMessage {
             content: parts.into(),
             tool_call_id,
+            metadata,
         })
     }
 

@@ -8,7 +8,7 @@
 use schemars::JsonSchema;
 use serde::Serialize;
 
-use crate::agent::completions::message::RichContentLog;
+use crate::agent::completions::message::{RichContentLog, ToolResponseMetadata};
 
 use super::ToolRole;
 
@@ -19,4 +19,7 @@ pub struct ToolResponseLog {
     pub index: u64,
     pub content: RichContentLog,
     pub tool_call_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[schemars(extend("omitempty" = true))]
+    pub metadata: Option<ToolResponseMetadata>,
 }

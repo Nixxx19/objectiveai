@@ -41,6 +41,7 @@ impl ToolResponse {
             index: self.index,
             content: content_log,
             tool_call_id: self.inner.tool_call_id.clone(),
+            metadata: self.inner.metadata.clone(),
         };
 
         let msg_file = LogFile {
