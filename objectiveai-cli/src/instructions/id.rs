@@ -18,14 +18,19 @@
 
 use clap::Args;
 
+// Alias the per-Client sqlite surface the sdk exposes for ad-hoc
+// SQL. Moved out of `filesystem::config::db` in the May-27 reshape
+// (commit cb20c319) — keeping a short alias here so the call sites
+// stay one-liners.
+use objectiveai_sdk::filesystem::db::connection as fsdb;
+
 /// Per-command scope. Each variant maps to its own sqlite table,
-/// isolating IDs between the four streaming `create` families.
+/// isolating IDs between the streaming `create` families.
 #[derive(Clone, Copy, Debug)]
 pub enum InstructionsScope {
     AgentCompletions,
     FunctionExecutions,
     FunctionInventionsRecursive,
-    LaboratoryExecutions,
 }
 
 impl InstructionsScope {
@@ -35,7 +40,6 @@ impl InstructionsScope {
         Self::AgentCompletions,
         Self::FunctionExecutions,
         Self::FunctionInventionsRecursive,
-        Self::LaboratoryExecutions,
     ];
 
     /// Name of the backing sqlite table. Hardcoded per-scope so the
@@ -45,7 +49,6 @@ impl InstructionsScope {
             Self::AgentCompletions => "agent_completions_instructions",
             Self::FunctionExecutions => "function_executions_instructions",
             Self::FunctionInventionsRecursive => "function_inventions_recursive_instructions",
-            Self::LaboratoryExecutions => "laboratory_executions_instructions",
         }
     }
 }
@@ -90,17 +93,17 @@ pub fn issue(
     // Table creation is idempotent — the `instructions get` subcommand
     // may be the first thing the user ever runs, in which case the
     // sqlite file and this table both need to exist before the INSERT.
-    objectiveai_sdk::filesystem::config::db::execute(
+    fsdb::execute(
         &client,
         &format!(
             "CREATE TABLE IF NOT EXISTS {table} (instructions_id TEXT PRIMARY KEY NOT NULL)"
         ),
         [],
     )?;
-    objectiveai_sdk::filesystem::config::db::execute(
+    fsdb::execute(
         &client,
         &format!("INSERT OR IGNORE INTO {table} (instructions_id) VALUES (?1)"),
-        objectiveai_sdk::filesystem::config::db::params![id],
+        fsdb::params![id],
     )?;
     Ok(format!("{content}\n\n Instructions ID: {id}"))
 }
@@ -120,10 +123,10 @@ pub fn verify(
     let client = fs_client(cli_config);
     let table = scope.table_name();
     let sql = format!("SELECT 1 FROM {table} WHERE instructions_id = ?1");
-    let result = objectiveai_sdk::filesystem::config::db::query_one(
+    let result = fsdb::query_one(
         &client,
         &sql,
-        objectiveai_sdk::filesystem::config::db::params![id],
+        fsdb::params![id],
         |row| row.get::<_, i64>(0),
     );
     match result {
@@ -146,7 +149,7 @@ pub fn clear_all(cli_config: &crate::Config) -> Result<usize, crate::error::Erro
     let client = fs_client(cli_config);
     for scope in InstructionsScope::ALL {
         let table = scope.table_name();
-        objectiveai_sdk::filesystem::config::db::execute(
+        fsdb::execute(
             &client,
             &format!("DROP TABLE IF EXISTS {table}"),
             [],
