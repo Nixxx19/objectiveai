@@ -182,84 +182,90 @@ impl Client {
         &self,
         request: &crate::agent::completions::request::AgentCompletionCreateParams,
     ) -> Result<super::LogWriter<crate::agent::completions::response::streaming::AgentCompletionChunk>, Error> {
+        use crate::agent::completions::response::streaming::AgentCompletionChunk;
         let conn = super::super::db::connection::connection(self)?;
         let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        Ok(super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+        Ok(super::LogWriter::new(self.logs_dir(), |chunk: &AgentCompletionChunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("agents/completions", request)?
             .with_queue(
                 queue,
                 Some(super::super::db::schema::MessageKind::AgentCompletionRequest),
-                |chunk| Box::new(chunk.produce_message_rows()),
+                |chunk: &AgentCompletionChunk| Box::new(chunk.produce_message_rows()),
             ))
     }
     pub fn write_vector_completion(
         &self,
         request: &crate::vector::completions::request::VectorCompletionCreateParams,
     ) -> Result<super::LogWriter<crate::vector::completions::response::streaming::VectorCompletionChunk>, Error> {
+        use crate::vector::completions::response::streaming::VectorCompletionChunk;
         let conn = super::super::db::connection::connection(self)?;
         let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        Ok(super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+        Ok(super::LogWriter::new(self.logs_dir(), |chunk: &VectorCompletionChunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("vector/completions", request)?
             .with_queue(
                 queue,
                 None,
-                |chunk| Box::new(chunk.produce_message_rows()),
+                |chunk: &VectorCompletionChunk| Box::new(chunk.produce_message_rows()),
             ))
     }
     pub fn write_function_execution(
         &self,
         request: &crate::functions::executions::request::FunctionExecutionCreateParams,
     ) -> Result<super::LogWriter<crate::functions::executions::response::streaming::FunctionExecutionChunk>, Error> {
+        use crate::functions::executions::response::streaming::FunctionExecutionChunk;
         let conn = super::super::db::connection::connection(self)?;
         let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        Ok(super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+        Ok(super::LogWriter::new(self.logs_dir(), |chunk: &FunctionExecutionChunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("functions/executions", request)?
             .with_queue(
                 queue,
                 Some(super::super::db::schema::MessageKind::FunctionExecutionRequest),
-                |chunk| chunk.produce_message_rows(),
+                |chunk: &FunctionExecutionChunk| chunk.produce_message_rows(),
             ))
     }
     pub fn write_function_invention(
         &self,
         request: &crate::functions::inventions::request::FunctionInventionCreateParams,
     ) -> Result<super::LogWriter<crate::functions::inventions::response::streaming::FunctionInventionChunk>, Error> {
+        use crate::functions::inventions::response::streaming::FunctionInventionChunk;
         let conn = super::super::db::connection::connection(self)?;
         let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        Ok(super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+        Ok(super::LogWriter::new(self.logs_dir(), |chunk: &FunctionInventionChunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("functions/inventions", request)?
             .with_queue(
                 queue,
                 None,
-                |chunk| Box::new(chunk.produce_message_rows()),
+                |chunk: &FunctionInventionChunk| Box::new(chunk.produce_message_rows()),
             ))
     }
     pub fn write_function_invention_recursive(
         &self,
         request: &crate::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams,
     ) -> Result<super::LogWriter<crate::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk>, Error> {
+        use crate::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk;
         let conn = super::super::db::connection::connection(self)?;
         let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        Ok(super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+        Ok(super::LogWriter::new(self.logs_dir(), |chunk: &FunctionInventionRecursiveChunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("functions/inventions/recursive", request)?
             .with_queue(
                 queue,
                 Some(super::super::db::schema::MessageKind::FunctionInventionRecursiveRequest),
-                |chunk| Box::new(chunk.produce_message_rows()),
+                |chunk: &FunctionInventionRecursiveChunk| Box::new(chunk.produce_message_rows()),
             ))
     }
     pub fn write_laboratory_execution(
         &self,
         request: &crate::laboratories::executions::request::LaboratoryExecutionCreateParams,
     ) -> Result<super::LogWriter<crate::laboratories::executions::response::streaming::LaboratoryExecutionChunk>, Error> {
+        use crate::laboratories::executions::response::streaming::LaboratoryExecutionChunk;
         let conn = super::super::db::connection::connection(self)?;
         let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        Ok(super::LogWriter::new(self.logs_dir(), |chunk| chunk.produce_files().map(|(_, files)| files))
+        Ok(super::LogWriter::new(self.logs_dir(), |chunk: &LaboratoryExecutionChunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("laboratories/executions", request)?
             .with_queue(
                 queue,
                 None,
-                |chunk| chunk.produce_message_rows(),
+                |chunk: &LaboratoryExecutionChunk| chunk.produce_message_rows(),
             ))
     }
 

@@ -2,14 +2,14 @@
   "title": "agent.completions.message.RichContentLog",
   "anyOf": [
     {
-      "title": "Text",
-      "type": "string"
+      "title": "Reference",
+      "$ref": "filesystem.logs.LogReference"
     },
     {
       "title": "Parts",
       "type": "array",
       "items": {
-        "$ref": "agent.completions.message.RichContentLogPart"
+        "$ref": "filesystem.logs.LogReference"
       }
     }
   ]

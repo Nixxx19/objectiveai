@@ -468,7 +468,6 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             // *Log structs (on-disk log file shapes for every
             // chunk type that has a `produce_files` implementation).
             schemars::schema_for!(crate::agent::completions::message::RichContentLog),
-            schemars::schema_for!(crate::agent::completions::message::RichContentLogPart),
             schemars::schema_for!(crate::agent::completions::response::ToolResponseLog),
             schemars::schema_for!(crate::agent::completions::response::streaming::AgentCompletionChunkLog),
             schemars::schema_for!(crate::agent::completions::response::streaming::AssistantResponseChunkLog),
