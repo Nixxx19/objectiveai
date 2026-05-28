@@ -737,6 +737,30 @@ impl Client {
         let conn = super::super::db::connection::connection(self)?;
         super::super::db::schema::path_for_file_id_async(conn, id).await
     }
+
+    /// List every direct-child agent of `parent_agent_id` (one
+    /// composite-id segment deeper, no grandchildren) along with
+    /// the unix-seconds timestamp of its most recent
+    /// `assistant_response` row in the `messages` table.
+    /// Newest-first.
+    pub async fn list_active(
+        &self,
+        parent_agent_id: &str,
+    ) -> Result<Vec<crate::cli::output::ActiveAgent>, Error> {
+        let conn = super::super::db::connection::connection(self)?;
+        let rows = super::super::db::schema::list_direct_active_children_async(
+            conn,
+            parent_agent_id.to_string(),
+        )
+        .await?;
+        Ok(rows
+            .into_iter()
+            .map(|(agent_id, last_log)| crate::cli::output::ActiveAgent {
+                agent_id,
+                last_log,
+            })
+            .collect())
+    }
 }
 
 // -- Pure helpers (no &Client) ---------------------------------------------

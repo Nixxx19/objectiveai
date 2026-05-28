@@ -196,6 +196,49 @@ pub async fn path_for_file_id_async(
     .map_err(spawn_blocking_join_err)?
 }
 
+/// List every direct-child agent of `parent_agent_id` (one
+/// lineage segment deeper, no grandchildren) along with the unix-
+/// seconds timestamp of its most recent
+/// [`MessageKind::AssistantResponse`] row. Newest-first.
+///
+/// Composite agent ids are slash-separated lineage strings minted
+/// at the api server (`{parent}/{local_id}`). "Direct child"
+/// means: `LIKE 'parent/%'` AND no further `/` after the prefix.
+pub fn list_direct_active_children(
+    conn: &Connection,
+    parent_agent_id: &str,
+) -> Result<Vec<(String, u64)>, super::super::Error> {
+    let mut stmt = conn.prepare_cached(
+        "SELECT agent_id, MAX(timestamp) AS last_log \
+         FROM messages \
+         WHERE agent_id LIKE (?1 || '/%') \
+           AND instr(substr(agent_id, length(?1) + 2), '/') = 0 \
+           AND kind = ?2 \
+         GROUP BY agent_id \
+         ORDER BY last_log DESC",
+    )?;
+    let rows = stmt
+        .query_map(
+            rusqlite::params![parent_agent_id, MessageKind::AssistantResponse.as_str()],
+            |r| Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?.max(0) as u64)),
+        )?
+        .collect::<rusqlite::Result<Vec<_>>>()?;
+    Ok(rows)
+}
+
+/// Async wrapper around [`list_direct_active_children`].
+pub async fn list_direct_active_children_async(
+    conn: Arc<Mutex<Connection>>,
+    parent_agent_id: String,
+) -> Result<Vec<(String, u64)>, super::super::Error> {
+    tokio::task::spawn_blocking(move || {
+        let conn = conn.lock().expect("filesystem db mutex poisoned");
+        list_direct_active_children(&conn, &parent_agent_id)
+    })
+    .await
+    .map_err(spawn_blocking_join_err)?
+}
+
 /// `SELECT MAX("index") FROM messages WHERE agent_id = ?`. `None` when
 /// no row matches.
 pub fn max_index(

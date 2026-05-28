@@ -1,5 +1,7 @@
+mod active;
 mod completions;
 
+pub use active::*;
 pub use completions::*;
 
 use schemars::JsonSchema;
