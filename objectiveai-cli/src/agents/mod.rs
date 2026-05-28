@@ -1,6 +1,7 @@
 pub mod completions;
 pub mod config;
 pub mod favorites;
+pub mod read_pending;
 
 use clap::Subcommand;
 
@@ -44,6 +45,8 @@ pub enum Commands {
         #[arg(long)]
         overwrite: bool,
     },
+    /// Drain pending queue items for the given spawned agent id(s)
+    ReadPending(read_pending::CommandArgs),
 }
 
 async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
@@ -96,6 +99,7 @@ impl Commands {
             Commands::Completions { command } => command.handle(cli_config, handle).await,
             Commands::Config { command } => command.handle(cli_config, handle).await,
             Commands::Favorites { command } => command.handle(cli_config, handle).await,
+            Commands::ReadPending(args) => read_pending::handle(args, cli_config, handle).await,
             Commands::Publish { repository, body, message, overwrite } => {
                 let agent: objectiveai_sdk::agent::RemoteAgentBaseWithFallbacks = body.resolve()?;
                 let msg = message.resolve()?;
