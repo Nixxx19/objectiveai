@@ -33,8 +33,8 @@ pub enum QueueItem {
     },
     #[schemars(title = "Notification")]
     Notification { content: Content },
-    #[schemars(title = "UserRequest")]
-    UserRequest { messages: Vec<QueueMessage> },
+    #[schemars(title = "AgentCompletionRequest")]
+    AgentCompletionRequest { messages: Vec<QueueMessage> },
     #[schemars(title = "FunctionExecutionRequest")]
     FunctionExecutionRequest { id: Id },
     #[schemars(title = "FunctionInventionRecursiveRequest")]

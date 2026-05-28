@@ -12,29 +12,29 @@ use super::{Content, Id};
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "filesystem.logs.queue.QueueMessage")]
 pub enum QueueMessage {
-    #[schemars(title = "DeveloperMessage")]
-    DeveloperMessage {
+    #[schemars(title = "Developer")]
+    Developer {
         content: Content,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[schemars(extend("omitempty" = true))]
         name: Option<String>,
     },
-    #[schemars(title = "SystemMessage")]
-    SystemMessage {
+    #[schemars(title = "System")]
+    System {
         content: Content,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[schemars(extend("omitempty" = true))]
         name: Option<String>,
     },
-    #[schemars(title = "UserMessage")]
-    UserMessage {
+    #[schemars(title = "User")]
+    User {
         content: Content,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[schemars(extend("omitempty" = true))]
         name: Option<String>,
     },
-    #[schemars(title = "AssistantMessage")]
-    AssistantMessage {
+    #[schemars(title = "Assistant")]
+    Assistant {
         #[serde(skip_serializing_if = "Option::is_none")]
         #[schemars(extend("omitempty" = true))]
         content: Option<Content>,
@@ -51,8 +51,8 @@ pub enum QueueMessage {
         #[schemars(extend("omitempty" = true))]
         refusal: Option<Id>,
     },
-    #[schemars(title = "ToolMessage")]
-    ToolMessage {
+    #[schemars(title = "Tool")]
+    Tool {
         content: Content,
         tool_call_id: String,
     },

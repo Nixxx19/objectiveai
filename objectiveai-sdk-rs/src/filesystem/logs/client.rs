@@ -557,7 +557,7 @@ impl Client {
                         self.read_log_file(&msg_ref.path).await?;
                     messages.push(message_log_to_queue_message(msg_log));
                 }
-                Ok(QueueItem::UserRequest { messages })
+                Ok(QueueItem::AgentCompletionRequest { messages })
             }
             MessageKind::AssistantResponse => {
                 let log: crate::agent::completions::response::streaming::AssistantResponseChunkLog =
@@ -608,26 +608,26 @@ fn message_log_to_queue_message(
     use super::queue::{Id, QueueMessage};
 
     match log {
-        MessageLog::Developer(m) => QueueMessage::DeveloperMessage {
+        MessageLog::Developer(m) => QueueMessage::Developer {
             content: m.content.into(),
             name: m.name,
         },
-        MessageLog::System(m) => QueueMessage::SystemMessage {
+        MessageLog::System(m) => QueueMessage::System {
             content: m.content.into(),
             name: m.name,
         },
-        MessageLog::User(m) => QueueMessage::UserMessage {
+        MessageLog::User(m) => QueueMessage::User {
             content: m.content.into(),
             name: m.name,
         },
-        MessageLog::Assistant(m) => QueueMessage::AssistantMessage {
+        MessageLog::Assistant(m) => QueueMessage::Assistant {
             content: m.content.map(Into::into),
             name: m.name,
             reasoning: m.reasoning.map(Id::from),
             tool_calls: m.tool_calls.map(|tcs| tcs.into_iter().map(Id::from).collect()),
             refusal: m.refusal.map(Id::from),
         },
-        MessageLog::Tool(m) => QueueMessage::ToolMessage {
+        MessageLog::Tool(m) => QueueMessage::Tool {
             content: m.content.into(),
             tool_call_id: m.tool_call_id,
         },
