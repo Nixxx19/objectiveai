@@ -223,24 +223,21 @@ async fn fall_back_to_continuation(
     );
 
     // The plan's hard rule: a non-existent agent id does NOT auto-spawn.
-    // `latest_agent_completion_request_id` returning None means the cli
-    // has no log record of this agent ever running — fatal.
+    // Walk-back is in the SDK helper — it tries each request newest-
+    // first and returns the most recent one whose continuation file
+    // exists, only erroring if NONE have one.
+    use objectiveai_sdk::filesystem::logs::LatestContinuationOutcome;
     let latest = match fs_client.read_latest_continuation(full_agent_id).await? {
-        Some(l) => l,
-        None => {
-            // Distinguish "never ran" from "ran but no continuation yet":
-            // re-query the lookup to surface the more specific message.
-            let response_id = fs_client
-                .latest_agent_completion_request_id(full_agent_id)
-                .await?;
-            return Err(match response_id {
-                Some(rid) => crate::error::Error::AgentNoContinuation {
-                    agent_id: full_agent_id.to_string(),
-                    response_id: rid,
-                },
-                None => crate::error::Error::AgentNoPriorRequest {
-                    agent_id: full_agent_id.to_string(),
-                },
+        LatestContinuationOutcome::Found(l) => l,
+        LatestContinuationOutcome::NoRequests => {
+            return Err(crate::error::Error::AgentNoPriorRequest {
+                agent_id: full_agent_id.to_string(),
+            });
+        }
+        LatestContinuationOutcome::NoContinuationsFound { request_count } => {
+            return Err(crate::error::Error::AgentNoContinuation {
+                agent_id: full_agent_id.to_string(),
+                request_count,
             });
         }
     };
