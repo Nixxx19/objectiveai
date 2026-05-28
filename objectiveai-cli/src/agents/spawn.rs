@@ -24,16 +24,16 @@ pub struct PromptSource {
     simple: Option<String>,
     /// Inline JSON messages array
     #[arg(long)]
-    prompt_inline: Option<String>,
+    inline: Option<String>,
     /// Path to a JSON file containing the messages array
     #[arg(long)]
-    prompt_file: Option<std::path::PathBuf>,
+    file: Option<std::path::PathBuf>,
     /// Inline Python code that produces the messages array
     #[arg(long)]
-    prompt_python_inline: Option<String>,
+    python_inline: Option<String>,
     /// Path to a Python file that produces the messages array
     #[arg(long)]
-    prompt_python_file: Option<std::path::PathBuf>,
+    python_file: Option<std::path::PathBuf>,
 }
 
 impl PromptSource {
@@ -44,22 +44,22 @@ impl PromptSource {
                 name: None,
             })]);
         }
-        if let Some(inline) = self.prompt_inline {
+        if let Some(inline) = self.inline {
             let mut de = serde_json::Deserializer::from_str(&inline);
             return serde_path_to_error::deserialize(&mut de)
                 .map_err(crate::error::Error::InlineDeserialize);
         }
-        if let Some(path) = self.prompt_file {
+        if let Some(path) = self.file {
             let bytes = std::fs::read(&path)
                 .map_err(|e| crate::error::Error::PromptFileRead(path.clone(), e))?;
             let mut de = serde_json::Deserializer::from_slice(&bytes);
             return serde_path_to_error::deserialize(&mut de)
                 .map_err(crate::error::Error::InlineDeserialize);
         }
-        if let Some(code) = self.prompt_python_inline {
+        if let Some(code) = self.python_inline {
             return crate::python::exec_code(&code);
         }
-        if let Some(path) = self.prompt_python_file {
+        if let Some(path) = self.python_file {
             return crate::python::exec_file(&path);
         }
         unreachable!("clap group ensures one is set")
