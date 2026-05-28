@@ -60,7 +60,7 @@ impl MessageKind {
     /// - Assistant / tool rows carry the server message index in
     ///   `path`; the file is at `agents/completions/response/messages/{agent_id}_{path}.json`.
     /// - Notification rows carry the writer-reserved index in `path`;
-    ///   the file is at `agents/completions/response/notifications/{agent_id}_{path}.json`.
+    ///   the file is at `agents/completions/request/notifications/{agent_id}_{path}.json`.
     pub fn file_path(&self, agent_id: &str, path: &str) -> String {
         match self {
             MessageKind::AgentCompletionRequest => {
@@ -76,7 +76,7 @@ impl MessageKind {
                 format!("agents/completions/response/messages/{agent_id}_{path}.json")
             }
             MessageKind::AgentCompletionNotification => {
-                format!("agents/completions/response/notifications/{agent_id}_{path}.json")
+                format!("agents/completions/request/notifications/{agent_id}_{path}.json")
             }
         }
     }

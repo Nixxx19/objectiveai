@@ -18,7 +18,7 @@
 //! mpsc, in addition to the existing fan-out to the API server via
 //! `notifier`. The writer task owns a local `Vec<PendingNotification>`:
 //! each arrival immediately writes the corresponding log file under
-//! `agents/completions/response/notifications/<id>_<idx>.json` and reserves a
+//! `agents/completions/request/notifications/<id>_<idx>.json` and reserves a
 //! DB index; the row itself goes into the queue and is flushed to the
 //! db when the next tool-response chunk for that agent comes in (so
 //! the notification's index naturally precedes the tool response's).
