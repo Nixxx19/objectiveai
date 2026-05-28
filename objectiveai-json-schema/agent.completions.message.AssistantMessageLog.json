@@ -27,7 +27,7 @@
     "reasoning": {
       "anyOf": [
         {
-          "type": "string"
+          "$ref": "filesystem.logs.LogReference"
         },
         {
           "type": "null"
@@ -38,7 +38,7 @@
     "refusal": {
       "anyOf": [
         {
-          "type": "string"
+          "$ref": "filesystem.logs.LogReference"
         },
         {
           "type": "null"
@@ -51,7 +51,7 @@
         {
           "type": "array",
           "items": {
-            "$ref": "agent.completions.message.AssistantToolCall"
+            "$ref": "filesystem.logs.LogReference"
           }
         },
         {
