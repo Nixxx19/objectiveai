@@ -1,5 +1,7 @@
 {
   "title": "filesystem.logs.queue.Id",
-  "description": "File pointer used throughout the queue-read schema. The string is\nthe path relative to `${config_base_dir}/logs/`, e.g.\n`\"agents/completions/response/messages/reasoning/acc-1_0.json\"`.",
-  "type": "string"
+  "description": "Stable integer id of a logged file.",
+  "type": "integer",
+  "minimum": -9223372036854775808,
+  "maximum": 9223372036854775807
 }

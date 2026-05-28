@@ -108,6 +108,10 @@ pub struct MessageRow {
 ///   watermark of the highest `messages."index"` the caller has
 ///   already consumed. One row per pair; the composite PRIMARY KEY
 ///   doubles as the lookup index.
+/// - `files` — lazy id↔path table populated on-demand by
+///   `read_new_from_queue` so callers can hold compact integer
+///   ids instead of full path strings. `UNIQUE(path)` enforces a
+///   stable one-to-one mapping forever.
 pub fn init_tables(conn: &Connection) -> Result<(), super::super::Error> {
     conn.execute_batch(
         "CREATE TABLE IF NOT EXISTS messages (\
@@ -125,9 +129,71 @@ pub fn init_tables(conn: &Connection) -> Result<(), super::super::Error> {
             spawned_agent_id TEXT NOT NULL, \
             \"index\"        INTEGER NOT NULL, \
             PRIMARY KEY (caller_agent_id, spawned_agent_id)\
+        );\
+        CREATE TABLE IF NOT EXISTS files (\
+            id   INTEGER PRIMARY KEY AUTOINCREMENT, \
+            path TEXT NOT NULL UNIQUE\
         );",
     )?;
     Ok(())
+}
+
+/// Look up (or insert) the SQL row id for `path` in the `files`
+/// table. Idempotent: same path → same id forever, even across
+/// processes and concurrent callers, because of the `UNIQUE(path)`
+/// constraint.
+///
+/// Uses `INSERT … ON CONFLICT(path) DO UPDATE SET path=excluded.path
+/// RETURNING id`. The no-op `UPDATE` is the canonical SQLite trick
+/// that makes `RETURNING` fire on the existing row when there's a
+/// conflict, so the call always returns the right id in one round-
+/// trip.
+pub fn file_id_for_path(
+    conn: &Connection,
+    path: &str,
+) -> Result<i64, super::super::Error> {
+    let mut stmt = conn.prepare_cached(
+        "INSERT INTO files (path) VALUES (?1) \
+         ON CONFLICT(path) DO UPDATE SET path = excluded.path \
+         RETURNING id",
+    )?;
+    Ok(stmt.query_row([path], |r| r.get::<_, i64>(0))?)
+}
+
+/// Resolve a SQL row id back to its path. `None` when no row matches.
+pub fn path_for_file_id(
+    conn: &Connection,
+    id: i64,
+) -> Result<Option<String>, super::super::Error> {
+    use rusqlite::OptionalExtension as _;
+    let mut stmt = conn.prepare_cached("SELECT path FROM files WHERE id = ?1")?;
+    Ok(stmt.query_row([id], |r| r.get::<_, String>(0)).optional()?)
+}
+
+/// Async wrapper around [`file_id_for_path`].
+pub async fn file_id_for_path_async(
+    conn: Arc<Mutex<Connection>>,
+    path: String,
+) -> Result<i64, super::super::Error> {
+    tokio::task::spawn_blocking(move || {
+        let conn = conn.lock().expect("filesystem db mutex poisoned");
+        file_id_for_path(&conn, &path)
+    })
+    .await
+    .map_err(spawn_blocking_join_err)?
+}
+
+/// Async wrapper around [`path_for_file_id`].
+pub async fn path_for_file_id_async(
+    conn: Arc<Mutex<Connection>>,
+    id: i64,
+) -> Result<Option<String>, super::super::Error> {
+    tokio::task::spawn_blocking(move || {
+        let conn = conn.lock().expect("filesystem db mutex poisoned");
+        path_for_file_id(&conn, id)
+    })
+    .await
+    .map_err(spawn_blocking_join_err)?
 }
 
 /// `SELECT MAX("index") FROM messages WHERE agent_id = ?`. `None` when

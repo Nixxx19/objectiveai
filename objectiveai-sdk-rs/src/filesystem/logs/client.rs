@@ -530,23 +530,28 @@ impl Client {
 
     /// Translate one [`crate::filesystem::db::schema::MessageRow`]
     /// into a typed [`super::queue::QueueItem`] by reading the row's
-    /// log file(s) from disk and converting log-type fields to
-    /// [`super::queue::Id`]s.
+    /// log file(s) from disk and converting each `LogReference` to
+    /// a [`super::queue::Id`] (SQL row id in the `files` table —
+    /// inserted on miss).
     async fn queue_item_from_row(
         &self,
         row: crate::filesystem::db::schema::MessageRow,
     ) -> Result<super::queue::QueueItem, Error> {
         use crate::filesystem::db::schema::MessageKind;
-        use super::queue::{Id, QueueItem};
+        use super::queue::QueueItem;
 
         let rel_path = row.kind.file_path(&row.agent_id, &row.path);
 
         match row.kind {
             MessageKind::FunctionExecutionRequest => {
-                Ok(QueueItem::FunctionExecutionRequest { id: Id::new(rel_path) })
+                Ok(QueueItem::FunctionExecutionRequest {
+                    id: self.file_id(&rel_path).await?,
+                })
             }
             MessageKind::FunctionInventionRecursiveRequest => {
-                Ok(QueueItem::FunctionInventionRecursiveRequest { id: Id::new(rel_path) })
+                Ok(QueueItem::FunctionInventionRecursiveRequest {
+                    id: self.file_id(&rel_path).await?,
+                })
             }
             MessageKind::AgentCompletionRequest => {
                 let envelope: crate::agent::completions::request::AgentCompletionCreateParamsLog =
@@ -555,7 +560,7 @@ impl Client {
                 for msg_ref in envelope.messages {
                     let msg_log: crate::agent::completions::message::MessageLog =
                         self.read_log_file(&msg_ref.path).await?;
-                    messages.push(message_log_to_queue_message(msg_log));
+                    messages.push(self.message_log_to_queue_message(msg_log).await?);
                 }
                 Ok(QueueItem::AgentCompletionRequest { messages })
             }
@@ -563,10 +568,10 @@ impl Client {
                 let log: crate::agent::completions::response::streaming::AssistantResponseChunkLog =
                     self.read_log_file(&rel_path).await?;
                 Ok(QueueItem::AssistantResponse {
-                    reasoning: log.reasoning.map(Id::from),
-                    tool_calls: log.tool_calls.map(|tcs| tcs.into_iter().map(Id::from).collect()),
-                    content: log.content.map(Into::into),
-                    refusal: log.refusal.map(Id::from),
+                    reasoning: self.maybe_id(log.reasoning).await?,
+                    tool_calls: self.maybe_id_list(log.tool_calls).await?,
+                    content: self.maybe_content(log.content).await?,
+                    refusal: self.maybe_id(log.refusal).await?,
                 })
             }
             MessageKind::ToolResponse => {
@@ -574,15 +579,53 @@ impl Client {
                     self.read_log_file(&rel_path).await?;
                 Ok(QueueItem::ToolResponse {
                     tool_call_id: log.tool_call_id,
-                    content: log.content.into(),
+                    content: self.rich_content_to_content(log.content).await?,
                 })
             }
             MessageKind::AgentCompletionNotification => {
                 let log: crate::agent::completions::message::RichContentLog =
                     self.read_log_file(&rel_path).await?;
-                Ok(QueueItem::Notification { content: log.into() })
+                Ok(QueueItem::Notification {
+                    content: self.rich_content_to_content(log).await?,
+                })
             }
         }
+    }
+
+    /// Per-role dispatch from [`crate::agent::completions::message::MessageLog`]
+    /// into [`super::queue::QueueMessage`].
+    async fn message_log_to_queue_message(
+        &self,
+        log: crate::agent::completions::message::MessageLog,
+    ) -> Result<super::queue::QueueMessage, Error> {
+        use crate::agent::completions::message::MessageLog;
+        use super::queue::QueueMessage;
+
+        Ok(match log {
+            MessageLog::Developer(m) => QueueMessage::Developer {
+                content: self.simple_content_to_content(m.content).await?,
+                name: m.name,
+            },
+            MessageLog::System(m) => QueueMessage::System {
+                content: self.simple_content_to_content(m.content).await?,
+                name: m.name,
+            },
+            MessageLog::User(m) => QueueMessage::User {
+                content: self.rich_content_to_content(m.content).await?,
+                name: m.name,
+            },
+            MessageLog::Assistant(m) => QueueMessage::Assistant {
+                content: self.maybe_content(m.content).await?,
+                name: m.name,
+                reasoning: self.maybe_id(m.reasoning).await?,
+                tool_calls: self.maybe_id_list(m.tool_calls).await?,
+                refusal: self.maybe_id(m.refusal).await?,
+            },
+            MessageLog::Tool(m) => QueueMessage::Tool {
+                content: self.rich_content_to_content(m.content).await?,
+                tool_call_id: m.tool_call_id,
+            },
+        })
     }
 
     /// Deserialize one log file at `rel_path` (relative to the logs
@@ -597,40 +640,102 @@ impl Client {
             .map_err(|e| Error::Read(full.clone(), e))?;
         serde_json::from_slice(&bytes).map_err(|e| Error::Parse(full, e))
     }
-}
 
-/// Convert a [`crate::agent::completions::message::MessageLog`]
-/// into a [`super::queue::QueueMessage`]. Per-role dispatch.
-fn message_log_to_queue_message(
-    log: crate::agent::completions::message::MessageLog,
-) -> super::queue::QueueMessage {
-    use crate::agent::completions::message::MessageLog;
-    use super::queue::{Id, QueueMessage};
+    /// Resolve a logs-relative path to its (stable) SQL row id in the
+    /// `files` table. Inserts on miss; the `UNIQUE(path)` constraint
+    /// keeps one id per path forever.
+    async fn file_id(&self, rel_path: &str) -> Result<super::queue::Id, Error> {
+        let conn = super::super::db::connection::connection(self)?;
+        let id = super::super::db::schema::file_id_for_path_async(
+            conn,
+            rel_path.to_string(),
+        )
+        .await?;
+        Ok(super::queue::Id(id))
+    }
 
-    match log {
-        MessageLog::Developer(m) => QueueMessage::Developer {
-            content: m.content.into(),
-            name: m.name,
-        },
-        MessageLog::System(m) => QueueMessage::System {
-            content: m.content.into(),
-            name: m.name,
-        },
-        MessageLog::User(m) => QueueMessage::User {
-            content: m.content.into(),
-            name: m.name,
-        },
-        MessageLog::Assistant(m) => QueueMessage::Assistant {
-            content: m.content.map(Into::into),
-            name: m.name,
-            reasoning: m.reasoning.map(Id::from),
-            tool_calls: m.tool_calls.map(|tcs| tcs.into_iter().map(Id::from).collect()),
-            refusal: m.refusal.map(Id::from),
-        },
-        MessageLog::Tool(m) => QueueMessage::Tool {
-            content: m.content.into(),
-            tool_call_id: m.tool_call_id,
-        },
+    /// Resolve an `Option<LogReference>` to `Option<Id>`.
+    async fn maybe_id(
+        &self,
+        r: Option<crate::filesystem::logs::LogReference>,
+    ) -> Result<Option<super::queue::Id>, Error> {
+        match r {
+            Some(r) => Ok(Some(self.file_id(&r.path).await?)),
+            None => Ok(None),
+        }
+    }
+
+    /// Resolve a `Vec<LogReference>` to `Vec<Id>`.
+    async fn id_list(
+        &self,
+        rs: Vec<crate::filesystem::logs::LogReference>,
+    ) -> Result<Vec<super::queue::Id>, Error> {
+        let mut out = Vec::with_capacity(rs.len());
+        for r in rs {
+            out.push(self.file_id(&r.path).await?);
+        }
+        Ok(out)
+    }
+
+    /// Resolve an `Option<Vec<LogReference>>` to `Option<Vec<Id>>`.
+    async fn maybe_id_list(
+        &self,
+        rs: Option<Vec<crate::filesystem::logs::LogReference>>,
+    ) -> Result<Option<Vec<super::queue::Id>>, Error> {
+        match rs {
+            Some(rs) => Ok(Some(self.id_list(rs).await?)),
+            None => Ok(None),
+        }
+    }
+
+    /// Translate a [`crate::agent::completions::message::RichContentLog`]
+    /// to [`super::queue::Content`], looking up an `Id` for every ref.
+    async fn rich_content_to_content(
+        &self,
+        log: crate::agent::completions::message::RichContentLog,
+    ) -> Result<super::queue::Content, Error> {
+        use crate::agent::completions::message::RichContentLog;
+        use super::queue::Content;
+        Ok(match log {
+            RichContentLog::Reference(r) => Content::One(self.file_id(&r.path).await?),
+            RichContentLog::Parts(rs) => Content::Many(self.id_list(rs).await?),
+        })
+    }
+
+    /// Translate a [`crate::agent::completions::message::SimpleContentLog`]
+    /// to [`super::queue::Content`], looking up an `Id` for every ref.
+    async fn simple_content_to_content(
+        &self,
+        log: crate::agent::completions::message::SimpleContentLog,
+    ) -> Result<super::queue::Content, Error> {
+        use crate::agent::completions::message::SimpleContentLog;
+        use super::queue::Content;
+        Ok(match log {
+            SimpleContentLog::Reference(r) => Content::One(self.file_id(&r.path).await?),
+            SimpleContentLog::Parts(rs) => Content::Many(self.id_list(rs).await?),
+        })
+    }
+
+    /// Resolve `Option<RichContentLog>` to `Option<Content>`.
+    async fn maybe_content(
+        &self,
+        log: Option<crate::agent::completions::message::RichContentLog>,
+    ) -> Result<Option<super::queue::Content>, Error> {
+        match log {
+            Some(l) => Ok(Some(self.rich_content_to_content(l).await?)),
+            None => Ok(None),
+        }
+    }
+
+    /// Resolve a queue [`super::queue::Id`] back to its logs-relative
+    /// path. Returns `None` if no row matches (e.g. the id was never
+    /// produced by this Client, or the `files` table was wiped).
+    pub async fn path_for_file_id(
+        &self,
+        id: i64,
+    ) -> Result<Option<String>, Error> {
+        let conn = super::super::db::connection::connection(self)?;
+        super::super::db::schema::path_for_file_id_async(conn, id).await
     }
 }
 
