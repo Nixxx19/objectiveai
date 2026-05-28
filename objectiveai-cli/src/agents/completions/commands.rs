@@ -1,14 +1,9 @@
 use clap::Subcommand;
 
-use super::{logs, continuations, messages, instructions};
+use super::{logs, continuations, messages};
 
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Manage agent-completion instructions
-    Instructions {
-        #[command(subcommand)]
-        command: instructions::Commands,
-    },
     /// Agent completion logs
     Logs {
         #[command(subcommand)]
@@ -29,7 +24,6 @@ pub enum Commands {
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
-            Commands::Instructions { command } => command.handle(cli_config, handle).await,
             Commands::Logs { command } => command.handle(cli_config, handle).await,
             Commands::Continuations { command } => command.handle(cli_config, handle).await,
             Commands::Messages { command } => command.handle(cli_config, handle).await,

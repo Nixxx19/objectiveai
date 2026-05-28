@@ -5,7 +5,6 @@ pub use notification::*;
 // Shared / multi-command wire shapes.
 mod ack;
 mod cleared;
-mod instructions;
 mod items;
 mod jq;
 mod log_content;
@@ -26,7 +25,6 @@ pub mod swarms;
 
 pub use ack::*;
 pub use cleared::*;
-pub use instructions::*;
 pub use items::*;
 pub use jq::*;
 pub use log_content::*;

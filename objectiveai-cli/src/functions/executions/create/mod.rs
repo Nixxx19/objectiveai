@@ -49,8 +49,6 @@ pub enum Commands {
         input: InputSource,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
-        #[command(flatten)]
-        instructions: crate::instructions::InstructionsIdArg,
         /// Retry token from a previous execution
         #[arg(long)]
         retry_token: Option<String>,
@@ -79,8 +77,6 @@ pub enum Commands {
         input: InputSource,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
-        #[command(flatten)]
-        instructions: crate::instructions::InstructionsIdArg,
         /// Retry token from a previous execution
         #[arg(long)]
         retry_token: Option<String>,
@@ -119,17 +115,15 @@ async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::f
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
-        let (function_source, profile_source, input_source, continuation_args, instructions, retry_token, seed, split, invert, strategy, detach) = match self {
-            Commands::Standard { function, profile, input, continuation, instructions, retry_token, seed, split, invert, detach } => {
-                (function, profile, input, continuation, instructions, retry_token, seed, split, invert, objectiveai_sdk::functions::executions::request::Strategy::Default, detach)
+        let (function_source, profile_source, input_source, continuation_args, retry_token, seed, split, invert, strategy, detach) = match self {
+            Commands::Standard { function, profile, input, continuation, retry_token, seed, split, invert, detach } => {
+                (function, profile, input, continuation, retry_token, seed, split, invert, objectiveai_sdk::functions::executions::request::Strategy::Default, detach)
             }
-            Commands::SwissSystem { function, profile, input, continuation, instructions, retry_token, seed, split, invert, pool, rounds, detach } => {
+            Commands::SwissSystem { function, profile, input, continuation, retry_token, seed, split, invert, pool, rounds, detach } => {
                 let strategy = objectiveai_sdk::functions::executions::request::Strategy::SwissSystem { pool, rounds };
-                (function, profile, input, continuation, instructions, retry_token, seed, split, invert, strategy, detach)
+                (function, profile, input, continuation, retry_token, seed, split, invert, strategy, detach)
             }
         };
-
-        instructions.verify(cli_config, crate::instructions::InstructionsScope::FunctionExecutions)?;
 
         if detach {
             crate::api::detach::detach(handle).await;

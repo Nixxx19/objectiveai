@@ -122,16 +122,6 @@ fn cleared_wire_shape() {
 }
 
 #[test]
-fn instructions_wire_shape() {
-    let out = notif(Instructions {
-        instructions: "follow these steps".to_string(),
-    });
-    let v = roundtrip(&out);
-    assert_eq!(v["type"], "notification");
-    assert_eq!(v["value"]["instructions"], "follow these steps");
-}
-
-#[test]
 fn items_generic_wire_shape() {
     #[derive(Serialize, Deserialize, Debug)]
     struct Sample {

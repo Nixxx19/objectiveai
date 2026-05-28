@@ -64,8 +64,6 @@ pub enum Commands {
         agent: AgentArg,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
-        #[command(flatten)]
-        instructions: crate::instructions::InstructionsIdArg,
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
@@ -81,8 +79,6 @@ pub enum Commands {
         agent: AgentArg,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
-        #[command(flatten)]
-        instructions: crate::instructions::InstructionsIdArg,
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
@@ -102,8 +98,6 @@ pub enum Commands {
         agent: AgentArg,
         #[command(flatten)]
         continuation: crate::continuation::ContinuationArgs,
-        #[command(flatten)]
-        instructions: crate::instructions::InstructionsIdArg,
         /// Seed for deterministic mock responses
         #[arg(long)]
         seed: Option<i64>,
@@ -115,26 +109,26 @@ pub enum Commands {
 
 impl Commands {
     pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
-        let (agent_ref, continuation_args, instructions, seed, state, detach) = match self {
-            Commands::AlphaScalar { params, agent, continuation, instructions, seed, detach } => {
+        let (agent_ref, continuation_args, seed, state, detach) = match self {
+            Commands::AlphaScalar { params, agent, continuation, seed, detach } => {
                 let p = params.into_params();
                 let state = objectiveai_sdk::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
                     objectiveai_sdk::functions::inventions::ParamsState::AlphaScalar(
                         objectiveai_sdk::functions::inventions::state::AlphaScalarState { params: p, input_schema: None },
                     ),
                 );
-                (agent, continuation, instructions, seed, state, detach)
+                (agent, continuation, seed, state, detach)
             }
-            Commands::AlphaVector { params, agent, continuation, instructions, seed, detach } => {
+            Commands::AlphaVector { params, agent, continuation, seed, detach } => {
                 let p = params.into_params();
                 let state = objectiveai_sdk::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
                     objectiveai_sdk::functions::inventions::ParamsState::AlphaVector(
                         objectiveai_sdk::functions::inventions::state::AlphaVectorState { params: p, input_schema: None },
                     ),
                 );
-                (agent, continuation, instructions, seed, state, detach)
+                (agent, continuation, seed, state, detach)
             }
-            Commands::Remote { state, state_inline, agent, continuation, instructions, seed, detach } => {
+            Commands::Remote { state, state_inline, agent, continuation, seed, detach } => {
                 let state = if let Some(inline) = state_inline {
                     let mut de = serde_json::Deserializer::from_str(&inline);
                     let parsed: objectiveai_sdk::functions::inventions::ParamsState =
@@ -145,11 +139,9 @@ impl Commands {
                     let remote_path = state.expect("clap ensures one is set").resolve()?;
                     objectiveai_sdk::functions::inventions::ParamsStateOrRemoteCommitOptional::Remote(remote_path)
                 };
-                (agent, continuation, instructions, seed, state, detach)
+                (agent, continuation, seed, state, detach)
             }
         };
-
-        instructions.verify(cli_config, crate::instructions::InstructionsScope::FunctionInventionsRecursive)?;
 
         if detach {
             crate::api::detach::detach(handle).await;

@@ -20,7 +20,6 @@ mod viewer;
 mod mcp;
 mod spawn;
 mod schemas;
-mod instructions;
 mod log_line;
 mod logs;
 mod plugins;
