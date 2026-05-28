@@ -115,6 +115,23 @@ fn nv_spawned_roundtrip() {
 }
 
 #[test]
+fn nv_message_delivered_roundtrip() {
+    let out = notif(NotificationValue::MessageDelivered(MessageDelivered {
+        agent_id: "cli/foo-123".into(),
+    }));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_message_queued_roundtrip() {
+    let out = notif(NotificationValue::MessageQueued(MessageQueued {
+        agent_id: "cli/foo-123".into(),
+        response_id: "resp-abc".into(),
+    }));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
 fn nv_detached_roundtrip() {
     let out = notif(NotificationValue::Detached(Detached { pid: 12345 }));
     assert_roundtrip_eq(out);

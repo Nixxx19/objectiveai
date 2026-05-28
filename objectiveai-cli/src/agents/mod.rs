@@ -2,6 +2,7 @@ pub mod completions;
 pub mod config;
 pub mod favorites;
 pub mod list_active;
+pub mod message;
 pub mod read;
 pub mod spawn;
 
@@ -54,6 +55,9 @@ pub enum Commands {
     },
     /// List direct-child agents + the time of their most recent assistant response
     ListActive(list_active::CommandArgs),
+    /// Deliver a message to a running spawned agent (or resume its most
+    /// recent completion via continuation if it's dormant)
+    Message(message::CommandArgs),
     /// Spawn an agent completion (open a streaming run as a child of this caller)
     Spawn(spawn::CommandArgs),
 }
@@ -109,6 +113,7 @@ impl Commands {
             Commands::Favorites { command } => command.handle(cli_config, handle).await,
             Commands::Read { command } => command.handle(cli_config, handle).await,
             Commands::ListActive(args) => list_active::handle(args, cli_config, handle).await,
+            Commands::Message(args) => message::handle(args, cli_config, handle).await,
             Commands::Spawn(args) => spawn::handle(args, cli_config, handle).await,
             Commands::Publish { repository, body, message, overwrite } => {
                 let agent: objectiveai_sdk::agent::RemoteAgentBaseWithFallbacks = body.resolve()?;

@@ -12,6 +12,7 @@ mod developer_message_log;
 mod file_content;
 #[cfg(feature = "filesystem")]
 mod message_log;
+mod pipe_ack;
 mod rich_content;
 #[cfg(feature = "filesystem")]
 mod rich_content_log;
@@ -37,6 +38,7 @@ pub use developer_message_log::*;
 pub use file_content::*;
 #[cfg(feature = "filesystem")]
 pub use message_log::*;
+pub use pipe_ack::*;
 pub use rich_content::*;
 #[cfg(feature = "filesystem")]
 pub use rich_content_log::*;

@@ -21,8 +21,9 @@ use serde::{Deserialize, Serialize};
 use super::{
     ActiveAgent, Agent, AgentItems, Cleared, Detached, Execution, Function, Help,
     Installed, Instructions, Inventions, JqResults, Laboratory, LogContent,
-    LogStreamReady, Ok, Pair, Plugin, Plugins, Profile, Published, Schema, Schemas,
-    Spawned, State, Swarm, Tool, ToolLine, Tools, Updater, ViewerSendResult,
+    LogStreamReady, MessageDelivered, MessageQueued, Ok, Pair, Plugin, Plugins,
+    Profile, Published, Schema, Schemas, Spawned, State, Swarm, Tool, ToolLine, Tools,
+    Updater, ViewerSendResult,
 };
 
 /// One emitted notification payload. The `kind` tag discriminates
@@ -35,6 +36,8 @@ pub enum NotificationValue {
     ActiveAgent(ActiveAgent),
     Agent(Agent),
     AgentItems(AgentItems),
+    MessageDelivered(MessageDelivered),
+    MessageQueued(MessageQueued),
     Spawned(Spawned),
 
     // API
@@ -119,7 +122,7 @@ macro_rules! from_variant {
 }
 
 from_variant! {
-    ActiveAgent, Agent, AgentItems, Spawned,
+    ActiveAgent, Agent, AgentItems, MessageDelivered, MessageQueued, Spawned,
     Detached,
     Execution, Function, Inventions, Pair, Profile, State,
     Laboratory,

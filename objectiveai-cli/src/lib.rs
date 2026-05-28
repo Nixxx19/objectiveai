@@ -18,6 +18,7 @@ mod swarms;
 mod functions;
 mod viewer;
 mod mcp;
+mod source_resolver;
 mod spawn;
 mod schemas;
 mod log_line;

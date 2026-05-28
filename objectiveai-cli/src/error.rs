@@ -79,6 +79,10 @@ pub enum Error {
     Spawn(String, std::io::Error),
     #[error("cli-stream subprocess exited with code {code}:\n{stderr_tail}")]
     CliStreamSubprocess { code: i32, stderr_tail: String },
+    #[error("no prior agent_completion_request for agent {agent_id:?}; spawn the agent first with `agents spawn`")]
+    AgentNoPriorRequest { agent_id: String },
+    #[error("agent {agent_id:?}'s most recent response ({response_id}) has no continuation file — the response may still be streaming, or it never finished. Cannot fall back without one.")]
+    AgentNoContinuation { agent_id: String, response_id: String },
 }
 
 impl Error {

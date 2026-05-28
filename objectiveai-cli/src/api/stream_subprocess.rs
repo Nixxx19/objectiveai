@@ -221,6 +221,27 @@ pub async fn run_detached(
     body: &(impl serde::Serialize + ?Sized),
     handle: &Handle,
 ) -> Result<(), crate::error::Error> {
+    run_detached_with(cli_config, endpoint_path, body, handle, |ready| {
+        Spawned { agent_id: ready }.into()
+    })
+    .await
+}
+
+/// `run_detached` parameterized by the terminal notification emitted
+/// once cli-stream's `LogStreamReady` handshake fires. Used by
+/// `agents message`'s continuation-fallback path to emit
+/// `MessageQueued { agent_id, response_id }` instead of the default
+/// `Spawned { agent_id }`.
+pub async fn run_detached_with<F>(
+    cli_config: &crate::Config,
+    endpoint_path: &[&str],
+    body: &(impl serde::Serialize + ?Sized),
+    handle: &Handle,
+    make_notification: F,
+) -> Result<(), crate::error::Error>
+where
+    F: FnOnce(String) -> NotificationValue,
+{
     let cli_stream_path = resolve_cli_stream_binary()?;
     let mut cmd = Command::new(&cli_stream_path);
 
@@ -293,10 +314,7 @@ pub async fn run_detached(
                 if let NotificationValue::LogStreamReady(ready) = n.value {
                     Output::Notification(Notification {
                         agent_id: None,
-                        value: Spawned {
-                            agent_id: ready.log_stream_ready,
-                        }
-                        .into(),
+                        value: make_notification(ready.log_stream_ready),
                     })
                     .emit(handle)
                     .await;

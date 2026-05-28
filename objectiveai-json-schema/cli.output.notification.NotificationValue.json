@@ -40,6 +40,30 @@
     },
     {
       "type": "object",
+      "$ref": "cli.output.notification.agents.MessageDelivered",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "message_delivered"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "cli.output.notification.agents.MessageQueued",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "message_queued"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
       "$ref": "cli.output.notification.agents.Spawned",
       "properties": {
         "kind": {

@@ -37,10 +37,10 @@ use dashmap::DashMap;
 use interprocess::local_socket::tokio::{Listener, prelude::*};
 use interprocess::local_socket::{GenericFilePath, ListenerOptions, Name, ToFsName};
 use objectiveai_sdk::Notifier;
-use objectiveai_sdk::agent::completions::message::RichContent;
+use objectiveai_sdk::agent::completions::message::{PipeAck, RichContent};
 use objectiveai_sdk::agent::completions::request::AgentCompletionNotifyParams;
 use objectiveai_sdk::cli::output::{Error, Handle, Level, Output};
-use tokio::io::AsyncBufReadExt;
+use tokio::io::{AsyncBufReadExt, AsyncWriteExt};
 use tokio::sync::oneshot;
 
 /// Compute the pipe address for `agent_id` under `pipes_root`.
@@ -236,7 +236,8 @@ async fn handle_connection(
     notif_tx: tokio::sync::mpsc::UnboundedSender<(String, RichContent)>,
     handle: Handle,
 ) {
-    let reader = tokio::io::BufReader::new(conn);
+    let (read_half, mut write_half) = conn.split();
+    let reader = tokio::io::BufReader::new(read_half);
     let mut lines = reader.lines();
     loop {
         let line = match lines.next_line().await {
@@ -258,14 +259,14 @@ async fn handle_connection(
         let content: RichContent = match serde_json::from_str(trimmed) {
             Ok(c) => c,
             Err(e) => {
-                emit_error(
-                    &handle,
-                    format!(
-                        "pipe line for {agent_id:?} is not a valid RichContent JSON: {e}; line: {}",
-                        truncate(trimmed, 200)
-                    ),
-                )
-                .await;
+                let parse_msg = format!(
+                    "pipe line for {agent_id:?} is not a valid RichContent JSON: {e}; line: {}",
+                    truncate(trimmed, 200)
+                );
+                emit_error(&handle, parse_msg.clone()).await;
+                // Tell the client too — broken-pipe on the ack write
+                // (old client closed already) is swallowed silently.
+                write_ack(&mut write_half, PipeAck::Error { message: parse_msg }).await;
                 continue;
             }
         };
@@ -277,14 +278,35 @@ async fn handle_connection(
             response_id: agent_id.clone(),
             content,
         };
-        if let Err(e) = notifier.notify(params).await {
-            emit_error(
-                &handle,
-                format!("notify dispatch for {agent_id:?}: {e}"),
-            )
-            .await;
-        }
+        let ack = match notifier.notify(params).await {
+            Ok(()) => PipeAck::Ok,
+            Err(e) => {
+                let msg = format!("notify dispatch for {agent_id:?}: {e}");
+                emit_error(&handle, msg.clone()).await;
+                PipeAck::Error { message: msg }
+            }
+        };
+        write_ack(&mut write_half, ack).await;
     }
+}
+
+/// Serialize `ack` as one NDJSON line and write it back to the client.
+/// Failures (typically a broken pipe — the client wrote a single line
+/// and closed the half-duplex) are swallowed so the read loop can
+/// continue for clients that send multiple lines per connection.
+async fn write_ack<W>(writer: &mut W, ack: PipeAck)
+where
+    W: AsyncWriteExt + Unpin,
+{
+    let line = match serde_json::to_string(&ack) {
+        Ok(s) => s,
+        // `PipeAck` always serializes; the err arm is here for type
+        // completeness only.
+        Err(_) => return,
+    };
+    let _ = writer.write_all(line.as_bytes()).await;
+    let _ = writer.write_all(b"\n").await;
+    let _ = writer.flush().await;
 }
 
 async fn emit_error(handle: &Handle, message: String) {

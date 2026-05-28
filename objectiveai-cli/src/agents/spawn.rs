@@ -38,31 +38,19 @@ pub struct PromptSource {
 
 impl PromptSource {
     fn resolve(self) -> Result<Vec<Message>, crate::error::Error> {
-        if let Some(text) = self.simple {
-            return Ok(vec![Message::User(UserMessage {
-                content: RichContent::Text(text),
-                name: None,
-            })]);
-        }
-        if let Some(inline) = self.inline {
-            let mut de = serde_json::Deserializer::from_str(&inline);
-            return serde_path_to_error::deserialize(&mut de)
-                .map_err(crate::error::Error::InlineDeserialize);
-        }
-        if let Some(path) = self.file {
-            let bytes = std::fs::read(&path)
-                .map_err(|e| crate::error::Error::PromptFileRead(path.clone(), e))?;
-            let mut de = serde_json::Deserializer::from_slice(&bytes);
-            return serde_path_to_error::deserialize(&mut de)
-                .map_err(crate::error::Error::InlineDeserialize);
-        }
-        if let Some(code) = self.python_inline {
-            return crate::python::exec_code(&code);
-        }
-        if let Some(path) = self.python_file {
-            return crate::python::exec_file(&path);
-        }
-        unreachable!("clap group ensures one is set")
+        crate::source_resolver::resolve_source(
+            self.simple,
+            self.inline,
+            self.file,
+            self.python_inline,
+            self.python_file,
+            |text| {
+                vec![Message::User(UserMessage {
+                    content: RichContent::Text(text),
+                    name: None,
+                })]
+            },
+        )
     }
 }
 
