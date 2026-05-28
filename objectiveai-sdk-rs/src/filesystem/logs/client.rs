@@ -749,7 +749,7 @@ impl Client {
     /// composite-id segment(s) with the `{parent_agent_id}/`
     /// prefix stripped — so callers can paste it back into
     /// commands that re-prepend the parent (e.g. `agents
-    /// read-pending`).
+    /// read pending`).
     ///
     /// [`ActiveAgent`]: crate::cli::output::ActiveAgent
     pub async fn list_active(

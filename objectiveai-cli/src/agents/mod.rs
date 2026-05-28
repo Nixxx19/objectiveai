@@ -2,7 +2,7 @@ pub mod completions;
 pub mod config;
 pub mod favorites;
 pub mod list_active;
-pub mod read_pending;
+pub mod read;
 pub mod spawn;
 
 use clap::Subcommand;
@@ -47,8 +47,11 @@ pub enum Commands {
         #[arg(long)]
         overwrite: bool,
     },
-    /// Drain pending queue items for the given spawned agent id(s)
-    ReadPending(read_pending::CommandArgs),
+    /// Read queue items
+    Read {
+        #[command(subcommand)]
+        command: read::Commands,
+    },
     /// List direct-child agents + the time of their most recent assistant response
     ListActive(list_active::CommandArgs),
     /// Spawn an agent completion (open a streaming run as a child of this caller)
@@ -105,7 +108,7 @@ impl Commands {
             Commands::Completions { command } => command.handle(cli_config, handle).await,
             Commands::Config { command } => command.handle(cli_config, handle).await,
             Commands::Favorites { command } => command.handle(cli_config, handle).await,
-            Commands::ReadPending(args) => read_pending::handle(args, cli_config, handle).await,
+            Commands::Read { command } => command.handle(cli_config, handle).await,
             Commands::ListActive(args) => list_active::handle(args, cli_config, handle).await,
             Commands::Spawn(args) => spawn::handle(args, cli_config, handle).await,
             Commands::Publish { repository, body, message, overwrite } => {

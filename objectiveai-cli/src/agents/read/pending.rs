@@ -1,4 +1,4 @@
-//! `agents read_pending` — drain every unread queue row for the
+//! `agents read pending` — drain every unread queue row for the
 //! given spawned agent id(s) from this CLI's perspective.
 //!
 //! Wraps [`objectiveai_sdk::filesystem::Client::read_new_from_queue`]:
@@ -11,7 +11,7 @@
 //! Positional args are **sub-ids**, not full composite ids — the
 //! caller prefix is glued on internally. So if the caller is `cli`
 //! and the spawned agent is `cli/foo-123`, the invocation is
-//! `agents read-pending foo-123` (matches the output shape of
+//! `agents read pending foo-123` (matches the output shape of
 //! `agents list-active`, which also drops the caller prefix).
 //! Each positional arg is drained in order and the resulting items
 //! are concatenated into one `Items<QueueItem>` notification.
@@ -26,7 +26,7 @@ pub struct CommandArgs {
     /// The caller prefix is prepended internally — so for a caller
     /// of `cli` and a spawned `cli/foo-123`, pass `foo-123`. Repeat
     /// the positional argument for multiple agents, e.g.
-    /// `agents read-pending foo-123 bar-456`.
+    /// `agents read pending foo-123 bar-456`.
     #[arg(required = true)]
     pub agent_ids: Vec<String>,
 }

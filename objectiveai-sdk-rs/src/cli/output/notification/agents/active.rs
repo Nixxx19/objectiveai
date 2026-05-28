@@ -16,7 +16,7 @@ pub struct ActiveAgent {
     /// segment(s) past the parent the caller asked about, with
     /// the `{parent}/` prefix stripped. Paste this verbatim into
     /// commands that re-prepend the parent (e.g. `agents
-    /// read-pending`).
+    /// read pending`).
     pub agent_id: String,
     /// Unix-seconds timestamp of this agent's most recent
     /// `assistant_response` row.
