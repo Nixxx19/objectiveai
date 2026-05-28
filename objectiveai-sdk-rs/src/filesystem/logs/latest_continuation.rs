@@ -1,6 +1,14 @@
 //! `read_latest_continuation` — walk backwards through an agent's
-//! request history (newest-first) and return the first turn that has
-//! a continuation `.txt` file on disk.
+//! request history (newest-first) and return the first turn whose
+//! *response* continuation file exists. The response continuation is
+//! the value the server emits in the final streaming chunk and
+//! persists at
+//! `logs/agents/completions/response/continuation/<response_id>.json`
+//! (a pretty-printed JSON-quoted string). Reusing it on a fresh
+//! `AgentCompletionCreateParams.continuation` picks up the
+//! conversation where that turn left off — not where the previous
+//! turn ended, which is what the request-side continuation would
+//! replay.
 //!
 //! Used by `objectiveai agents message`'s fallback path: if the live
 //! per-agent socket is unreachable, we resume the agent's most recent
@@ -31,9 +39,15 @@ pub struct LatestContinuation {
     /// file exists.
     pub response_id: String,
     /// Continuation token to set as `continuation: Some(_)` on the
-    /// fresh `AgentCompletionCreateParams`. Stored on-disk as a `.txt`
-    /// file containing the raw base64 string under
-    /// `logs/agents/completions/response/continuation/<response_id>.txt`.
+    /// fresh `AgentCompletionCreateParams`. This is the **response**
+    /// continuation — the value the server emitted in the final
+    /// streaming chunk, persisted by
+    /// [`crate::agent::completions::response::streaming::AgentCompletionChunk::produce_files`]
+    /// as a JSON-quoted string at
+    /// `logs/agents/completions/response/continuation/<response_id>.json`.
+    /// Resuming a conversation requires this value, **not** the
+    /// previous turn's request-side continuation (which would replay
+    /// from the earlier turn's end).
     pub continuation: String,
     /// The agent definition from the original request log — reused
     /// verbatim so the conversation continues against the same agent.
@@ -93,13 +107,17 @@ impl Client {
             .join("agents/completions/response/continuation");
 
         for response_id in response_ids {
-            let cont_path = cont_dir.join(format!("{response_id}.txt"));
-            let continuation = match tokio::fs::read_to_string(&cont_path).await
-            {
-                Ok(s) => s,
+            // Response-side continuation: a JSON-quoted string in a
+            // `.json` file. Matches the producer at
+            // `AgentCompletionChunk::produce_files`.
+            let cont_path = cont_dir.join(format!("{response_id}.json"));
+            let bytes = match tokio::fs::read(&cont_path).await {
+                Ok(b) => b,
                 Err(e) if e.kind() == std::io::ErrorKind::NotFound => continue,
                 Err(e) => return Err(Error::Read(cont_path, e)),
             };
+            let continuation: String = serde_json::from_slice(&bytes)
+                .map_err(|e| Error::Parse(cont_path.clone(), e))?;
 
             // Found one — pair it with the per-turn request log.
             let request = self
@@ -263,7 +281,10 @@ mod tests {
         let dir = base_dir
             .join("logs/agents/completions/response/continuation");
         tokio::fs::create_dir_all(&dir).await.expect("mkdir continuation");
-        tokio::fs::write(dir.join(format!("{response_id}.txt")), body)
+        // Match the on-disk shape `AgentCompletionChunk::produce_files`
+        // writes: pretty JSON-quoted string, `.json` extension.
+        let json = serde_json::to_vec_pretty(body).expect("encode cont");
+        tokio::fs::write(dir.join(format!("{response_id}.json")), json)
             .await
             .expect("write continuation");
     }
