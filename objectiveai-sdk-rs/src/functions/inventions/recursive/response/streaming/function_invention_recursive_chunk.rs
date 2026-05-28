@@ -132,7 +132,7 @@ impl FunctionInventionRecursiveChunk {
         &self,
     ) -> Option<(crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>)> {
         use crate::filesystem::logs::{LogFile, LogReference};
-        const ROUTE: &str = "functions/inventions/recursive";
+        const ROUTE: &str = "functions/inventions/recursive/response";
 
         let id = &self.id;
         if id.is_empty() {
@@ -165,7 +165,6 @@ impl FunctionInventionRecursiveChunk {
             media_index: None,
             extension: "json".to_string(),
             content: serde_json::to_vec_pretty(&log).unwrap(),
-            suffix: Some("response"),
         };
         let reference = LogReference::new(root_file.path());
         files.push(root_file);

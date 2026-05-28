@@ -4,7 +4,7 @@
 //! On disk:
 //!
 //! ```json
-//! { "type": "reference", "path": "agents/completions/messages/acc-1_0.json" }
+//! { "type": "reference", "path": "agents/completions/response/messages/acc-1_0.json" }
 //! ```
 //!
 //! For references that carry additional per-context metadata (an

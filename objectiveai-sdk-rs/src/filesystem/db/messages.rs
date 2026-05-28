@@ -140,7 +140,7 @@ impl Queue {
     }
 
     /// Write a notification log file at
-    /// `agents/completions/notifications/<agent_id>_<idx>.json`,
+    /// `agents/completions/response/notifications/<agent_id>_<idx>.json`,
     /// reserve the agent's next index, and return a
     /// [`PendingNotification`] the caller queues locally for a later
     /// [`Self::insert_notification`] call. The row's `path` column
@@ -161,7 +161,7 @@ impl Queue {
         // On-disk filename keeps its existing shape (so files from
         // different agents don't collide in the same directory).
         let rel_path = format!(
-            "agents/completions/notifications/{agent_id}_{index}.json"
+            "agents/completions/response/notifications/{agent_id}_{index}.json"
         );
         let full_path = self.inner.logs_dir.join(&rel_path);
         if let Some(parent) = full_path.parent() {

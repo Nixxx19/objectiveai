@@ -3,7 +3,7 @@
 /// Instead of opaque path strings, each file carries semantic fields
 /// (route, id, optional indices) from which the on-disk path is derived.
 pub struct LogFile {
-    /// Directory route, e.g. `"agents/completions/messages/image"`.
+    /// Directory route, e.g. `"agents/completions/response/messages/image"`.
     pub route: String,
     /// Chunk ID, e.g. `"acc-1"`.
     pub id: String,
@@ -15,23 +15,15 @@ pub struct LogFile {
     pub extension: String,
     /// File content bytes.
     pub content: Vec<u8>,
-    /// Optional role suffix appended to the stem with a leading `-`,
-    /// e.g. `"response"` → `acc-1-response`. Only the root file at
-    /// each endpoint sets this; nested child files leave it `None`.
-    pub suffix: Option<&'static str>,
 }
 
 impl LogFile {
     /// The filename stem without extension, e.g. `"acc-1"`, `"acc-1_0"`, `"acc-1_0_2"`.
     pub fn stem(&self) -> String {
-        let base = match (self.message_index, self.media_index) {
+        match (self.message_index, self.media_index) {
             (None, _) => self.id.clone(),
             (Some(mi), None) => format!("{}_{mi}", self.id),
             (Some(mi), Some(mdi)) => format!("{}_{mi}_{mdi}", self.id),
-        };
-        match self.suffix {
-            Some(s) => format!("{base}-{s}"),
-            None => base,
         }
     }
 
@@ -40,7 +32,7 @@ impl LogFile {
         format!("{}.{}", self.stem(), self.extension)
     }
 
-    /// The full relative path, e.g. `"agents/completions/messages/image/acc-1_0_2.png"`.
+    /// The full relative path, e.g. `"agents/completions/response/messages/image/acc-1_0_2.png"`.
     pub fn path(&self) -> String {
         format!("{}/{}", self.route, self.filename())
     }

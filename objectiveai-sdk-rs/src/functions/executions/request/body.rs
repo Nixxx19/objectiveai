@@ -92,7 +92,6 @@ impl crate::filesystem::logs::ProducesRequestFiles for FunctionExecutionCreatePa
                 media_index: None,
                 extension: "txt".to_string(),
                 content: c.clone().into_bytes(),
-                suffix: None,
             };
             let r = LogReference::new(file.path());
             all_files.push(file);
@@ -123,7 +122,6 @@ impl crate::filesystem::logs::ProducesRequestFiles for FunctionExecutionCreatePa
             extension: "json".to_string(),
             content: serde_json::to_vec_pretty(&log)
                 .expect("FunctionExecutionCreateParamsLog serializes"),
-            suffix: None,
         };
         let summary_ref = LogReference::new(summary_file.path());
         all_files.push(summary_file);

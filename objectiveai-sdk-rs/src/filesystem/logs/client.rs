@@ -49,12 +49,7 @@ impl Client {
                 Some(s) => s,
                 None => continue,
             };
-            // Only the `-response` root file represents a listable entry;
-            // strip the suffix and skip `-request` (and any other) files.
-            let id = match stem.strip_suffix("-response") {
-                Some(id) => id.to_string(),
-                None => continue,
-            };
+            let id = stem.to_string();
             let metadata = tokio::fs::metadata(&path)
                 .await
                 .map_err(|e| Error::Read(path.clone(), e))?;
@@ -76,19 +71,19 @@ impl Client {
     // -- List methods --------------------------------------------------------
 
     pub async fn list_agent_completions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, Error> {
-        self.list_endpoint("agents/completions", offset, limit).await
+        self.list_endpoint("agents/completions/response", offset, limit).await
     }
     pub async fn list_vector_completions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, Error> {
-        self.list_endpoint("vector/completions", offset, limit).await
+        self.list_endpoint("vector/completions/response", offset, limit).await
     }
     pub async fn list_function_executions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, Error> {
-        self.list_endpoint("functions/executions", offset, limit).await
+        self.list_endpoint("functions/executions/response", offset, limit).await
     }
     pub async fn list_function_inventions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, Error> {
-        self.list_endpoint("functions/inventions", offset, limit).await
+        self.list_endpoint("functions/inventions/response", offset, limit).await
     }
     pub async fn list_function_inventions_recursive(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, Error> {
-        self.list_endpoint("functions/inventions/recursive", offset, limit).await
+        self.list_endpoint("functions/inventions/recursive/response", offset, limit).await
     }
 
     // -- Clear helpers + methods --------------------------------------------
@@ -122,52 +117,52 @@ impl Client {
     }
 
     pub async fn clear_agent_completions(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agents/completions").await
+        self.clear_endpoint("agents/completions/response").await
     }
     pub async fn clear_agent_completion_continuations(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agent/completions/continuation").await
+        self.clear_endpoint("agents/completions/response/continuation").await
     }
     pub async fn clear_agent_completion_messages(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agent/completions/messages").await
+        self.clear_endpoint("agents/completions/response/messages").await
     }
     pub async fn clear_agent_completion_message_logprobs(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agent/completions/messages/logprobs").await
+        self.clear_endpoint("agents/completions/response/messages/logprobs").await
     }
     pub async fn clear_agent_completion_message_reasoning(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agent/completions/messages/reasoning").await
+        self.clear_endpoint("agents/completions/response/messages/reasoning").await
     }
     pub async fn clear_agent_completion_message_refusal(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agent/completions/messages/refusal").await
+        self.clear_endpoint("agents/completions/response/messages/refusal").await
     }
     pub async fn clear_agent_completion_message_tool_calls(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agent/completions/messages/tool_calls").await
+        self.clear_endpoint("agents/completions/response/messages/tool_calls").await
     }
     pub async fn clear_agent_completion_message_images(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agent/completions/messages/image").await
+        self.clear_endpoint("agents/completions/response/messages/image").await
     }
     pub async fn clear_agent_completion_message_audio(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agent/completions/messages/audio").await
+        self.clear_endpoint("agents/completions/response/messages/audio").await
     }
     pub async fn clear_agent_completion_message_video(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agent/completions/messages/video").await
+        self.clear_endpoint("agents/completions/response/messages/video").await
     }
     pub async fn clear_agent_completion_message_files(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agent/completions/messages/file").await
+        self.clear_endpoint("agents/completions/response/messages/file").await
     }
     pub async fn clear_vector_completions(&self) -> Result<u64, Error> {
-        self.clear_endpoint("vector/completions").await
+        self.clear_endpoint("vector/completions/response").await
     }
     pub async fn clear_function_executions(&self) -> Result<u64, Error> {
-        self.clear_endpoint("functions/executions").await
+        self.clear_endpoint("functions/executions/response").await
     }
     pub async fn clear_function_execution_retry_tokens(&self) -> Result<u64, Error> {
-        self.clear_endpoint("functions/executions/retry_token").await
+        self.clear_endpoint("functions/executions/response/retry_token").await
     }
     pub async fn clear_function_inventions(&self) -> Result<u64, Error> {
-        self.clear_endpoint("functions/inventions").await
+        self.clear_endpoint("functions/inventions/response").await
     }
     pub async fn clear_function_inventions_recursive(&self) -> Result<u64, Error> {
-        self.clear_endpoint("functions/inventions/recursive").await
+        self.clear_endpoint("functions/inventions/recursive/response").await
     }
 
     // -- Write methods (LogWriter constructors) -----------------------------
@@ -180,7 +175,7 @@ impl Client {
         let conn = super::super::db::connection::connection(self)?;
         let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
         Ok(super::LogWriter::new(self.logs_dir(), |chunk: &AgentCompletionChunk| chunk.produce_files().map(|(_, files)| files))
-            .with_request("agents/completions", request)?
+            .with_request("agents/completions/request", request)?
             .with_queue(
                 queue,
                 Some(super::super::db::schema::MessageKind::AgentCompletionRequest),
@@ -195,7 +190,7 @@ impl Client {
         let conn = super::super::db::connection::connection(self)?;
         let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
         Ok(super::LogWriter::new(self.logs_dir(), |chunk: &VectorCompletionChunk| chunk.produce_files().map(|(_, files)| files))
-            .with_request("vector/completions", request)?
+            .with_request("vector/completions/request", request)?
             .with_queue(
                 queue,
                 None,
@@ -210,7 +205,7 @@ impl Client {
         let conn = super::super::db::connection::connection(self)?;
         let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
         Ok(super::LogWriter::new(self.logs_dir(), |chunk: &FunctionExecutionChunk| chunk.produce_files().map(|(_, files)| files))
-            .with_request("functions/executions", request)?
+            .with_request("functions/executions/request", request)?
             .with_queue(
                 queue,
                 Some(super::super::db::schema::MessageKind::FunctionExecutionRequest),
@@ -225,7 +220,7 @@ impl Client {
         let conn = super::super::db::connection::connection(self)?;
         let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
         Ok(super::LogWriter::new(self.logs_dir(), |chunk: &FunctionInventionChunk| chunk.produce_files().map(|(_, files)| files))
-            .with_request("functions/inventions", request)?
+            .with_request("functions/inventions/request", request)?
             .with_queue(
                 queue,
                 None,
@@ -240,7 +235,7 @@ impl Client {
         let conn = super::super::db::connection::connection(self)?;
         let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
         Ok(super::LogWriter::new(self.logs_dir(), |chunk: &FunctionInventionRecursiveChunk| chunk.produce_files().map(|(_, files)| files))
-            .with_request("functions/inventions/recursive", request)?
+            .with_request("functions/inventions/recursive/request", request)?
             .with_queue(
                 queue,
                 Some(super::super::db::schema::MessageKind::FunctionInventionRecursiveRequest),
@@ -295,67 +290,67 @@ impl Client {
     }
 
     pub async fn read_agent_completion(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions", &format!("{id}-response"), jq).await
+        self.read_json("agents/completions/response", id, jq).await
     }
     pub async fn read_agent_completion_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions", &format!("{id}-request"), jq).await
+        self.read_json("agents/completions/request", id, jq).await
     }
     pub async fn read_agent_completion_continuation(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions/continuation", id, jq).await
+        self.read_json("agents/completions/response/continuation", id, jq).await
     }
     pub async fn read_agent_completion_message(&self, id: &str, message_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions/messages", &format!("{id}_{message_index}"), jq).await
+        self.read_json("agents/completions/response/messages", &format!("{id}_{message_index}"), jq).await
     }
     pub async fn read_agent_completion_message_logprobs(&self, id: &str, message_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions/messages/logprobs", &format!("{id}_{message_index}"), jq).await
+        self.read_json("agents/completions/response/messages/logprobs", &format!("{id}_{message_index}"), jq).await
     }
     pub async fn read_agent_completion_message_reasoning(&self, id: &str, message_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions/messages/reasoning", &format!("{id}_{message_index}"), jq).await
+        self.read_json("agents/completions/response/messages/reasoning", &format!("{id}_{message_index}"), jq).await
     }
     pub async fn read_agent_completion_message_refusal(&self, id: &str, message_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions/messages/refusal", &format!("{id}_{message_index}"), jq).await
+        self.read_json("agents/completions/response/messages/refusal", &format!("{id}_{message_index}"), jq).await
     }
     pub async fn read_agent_completion_message_tool_call(&self, id: &str, message_index: u64, tool_call_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions/messages/tool_calls", &format!("{id}_{message_index}_{tool_call_index}"), jq).await
+        self.read_json("agents/completions/response/messages/tool_calls", &format!("{id}_{message_index}_{tool_call_index}"), jq).await
     }
     pub async fn read_agent_completion_message_image(&self, id: &str, message_index: u64, media_index: u64) -> Result<String, Error> {
-        self.read_data_url_by_stem("agents/completions/messages/image", &format!("{id}_{message_index}_{media_index}")).await
+        self.read_data_url_by_stem("agents/completions/response/messages/image", &format!("{id}_{message_index}_{media_index}")).await
     }
     pub async fn read_agent_completion_message_audio(&self, id: &str, message_index: u64, media_index: u64) -> Result<String, Error> {
-        self.read_data_url_by_stem("agents/completions/messages/audio", &format!("{id}_{message_index}_{media_index}")).await
+        self.read_data_url_by_stem("agents/completions/response/messages/audio", &format!("{id}_{message_index}_{media_index}")).await
     }
     pub async fn read_agent_completion_message_video(&self, id: &str, message_index: u64, media_index: u64) -> Result<String, Error> {
-        self.read_data_url_by_stem("agents/completions/messages/video", &format!("{id}_{message_index}_{media_index}")).await
+        self.read_data_url_by_stem("agents/completions/response/messages/video", &format!("{id}_{message_index}_{media_index}")).await
     }
     pub async fn read_agent_completion_message_file(&self, id: &str, message_index: u64, media_index: u64) -> Result<String, Error> {
-        self.read_data_url_by_stem("agents/completions/messages/file", &format!("{id}_{message_index}_{media_index}")).await
+        self.read_data_url_by_stem("agents/completions/response/messages/file", &format!("{id}_{message_index}_{media_index}")).await
     }
     pub async fn read_vector_completion(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("vector/completions", &format!("{id}-response"), jq).await
+        self.read_json("vector/completions/response", id, jq).await
     }
     pub async fn read_vector_completion_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("vector/completions", &format!("{id}-request"), jq).await
+        self.read_json("vector/completions/request", id, jq).await
     }
     pub async fn read_function_execution(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/executions", &format!("{id}-response"), jq).await
+        self.read_json("functions/executions/response", id, jq).await
     }
     pub async fn read_function_execution_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/executions", &format!("{id}-request"), jq).await
+        self.read_json("functions/executions/request", id, jq).await
     }
     pub async fn read_function_execution_retry_token(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/executions/retry_token", id, jq).await
+        self.read_json("functions/executions/response/retry_token", id, jq).await
     }
     pub async fn read_function_invention(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/inventions", &format!("{id}-response"), jq).await
+        self.read_json("functions/inventions/response", id, jq).await
     }
     pub async fn read_function_invention_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/inventions", &format!("{id}-request"), jq).await
+        self.read_json("functions/inventions/request", id, jq).await
     }
     pub async fn read_function_invention_recursive(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/inventions/recursive", &format!("{id}-response"), jq).await
+        self.read_json("functions/inventions/recursive/response", id, jq).await
     }
     pub async fn read_function_invention_recursive_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/inventions/recursive", &format!("{id}-request"), jq).await
+        self.read_json("functions/inventions/recursive/request", id, jq).await
     }
 
     // -- Subscribe helpers + methods ----------------------------------------
@@ -441,67 +436,67 @@ impl Client {
     }
 
     pub async fn subscribe_agent_completion(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions", &format!("{id}-response"), timeout, require_modification, jq).await
+        self.subscribe_json("agents/completions/response", id, timeout, require_modification, jq).await
     }
     pub async fn subscribe_agent_completion_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions", &format!("{id}-request"), timeout, require_modification, jq).await
+        self.subscribe_json("agents/completions/request", id, timeout, require_modification, jq).await
     }
     pub async fn subscribe_agent_completion_continuation(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/continuation", id, timeout, require_modification, jq).await
+        self.subscribe_json("agents/completions/response/continuation", id, timeout, require_modification, jq).await
     }
     pub async fn subscribe_agent_completion_message(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/messages", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
+        self.subscribe_json("agents/completions/response/messages", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
     }
     pub async fn subscribe_agent_completion_message_logprobs(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/messages/logprobs", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
+        self.subscribe_json("agents/completions/response/messages/logprobs", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
     }
     pub async fn subscribe_agent_completion_message_reasoning(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/messages/reasoning", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
+        self.subscribe_json("agents/completions/response/messages/reasoning", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
     }
     pub async fn subscribe_agent_completion_message_refusal(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/messages/refusal", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
+        self.subscribe_json("agents/completions/response/messages/refusal", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
     }
     pub async fn subscribe_agent_completion_message_tool_call(&self, id: &str, message_index: u64, tool_call_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/messages/tool_calls", &format!("{id}_{message_index}_{tool_call_index}"), timeout, require_modification, jq).await
+        self.subscribe_json("agents/completions/response/messages/tool_calls", &format!("{id}_{message_index}_{tool_call_index}"), timeout, require_modification, jq).await
     }
     pub async fn subscribe_agent_completion_message_image(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<String> {
-        self.subscribe_data_url_by_stem("agents/completions/messages/image", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
+        self.subscribe_data_url_by_stem("agents/completions/response/messages/image", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
     }
     pub async fn subscribe_agent_completion_message_audio(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<String> {
-        self.subscribe_data_url_by_stem("agents/completions/messages/audio", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
+        self.subscribe_data_url_by_stem("agents/completions/response/messages/audio", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
     }
     pub async fn subscribe_agent_completion_message_video(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<String> {
-        self.subscribe_data_url_by_stem("agents/completions/messages/video", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
+        self.subscribe_data_url_by_stem("agents/completions/response/messages/video", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
     }
     pub async fn subscribe_agent_completion_message_file(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<String> {
-        self.subscribe_data_url_by_stem("agents/completions/messages/file", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
+        self.subscribe_data_url_by_stem("agents/completions/response/messages/file", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
     }
     pub async fn subscribe_vector_completion(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("vector/completions", &format!("{id}-response"), timeout, require_modification, jq).await
+        self.subscribe_json("vector/completions/response", id, timeout, require_modification, jq).await
     }
     pub async fn subscribe_vector_completion_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("vector/completions", &format!("{id}-request"), timeout, require_modification, jq).await
+        self.subscribe_json("vector/completions/request", id, timeout, require_modification, jq).await
     }
     pub async fn subscribe_function_execution(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/executions", &format!("{id}-response"), timeout, require_modification, jq).await
+        self.subscribe_json("functions/executions/response", id, timeout, require_modification, jq).await
     }
     pub async fn subscribe_function_execution_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/executions", &format!("{id}-request"), timeout, require_modification, jq).await
+        self.subscribe_json("functions/executions/request", id, timeout, require_modification, jq).await
     }
     pub async fn subscribe_function_execution_retry_token(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/executions/retry_token", id, timeout, require_modification, jq).await
+        self.subscribe_json("functions/executions/response/retry_token", id, timeout, require_modification, jq).await
     }
     pub async fn subscribe_function_invention(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/inventions", &format!("{id}-response"), timeout, require_modification, jq).await
+        self.subscribe_json("functions/inventions/response", id, timeout, require_modification, jq).await
     }
     pub async fn subscribe_function_invention_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/inventions", &format!("{id}-request"), timeout, require_modification, jq).await
+        self.subscribe_json("functions/inventions/request", id, timeout, require_modification, jq).await
     }
     pub async fn subscribe_function_invention_recursive(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/inventions/recursive", &format!("{id}-response"), timeout, require_modification, jq).await
+        self.subscribe_json("functions/inventions/recursive/response", id, timeout, require_modification, jq).await
     }
     pub async fn subscribe_function_invention_recursive_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/inventions/recursive", &format!("{id}-request"), timeout, require_modification, jq).await
+        self.subscribe_json("functions/inventions/recursive/request", id, timeout, require_modification, jq).await
     }
 }
 

@@ -77,7 +77,6 @@ impl SimpleContent {
                     media_index: None,
                     extension: "txt".to_string(),
                     content: text.into_bytes(),
-                    suffix: None,
                 };
                 let reference = LogReference::new(log_file.path());
                 (SimpleContentLog::Reference(reference), vec![log_file])
@@ -94,7 +93,6 @@ impl SimpleContent {
                         media_index: Some(part_idx as u64),
                         extension: "txt".to_string(),
                         content: text.into_bytes(),
-                        suffix: None,
                     };
                     log_refs.push(LogReference::new(log_file.path()));
                     files.push(log_file);

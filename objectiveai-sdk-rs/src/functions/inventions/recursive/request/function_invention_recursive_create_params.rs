@@ -63,7 +63,6 @@ impl crate::filesystem::logs::ProducesRequestFiles for FunctionInventionRecursiv
             extension: "json".to_string(),
             content: serde_json::to_vec_pretty(&self.state)
                 .expect("ParamsStateOrRemoteCommitOptional serializes"),
-            suffix: None,
         };
         let state_ref = LogReference::new(state_file.path());
         all_files.push(state_file);
@@ -77,7 +76,6 @@ impl crate::filesystem::logs::ProducesRequestFiles for FunctionInventionRecursiv
                 media_index: None,
                 extension: "txt".to_string(),
                 content: c.clone().into_bytes(),
-                suffix: None,
             };
             let r = LogReference::new(file.path());
             all_files.push(file);
@@ -105,7 +103,6 @@ impl crate::filesystem::logs::ProducesRequestFiles for FunctionInventionRecursiv
             extension: "json".to_string(),
             content: serde_json::to_vec_pretty(&log)
                 .expect("FunctionInventionRecursiveCreateParamsLog serializes"),
-            suffix: None,
         };
         let summary_ref = LogReference::new(summary_file.path());
         all_files.push(summary_file);

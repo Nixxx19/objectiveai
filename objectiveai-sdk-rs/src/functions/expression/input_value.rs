@@ -100,7 +100,6 @@ impl InputValue {
                         extension: "json".to_string(),
                         content: serde_json::to_vec_pretty(&child_log)
                             .expect("InputValueLog serializes"),
-                        suffix: None,
                     };
                     log_map.insert(key, LogReference::new(child_file.path()));
                     all_files.push(child_file);
@@ -129,7 +128,6 @@ impl InputValue {
                         extension: "json".to_string(),
                         content: serde_json::to_vec_pretty(&child_log)
                             .expect("InputValueLog serializes"),
-                        suffix: None,
                     };
                     log_vec.push(LogReference::new(child_file.path()));
                     all_files.push(child_file);
@@ -147,7 +145,6 @@ impl InputValue {
                     media_index: None,
                     extension: "txt".to_string(),
                     content: s.into_bytes(),
-                    suffix: None,
                 };
                 let r = LogReference::new(file.path());
                 (InputValueLog::Reference(r), vec![file])
@@ -164,7 +161,6 @@ impl InputValue {
                     extension: "json".to_string(),
                     content: serde_json::to_vec_pretty(&self)
                         .expect("InputValue leaf serializes"),
-                    suffix: None,
                 };
                 let r = LogReference::new(file.path());
                 (InputValueLog::Reference(r), vec![file])

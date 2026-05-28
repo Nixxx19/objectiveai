@@ -152,7 +152,6 @@ impl RichContent {
                     media_index: None,
                     extension: "txt".to_string(),
                     content: text.into_bytes(),
-                    suffix: None,
                 };
                 let reference = LogReference::new(log_file.path());
                 (RichContentLog::Reference(reference), vec![log_file])
@@ -212,7 +211,6 @@ impl RichContent {
                 media_index: Some(part_idx),
                 extension: "txt".to_string(),
                 content: text.clone().into_bytes(),
-                suffix: None,
             };
         }
 
@@ -234,7 +232,6 @@ impl RichContent {
                     media_index: Some(part_idx),
                     extension: fc.extension.to_string(),
                     content: decoded,
-                    suffix: None,
                 };
             }
         }
@@ -250,7 +247,6 @@ impl RichContent {
             media_index: Some(part_idx),
             extension: "json".to_string(),
             content: json,
-            suffix: None,
         }
     }
 

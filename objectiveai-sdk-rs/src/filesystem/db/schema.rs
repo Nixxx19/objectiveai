@@ -56,27 +56,27 @@ impl MessageKind {
     /// from a (kind, agent_id, path) row.
     ///
     /// - Request rows carry the top-level response_id in `path`; the
-    ///   file lives at `{route}/{path}-request.json`.
+    ///   file lives at `{route}/request/{path}.json`.
     /// - Assistant / tool rows carry the server message index in
-    ///   `path`; the file is at `agents/completions/messages/{agent_id}_{path}.json`.
+    ///   `path`; the file is at `agents/completions/response/messages/{agent_id}_{path}.json`.
     /// - Notification rows carry the writer-reserved index in `path`;
-    ///   the file is at `agents/completions/notifications/{agent_id}_{path}.json`.
+    ///   the file is at `agents/completions/response/notifications/{agent_id}_{path}.json`.
     pub fn file_path(&self, agent_id: &str, path: &str) -> String {
         match self {
             MessageKind::AgentCompletionRequest => {
-                format!("agents/completions/{path}-request.json")
+                format!("agents/completions/request/{path}.json")
             }
             MessageKind::FunctionExecutionRequest => {
-                format!("functions/executions/{path}-request.json")
+                format!("functions/executions/request/{path}.json")
             }
             MessageKind::FunctionInventionRecursiveRequest => {
-                format!("functions/inventions/recursive/{path}-request.json")
+                format!("functions/inventions/recursive/request/{path}.json")
             }
             MessageKind::AssistantResponse | MessageKind::ToolResponse => {
-                format!("agents/completions/messages/{agent_id}_{path}.json")
+                format!("agents/completions/response/messages/{agent_id}_{path}.json")
             }
             MessageKind::AgentCompletionNotification => {
-                format!("agents/completions/notifications/{agent_id}_{path}.json")
+                format!("agents/completions/response/notifications/{agent_id}_{path}.json")
             }
         }
     }

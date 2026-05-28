@@ -93,7 +93,7 @@ impl PipeRegistry {
     /// writer task. Every line the reader successfully parses as
     /// `RichContent` is fanned out to the API server via `notifier`
     /// (existing) AND pushed onto `notif_tx` so the writer task can
-    /// log it under `agents/completions/notifications/...` and queue
+    /// log it under `agents/completions/response/notifications/...` and queue
     /// the matching DB row.
     pub async fn ensure_pipe(
         &self,

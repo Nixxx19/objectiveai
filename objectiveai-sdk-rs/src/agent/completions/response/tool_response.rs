@@ -51,7 +51,6 @@ impl ToolResponse {
             media_index: None,
             extension: "json".to_string(),
             content: serde_json::to_vec_pretty(&log).unwrap(),
-            suffix: None,
         };
         let reference = LogReference::new(msg_file.path());
         files.push(msg_file);

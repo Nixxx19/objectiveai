@@ -83,7 +83,7 @@ impl AgentCompletionChunk {
         &self,
     ) -> Option<(crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>)> {
         use crate::filesystem::logs::{LogFile, LogReference};
-        const ROUTE: &str = "agents/completions";
+        const ROUTE: &str = "agents/completions/response";
 
         let id = &self.id;
         if id.is_empty() {
@@ -108,7 +108,6 @@ impl AgentCompletionChunk {
                 media_index: None,
                 extension: "json".to_string(),
                 content: serde_json::to_vec_pretty(continuation).unwrap(),
-                suffix: None,
             };
             let r = LogReference::new(cont_file.path());
             files.push(cont_file);
@@ -134,7 +133,6 @@ impl AgentCompletionChunk {
             media_index: None,
             extension: "json".to_string(),
             content: serde_json::to_vec_pretty(&log).unwrap(),
-            suffix: Some("response"),
         };
         let reference = LogReference::new(root_file.path());
         files.push(root_file);
@@ -146,7 +144,7 @@ impl AgentCompletionChunk {
     /// `messages` table. Lazy: borrows from `self`, never collects.
     ///
     /// `agent_id` is this chunk's `id`; `path` points at the
-    /// per-message log file under `agents/completions/messages/`.
+    /// per-message log file under `agents/completions/response/messages/`.
     /// Returns an empty iterator when `id` is empty (the chunk hasn't
     /// been assigned a response id yet — same gate `produce_files`
     /// uses).

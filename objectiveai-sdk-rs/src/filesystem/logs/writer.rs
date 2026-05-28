@@ -182,7 +182,6 @@ impl<C> LogWriter<C> {
                         media_index: None,
                         extension: "json".to_string(),
                         content: bytes,
-                        suffix: Some("request"),
                     };
                     self.request_file_path = Some(request_file.path());
                     files.push(request_file);
