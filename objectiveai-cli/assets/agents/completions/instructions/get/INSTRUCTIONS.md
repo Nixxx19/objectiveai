@@ -1,6 +1,6 @@
 # Agent Completion — Spawn Instructions
 
-You are about to run `objectiveai agents spawn standard …`.
+You are about to run `objectiveai agents spawn …`.
 Read all of the following before constructing the command.
 
 ## Watching progress
