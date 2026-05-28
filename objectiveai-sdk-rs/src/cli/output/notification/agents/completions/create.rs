@@ -1,7 +1,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-/// Final assistant message text returned by `agents completions create`.
+/// Final assistant message text returned by `agents spawn`.
 ///
 /// Wire: `{"type":"notification","content":"...text..."}`.
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]

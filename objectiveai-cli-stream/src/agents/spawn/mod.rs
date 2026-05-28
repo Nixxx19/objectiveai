@@ -1,4 +1,4 @@
-//! `agents completions create` — open an agent completion stream,
+//! `agents spawn` — open an agent completion stream,
 //! emit each chunk as NDJSON to stdout, manage per-agent named pipes,
 //! and write coalesced log files to `${config_base_dir}/logs/`.
 

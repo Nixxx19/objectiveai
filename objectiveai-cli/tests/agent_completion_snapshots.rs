@@ -74,7 +74,7 @@ macro_rules! snapshot_test {
                 cli_test_util::InstructionsScope::AgentCompletions,
             );
             let mut args = vec![
-                "agents", "completions", "create", "standard",
+                "agents", "spawn", "standard",
                 "--agent", &agent_str,
                 "--messages-inline", $messages_json,
                 "--seed", &seed_str,

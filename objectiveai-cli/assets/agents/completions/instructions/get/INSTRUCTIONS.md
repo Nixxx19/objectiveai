@@ -1,6 +1,6 @@
-# Agent Completion — Create Instructions
+# Agent Completion — Spawn Instructions
 
-You are about to run `objectiveai agents completions create standard …`.
+You are about to run `objectiveai agents spawn standard …`.
 Read all of the following before constructing the command.
 
 ## Watching progress
@@ -10,7 +10,7 @@ If you want to monitor the agent's progress while it streams, pass
 immediately so you can poll the logs while the completion runs in
 the background.
 
-**Never use the built-in `Monitor` tool to watch a `create` command.**
+**Never use the built-in `Monitor` tool to watch an `agents spawn` command.**
 The CLI streams to disk through its log writer; nothing meaningful
 goes to stdout while the completion is in flight, so `Monitor` will
 sit silent and you will draw the wrong conclusion. Poll with the

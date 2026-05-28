@@ -1,14 +1,19 @@
 use clap::Subcommand;
 use objectiveai_sdk::cli::output::Handle;
 
-use crate::api::{HttpArgs, PipeArgs};
+use crate::api::{BodySource, HttpArgs, PipeArgs};
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-    /// Agent completions
-    Completions {
-        #[command(subcommand)]
-        command: super::completions::Commands,
+    /// Stream a spawned agent completion. Per-chunk NDJSON on
+    /// stdout, per-agent pipes under
+    /// `${config_base_dir}/pipes/<agent_id>`, coalesced log files
+    /// under `${config_base_dir}/logs/agents/completions/<acc-id>/`,
+    /// and a one-shot `LogStreamReady` notification once the root
+    /// log id is available.
+    Spawn {
+        #[command(flatten)]
+        body: BodySource,
     },
 }
 
@@ -20,7 +25,7 @@ impl Commands {
         handle: &Handle,
     ) -> Result<(), String> {
         match self {
-            Commands::Completions { command } => command.handle(http, pipes, handle).await,
+            Commands::Spawn { body } => super::spawn::handle(http, pipes, body, handle).await,
         }
     }
 }

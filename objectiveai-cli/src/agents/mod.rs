@@ -3,6 +3,7 @@ pub mod config;
 pub mod favorites;
 pub mod list_active;
 pub mod read_pending;
+pub mod spawn;
 
 use clap::Subcommand;
 
@@ -50,6 +51,11 @@ pub enum Commands {
     ReadPending(read_pending::CommandArgs),
     /// List direct-child agents + the time of their most recent assistant response
     ListActive(list_active::CommandArgs),
+    /// Spawn an agent completion (open a streaming run as a child of this caller)
+    Spawn {
+        #[command(subcommand)]
+        command: spawn::Commands,
+    },
 }
 
 async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
@@ -104,6 +110,7 @@ impl Commands {
             Commands::Favorites { command } => command.handle(cli_config, handle).await,
             Commands::ReadPending(args) => read_pending::handle(args, cli_config, handle).await,
             Commands::ListActive(args) => list_active::handle(args, cli_config, handle).await,
+            Commands::Spawn { command } => command.handle(cli_config, handle).await,
             Commands::Publish { repository, body, message, overwrite } => {
                 let agent: objectiveai_sdk::agent::RemoteAgentBaseWithFallbacks = body.resolve()?;
                 let msg = message.resolve()?;

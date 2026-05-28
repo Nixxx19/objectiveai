@@ -1,3 +1,8 @@
+//! `agents spawn` — open an agent completion as a child of the
+//! current caller. Same code that used to live under
+//! `agents completions create`, just relocated to a top-level
+//! verb under `agents`.
+
 use clap::{Args, Subcommand};
 
 crate::define_inline_or_ref!(AgentArg, "agent", objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional, Remote);
@@ -102,7 +107,7 @@ impl Commands {
             objectiveai_sdk::agent::completions::response::streaming::AgentCompletionChunk,
         >(
             cli_config,
-            &["agents", "completions", "create"],
+            &["agents", "spawn"],
             &params,
             handle,
             |_chunk| Vec::new(),  // agent completions have no per-chunk inner errors
