@@ -11,29 +11,32 @@ use objectiveai_sdk::agent::completions::message::{Message, RichContent, UserMes
 
 crate::define_inline_or_ref!(AgentArg, "agent", objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional, Remote);
 
-/// How messages are provided to the agent completion.
+/// How the prompt is provided to the agent completion. Resolves to
+/// the wire-level `messages` array, but the CLI surface is named
+/// "prompt" — the common case (`--simple "<text>"`) is a single
+/// user message, not a multi-message conversation.
 #[derive(Args)]
 #[group(required = true, multiple = false)]
-pub struct MessageSource {
+pub struct PromptSource {
     /// Plain text — becomes one user message
     /// (`{ role: "user", content: <text> }`).
     #[arg(long)]
     simple: Option<String>,
     /// Inline JSON messages array
     #[arg(long)]
-    messages_inline: Option<String>,
+    prompt_inline: Option<String>,
     /// Path to a JSON file containing the messages array
     #[arg(long)]
-    messages_file: Option<std::path::PathBuf>,
+    prompt_file: Option<std::path::PathBuf>,
     /// Inline Python code that produces the messages array
     #[arg(long)]
-    messages_python_inline: Option<String>,
+    prompt_python_inline: Option<String>,
     /// Path to a Python file that produces the messages array
     #[arg(long)]
-    messages_python_file: Option<std::path::PathBuf>,
+    prompt_python_file: Option<std::path::PathBuf>,
 }
 
-impl MessageSource {
+impl PromptSource {
     fn resolve(self) -> Result<Vec<Message>, crate::error::Error> {
         if let Some(text) = self.simple {
             return Ok(vec![Message::User(UserMessage {
@@ -41,22 +44,22 @@ impl MessageSource {
                 name: None,
             })]);
         }
-        if let Some(inline) = self.messages_inline {
+        if let Some(inline) = self.prompt_inline {
             let mut de = serde_json::Deserializer::from_str(&inline);
             return serde_path_to_error::deserialize(&mut de)
                 .map_err(crate::error::Error::InlineDeserialize);
         }
-        if let Some(path) = self.messages_file {
+        if let Some(path) = self.prompt_file {
             let bytes = std::fs::read(&path)
-                .map_err(|e| crate::error::Error::MessagesFileRead(path.clone(), e))?;
+                .map_err(|e| crate::error::Error::PromptFileRead(path.clone(), e))?;
             let mut de = serde_json::Deserializer::from_slice(&bytes);
             return serde_path_to_error::deserialize(&mut de)
                 .map_err(crate::error::Error::InlineDeserialize);
         }
-        if let Some(code) = self.messages_python_inline {
+        if let Some(code) = self.prompt_python_inline {
             return crate::python::exec_code(&code);
         }
-        if let Some(path) = self.messages_python_file {
+        if let Some(path) = self.prompt_python_file {
             return crate::python::exec_file(&path);
         }
         unreachable!("clap group ensures one is set")
@@ -66,7 +69,7 @@ impl MessageSource {
 #[derive(Args)]
 pub struct CommandArgs {
     #[command(flatten)]
-    pub messages: MessageSource,
+    pub prompt: PromptSource,
     #[command(flatten)]
     pub agent: AgentArg,
     /// Seed for deterministic mock responses
@@ -79,7 +82,7 @@ pub async fn handle(
     cli_config: &crate::Config,
     handle: &objectiveai_sdk::cli::output::Handle,
 ) -> Result<(), crate::error::Error> {
-    let messages = args.messages.resolve()?;
+    let messages = args.prompt.resolve()?;
     let agent = args
         .agent
         .resolve(|| async {
