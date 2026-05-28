@@ -6,12 +6,12 @@
 //! [`crate::agent::completions::response::streaming::AssistantResponseChunkLog`].
 
 use schemars::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use super::RichContentLog;
 use crate::filesystem::logs::LogReference;
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "agent.completions.message.AssistantMessageLog")]
 pub struct AssistantMessageLog {
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -125,18 +125,24 @@ impl RichContent {
     /// Per-chunk write rules:
     ///
     /// - `RichContent::Text(text)` → one `.txt` file at
-    ///   `<route_base>/messages/text/<id>-<idx>.txt` containing the
-    ///   raw UTF-8 text. Return `RichContentLog::Reference(ref)`.
+    ///   `<media_root>/text/<id>-<idx>.txt` containing the raw
+    ///   UTF-8 text. Return `RichContentLog::Reference(ref)`.
     /// - `RichContent::Parts(parts)` → one file per part (rules
     ///   below in [`Self::extract_one_part`]). Return
     ///   `RichContentLog::Parts(vec_of_refs)` in original order.
     ///
-    /// `route_base` is the route prefix (e.g. `"agents/completions"`).
-    /// `id` and `message_index` identify the parent message.
+    /// `media_root` is the parent directory under which the
+    /// per-media-type subdirs (`text`, `image`, `audio`, `video`,
+    /// `file`) get created. Callers pass things like
+    /// `"agents/completions/request/messages"` for message extraction
+    /// or `"agents/completions/request/notifications"` for notification
+    /// extraction.
+    ///
+    /// `id` and `message_index` identify the parent record.
     #[cfg(feature = "filesystem")]
     pub fn extract_media(
         self,
-        route_base: &str,
+        media_root: &str,
         id: &str,
         message_index: u64,
     ) -> (super::RichContentLog, Vec<crate::filesystem::logs::LogFile>) {
@@ -146,7 +152,7 @@ impl RichContent {
         match self {
             RichContent::Text(text) => {
                 let log_file = LogFile {
-                    route: format!("{route_base}/messages/text"),
+                    route: format!("{media_root}/text"),
                     id: id.to_string(),
                     message_index: Some(message_index),
                     media_index: None,
@@ -162,7 +168,7 @@ impl RichContent {
                 for (part_idx, part) in parts.into_iter().enumerate() {
                     let file = Self::extract_one_part(
                         part,
-                        route_base,
+                        media_root,
                         id,
                         message_index,
                         part_idx as u64,
@@ -178,16 +184,16 @@ impl RichContent {
     /// Write one `RichContentPart` to its own [`LogFile`].
     ///
     /// File-type choice per part:
-    /// - `Text { text }` → `.txt` (raw UTF-8) under `messages/text/`.
+    /// - `Text { text }` → `.txt` (raw UTF-8) under `<media_root>/text/`.
     /// - Inline-decodable media (`ImageUrl` / `InputAudio` /
     ///   `InputVideo` / `VideoUrl` / `File` whose `file_content()`
     ///   yields a `FileContent` that successfully `decode()`s) → the
-    ///   decoded binary written under `messages/<media_dir>/` with
-    ///   the `FileContent`'s native extension.
+    ///   decoded binary written under `<media_root>/<media_dir>/`
+    ///   with the `FileContent`'s native extension.
     /// - Anything else (remote URLs, non-decodable inline data) →
     ///   `serde_json::to_vec_pretty(&part)` written under
-    ///   `messages/<media_dir>/` as a `.json` file. The reader can
-    ///   `serde_json::from_slice::<RichContentPart>` it back.
+    ///   `<media_root>/<media_dir>/` as a `.json` file. The reader
+    ///   can `serde_json::from_slice::<RichContentPart>` it back.
     ///
     /// `media_dir` is debug grouping only — `image|audio|video|file`
     /// per variant. Not load-bearing for parsing (the reader keys
@@ -195,7 +201,7 @@ impl RichContent {
     #[cfg(feature = "filesystem")]
     fn extract_one_part(
         part: RichContentPart,
-        route_base: &str,
+        media_root: &str,
         id: &str,
         message_index: u64,
         part_idx: u64,
@@ -205,7 +211,7 @@ impl RichContent {
         // Text branches out early — never goes through file_content().
         if let RichContentPart::Text { text } = &part {
             return LogFile {
-                route: format!("{route_base}/messages/text"),
+                route: format!("{media_root}/text"),
                 id: id.to_string(),
                 message_index: Some(message_index),
                 media_index: Some(part_idx),
@@ -226,7 +232,7 @@ impl RichContent {
         if let Some(fc) = bin_attempt {
             if let Ok(decoded) = fc.decode() {
                 return LogFile {
-                    route: format!("{route_base}/messages/{media_dir}"),
+                    route: format!("{media_root}/{media_dir}"),
                     id: id.to_string(),
                     message_index: Some(message_index),
                     media_index: Some(part_idx),
@@ -241,7 +247,7 @@ impl RichContent {
         let json = serde_json::to_vec_pretty(&part)
             .expect("RichContentPart serializes");
         LogFile {
-            route: format!("{route_base}/messages/{media_dir}"),
+            route: format!("{media_root}/{media_dir}"),
             id: id.to_string(),
             message_index: Some(message_index),
             media_index: Some(part_idx),

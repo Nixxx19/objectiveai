@@ -33,7 +33,7 @@ impl ToolResponse {
         // wire chunk's `serde(flatten)` on `inner`).
         let mut content = self.inner.content.clone();
         content.prepare();
-        let (content_log, media_files) = content.extract_media(route_base, id, self.index);
+        let (content_log, media_files) = content.extract_media(&format!("{route_base}/messages"), id, self.index);
         files.extend(media_files);
 
         let log = super::ToolResponseLog {

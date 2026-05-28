@@ -16,11 +16,11 @@
 //! small + structurally important for log-readability.
 
 use schemars::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::filesystem::logs::LogReference;
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "agent.completions.request.AgentCompletionCreateParamsLog")]
 pub struct AgentCompletionCreateParamsLog {
     pub messages: Vec<LogReference>,

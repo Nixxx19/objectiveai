@@ -240,7 +240,7 @@ impl AssistantResponseChunk {
         // Extract media from content (if present).
         let content_log = self.content.clone().map(|mut content| {
             content.prepare();
-            let (content_log, media_files) = content.extract_media(route_base, id, self.index);
+            let (content_log, media_files) = content.extract_media(&format!("{route_base}/messages"), id, self.index);
             files.extend(media_files);
             content_log
         });

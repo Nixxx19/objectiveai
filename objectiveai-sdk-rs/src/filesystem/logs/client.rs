@@ -498,6 +498,140 @@ impl Client {
     pub async fn subscribe_function_invention_recursive_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
         self.subscribe_json("functions/inventions/recursive/request", id, timeout, require_modification, jq).await
     }
+
+    // -- Per-agent message queue ---------------------------------------------
+
+    /// Drain every unread row for `spawned_agent_id` from
+    /// `caller_agent_id`'s perspective and atomically advance the
+    /// pair's watermark in `messages_queue`. Each row is hydrated
+    /// from its on-disk log file(s) and translated into a typed
+    /// [`super::queue::QueueItem`] following the `WORK.md` schema.
+    ///
+    /// Returns the items in ascending DB-`"index"` order — the same
+    /// order they were inserted. First-call semantics inherit from
+    /// [`super::super::db::messages::Queue::read_new_messages`]: when
+    /// no `messages_queue` row exists yet, the watermark defaults
+    /// to 0 and the (typically request-row) index 0 is NOT
+    /// returned.
+    pub async fn read_new_from_queue(
+        &self,
+        caller_agent_id: &str,
+        spawned_agent_id: &str,
+    ) -> Result<Vec<super::queue::QueueItem>, Error> {
+        let conn = super::super::db::connection::connection(self)?;
+        let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
+        let rows = queue.read_new_messages(caller_agent_id, spawned_agent_id).await?;
+        let mut items = Vec::with_capacity(rows.len());
+        for row in rows {
+            items.push(self.queue_item_from_row(row).await?);
+        }
+        Ok(items)
+    }
+
+    /// Translate one [`crate::filesystem::db::schema::MessageRow`]
+    /// into a typed [`super::queue::QueueItem`] by reading the row's
+    /// log file(s) from disk and converting log-type fields to
+    /// [`super::queue::Id`]s.
+    async fn queue_item_from_row(
+        &self,
+        row: crate::filesystem::db::schema::MessageRow,
+    ) -> Result<super::queue::QueueItem, Error> {
+        use crate::filesystem::db::schema::MessageKind;
+        use super::queue::{Id, QueueItem};
+
+        let rel_path = row.kind.file_path(&row.agent_id, &row.path);
+
+        match row.kind {
+            MessageKind::FunctionExecutionRequest => {
+                Ok(QueueItem::FunctionExecutionRequest { id: Id::new(rel_path) })
+            }
+            MessageKind::FunctionInventionRecursiveRequest => {
+                Ok(QueueItem::FunctionInventionRecursiveRequest { id: Id::new(rel_path) })
+            }
+            MessageKind::AgentCompletionRequest => {
+                let envelope: crate::agent::completions::request::AgentCompletionCreateParamsLog =
+                    self.read_log_file(&rel_path).await?;
+                let mut messages = Vec::with_capacity(envelope.messages.len());
+                for msg_ref in envelope.messages {
+                    let msg_log: crate::agent::completions::message::MessageLog =
+                        self.read_log_file(&msg_ref.path).await?;
+                    messages.push(message_log_to_queue_message(msg_log));
+                }
+                Ok(QueueItem::UserRequest { messages })
+            }
+            MessageKind::AssistantResponse => {
+                let log: crate::agent::completions::response::streaming::AssistantResponseChunkLog =
+                    self.read_log_file(&rel_path).await?;
+                Ok(QueueItem::AssistantResponse {
+                    reasoning: log.reasoning.map(Id::from),
+                    tool_calls: log.tool_calls.map(|tcs| tcs.into_iter().map(Id::from).collect()),
+                    content: log.content.map(Into::into),
+                    refusal: log.refusal.map(Id::from),
+                })
+            }
+            MessageKind::ToolResponse => {
+                let log: crate::agent::completions::response::ToolResponseLog =
+                    self.read_log_file(&rel_path).await?;
+                Ok(QueueItem::ToolResponse {
+                    tool_call_id: log.tool_call_id,
+                    content: log.content.into(),
+                })
+            }
+            MessageKind::AgentCompletionNotification => {
+                let log: crate::agent::completions::message::RichContentLog =
+                    self.read_log_file(&rel_path).await?;
+                Ok(QueueItem::Notification { content: log.into() })
+            }
+        }
+    }
+
+    /// Deserialize one log file at `rel_path` (relative to the logs
+    /// dir) into the requested type.
+    async fn read_log_file<T: serde::de::DeserializeOwned>(
+        &self,
+        rel_path: &str,
+    ) -> Result<T, Error> {
+        let full = self.logs_dir().join(rel_path);
+        let bytes = tokio::fs::read(&full)
+            .await
+            .map_err(|e| Error::Read(full.clone(), e))?;
+        serde_json::from_slice(&bytes).map_err(|e| Error::Parse(full, e))
+    }
+}
+
+/// Convert a [`crate::agent::completions::message::MessageLog`]
+/// into a [`super::queue::QueueMessage`]. Per-role dispatch.
+fn message_log_to_queue_message(
+    log: crate::agent::completions::message::MessageLog,
+) -> super::queue::QueueMessage {
+    use crate::agent::completions::message::MessageLog;
+    use super::queue::{Id, QueueMessage};
+
+    match log {
+        MessageLog::Developer(m) => QueueMessage::DeveloperMessage {
+            content: m.content.into(),
+            name: m.name,
+        },
+        MessageLog::System(m) => QueueMessage::SystemMessage {
+            content: m.content.into(),
+            name: m.name,
+        },
+        MessageLog::User(m) => QueueMessage::UserMessage {
+            content: m.content.into(),
+            name: m.name,
+        },
+        MessageLog::Assistant(m) => QueueMessage::AssistantMessage {
+            content: m.content.map(Into::into),
+            name: m.name,
+            reasoning: m.reasoning.map(Id::from),
+            tool_calls: m.tool_calls.map(|tcs| tcs.into_iter().map(Id::from).collect()),
+            refusal: m.refusal.map(Id::from),
+        },
+        MessageLog::Tool(m) => QueueMessage::ToolMessage {
+            content: m.content.into(),
+            tool_call_id: m.tool_call_id,
+        },
+    }
 }
 
 // -- Pure helpers (no &Client) ---------------------------------------------

@@ -59,7 +59,7 @@ impl ToolMessage {
         id: &str,
         message_index: u64,
     ) -> (super::ToolMessageLog, Vec<crate::filesystem::logs::LogFile>) {
-        let (content, files) = self.content.extract_media(route_base, id, message_index);
+        let (content, files) = self.content.extract_media(&format!("{route_base}/messages"), id, message_index);
         (
             super::ToolMessageLog {
                 content,

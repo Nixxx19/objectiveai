@@ -484,6 +484,11 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunkLog),
             schemars::schema_for!(crate::functions::inventions::response::streaming::FunctionInventionChunkLog),
             schemars::schema_for!(crate::vector::completions::response::streaming::VectorCompletionChunkLog),
+            // Typed queue-reader schemas (Client::read_new_from_queue).
+            schemars::schema_for!(crate::filesystem::logs::queue::Id),
+            schemars::schema_for!(crate::filesystem::logs::queue::Content),
+            schemars::schema_for!(crate::filesystem::logs::queue::QueueMessage),
+            schemars::schema_for!(crate::filesystem::logs::queue::QueueItem),
             schemars::schema_for!(crate::filesystem::plugins::Binaries),
             schemars::schema_for!(crate::filesystem::plugins::Manifest),
             schemars::schema_for!(crate::filesystem::plugins::ManifestWithNameAndSource),

@@ -53,7 +53,7 @@ impl SystemMessage {
         id: &str,
         message_index: u64,
     ) -> (super::SystemMessageLog, Vec<crate::filesystem::logs::LogFile>) {
-        let (content, files) = self.content.extract_media(route_base, id, message_index);
+        let (content, files) = self.content.extract_media(&format!("{route_base}/messages"), id, message_index);
         (super::SystemMessageLog { content, name: self.name }, files)
     }
 }

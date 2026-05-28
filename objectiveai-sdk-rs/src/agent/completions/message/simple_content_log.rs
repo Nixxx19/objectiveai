@@ -20,11 +20,11 @@
 //! - `Parts`:     `[{"type":"reference","path":"…"}, …]`
 
 use schemars::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::filesystem::logs::LogReference;
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "agent.completions.message.SimpleContentLog")]
 pub enum SimpleContentLog {

@@ -50,18 +50,21 @@ impl SimpleContent {
     /// Extract every chunk of this content into its own on-disk log
     /// file, returning a [`super::SimpleContentLog`] of
     /// [`LogReference`]s pointing at the written files. Parallel to
-    /// [`super::RichContent::extract_media`] (post-rewrite).
+    /// [`super::RichContent::extract_media`].
+    ///
+    /// `media_root` is the parent directory under which the `text`
+    /// subdir gets created (SimpleContent has only text parts).
     ///
     /// - `SimpleContent::Text(text)` → one `.txt` at
-    ///   `<route_base>/messages/text/<id>-<idx>.txt` containing
+    ///   `<media_root>/text/<id>-<idx>.txt` containing
     ///   `text.into_bytes()`. Return `Reference(ref)`.
     /// - `SimpleContent::Parts(parts)` → one `.txt` per part at
-    ///   `<route_base>/messages/text/<id>-<idx>-<part_idx>.txt`.
+    ///   `<media_root>/text/<id>-<idx>-<part_idx>.txt`.
     ///   Return `Parts(vec_of_refs)`.
     #[cfg(feature = "filesystem")]
     pub fn extract_media(
         self,
-        route_base: &str,
+        media_root: &str,
         id: &str,
         message_index: u64,
     ) -> (super::SimpleContentLog, Vec<crate::filesystem::logs::LogFile>) {
@@ -71,7 +74,7 @@ impl SimpleContent {
         match self {
             SimpleContent::Text(text) => {
                 let log_file = LogFile {
-                    route: format!("{route_base}/messages/text"),
+                    route: format!("{media_root}/text"),
                     id: id.to_string(),
                     message_index: Some(message_index),
                     media_index: None,
@@ -87,7 +90,7 @@ impl SimpleContent {
                 for (part_idx, part) in parts.into_iter().enumerate() {
                     let SimpleContentPart::Text { text } = part;
                     let log_file = LogFile {
-                        route: format!("{route_base}/messages/text"),
+                        route: format!("{media_root}/text"),
                         id: id.to_string(),
                         message_index: Some(message_index),
                         media_index: Some(part_idx as u64),

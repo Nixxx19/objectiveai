@@ -24,13 +24,13 @@
 //! (even when `None` → JSON `null`) — same as the wire chunk.
 
 use schemars::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::agent::completions::message;
 use crate::agent::completions::response;
 use crate::filesystem::logs::LogReference;
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "agent.completions.response.streaming.AssistantResponseChunkLog")]
 pub struct AssistantResponseChunkLog {
     pub role: response::AssistantRole,

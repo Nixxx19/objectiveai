@@ -6,14 +6,14 @@
 //! metadata stay inline.
 
 use schemars::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use super::{
     AssistantMessageLog, DeveloperMessageLog, SystemMessageLog, ToolMessageLog,
     UserMessageLog,
 };
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "role")]
 #[schemars(rename = "agent.completions.message.MessageLog")]
 pub enum MessageLog {

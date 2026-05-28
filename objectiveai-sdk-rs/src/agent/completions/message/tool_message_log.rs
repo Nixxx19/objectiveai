@@ -3,11 +3,11 @@
 //! tool_call_id + metadata stay inline.
 
 use schemars::JsonSchema;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use super::{RichContentLog, ToolResponseMetadata};
 
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "agent.completions.message.ToolMessageLog")]
 pub struct ToolMessageLog {
     pub content: RichContentLog,

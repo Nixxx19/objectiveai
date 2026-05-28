@@ -139,13 +139,17 @@ impl Queue {
         Ok(state.inserted_paths.insert(path.to_string()))
     }
 
-    /// Write a notification log file at
+    /// Write a notification's content out as per-leaf files (text /
+    /// media parts under
+    /// `agents/completions/request/notifications/{text,image,...}/`)
+    /// plus a parent `RichContentLog` envelope at
     /// `agents/completions/request/notifications/<agent_id>_<idx>.json`,
     /// reserve the agent's next index, and return a
     /// [`PendingNotification`] the caller queues locally for a later
-    /// [`Self::insert_notification`] call. The row's `path` column
-    /// holds just `{idx}` — the agent_id is in its own column and
-    /// the route is implied by the kind.
+    /// [`Self::insert_notification`] call. Same extract-to-leaves
+    /// pattern that messages use; the on-disk DB row's `path` column
+    /// holds just `{idx}` (the agent_id is its own column and the
+    /// route is implied by the kind).
     pub async fn write_notification(
         &self,
         agent_id: &str,
@@ -158,8 +162,29 @@ impl Queue {
             state.next_index += 1;
             idx
         };
-        // On-disk filename keeps its existing shape (so files from
-        // different agents don't collide in the same directory).
+
+        // 1. Extract the content into per-leaf files; their parent
+        //    directory is `request/notifications/{text,image,...}/`.
+        let (content_log, leaf_files) = content.clone().extract_media(
+            "agents/completions/request/notifications",
+            agent_id,
+            index,
+        );
+
+        // 2. Write the per-leaf files.
+        for file in leaf_files {
+            let full_path = self.inner.logs_dir.join(file.path());
+            if let Some(parent) = full_path.parent() {
+                tokio::fs::create_dir_all(parent).await.map_err(|e| {
+                    super::super::Error::Write(parent.to_path_buf(), e)
+                })?;
+            }
+            tokio::fs::write(&full_path, file.content)
+                .await
+                .map_err(|e| super::super::Error::Write(full_path, e))?;
+        }
+
+        // 3. Write the parent envelope (a bare `RichContentLog`).
         let rel_path = format!(
             "agents/completions/request/notifications/{agent_id}_{index}.json"
         );
@@ -169,11 +194,12 @@ impl Queue {
                 super::super::Error::Write(parent.to_path_buf(), e)
             })?;
         }
-        let bytes = serde_json::to_vec_pretty(content)
+        let bytes = serde_json::to_vec_pretty(&content_log)
             .map_err(super::super::Error::Serialize)?;
         tokio::fs::write(&full_path, bytes)
             .await
             .map_err(|e| super::super::Error::Write(full_path, e))?;
+
         Ok(PendingNotification {
             agent_id: agent_id.to_string(),
             index,

@@ -128,7 +128,7 @@ impl AssistantMessage {
         });
 
         let content_log = self.content.map(|content| {
-            let (log, content_files) = content.extract_media(route_base, id, message_index);
+            let (log, content_files) = content.extract_media(&format!("{route_base}/messages"), id, message_index);
             files.extend(content_files);
             log
         });
