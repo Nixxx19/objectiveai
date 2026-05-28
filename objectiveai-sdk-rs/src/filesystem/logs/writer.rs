@@ -57,6 +57,14 @@ pub struct LogWriter<C> {
     /// Captured once on the first chunk so it can be reused as the
     /// `path` column for every agent's request row.
     request_file_path: Option<String>,
+    /// The most recently-received chunk, buffered awaiting a
+    /// successor. Processed on the NEXT `write` call or by
+    /// `finalize`. `None` before the first `write` and again once
+    /// `finalize` flushes it. Defers all per-chunk work (files,
+    /// DB rows, notification drain) by one chunk so a chunk's
+    /// outputs only commit once a successor confirms the chunk is
+    /// done evolving.
+    pending_chunk: Option<C>,
 }
 
 impl<C> LogWriter<C> {
@@ -74,6 +82,7 @@ impl<C> LogWriter<C> {
             request_kind: None,
             produce_rows: None,
             request_file_path: None,
+            pending_chunk: None,
         }
     }
 
@@ -156,6 +165,25 @@ impl<C> LogWriter<C> {
     /// the tool response's reserved index). Notifications for agents
     /// not in this chunk remain in `pending` for the next call.
     pub async fn write(
+        &mut self,
+        chunk: &C,
+        pending: &mut Vec<PendingNotification>,
+    ) -> Result<(), super::super::Error>
+    where
+        C: AgentCompletionIds + Clone,
+    {
+        // Process the previously-buffered chunk (one chunk behind),
+        // then stash the current one to await its successor.
+        let prev = self.pending_chunk.replace(chunk.clone());
+        if let Some(buffered) = prev {
+            self.process_chunk(&buffered, pending).await?;
+        }
+        Ok(())
+    }
+
+    /// Verbatim body of the original `write`. Splits files +
+    /// DB rows + notification drain in one atomic op set.
+    async fn process_chunk(
         &mut self,
         chunk: &C,
         pending: &mut Vec<PendingNotification>,
@@ -312,15 +340,27 @@ impl<C> LogWriter<C> {
         Ok(())
     }
 
-    /// Drain any remaining notifications into their respective per-
-    /// agent dbs. Called by the cli-stream writer task after the chunk
-    /// channel closes and any in-flight notifications have been pulled
-    /// off the wire. Each surviving notification is inserted at its
-    /// already-reserved index.
+    /// Flush the buffered last chunk (if any), then drain any
+    /// remaining notifications into their respective per-agent dbs.
+    /// Called by the cli-stream writer task after the chunk channel
+    /// closes and any in-flight notifications have been pulled off
+    /// the wire — this is the writer's only "stream is over" signal,
+    /// and it's where the deferred-by-one `pending_chunk` finally
+    /// gets processed. Each surviving notification is inserted at
+    /// its already-reserved index.
     pub async fn finalize(
         &mut self,
         pending: &mut Vec<PendingNotification>,
-    ) -> Result<(), super::super::Error> {
+    ) -> Result<(), super::super::Error>
+    where
+        C: AgentCompletionIds,
+    {
+        // Flush the last buffered chunk before doing the
+        // notification drain — its tool-response rows may want to
+        // drain notifications too, and those should land first.
+        if let Some(buffered) = self.pending_chunk.take() {
+            self.process_chunk(&buffered, pending).await?;
+        }
         let queue = match self.queue.clone() {
             Some(q) => q,
             None => {

@@ -190,7 +190,7 @@ async fn writer_loop<Chunk, F>(
 ) -> Result<(), objectiveai_sdk::filesystem::Error>
 where
     F: Fn(&mut Chunk, &Chunk),
-    Chunk: objectiveai_sdk::agent::completions::response::streaming::AgentCompletionIds,
+    Chunk: objectiveai_sdk::agent::completions::response::streaming::AgentCompletionIds + Clone,
 {
     let mut agg: Option<Chunk> = None;
     let mut pending: Vec<PendingNotification> = Vec::new();
