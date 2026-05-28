@@ -97,23 +97,6 @@ fn ack_ok_wire_shape() {
 }
 
 #[test]
-fn begin_wire_shape() {
-    let out: Output<Ok> = Output::Begin;
-    let v = roundtrip(&out);
-    assert_eq!(v["type"], "begin");
-    // No other fields.
-    assert_eq!(v.as_object().unwrap().len(), 1);
-}
-
-#[test]
-fn end_wire_shape() {
-    let out: Output<Ok> = Output::End;
-    let v = roundtrip(&out);
-    assert_eq!(v["type"], "end");
-    assert_eq!(v.as_object().unwrap().len(), 1);
-}
-
-#[test]
 fn cleared_wire_shape() {
     let out = notif(Cleared { cleared: 7 });
     let v = roundtrip(&out);

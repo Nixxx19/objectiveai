@@ -33,10 +33,6 @@ pub enum Output<T> {
     /// nested `value` key — protects against `T` carrying its own
     /// `"type"` field colliding with this enum's discriminator.
     Notification(Notification<T>),
-    /// Stream-start marker. Wire: `{"type":"begin"}`.
-    Begin,
-    /// Stream-end marker. Wire: `{"type":"end"}`.
-    End,
 }
 
 impl<T: Serialize> Output<T> {

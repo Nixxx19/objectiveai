@@ -20,8 +20,6 @@
 //! inner-errors-emitted, accumulated). `LogStreamReady` lines are
 //! forwarded through `handle.emit()`. `Output::Error` lines from
 //! cli-stream (e.g. pipe failures) are forwarded as-is.
-//! `Output::Begin` / `Output::End` are ignored — the parent cli's
-//! own `run()` wraps the entire invocation in Begin/End already.
 
 use serde::de::DeserializeOwned;
 use tokio::io::{AsyncBufReadExt, BufReader};
@@ -106,7 +104,6 @@ where
         let out: Output<serde_json::Value> = serde_json::from_str(trimmed)
             .unwrap_or_else(|e| panic!("cli-stream stdout produced a non-JSONL line: {trimmed}; parse error: {e}"));
         match out {
-            Output::Begin | Output::End => { /* cli wraps its own Begin/End */ }
             Output::Notification(n) => handle_notification::<Chunk>(
                 n,
                 handle,
@@ -283,7 +280,6 @@ pub async fn run_detached(
         let out: Output<serde_json::Value> = serde_json::from_str(trimmed)
             .unwrap_or_else(|e| panic!("cli-stream stdout produced a non-JSONL line: {trimmed}; parse error: {e}"));
         match out {
-            Output::Begin | Output::End => { /* cli wraps its own Begin/End */ }
             Output::Error(e) => {
                 Output::<serde_json::Value>::Error(e).emit(handle).await;
             }

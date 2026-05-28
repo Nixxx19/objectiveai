@@ -88,18 +88,16 @@ impl Handle {
     /// match `println!` semantics.
     pub async fn emit<T: Serialize>(&self, output: &Output<T>) {
         // Single Value round-trip when we have an agent_id to stamp.
-        // Only `Notification` and `Error` get tagged; `Begin` / `End`
-        // are unit-shaped framing markers and stay as-is.
+        // Both remaining variants (Notification + Error) are
+        // object-shaped, so the insert always lands on a real object.
         let json = if let Some(id) = self.agent_id.as_deref() {
             let mut v = serde_json::to_value(output)
                 .expect("Output<T> serializes when T: Serialize");
-            if matches!(output, Output::Notification(_) | Output::Error(_)) {
-                if let Some(obj) = v.as_object_mut() {
-                    obj.insert(
-                        "agent_id".to_string(),
-                        serde_json::Value::String(id.to_string()),
-                    );
-                }
+            if let Some(obj) = v.as_object_mut() {
+                obj.insert(
+                    "agent_id".to_string(),
+                    serde_json::Value::String(id.to_string()),
+                );
             }
             serde_json::to_string(&v)
                 .expect("agent-id-stamped Output<T> reserializes")
@@ -160,8 +158,6 @@ impl Handle {
                     .expect("T serializes when T: Serialize"),
                 agent_id: n.agent_id.clone().or_else(|| self.agent_id.clone()),
             }),
-            Output::Begin => Output::Begin,
-            Output::End => Output::End,
         }
     }
 }

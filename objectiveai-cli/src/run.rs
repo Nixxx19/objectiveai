@@ -237,8 +237,6 @@ where
 {
     use objectiveai_sdk::cli::output::{Error as OutputError, Level, Notification, Output};
 
-    Output::<serde_json::Value>::Begin.emit(&handle).await;
-
     let code = match Cli::try_parse_from(args) {
         Ok(cli) => match cli.command.handle(cli_config, &handle).await {
             Ok(()) => 0,
@@ -281,7 +279,6 @@ where
         }
     };
 
-    Output::<serde_json::Value>::End.emit(&handle).await;
     code
 }
 

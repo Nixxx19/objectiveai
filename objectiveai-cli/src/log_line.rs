@@ -17,7 +17,7 @@ pub fn parse_log_stream_ready(line: &str) -> Option<String> {
             value: LogStreamReady { log_stream_ready },
             ..
         }) => Some(log_stream_ready),
-        Output::Error(_) | Output::Begin | Output::End => None,
+        Output::Error(_) => None,
     }
 }
 
