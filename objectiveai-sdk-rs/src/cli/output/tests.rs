@@ -320,6 +320,235 @@ fn nv_viewer_send_result_roundtrip() {
     assert_roundtrip_eq(out);
 }
 
+// === Fixtures for wrappers around deep API response types. Built
+// via Rust value construction (mock-backed default builders) rather
+// than hand-rolled JSON so the round-trip catches schema drift, not
+// fixture typos. ===
+
+fn mock_remote_path() -> crate::RemotePath {
+    crate::RemotePath::Mock { name: "demo".to_string() }
+}
+
+fn mock_agent_with_fallbacks() -> crate::agent::RemoteAgentWithFallbacks {
+    let base = crate::agent::mock::AgentBase::default();
+    let inner = crate::agent::InlineAgentBaseWithFallbacks { inner: crate::agent::InlineAgentBase::Mock(base), fallbacks: None };
+    let remote_base = crate::agent::RemoteAgentBaseWithFallbacks {
+        description: "demo agent".to_string(),
+        inner,
+    };
+    remote_base.convert().expect("mock agent converts")
+}
+
+#[test]
+fn nv_agent_roundtrip() {
+    let response = crate::agent::response::GetAgentResponse {
+        path: mock_remote_path(),
+        inner: mock_agent_with_fallbacks(),
+    };
+    let out = notif(NotificationValue::Agent(
+        crate::cli::output::notification::Agent { agent: response },
+    ));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_swarm_roundtrip() {
+    // RemoteSwarmBase::convert with one mock agent slot.
+    let agent_slot = crate::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+        count: 1,
+        inner: crate::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+            crate::agent::InlineAgentBaseWithFallbacks {
+                inner: crate::agent::InlineAgentBase::Mock(crate::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
+    };
+    let inline_base = crate::swarm::InlineSwarmBase {
+        agents: vec![agent_slot],
+        weights: None,
+    };
+    let remote_base = crate::swarm::RemoteSwarmBase {
+        description: "demo swarm".to_string(),
+        inner: inline_base,
+    };
+    let remote_swarm = remote_base.convert(None).expect("swarm converts");
+    let response = crate::swarm::response::GetSwarmResponse {
+        path: mock_remote_path(),
+        inner: remote_swarm,
+    };
+    let out = notif(NotificationValue::Swarm(
+        crate::cli::output::notification::Swarm { swarm: response },
+    ));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_execution_roundtrip() {
+    // TaskOutputOwned::Scalar is the simplest output variant.
+    let out = notif(NotificationValue::Execution(
+        crate::cli::output::notification::Execution {
+            execution: crate::cli::output::notification::ExecutionResult {
+                output: crate::functions::expression::TaskOutputOwned::Scalar(
+                    rust_decimal::Decimal::new(5, 1), // 0.5
+                ),
+            },
+        },
+    ));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_laboratory_roundtrip() {
+    // LabResultItem holds an agent + optional score. Use the Remote
+    // variant pointing at a mock path — sidesteps inline-agent
+    // construction.
+    let item = crate::cli::output::notification::LabResultItem {
+        agent: crate::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(
+            crate::RemotePathCommitOptional::Mock { name: "demo".to_string() },
+        ),
+        score: Some(0.75),
+    };
+    let out = notif(NotificationValue::Laboratory(
+        crate::cli::output::notification::Laboratory { laboratory: vec![item] },
+    ));
+    assert_roundtrip_eq(out);
+}
+
+/// Deterministic Arbitrary-based builder for types whose direct
+/// construction would require walking deep flatten chains. Seed bytes
+/// are constant per-fixture so a regression surfaces as a stable diff
+/// rather than a flaky one.
+fn arb<'a, T: arbitrary::Arbitrary<'a>>(seed: &'a [u8]) -> T {
+    let mut u = arbitrary::Unstructured::new(seed);
+    T::arbitrary(&mut u).expect("arbitrary fixture")
+}
+
+/// Smallest valid RemoteFunction: a Standard Scalar with empty
+/// any-of input schema and no tasks. Used by Function + Pair to
+/// avoid Arbitrary's f32→f64 precision drift on number bounds.
+fn minimal_remote_function() -> crate::functions::FullRemoteFunction {
+    crate::functions::FullRemoteFunction::Standard(
+        crate::functions::RemoteFunction::Scalar {
+            description: "demo function".to_string(),
+            input_schema: crate::functions::expression::InputSchema::AnyOf(
+                crate::functions::expression::AnyOfInputSchema { any_of: vec![] },
+            ),
+            tasks: vec![],
+        },
+    )
+}
+
+#[test]
+fn nv_function_roundtrip() {
+    let response = crate::functions::response::GetFunctionResponse {
+        path: mock_remote_path(),
+        inner: minimal_remote_function(),
+    };
+    let out = notif(NotificationValue::Function(
+        crate::cli::output::notification::Function { function: response },
+    ));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_profile_roundtrip() {
+    // RemoteProfile::Auto wraps a RemoteSwarmBase — minimal swarm
+    // base with one mock agent slot.
+    let agent_slot = crate::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+        count: 1,
+        inner: crate::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+            crate::agent::InlineAgentBaseWithFallbacks {
+                inner: crate::agent::InlineAgentBase::Mock(crate::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
+    };
+    let swarm_base = crate::swarm::RemoteSwarmBase {
+        description: "demo profile swarm".to_string(),
+        inner: crate::swarm::InlineSwarmBase { agents: vec![agent_slot], weights: None },
+    };
+    let inner = crate::functions::RemoteProfile::Auto(swarm_base);
+    let response = crate::functions::profiles::response::GetProfileResponse {
+        path: mock_remote_path(),
+        inner,
+    };
+    let out = notif(NotificationValue::Profile(
+        crate::cli::output::notification::Profile { profile: response },
+    ));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_pair_roundtrip() {
+    let function = crate::functions::response::GetFunctionResponse {
+        path: mock_remote_path(),
+        inner: minimal_remote_function(),
+    };
+    let agent_slot = crate::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+        count: 1,
+        inner: crate::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+            crate::agent::InlineAgentBaseWithFallbacks {
+                inner: crate::agent::InlineAgentBase::Mock(crate::agent::mock::AgentBase::default()),
+                fallbacks: None,
+            },
+        ),
+    };
+    let swarm_base = crate::swarm::RemoteSwarmBase {
+        description: "demo pair swarm".to_string(),
+        inner: crate::swarm::InlineSwarmBase { agents: vec![agent_slot], weights: None },
+    };
+    let profile = crate::functions::profiles::response::GetProfileResponse {
+        path: mock_remote_path(),
+        inner: crate::functions::RemoteProfile::Auto(swarm_base),
+    };
+    let pair = crate::cli::output::notification::FunctionProfilePair { function, profile };
+    let out = notif(NotificationValue::Pair(
+        crate::cli::output::notification::Pair { pair },
+    ));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_state_roundtrip() {
+    // ParamsState::AlphaScalarLeaf wraps Params which has its own
+    // `name` field — collides with `RemotePath::Mock.name` under
+    // serde flatten. Use the Github RemotePath variant (no `name`)
+    // for this fixture, and hand-build the inner state to skip
+    // Arbitrary's f32→f64 precision drift on schema bounds.
+    let leaf = crate::functions::inventions::state::AlphaScalarLeafState {
+        params: crate::functions::inventions::state::Params {
+            depth: 3,
+            min_branch_width: 1,
+            max_branch_width: 2,
+            min_leaf_width: 1,
+            max_leaf_width: 2,
+            name: "demo".to_string(),
+            spec: "demo spec".to_string(),
+        },
+        essay: None,
+        input_schema: None,
+        essay_tasks: None,
+        tasks: None,
+        tasks_length: None,
+        description: None,
+        readme: None,
+        checker_seed: None,
+    };
+    let inner = crate::functions::inventions::state::ParamsState::AlphaScalarLeaf(leaf);
+    let response = crate::functions::inventions::state::response::GetFunctionInventionStateResponse {
+        path: crate::RemotePath::Github {
+            owner: "demo".to_string(),
+            repository: "inv".to_string(),
+            commit: "0".repeat(40),
+        },
+        inner,
+    };
+    let out = notif(NotificationValue::State(
+        crate::cli::output::notification::State { state: response },
+    ));
+    assert_roundtrip_eq(out);
+}
+
 #[test]
 fn nv_other_items_roundtrip() {
     // The catch-all: an `Items<T>` payload routes through Other.
