@@ -180,8 +180,7 @@ impl Commands {
             });
 
         let result = ExecutionResult { output };
-        objectiveai_sdk::cli::output::Output::<Execution>::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value:
-            Execution { execution: result },
+        objectiveai_sdk::cli::output::Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (Execution { execution: result }).into(),
          })
         .emit(handle).await;
         Ok(())

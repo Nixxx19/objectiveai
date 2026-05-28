@@ -76,7 +76,7 @@ async fn get(
         cli_config.commit_author_email.as_deref(),
     );
     let tool = fs_client.get_tool(name).await;
-    Output::<Tool>::Notification(Notification { agent_id: None, value: Tool { tool } })
+    Output::Notification(Notification { agent_id: None, value: (Tool { tool }).into() })
         .emit(handle)
         .await;
     Ok(())
@@ -94,7 +94,7 @@ async fn list(
         cli_config.commit_author_email.as_deref(),
     );
     let tools = fs_client.list_tools(offset, limit).await;
-    Output::<Tools>::Notification(Notification { agent_id: None, value: Tools { tools } })
+    Output::Notification(Notification { agent_id: None, value: (Tools { tools }).into() })
         .emit(handle)
         .await;
     Ok(())
@@ -188,9 +188,9 @@ where
                         stderr: Some(true),
                     },
                 };
-                Output::<ToolLine>::Notification(Notification {
+                Output::Notification(Notification {
                     agent_id: None,
-                    value,
+                    value: value.into(),
                 })
                 .emit(handle)
                 .await;

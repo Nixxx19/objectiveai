@@ -246,7 +246,7 @@ where
                     _ => 1,
                 };
                 let err = e.to_output(Level::Error, true);
-                Output::<serde_json::Value>::Error(err).emit(&handle).await;
+                Output::Error(err).emit(&handle).await;
                 exit_code
             }
         },
@@ -260,8 +260,8 @@ where
             // stderr-mirror double-print (handle.rs emits fatal errors
             // to both stdout AND stderr so they survive stdout
             // capture), which is wrong for help output.
-            Output::<String>::Notification(Notification { agent_id: None,
-                value: e.to_string(),
+            Output::Notification(Notification { agent_id: None,
+                value: objectiveai_sdk::cli::output::Help { help: e.to_string() }.into(),
             })
             .emit(&handle)
             .await;
@@ -274,7 +274,7 @@ where
                 message: e.to_string().into(),
                 agent_id: None,
             };
-            Output::<serde_json::Value>::Error(err).emit(&handle).await;
+            Output::Error(err).emit(&handle).await;
             1
         }
     };

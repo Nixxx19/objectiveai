@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 /// absent.
 ///
 /// Wire: `{"type":"notification","value":{"agent_id":"<sub>","items":[…]}}`.
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
 #[schemars(rename = "cli.output.notification.agents.AgentItems")]
 pub struct AgentItems {
     pub agent_id: String,

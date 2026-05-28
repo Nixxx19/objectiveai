@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 /// match against the output of `agents list-active`.
 ///
 /// Wire: `{"type":"notification","agent_id":"<local-id>"}`.
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
 #[schemars(rename = "cli.output.notification.agents.Spawned")]
 pub struct Spawned {
     pub agent_id: String,

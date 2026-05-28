@@ -262,11 +262,11 @@ where
 }
 
 async fn emit_log_stream_ready(id: &str, handle: &Handle) {
-    let out = Output::<LogStreamReady>::Notification(Notification {
+    let out = Output::Notification(Notification {
         agent_id: None,
-        value: LogStreamReady {
+        value: (LogStreamReady {
             log_stream_ready: id.to_string(),
-        },
+        }).into(),
     });
     out.emit(handle).await;
 }
@@ -281,9 +281,9 @@ async fn emit_chunk<C: Serialize>(chunk: &C, handle: &Handle) {
     // For chunks we wrap them in a Notification so they ride the
     // same NDJSON envelope every other cli output line uses.
     let value: serde_json::Value = serde_json::from_str(&line).unwrap_or(serde_json::Value::Null);
-    let out = Output::<serde_json::Value>::Notification(Notification {
+    let out = Output::Notification(Notification {
         agent_id: None,
-        value,
+        value: objectiveai_sdk::cli::output::NotificationValue::other(&value),
     });
     out.emit(handle).await;
 }

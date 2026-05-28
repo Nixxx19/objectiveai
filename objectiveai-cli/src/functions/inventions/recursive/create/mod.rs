@@ -199,8 +199,7 @@ impl Commands {
             })
             .collect();
 
-        objectiveai_sdk::cli::output::Output::<Inventions>::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value:
-            Inventions { inventions: results },
+        objectiveai_sdk::cli::output::Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (Inventions { inventions: results }).into(),
          })
         .emit(handle).await;
         Ok(())

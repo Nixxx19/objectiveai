@@ -20,11 +20,10 @@
 
 use std::sync::Arc;
 
-use serde::Serialize;
 use tokio::process::ChildStdin;
 use tokio::sync::{Mutex, mpsc};
 
-use super::{Notification, Output};
+use super::Output;
 
 /// Destination for [`super::Output::emit`].
 ///
@@ -40,15 +39,15 @@ pub enum HandleDestination {
     Stdout,
     /// Write each line to a child process's stdin.
     Stdin(Arc<Mutex<ChildStdin>>),
-    /// Push each emitted `Output<T>` (reserialized as `Output<Value>`
-    /// for a uniform storage type) into a shared vector.
-    Collect(Arc<Mutex<Vec<Output<serde_json::Value>>>>),
-    /// Forward each emitted `Output<T>` through an mpsc channel
-    /// (reserialized as `Output<Value>` to match `Collect`'s storage
-    /// type). The receiver loops on `rx.recv()` until the cli's
-    /// `run()` completes and the `Handle` is dropped — at which point
-    /// the sender side closes and the receiver's loop exits.
-    Stream(mpsc::UnboundedSender<Output<serde_json::Value>>),
+    /// Push each emitted [`Output`] into a shared vector. Used by
+    /// tests and by in-process embedders that want to observe every
+    /// emitted line.
+    Collect(Arc<Mutex<Vec<Output>>>),
+    /// Forward each emitted [`Output`] through an mpsc channel. The
+    /// receiver loops on `rx.recv()` until the cli's `run()` completes
+    /// and the `Handle` is dropped — at which point the sender side
+    /// closes and the receiver's loop exits.
+    Stream(mpsc::UnboundedSender<Output>),
 }
 
 impl Default for HandleDestination {
@@ -86,13 +85,13 @@ impl Handle {
 
     /// Emit `output` to this destination. Panics on write failure to
     /// match `println!` semantics.
-    pub async fn emit<T: Serialize>(&self, output: &Output<T>) {
+    pub async fn emit(&self, output: &Output) {
         // Single Value round-trip when we have an agent_id to stamp.
         // Both remaining variants (Notification + Error) are
         // object-shaped, so the insert always lands on a real object.
         let json = if let Some(id) = self.agent_id.as_deref() {
             let mut v = serde_json::to_value(output)
-                .expect("Output<T> serializes when T: Serialize");
+                .expect("Output serializes");
             if let Some(obj) = v.as_object_mut() {
                 obj.insert(
                     "agent_id".to_string(),
@@ -100,10 +99,10 @@ impl Handle {
                 );
             }
             serde_json::to_string(&v)
-                .expect("agent-id-stamped Output<T> reserializes")
+                .expect("agent-id-stamped Output reserializes")
         } else {
             serde_json::to_string(output)
-                .expect("Output<T> serializes when T: Serialize")
+                .expect("Output serializes")
         };
         match &self.destination {
             HandleDestination::Stdout => {
@@ -125,26 +124,22 @@ impl Handle {
                     .expect("emit to child stdin failed");
             }
             HandleDestination::Collect(vec) => {
-                vec.lock().await.push(self.rebuild_as_value(output));
+                vec.lock().await.push(self.stamped(output));
             }
             HandleDestination::Stream(tx) => {
                 // Best-effort send: if the receiver dropped (consumer
                 // gone), just drop the message — same semantics as
                 // Stdout where a closed pipe would crash.
-                let _ = tx.send(self.rebuild_as_value(output));
+                let _ = tx.send(self.stamped(output));
             }
         }
     }
 
-    /// Rebuild `Output<T>` as `Output<Value>` variant-wise, avoiding a
-    /// full serialize→deserialize roundtrip. Used by `Collect` and
-    /// `Stream`. Picks up the handle's `agent_id` on `Notification`
-    /// and `Error` so in-memory consumers see the same stamped shape
+    /// Clone `output` with the handle's `agent_id` stamped in if the
+    /// output didn't already carry one. Used by `Collect` and
+    /// `Stream` so in-memory consumers see the same stamped shape
     /// the wire output carries.
-    fn rebuild_as_value<T: Serialize>(
-        &self,
-        output: &Output<T>,
-    ) -> Output<serde_json::Value> {
+    fn stamped(&self, output: &Output) -> Output {
         match output {
             Output::Error(e) => {
                 let mut e = e.clone();
@@ -153,11 +148,13 @@ impl Handle {
                 }
                 Output::Error(e)
             }
-            Output::Notification(n) => Output::Notification(Notification {
-                value: serde_json::to_value(&n.value)
-                    .expect("T serializes when T: Serialize"),
-                agent_id: n.agent_id.clone().or_else(|| self.agent_id.clone()),
-            }),
+            Output::Notification(n) => {
+                let mut n = n.clone();
+                if n.agent_id.is_none() {
+                    n.agent_id = self.agent_id.clone();
+                }
+                Output::Notification(n)
+            }
         }
     }
 }

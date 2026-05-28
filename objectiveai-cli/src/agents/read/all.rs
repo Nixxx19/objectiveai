@@ -43,12 +43,12 @@ pub async fn handle(
         let spawned = format!("{caller}/{sub}");
         let items = client.read_all_from_queue(caller, &spawned).await?;
 
-        Output::<AgentItems>::Notification(Notification {
+        Output::Notification(Notification {
             agent_id: None,
-            value: AgentItems {
+            value: (AgentItems {
                 agent_id: sub.clone(),
                 items,
-            },
+            }).into(),
         })
         .emit(handle)
         .await;

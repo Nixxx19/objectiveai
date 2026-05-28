@@ -503,10 +503,16 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
     #[cfg(feature = "cli")]
     {
         schemas.extend([
+            schemars::schema_for!(crate::cli::output::Output),
+            schemars::schema_for!(crate::cli::output::Notification),
+            schemars::schema_for!(crate::cli::output::NotificationValue),
             schemars::schema_for!(crate::cli::output::Error),
             schemars::schema_for!(crate::cli::output::Level),
             schemars::schema_for!(crate::cli::output::notification::Ok),
             schemars::schema_for!(crate::cli::output::notification::Cleared),
+            schemars::schema_for!(crate::cli::output::notification::Help),
+            schemars::schema_for!(crate::cli::output::notification::Instructions),
+            schemars::schema_for!(crate::cli::output::notification::ViewerSendResult),
             schemars::schema_for!(crate::cli::output::notification::JqResults),
             schemars::schema_for!(crate::cli::output::notification::ListItem),
             schemars::schema_for!(crate::cli::output::notification::LogContent),

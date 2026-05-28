@@ -26,7 +26,7 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 
 use objectiveai_sdk::cli::output::{
-    Error as OutputError, Handle, Level, LogStreamReady, Notification, Output, Spawned,
+    Error as OutputError, Handle, Level, Notification, NotificationValue, Output, Spawned,
 };
 
 /// Spawn `objectiveai-cli-stream <endpoint_path...> --body <JSON>` and
@@ -101,7 +101,7 @@ where
         if trimmed.is_empty() {
             continue;
         }
-        let out: Output<serde_json::Value> = serde_json::from_str(trimmed)
+        let out: Output = serde_json::from_str(trimmed)
             .unwrap_or_else(|e| panic!("cli-stream stdout produced a non-JSONL line: {trimmed}; parse error: {e}"));
         match out {
             Output::Notification(n) => handle_notification::<Chunk>(
@@ -113,7 +113,7 @@ where
             )
             .await,
             Output::Error(e) => {
-                Output::<serde_json::Value>::Error(e).emit(handle).await;
+                Output::Error(e).emit(handle).await;
             }
         }
     }
@@ -151,7 +151,7 @@ where
 }
 
 async fn handle_notification<Chunk>(
-    n: Notification<serde_json::Value>,
+    n: Notification,
     handle: &Handle,
     inner_errors_fn: &impl Fn(&Chunk) -> Vec<serde_json::Value>,
     push: &impl Fn(&mut Chunk, &Chunk),
@@ -159,39 +159,42 @@ async fn handle_notification<Chunk>(
 ) where
     Chunk: DeserializeOwned,
 {
-    // LogStreamReady has a single distinctive key. Detect by key
-    // presence rather than try/catch parsing — every chunk type
-    // emitted by cli-stream is shape-distinct from LogStreamReady.
-    if n.value.get("log_stream_ready").is_some() {
-        let ready: LogStreamReady = serde_json::from_value(n.value)
-            .expect("LogStreamReady-shaped value should deserialize");
-        Output::<LogStreamReady>::Notification(Notification {
-            agent_id: None,
-            value: ready,
-        })
-        .emit(handle)
-        .await;
-        return;
-    }
-
-    let chunk: Chunk = serde_json::from_value(n.value).unwrap_or_else(|e| {
-        panic!("cli-stream emitted a Notification with unexpected shape: {e}")
-    });
-
-    for inner in inner_errors_fn(&chunk) {
-        Output::<serde_json::Value>::Error(OutputError {
-            level: Level::Warn,
-            fatal: false,
-            message: inner,
-            agent_id: None,
-        })
-        .emit(handle)
-        .await;
-    }
-
-    match aggregate.as_mut() {
-        Some(a) => push(a, &chunk),
-        None => *aggregate = Some(chunk),
+    // LogStreamReady arrives as its own typed variant; every chunk
+    // emitted by cli-stream lands in the `Other` catch-all (its
+    // typed shape varies per endpoint, so cli-stream emits it as a
+    // serde_json::Value through the catch-all path).
+    match n.value {
+        NotificationValue::LogStreamReady(ready) => {
+            Output::Notification(Notification {
+                agent_id: None,
+                value: ready.into(),
+            })
+            .emit(handle)
+            .await;
+        }
+        NotificationValue::Other(map) => {
+            let value = serde_json::Value::Object(map);
+            let chunk: Chunk = serde_json::from_value(value).unwrap_or_else(|e| {
+                panic!("cli-stream emitted a Notification with unexpected shape: {e}")
+            });
+            for inner in inner_errors_fn(&chunk) {
+                Output::Error(OutputError {
+                    level: Level::Warn,
+                    fatal: false,
+                    message: inner,
+                    agent_id: None,
+                })
+                .emit(handle)
+                .await;
+            }
+            match aggregate.as_mut() {
+                Some(a) => push(a, &chunk),
+                None => *aggregate = Some(chunk),
+            }
+        }
+        other => {
+            panic!("cli-stream emitted an unexpected Notification variant: {other:?}");
+        }
     }
 }
 
@@ -277,24 +280,23 @@ pub async fn run_detached(
         if trimmed.is_empty() {
             continue;
         }
-        let out: Output<serde_json::Value> = serde_json::from_str(trimmed)
+        let out: Output = serde_json::from_str(trimmed)
             .unwrap_or_else(|e| panic!("cli-stream stdout produced a non-JSONL line: {trimmed}; parse error: {e}"));
         match out {
             Output::Error(e) => {
-                Output::<serde_json::Value>::Error(e).emit(handle).await;
+                Output::Error(e).emit(handle).await;
             }
             Output::Notification(n) => {
                 // Only LogStreamReady triggers our handshake; every
                 // other Notification (chunks) is dropped since the
                 // caller does not wait for the completion.
-                if n.value.get("log_stream_ready").is_some() {
-                    let ready: LogStreamReady = serde_json::from_value(n.value)
-                        .expect("LogStreamReady-shaped value should deserialize");
-                    Output::<Spawned>::Notification(Notification {
+                if let NotificationValue::LogStreamReady(ready) = n.value {
+                    Output::Notification(Notification {
                         agent_id: None,
                         value: Spawned {
                             agent_id: ready.log_stream_ready,
-                        },
+                        }
+                        .into(),
                     })
                     .emit(handle)
                     .await;

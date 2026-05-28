@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Direct children only — deeper descendants don't appear in the
 /// list. See [`crate::filesystem::Client::list_active`].
-#[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
 #[schemars(rename = "cli.output.notification.agents.ActiveAgent")]
 pub struct ActiveAgent {
     /// Sub-portion of the composite agent id — the trailing

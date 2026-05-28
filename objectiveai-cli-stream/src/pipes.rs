@@ -288,7 +288,7 @@ async fn handle_connection(
 }
 
 async fn emit_error(handle: &Handle, message: String) {
-    let out = Output::<serde_json::Value>::Error(Error {
+    let out = Output::Error(Error {
         level: Level::Warn,
         fatal: false,
         message: serde_json::Value::String(message),

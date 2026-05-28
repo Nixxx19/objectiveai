@@ -158,7 +158,7 @@ pub(super) async fn install(
     let installed = fs_client
         .install_plugin_from_manifest(owner, repository, &manifest, &source, None, upgrade)
         .await?;
-    Output::<Installed>::Notification(Notification { agent_id: None, value: Installed { installed } })
+    Output::Notification(Notification { agent_id: None, value: (Installed { installed }).into() })
         .emit(handle)
         .await;
     Ok(())
@@ -176,7 +176,7 @@ async fn emit_untrusted_warning(
         "installing untrusted plugin {owner}/{repository} (commit: {commit_sha}, version: {version}); \
          this plugin is not in the whitelist and is being installed because --allow-untrusted was passed"
     );
-    Output::<serde_json::Value>::Error(OutputError {
+    Output::Error(OutputError {
         level: Level::Warn,
         fatal: false,
         message: message.into(),
@@ -197,7 +197,7 @@ async fn get(
         cli_config.commit_author_email.as_deref(),
     );
     let plugin = fs_client.get_plugin(name).await;
-    Output::<Plugin>::Notification(Notification { agent_id: None, value: Plugin { plugin } })
+    Output::Notification(Notification { agent_id: None, value: (Plugin { plugin }).into() })
         .emit(handle)
         .await;
     Ok(())
@@ -215,7 +215,7 @@ async fn list(
         cli_config.commit_author_email.as_deref(),
     );
     let plugins = fs_client.list_plugins(offset, limit).await;
-    Output::<Plugins>::Notification(Notification { agent_id: None, value: Plugins { plugins } })
+    Output::Notification(Notification { agent_id: None, value: (Plugins { plugins }).into() })
         .emit(handle)
         .await;
     Ok(())
@@ -270,10 +270,10 @@ pub async fn dispatch_external(
         let trimmed = line.trim_end_matches(['\r', '\n']);
         match serde_json::from_str::<PluginOutput>(trimmed) {
             Ok(PluginOutput::Error(e)) => {
-                Output::<serde_json::Value>::Error(e).emit(handle).await;
+                Output::Error(e).emit(handle).await;
             }
             Ok(PluginOutput::Notification(value)) => {
-                Output::<serde_json::Value>::Notification(Notification { value, agent_id: None })
+                Output::Notification(Notification { value: objectiveai_sdk::cli::output::NotificationValue::other(&value), agent_id: None })
                     .emit(handle)
                     .await;
             }
@@ -282,7 +282,7 @@ pub async fn dispatch_external(
             }
             Err(_) => {
                 let value = serde_json::Value::String(trimmed.to_string());
-                Output::<serde_json::Value>::Notification(Notification { value, agent_id: None })
+                Output::Notification(Notification { value: objectiveai_sdk::cli::output::NotificationValue::other(&value), agent_id: None })
                     .emit(handle)
                     .await;
             }

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{Content, Id, QueueMessage};
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "filesystem.logs.queue.QueueItem")]
 pub enum QueueItem {

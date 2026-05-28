@@ -45,7 +45,7 @@ where
     let mut http = super::client::build_http_client(cli_config, &mut config);
     apply_agent_id_arg(&mut http, agent_id_arg);
     let response: Resp = http.send_unary(method, path, body).await?;
-    Output::<Resp>::Notification(Notification { agent_id: None, value: response })
+    Output::Notification(Notification { agent_id: None, value: objectiveai_sdk::cli::output::NotificationValue::other(&(response)) })
         .emit(handle)
         .await;
     Ok(())
@@ -69,9 +69,9 @@ where
     let mut http = super::client::build_http_client(cli_config, &mut config);
     apply_agent_id_arg(&mut http, agent_id_arg);
     http.send_unary_no_response(method, path, body).await?;
-    Output::<serde_json::Value>::Notification(Notification {
+    Output::Notification(Notification {
         agent_id: None,
-        value: serde_json::Value::Null,
+        value: objectiveai_sdk::cli::output::NotificationValue::other(&(serde_json::Value::Null)),
     })
     .emit(handle)
     .await;
@@ -99,7 +99,7 @@ where
     let mut stream = std::pin::pin!(stream);
     while let Some(result) = stream.next().await {
         let chunk = result?;
-        Output::<Chunk>::Notification(Notification { agent_id: None, value: chunk })
+        Output::Notification(Notification { agent_id: None, value: objectiveai_sdk::cli::output::NotificationValue::other(&(chunk)) })
             .emit(handle)
             .await;
     }

@@ -7,7 +7,7 @@ use super::Platform;
 /// JSON; the on-disk convention (sibling file, embedded resource,
 /// `--manifest` flag, …) is deliberately out of scope of this struct
 /// and will be settled in a follow-up.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "filesystem.plugins.Manifest")]
 pub struct Manifest {
     /// One-line description of what the plugin does. Surfaced in
@@ -243,7 +243,7 @@ impl Binaries {
 /// `/plugin/<repository>/<self.path>`; on a hit, the body is
 /// JSON-decoded and forwarded as a `PluginRequest { type: self.type,
 /// value: body }` event to the frontend.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "filesystem.plugins.ViewerRoute")]
 pub struct ViewerRoute {
     /// Path relative to the plugin's namespace. Must start with `/`;
@@ -284,7 +284,7 @@ pub enum HttpMethod {
 /// one flat JSON object — `serde_json`'s `preserve_order` feature
 /// keeps the declared field order, so consumers see `name` first
 /// and `source` last.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "filesystem.plugins.ManifestWithNameAndSource")]
 pub struct ManifestWithNameAndSource {
     /// The plugin's identifier — the filename it lives under in the
