@@ -760,6 +760,50 @@ impl Client {
         super::super::db::schema::path_for_file_id_async(conn, id).await
     }
 
+    /// Resolve a queue [`super::queue::Id`] to its file content.
+    /// `.json` files are parsed into [`LogContent::Json`]; every
+    /// other extension is encoded as a `data:` URL via
+    /// [`LogContent::DataUrl`].
+    ///
+    /// Errors:
+    /// - [`Error::NotFound`] if no `files` row matches `id`.
+    /// - [`Error::Read`] if the row exists but the file can't be
+    ///   read from disk.
+    /// - [`Error::Parse`] if a `.json` file is malformed.
+    pub async fn read_file_by_id(
+        &self,
+        id: i64,
+    ) -> Result<super::LogContent, Error> {
+        use base64::Engine;
+
+        let rel_path = self
+            .path_for_file_id(id)
+            .await?
+            .ok_or_else(|| Error::NotFound(format!("file id {id}")))?;
+        let full = self.logs_dir().join(&rel_path);
+        let bytes = tokio::fs::read(&full)
+            .await
+            .map_err(|e| Error::Read(full.clone(), e))?;
+
+        if std::path::Path::new(&rel_path)
+            .extension()
+            .and_then(|e| e.to_str())
+            == Some("json")
+        {
+            let value: serde_json::Value = serde_json::from_slice(&bytes)
+                .map_err(|e| Error::Parse(full, e))?;
+            Ok(super::LogContent::Json(value))
+        } else {
+            let mime = mime_guess::from_path(&full)
+                .first_or_octet_stream()
+                .to_string();
+            let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
+            Ok(super::LogContent::DataUrl(format!(
+                "data:{mime};base64,{b64}"
+            )))
+        }
+    }
+
     /// List every direct-child agent of `parent_agent_id` (one
     /// composite-id segment deeper, no grandchildren) along with
     /// the unix-seconds timestamp of its most recent
