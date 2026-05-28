@@ -309,6 +309,69 @@ impl Queue {
         })?
     }
 
+    /// Read every message row for `spawned_agent_id` (no watermark
+    /// filter) in ascending index order, then upsert
+    /// `caller_agent_id`'s watermark for the pair to the returned
+    /// max index. Same atomicity guarantee as
+    /// [`Self::read_new_messages`]: the SELECT + UPSERT run under
+    /// one connection lock.
+    ///
+    /// The watermark only moves forward — MAX over every row is
+    /// always ≥ whatever was previously stored, so a no-op when
+    /// the caller has already drained.
+    pub async fn read_all_messages(
+        &self,
+        caller_agent_id: &str,
+        spawned_agent_id: &str,
+    ) -> Result<Vec<MessageRow>, super::super::Error> {
+        let conn = Arc::clone(&self.inner.conn);
+        let caller = caller_agent_id.to_string();
+        let spawned = spawned_agent_id.to_string();
+        tokio::task::spawn_blocking(move || -> Result<Vec<MessageRow>, super::super::Error> {
+            let conn = conn.lock().expect("filesystem db mutex poisoned");
+            let mut stmt = conn.prepare_cached(
+                "SELECT kind, path, timestamp, \"index\" FROM messages \
+                 WHERE agent_id = ?1 ORDER BY \"index\"",
+            )?;
+            let rows = stmt
+                .query_map(rusqlite::params![&spawned], |r| {
+                    let kind_str: String = r.get(0)?;
+                    let path: String = r.get(1)?;
+                    let timestamp: i64 = r.get(2)?;
+                    let index: i64 = r.get(3)?;
+                    Ok((kind_str, path, timestamp, index))
+                })?
+                .collect::<rusqlite::Result<Vec<_>>>()?;
+            drop(stmt);
+            let rows: Vec<MessageRow> = rows
+                .into_iter()
+                .map(|(kind_str, path, ts, idx)| {
+                    Ok(MessageRow {
+                        agent_id: spawned.clone(),
+                        kind: MessageKind::from_str(&kind_str)?,
+                        path,
+                        timestamp: ts.max(0) as u64,
+                        index: idx.max(0) as u64,
+                    })
+                })
+                .collect::<Result<Vec<_>, super::super::Error>>()?;
+            if let Some(new_max) = rows.last().map(|r| r.index as i64) {
+                conn.execute(
+                    "INSERT INTO messages_queue (caller_agent_id, spawned_agent_id, \"index\") \
+                     VALUES (?1, ?2, ?3) \
+                     ON CONFLICT (caller_agent_id, spawned_agent_id) \
+                     DO UPDATE SET \"index\" = excluded.\"index\"",
+                    rusqlite::params![&caller, &spawned, new_max],
+                )?;
+            }
+            Ok(rows)
+        })
+        .await
+        .map_err(|e| {
+            super::super::Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e))
+        })?
+    }
+
     /// Internal: ensure the agent's mutable state is initialised.
     /// Seeds `next_index` from `MAX(index) WHERE agent_id = ?` + 1
     /// the first time this id is seen. Idempotent — losing-race

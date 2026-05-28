@@ -528,6 +528,28 @@ impl Client {
         Ok(items)
     }
 
+    /// Read every queue row for `spawned_agent_id` (no watermark
+    /// filter), advancing `caller_agent_id`'s watermark to the
+    /// returned max. Companion to [`Self::read_new_from_queue`]:
+    /// `read_all` returns everything; `read_new` returns only past
+    /// the watermark. Both advance the watermark identically — a
+    /// subsequent `read_new` after `read_all` always returns empty
+    /// until new rows land.
+    pub async fn read_all_from_queue(
+        &self,
+        caller_agent_id: &str,
+        spawned_agent_id: &str,
+    ) -> Result<Vec<super::queue::QueueItem>, Error> {
+        let conn = super::super::db::connection::connection(self)?;
+        let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
+        let rows = queue.read_all_messages(caller_agent_id, spawned_agent_id).await?;
+        let mut items = Vec::with_capacity(rows.len());
+        for row in rows {
+            items.push(self.queue_item_from_row(row).await?);
+        }
+        Ok(items)
+    }
+
     /// Translate one [`crate::filesystem::db::schema::MessageRow`]
     /// into a typed [`super::queue::QueueItem`] by reading the row's
     /// log file(s) from disk and converting each `LogReference` to
