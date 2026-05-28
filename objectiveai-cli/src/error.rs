@@ -16,6 +16,8 @@ pub enum Error {
     PythonNotFound,
     #[error("failed to read python file {0}: {1}")]
     PythonFileRead(std::path::PathBuf, std::io::Error),
+    #[error("failed to read messages file {0}: {1}")]
+    MessagesFileRead(std::path::PathBuf, std::io::Error),
     #[error("python exception:\n{0}")]
     PythonException(String),
     #[error("python output deserialization failed: {0}")]

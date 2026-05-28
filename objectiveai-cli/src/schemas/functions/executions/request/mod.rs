@@ -19,6 +19,10 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    FunctionExecutionCreateParamsLog {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     Reasoning {
         #[command(subcommand)]
         command: GetCommand,
@@ -33,7 +37,7 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["FunctionExecutionCreateParams", "Reasoning", "Strategy"];
+                const NAMES: &[&str] = &["FunctionExecutionCreateParams", "FunctionExecutionCreateParamsLog", "Reasoning", "Strategy"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         agent_id: None,
@@ -47,6 +51,18 @@ impl Commands {
             Commands::FunctionExecutionCreateParams { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/functions.executions.request.FunctionExecutionCreateParams.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
+                        value: objectiveai_sdk::cli::output::Schema { schema },
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::FunctionExecutionCreateParamsLog { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../../../objectiveai-json-schema/functions.executions.request.FunctionExecutionCreateParamsLog.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
                     objectiveai_sdk::cli::output::Notification {

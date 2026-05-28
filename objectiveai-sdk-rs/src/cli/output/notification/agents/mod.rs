@@ -1,8 +1,8 @@
 mod active;
-mod completions;
+mod spawned;
 
 pub use active::*;
-pub use completions::*;
+pub use spawned::*;
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};

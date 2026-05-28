@@ -3,49 +3,77 @@
 You are about to run `objectiveai agents spawn …`.
 Read all of the following before constructing the command.
 
+## What `spawn` does
+
+`agents spawn` fires a child agent in the background and exits
+immediately. It emits one notification on stdout:
+
+```
+{"type":"notification","agent_id":"<local-id>"}
+```
+
+Where `<local-id>` is the spawned agent's local lineage segment
+(the trailing segment past your own caller id). The actual
+completion streams into log files on disk; this command does **not**
+wait for the agent to finish.
+
+**Never use the built-in `Monitor` tool on an `agents spawn`
+invocation.** It exits within a second; there is nothing to
+monitor at the CLI level. Use the polling commands below instead.
+
+## Providing messages
+
+Exactly one of these flags is required:
+
+- `--simple "<text>"` — quickest. The text becomes a single user
+  message (`{ role: "user", content: "<text>" }`).
+- `--messages-inline '<json-array>'` — full inline messages array.
+- `--messages-file <path>` — same as `--messages-inline` but read
+  from a JSON file on disk.
+- `--messages-python-inline '<python>'` — Python expression that
+  produces a messages list.
+- `--messages-python-file <path>` — same, from a `.py` file.
+
 ## Watching progress
 
-If you want to monitor the agent's progress while it streams, pass
-`--detach`. The CLI prints a `Logs ID:` line and a PID, then exits
-immediately so you can poll the logs while the completion runs in
-the background.
-
-**Never use the built-in `Monitor` tool to watch an `agents spawn` command.**
-The CLI streams to disk through its log writer; nothing meaningful
-goes to stdout while the completion is in flight, so `Monitor` will
-sit silent and you will draw the wrong conclusion. Poll with the
-`logs get` family below instead.
-
-## Reading the logs
-
-Every agent completion writes a *root* log file. Get it with:
+The spawned agent writes log files under
+`${config_base_dir}/logs/agents/completions/response/...`. Poll
+them at any time:
 
 ```
-objectiveai agents completions logs get <logs-id>
+objectiveai agents completions logs get <local-id>
 ```
 
-The root only contains **references** to other logs — it doesn't
-inline the message content. The `messages` field is an array of
-references, one per message slot the agent produced (assistant turns
-and tool responses). To see what the assistant actually wrote you
-must follow each reference down to its per-message file:
+The root log only contains **references** to other logs. Walk
+each `messages` reference down to its per-message file to see
+what the assistant actually wrote:
 
 ```
-objectiveai agents completions messages logs get <logs-id> <message-index>
+objectiveai agents completions messages logs get <local-id> <message-index>
 ```
 
-For multi-turn agent loops with tool use, the continuation chain is
-also stored separately:
+For multi-turn loops, the continuation chain lives at:
 
 ```
-objectiveai agents completions continuations logs get <logs-id>
+objectiveai agents completions continuations logs get <local-id>
 ```
 
-**Walk the references all the way to the bottom.** The root tells
-you "there are N messages here"; the per-message files tell you
-*what they say* (text content, reasoning, tool_calls, refusals,
-finish_reason, usage). Stopping at any intermediate level will
-leave you guessing about the agent's behaviour.
+To enumerate every agent you've spawned plus the timestamp of
+each one's latest response:
+
+```
+objectiveai agents list-active
+```
+
+To drain queue items (request envelopes, assistant responses,
+tool responses, notifications) for one or more spawned agents:
+
+```
+objectiveai agents read-pending <local-id> [<local-id> ...]
+```
+
+Both `list-active` output and `read-pending` input speak
+lineage-relative ids — the caller prefix is implicit.
 
 ## `get` vs `subscribe`
 

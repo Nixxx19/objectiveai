@@ -19,6 +19,10 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    AgentCompletionCreateParamsLog {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     AgentCompletionNotifyParams {
         #[command(subcommand)]
         command: GetCommand,
@@ -53,7 +57,7 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["AgentCompletionCreateParams", "AgentCompletionNotifyParams", "Provider", "ProviderDataCollection", "ProviderMaxPrice", "ProviderSort", "ResponseFormat", "ResponseFormatParam"];
+                const NAMES: &[&str] = &["AgentCompletionCreateParams", "AgentCompletionCreateParamsLog", "AgentCompletionNotifyParams", "Provider", "ProviderDataCollection", "ProviderMaxPrice", "ProviderSort", "ResponseFormat", "ResponseFormatParam"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         agent_id: None,
@@ -67,6 +71,18 @@ impl Commands {
             Commands::AgentCompletionCreateParams { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/agent.completions.request.AgentCompletionCreateParams.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
+                        value: objectiveai_sdk::cli::output::Schema { schema },
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::AgentCompletionCreateParamsLog { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../../../objectiveai-json-schema/agent.completions.request.AgentCompletionCreateParamsLog.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
                     objectiveai_sdk::cli::output::Notification {

@@ -15,11 +15,7 @@ pub enum GetCommand {
 pub enum Commands {
     #[command(name = "list")]
     List,
-    FunctionInventionRecursiveCreateParams {
-        #[command(subcommand)]
-        command: GetCommand,
-    },
-    FunctionInventionRecursiveCreateParamsLog {
+    LogReference {
         #[command(subcommand)]
         command: GetCommand,
     },
@@ -29,7 +25,7 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["FunctionInventionRecursiveCreateParams", "FunctionInventionRecursiveCreateParamsLog"];
+                const NAMES: &[&str] = &["LogReference"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         agent_id: None,
@@ -40,21 +36,9 @@ impl Commands {
                 ).emit(handle).await;
                 Ok(())
             }
-            Commands::FunctionInventionRecursiveCreateParams { .. } => {
+            Commands::LogReference { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../../../../objectiveai-json-schema/functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams.json"),
-                ).expect("embedded JSON Schema must parse");
-                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
-                    objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
-                        value: objectiveai_sdk::cli::output::Schema { schema },
-                    },
-                ).emit(handle).await;
-                Ok(())
-            }
-            Commands::FunctionInventionRecursiveCreateParamsLog { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../../../../objectiveai-json-schema/functions.inventions.recursive.request.FunctionInventionRecursiveCreateParamsLog.json"),
+                    include_str!("../../../../../../objectiveai-json-schema/filesystem.logs.indexed_reference.LogReference.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
                     objectiveai_sdk::cli::output::Notification {

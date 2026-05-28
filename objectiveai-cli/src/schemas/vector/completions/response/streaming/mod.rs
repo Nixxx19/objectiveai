@@ -31,13 +31,17 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    VectorCompletionChunkLog {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
 }
 
 impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["AgentCompletionChunk", "InnerError", "Object", "VectorCompletionChunk"];
+                const NAMES: &[&str] = &["AgentCompletionChunk", "InnerError", "Object", "VectorCompletionChunk", "VectorCompletionChunkLog"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         agent_id: None,
@@ -87,6 +91,18 @@ impl Commands {
             Commands::VectorCompletionChunk { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../../objectiveai-json-schema/vector.completions.response.streaming.VectorCompletionChunk.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
+                        value: objectiveai_sdk::cli::output::Schema { schema },
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::VectorCompletionChunkLog { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../../../../objectiveai-json-schema/vector.completions.response.streaming.VectorCompletionChunkLog.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
                     objectiveai_sdk::cli::output::Notification {

@@ -1,9 +1,13 @@
-//! `agents spawn` — open an agent completion as a child of the
-//! current caller. Same code that used to live under
-//! `agents completions create`, just relocated to a top-level
-//! verb under `agents`.
+//! `agents spawn` — fire a child agent in the background. Always
+//! detaches; emits exactly one `Spawned { agent_id }` notification
+//! (the spawned agent's local lineage segment) and exits. The
+//! actual completion stream is consumed by an orphaned
+//! `objectiveai-cli-stream` child, which writes coalesced log
+//! files under `${config_base_dir}/logs/`.
 
 use clap::Args;
+
+use objectiveai_sdk::agent::completions::message::{Message, RichContent, UserMessage};
 
 crate::define_inline_or_ref!(AgentArg, "agent", objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional, Remote);
 
@@ -11,9 +15,16 @@ crate::define_inline_or_ref!(AgentArg, "agent", objectiveai_sdk::agent::InlineAg
 #[derive(Args)]
 #[group(required = true, multiple = false)]
 pub struct MessageSource {
+    /// Plain text — becomes one user message
+    /// (`{ role: "user", content: <text> }`).
+    #[arg(long)]
+    simple: Option<String>,
     /// Inline JSON messages array
     #[arg(long)]
     messages_inline: Option<String>,
+    /// Path to a JSON file containing the messages array
+    #[arg(long)]
+    messages_file: Option<std::path::PathBuf>,
     /// Inline Python code that produces the messages array
     #[arg(long)]
     messages_python_inline: Option<String>,
@@ -23,9 +34,22 @@ pub struct MessageSource {
 }
 
 impl MessageSource {
-    fn resolve(self) -> Result<Vec<objectiveai_sdk::agent::completions::message::Message>, crate::error::Error> {
+    fn resolve(self) -> Result<Vec<Message>, crate::error::Error> {
+        if let Some(text) = self.simple {
+            return Ok(vec![Message::User(UserMessage {
+                content: RichContent::Text(text),
+                name: None,
+            })]);
+        }
         if let Some(inline) = self.messages_inline {
             let mut de = serde_json::Deserializer::from_str(&inline);
+            return serde_path_to_error::deserialize(&mut de)
+                .map_err(crate::error::Error::InlineDeserialize);
+        }
+        if let Some(path) = self.messages_file {
+            let bytes = std::fs::read(&path)
+                .map_err(|e| crate::error::Error::MessagesFileRead(path.clone(), e))?;
+            let mut de = serde_json::Deserializer::from_slice(&bytes);
             return serde_path_to_error::deserialize(&mut de)
                 .map_err(crate::error::Error::InlineDeserialize);
         }
@@ -45,18 +69,9 @@ pub struct CommandArgs {
     pub messages: MessageSource,
     #[command(flatten)]
     pub agent: AgentArg,
-    #[command(flatten)]
-    pub continuation: crate::continuation::ContinuationArgs,
-    #[command(flatten)]
-    pub response_format: crate::response_format::ResponseFormatArgs,
-    #[command(flatten)]
-    pub instructions: crate::instructions::InstructionsIdArg,
     /// Seed for deterministic mock responses
     #[arg(long)]
     pub seed: Option<i64>,
-    /// Run in the background: print PID and log path, then exit
-    #[arg(long)]
-    pub detach: bool,
 }
 
 pub async fn handle(
@@ -64,88 +79,30 @@ pub async fn handle(
     cli_config: &crate::Config,
     handle: &objectiveai_sdk::cli::output::Handle,
 ) -> Result<(), crate::error::Error> {
-    let CommandArgs {
-        messages: message_source,
-        agent: agent_arg,
-        continuation: continuation_args,
-        response_format: response_format_args,
-        instructions,
-        seed,
-        detach,
-    } = args;
-
-    instructions.verify(cli_config, crate::instructions::InstructionsScope::AgentCompletions)?;
-
-    if detach {
-        crate::api::detach::detach(handle).await;
-    }
-
-    let messages = message_source.resolve()?;
-    let agent = agent_arg.resolve(|| async {
-        let (_, mut c) = crate::config::read(cli_config).await.unwrap();
-        c.agents().get_favorites().to_vec()
-    }).await?;
-    let continuation = continuation_args.resolve()?;
-    let response_format = response_format_args.resolve()?
-        .map(objectiveai_sdk::agent::completions::request::ResponseFormatParam::Single);
+    let messages = args.messages.resolve()?;
+    let agent = args
+        .agent
+        .resolve(|| async {
+            let (_, mut c) = crate::config::read(cli_config).await.unwrap();
+            c.agents().get_favorites().to_vec()
+        })
+        .await?;
 
     let params = objectiveai_sdk::agent::completions::request::AgentCompletionCreateParams {
         messages,
         provider: None,
         agent,
-        response_format,
-        seed,
+        response_format: None,
+        seed: args.seed,
         stream: Some(true),
-        continuation,
+        continuation: None,
     };
 
-    // Delegate the actual streaming to cli-stream. cli-stream
-    // opens the WS, runs the MCP conduit, manages per-agent
-    // pipes, writes coalesced log files under
-    // `${config_base_dir}/logs/`, and emits LogStreamReady. We
-    // consume its chunk-NDJSON, build the same in-memory
-    // aggregate the old `consume_with_coalesced_writes` returned,
-    // then do the same final-content extraction + emit.
-    let aggregate = crate::api::stream_subprocess::run::<
-        objectiveai_sdk::agent::completions::response::streaming::AgentCompletionChunk,
-    >(
+    crate::api::stream_subprocess::run_detached(
         cli_config,
         &["agents", "spawn"],
         &params,
         handle,
-        |_chunk| Vec::new(),  // agent completions have no per-chunk inner errors
-        |agg, c| agg.push(c),
-    ).await?;
-    let mut accumulated = aggregate.ok_or(crate::error::Error::EmptyStream)?;
-
-    if let Some(error) = accumulated.error.take() {
-        return Err(crate::error::Error::ResponseError(error));
-    }
-
-    let completion: objectiveai_sdk::agent::completions::response::unary::AgentCompletion = accumulated.into();
-
-    // Extract the last assistant message content
-    let content = completion.messages.iter().rev()
-        .find_map(|msg| {
-            if let objectiveai_sdk::agent::completions::response::unary::Message::Assistant(asst) = msg {
-                asst.content.as_ref().map(|c| match c {
-                    objectiveai_sdk::agent::completions::message::RichContent::Text(t) => t.clone(),
-                    objectiveai_sdk::agent::completions::message::RichContent::Parts(parts) => {
-                        parts.iter().filter_map(|p| match p {
-                            objectiveai_sdk::agent::completions::message::RichContentPart::Text { text } => Some(text.as_str()),
-                            _ => None,
-                        }).collect::<Vec<_>>().join("")
-                    }
-                })
-            } else {
-                None
-            }
-        })
-        .unwrap_or_default();
-
-    objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Content>::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value:
-        objectiveai_sdk::cli::output::Content { content },
-     })
-    .emit(handle).await;
-    Ok(())
+    )
+    .await
 }

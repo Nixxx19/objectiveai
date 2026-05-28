@@ -28,7 +28,7 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 
 use objectiveai_sdk::cli::output::{
-    Error as OutputError, Handle, Level, LogStreamReady, Notification, Output,
+    Error as OutputError, Handle, Level, LogStreamReady, Notification, Output, Spawned,
 };
 
 /// Spawn `objectiveai-cli-stream <endpoint_path...> --body <JSON>` and
@@ -196,6 +196,136 @@ async fn handle_notification<Chunk>(
         Some(a) => push(a, &chunk),
         None => *aggregate = Some(chunk),
     }
+}
+
+/// Spawn cli-stream as a detached background process, wait for
+/// the [`LogStreamReady`] handshake, emit
+/// [`Spawned { agent_id }`](objectiveai_sdk::cli::output::Spawned),
+/// and return Ok. The cli-stream child keeps running after this
+/// returns; the caller is expected to exit promptly so the orphan
+/// can take over the actual completion stream.
+///
+/// Chunk Notifications and Begin/End are dropped (cli-stream's
+/// further output never makes it back to this process). Errors are
+/// forwarded via `handle.emit()`. Stderr is mirrored to this
+/// process's stderr until the handshake; once we return, the
+/// cli-stream child continues writing to its own stderr but nobody
+/// reads it.
+///
+/// On stdout EOF before LogStreamReady, returns
+/// `Err(CliStreamSubprocess)` with the stderr tail (same shape as
+/// [`run`]).
+pub async fn run_detached(
+    cli_config: &crate::Config,
+    endpoint_path: &[&str],
+    body: &(impl serde::Serialize + ?Sized),
+    handle: &Handle,
+) -> Result<(), crate::error::Error> {
+    let cli_stream_path = resolve_cli_stream_binary()?;
+    let mut cmd = Command::new(&cli_stream_path);
+
+    push_forwarded_args(&mut cmd, cli_config).await?;
+
+    for seg in endpoint_path {
+        cmd.arg(seg);
+    }
+
+    let body_json = serde_json::to_string(body)
+        .expect("body serialization to JSON should not fail for valid params");
+    cmd.args(["--body", &body_json]);
+
+    cmd.stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped());
+
+    // On Windows, detach the child from the parent's job object so
+    // it survives when the parent exits. Same flag `api/detach.rs`
+    // uses for the parent→child CLI re-exec.
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
+        cmd.creation_flags(CREATE_NEW_PROCESS_GROUP);
+    }
+
+    let mut child = cmd
+        .spawn()
+        .map_err(|e| crate::error::Error::Spawn("objectiveai-cli-stream".into(), e))?;
+    let stdout = child.stdout.take().expect("stdout piped");
+    let stderr = child.stderr.take().expect("stderr piped");
+
+    let stderr_task = tokio::spawn(async move {
+        let mut buf: Vec<String> = Vec::new();
+        let mut lines = BufReader::new(stderr).lines();
+        while let Ok(Some(l)) = lines.next_line().await {
+            eprintln!("{l}");
+            buf.push(l);
+        }
+        buf
+    });
+
+    let mut stdout_lines = BufReader::new(stdout).lines();
+    loop {
+        let line = match stdout_lines.next_line().await {
+            Ok(Some(l)) => l,
+            Ok(None) => break,
+            Err(e) => {
+                return Err(crate::error::Error::Spawn(
+                    "read cli-stream stdout".into(),
+                    e,
+                ));
+            }
+        };
+        let trimmed = line.trim_end_matches(['\r', '\n']);
+        if trimmed.is_empty() {
+            continue;
+        }
+        let out: Output<serde_json::Value> = serde_json::from_str(trimmed)
+            .unwrap_or_else(|e| panic!("cli-stream stdout produced a non-JSONL line: {trimmed}; parse error: {e}"));
+        match out {
+            Output::Begin | Output::End => { /* cli wraps its own Begin/End */ }
+            Output::Error(e) => {
+                Output::<serde_json::Value>::Error(e).emit(handle).await;
+            }
+            Output::Notification(n) => {
+                // Only LogStreamReady triggers our handshake; every
+                // other Notification (chunks) is dropped since the
+                // caller does not wait for the completion.
+                if n.value.get("log_stream_ready").is_some() {
+                    let ready: LogStreamReady = serde_json::from_value(n.value)
+                        .expect("LogStreamReady-shaped value should deserialize");
+                    Output::<Spawned>::Notification(Notification {
+                        agent_id: None,
+                        value: Spawned {
+                            agent_id: ready.log_stream_ready,
+                        },
+                    })
+                    .emit(handle)
+                    .await;
+                    return Ok(());
+                }
+            }
+        }
+    }
+
+    // Stdout EOF before LogStreamReady — child failed early.
+    let stderr_buf = stderr_task.await.unwrap_or_default();
+    let status = child
+        .wait()
+        .await
+        .map_err(|e| crate::error::Error::Spawn("wait for cli-stream".into(), e))?;
+    let tail: String = stderr_buf
+        .iter()
+        .rev()
+        .take(20)
+        .rev()
+        .cloned()
+        .collect::<Vec<_>>()
+        .join("\n");
+    Err(crate::error::Error::CliStreamSubprocess {
+        code: status.code().unwrap_or(-1),
+        stderr_tail: tail,
+    })
 }
 
 /// `<dir-of-current-exe>/objectiveai-cli-stream` (`.exe` on Windows).

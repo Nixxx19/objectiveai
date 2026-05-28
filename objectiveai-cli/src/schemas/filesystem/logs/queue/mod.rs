@@ -15,15 +15,19 @@ pub enum GetCommand {
 pub enum Commands {
     #[command(name = "list")]
     List,
-    ActiveAgent {
+    Content {
         #[command(subcommand)]
         command: GetCommand,
     },
-    Agent {
+    Id {
         #[command(subcommand)]
         command: GetCommand,
     },
-    Spawned {
+    QueueItem {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
+    QueueMessage {
         #[command(subcommand)]
         command: GetCommand,
     },
@@ -33,7 +37,7 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["ActiveAgent", "Agent", "Spawned"];
+                const NAMES: &[&str] = &["Content", "Id", "QueueItem", "QueueMessage"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         agent_id: None,
@@ -44,9 +48,9 @@ impl Commands {
                 ).emit(handle).await;
                 Ok(())
             }
-            Commands::ActiveAgent { .. } => {
+            Commands::Content { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../../../../objectiveai-json-schema/cli.output.notification.agents.ActiveAgent.json"),
+                    include_str!("../../../../../../objectiveai-json-schema/filesystem.logs.queue.Content.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
                     objectiveai_sdk::cli::output::Notification {
@@ -56,9 +60,9 @@ impl Commands {
                 ).emit(handle).await;
                 Ok(())
             }
-            Commands::Agent { .. } => {
+            Commands::Id { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../../../../objectiveai-json-schema/cli.output.notification.agents.Agent.json"),
+                    include_str!("../../../../../../objectiveai-json-schema/filesystem.logs.queue.Id.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
                     objectiveai_sdk::cli::output::Notification {
@@ -68,9 +72,21 @@ impl Commands {
                 ).emit(handle).await;
                 Ok(())
             }
-            Commands::Spawned { .. } => {
+            Commands::QueueItem { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../../../../objectiveai-json-schema/cli.output.notification.agents.Spawned.json"),
+                    include_str!("../../../../../../objectiveai-json-schema/filesystem.logs.queue.QueueItem.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
+                        value: objectiveai_sdk::cli::output::Schema { schema },
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::QueueMessage { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../../../objectiveai-json-schema/filesystem.logs.queue.QueueMessage.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
                     objectiveai_sdk::cli::output::Notification {

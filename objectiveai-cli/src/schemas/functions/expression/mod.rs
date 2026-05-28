@@ -75,6 +75,10 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    InputValueLog {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     IntegerInputSchema {
         #[command(subcommand)]
         command: GetCommand,
@@ -133,7 +137,7 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["AnyOfInputSchema", "ArrayInputSchema", "ArrayInputSchemaType", "AudioInputSchema", "AudioInputSchemaType", "BooleanInputSchema", "BooleanInputSchemaType", "Expression", "FileInputSchema", "FileInputSchemaType", "ImageInputSchema", "ImageInputSchemaType", "InputSchema", "InputValue", "InputValueExpression", "IntegerInputSchema", "IntegerInputSchemaType", "NumberInputSchema", "NumberInputSchemaType", "ObjectInputSchema", "ObjectInputSchemaType", "Params", "Special", "StringInputSchema", "StringInputSchemaType", "TaskOutput", "VideoInputSchema", "VideoInputSchemaType"];
+                const NAMES: &[&str] = &["AnyOfInputSchema", "ArrayInputSchema", "ArrayInputSchemaType", "AudioInputSchema", "AudioInputSchemaType", "BooleanInputSchema", "BooleanInputSchemaType", "Expression", "FileInputSchema", "FileInputSchemaType", "ImageInputSchema", "ImageInputSchemaType", "InputSchema", "InputValue", "InputValueExpression", "InputValueLog", "IntegerInputSchema", "IntegerInputSchemaType", "NumberInputSchema", "NumberInputSchemaType", "ObjectInputSchema", "ObjectInputSchemaType", "Params", "Special", "StringInputSchema", "StringInputSchemaType", "TaskOutput", "VideoInputSchema", "VideoInputSchemaType"];
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schemas>::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         agent_id: None,
@@ -315,6 +319,18 @@ impl Commands {
             Commands::InputValueExpression { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/functions.expression.InputValueExpression.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
+                        value: objectiveai_sdk::cli::output::Schema { schema },
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::InputValueLog { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../../objectiveai-json-schema/functions.expression.InputValueLog.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::<objectiveai_sdk::cli::output::Schema>::Notification(
                     objectiveai_sdk::cli::output::Notification {
