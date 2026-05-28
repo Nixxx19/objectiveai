@@ -743,6 +743,15 @@ impl Client {
     /// the unix-seconds timestamp of its most recent
     /// `assistant_response` row in the `messages` table.
     /// Newest-first.
+    ///
+    /// The `agent_id` in each returned [`ActiveAgent`] is the
+    /// sub-portion past the parent — i.e. the trailing
+    /// composite-id segment(s) with the `{parent_agent_id}/`
+    /// prefix stripped — so callers can paste it back into
+    /// commands that re-prepend the parent (e.g. `agents
+    /// read-pending`).
+    ///
+    /// [`ActiveAgent`]: crate::cli::output::ActiveAgent
     pub async fn list_active(
         &self,
         parent_agent_id: &str,
@@ -753,10 +762,14 @@ impl Client {
             parent_agent_id.to_string(),
         )
         .await?;
+        let prefix = format!("{parent_agent_id}/");
         Ok(rows
             .into_iter()
-            .map(|(agent_id, last_log)| crate::cli::output::ActiveAgent {
-                agent_id,
+            .map(|(full, last_log)| crate::cli::output::ActiveAgent {
+                agent_id: full
+                    .strip_prefix(&prefix)
+                    .unwrap_or(&full)
+                    .to_string(),
                 last_log,
             })
             .collect())

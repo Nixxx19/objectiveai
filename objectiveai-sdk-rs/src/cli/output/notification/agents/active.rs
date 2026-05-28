@@ -12,7 +12,11 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone, JsonSchema)]
 #[schemars(rename = "cli.output.notification.agents.ActiveAgent")]
 pub struct ActiveAgent {
-    /// Full composite agent id (e.g. `cli/ag-abc-123`).
+    /// Sub-portion of the composite agent id — the trailing
+    /// segment(s) past the parent the caller asked about, with
+    /// the `{parent}/` prefix stripped. Paste this verbatim into
+    /// commands that re-prepend the parent (e.g. `agents
+    /// read-pending`).
     pub agent_id: String,
     /// Unix-seconds timestamp of this agent's most recent
     /// `assistant_response` row.
