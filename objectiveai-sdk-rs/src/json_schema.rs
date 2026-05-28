@@ -525,6 +525,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::cli::output::notification::Schemas),
             schemars::schema_for!(crate::cli::output::notification::agents::ActiveAgent),
             schemars::schema_for!(crate::cli::output::notification::agents::Agent),
+            schemars::schema_for!(crate::cli::output::notification::agents::AgentItems),
             schemars::schema_for!(crate::cli::output::notification::agents::Spawned),
             schemars::schema_for!(crate::cli::output::notification::api::Detached),
             schemars::schema_for!(crate::cli::output::notification::functions::Function),

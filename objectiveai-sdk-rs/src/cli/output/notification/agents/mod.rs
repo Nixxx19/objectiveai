@@ -1,7 +1,9 @@
 mod active;
+mod agent_items;
 mod spawned;
 
 pub use active::*;
+pub use agent_items::*;
 pub use spawned::*;
 
 use schemars::JsonSchema;
