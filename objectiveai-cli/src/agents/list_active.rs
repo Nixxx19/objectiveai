@@ -31,8 +31,7 @@ pub async fn handle(
     let parent = args
         .parent_agent_id
         .as_deref()
-        .or(cli_config.agent_id.as_deref())
-        .unwrap_or("cli");
+        .unwrap_or(&cli_config.agent_id);
 
     let items = client.list_active(parent).await?;
 

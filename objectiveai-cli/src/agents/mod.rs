@@ -60,6 +60,8 @@ pub enum Commands {
     Message(message::CommandArgs),
     /// Spawn an agent completion (open a streaming run as a child of this caller)
     Spawn(spawn::CommandArgs),
+    /// Return the configured self agent id
+    Me,
 }
 
 async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
@@ -115,6 +117,20 @@ impl Commands {
             Commands::ListActive(args) => list_active::handle(args, cli_config, handle).await,
             Commands::Message(args) => message::handle(args, cli_config, handle).await,
             Commands::Spawn(args) => spawn::handle(args, cli_config, handle).await,
+            Commands::Me => {
+                objectiveai_sdk::cli::output::Output::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
+                        value: objectiveai_sdk::cli::output::Me {
+                            agent_id: cli_config.agent_id.clone(),
+                        }
+                        .into(),
+                    },
+                )
+                .emit(handle)
+                .await;
+                Ok(())
+            }
             Commands::Publish { repository, body, message, overwrite } => {
                 let agent: objectiveai_sdk::agent::RemoteAgentBaseWithFallbacks = body.resolve()?;
                 let msg = message.resolve()?;

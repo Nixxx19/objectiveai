@@ -30,7 +30,8 @@ use crate::filesystem::{Client, Error};
 /// `agent`, `provider`, `response_format`, `seed` stay inline in the
 /// request log; the caller composes them with their own new `messages`
 /// + the `continuation` string.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "filesystem.logs.LatestContinuation")]
 pub struct LatestContinuation {
     /// The response_id of the original (about-to-be-continued)
     /// agent-completion turn. **Not necessarily the newest** request
@@ -279,6 +280,7 @@ mod tests {
                 insert(
                     &c,
                     agent_id,
+                    &response_id,
                     MessageKind::AgentCompletionRequest,
                     &stored_path,
                     1_700_000_000 + i as u64,

@@ -55,6 +55,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(crate::agent::completions::message::SystemMessageExpression),
         schemars::schema_for!(crate::agent::completions::message::ToolMessage),
         schemars::schema_for!(crate::agent::completions::message::ToolMessageExpression),
+        schemars::schema_for!(crate::agent::completions::message::ToolResponseMetadata),
         schemars::schema_for!(crate::agent::completions::message::UserMessage),
         schemars::schema_for!(crate::agent::completions::message::UserMessageExpression),
         schemars::schema_for!(crate::agent::completions::request::AgentCompletionCreateParams),
@@ -458,6 +459,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::filesystem::logs::LogReference),
             schemars::schema_for!(crate::filesystem::logs::LogReferenceTag),
             schemars::schema_for!(crate::filesystem::logs::indexed_reference::LogReference),
+            schemars::schema_for!(crate::filesystem::logs::LatestContinuation),
             // Per-site `LogReference` types (sibling to the chunk
             // that produces them; same name, distinct module paths).
             schemars::schema_for!(crate::functions::executions::response::streaming::function_execution_task_log_reference::LogReference),
@@ -509,6 +511,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::cli::output::NotificationValue),
             schemars::schema_for!(crate::cli::output::Error),
             schemars::schema_for!(crate::cli::output::Level),
+            schemars::schema_for!(crate::cli::output::notification::Me),
             schemars::schema_for!(crate::cli::output::notification::Ok),
             schemars::schema_for!(crate::cli::output::notification::Cleared),
             schemars::schema_for!(crate::cli::output::notification::Help),

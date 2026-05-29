@@ -135,9 +135,7 @@ pub async fn dispatch_tool(
     // subprocess. Tools that key per-session state (e.g. count files,
     // caches) read these from env; tools that don't need them ignore
     // them. Inherit-everything-else stays; we only add to the env.
-    if let Some(agent_id) = cli_config.agent_id.as_deref() {
-        cmd.env("OBJECTIVEAI_AGENT_ID", agent_id);
-    }
+    cmd.env("OBJECTIVEAI_AGENT_ID", &cli_config.agent_id);
     if let Some(session_id) = cli_config.mcp_session_id.as_deref() {
         cmd.env(
             objectiveai_sdk::mcp::MCP_SESSION_ID_ENV,

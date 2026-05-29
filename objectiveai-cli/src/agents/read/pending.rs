@@ -43,7 +43,7 @@ pub async fn handle(
         None::<String>,
         None::<String>,
     );
-    let caller = cli_config.agent_id.as_deref().unwrap_or("cli");
+    let caller = &cli_config.agent_id;
 
     for sub in &args.agent_ids {
         let spawned = format!("{caller}/{sub}");

@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 use super::{
     ActiveAgent, Agent, AgentItems, Cleared, Detached, Execution, Function, Help,
     Installed, Instructions, Inventions, JqResults, Laboratory, LogContent,
-    LogStreamReady, MessageDelivered, MessageQueued, Ok, Pair, Plugin, Plugins,
+    LogStreamReady, Me, MessageDelivered, MessageQueued, Ok, Pair, Plugin, Plugins,
     Profile, Published, Schema, Schemas, Spawned, State, Swarm, Tool, ToolLine, Tools,
     Updater, ViewerSendResult,
 };
@@ -65,6 +65,7 @@ pub enum NotificationValue {
     JqResults(JqResults),
     LogContent(LogContent),
     LogStreamReady(LogStreamReady),
+    Me(Me),
     Ok(Ok),
     Plugin(Plugin),
     Plugins(Plugins),
@@ -128,6 +129,6 @@ from_variant! {
     Laboratory,
     Swarm,
     Cleared, Help, Installed, Instructions, JqResults, LogContent, LogStreamReady,
-    Ok, Plugin, Plugins, Published, Schema, Schemas, Tool, ToolLine, Tools,
+    Me, Ok, Plugin, Plugins, Published, Schema, Schemas, Tool, ToolLine, Tools,
     Updater, ViewerSendResult,
 }

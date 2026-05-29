@@ -98,7 +98,7 @@ pub async fn handle(
     // socket at (`pipes/<caller>/<sub-id>/socket`). Same convention
     // every other agent-lookup command (e.g. `agents read pending`)
     // uses on the read side.
-    let caller = cli_config.agent_id.as_deref().unwrap_or("cli");
+    let caller = &cli_config.agent_id;
     let full_agent_id = format!("{caller}/{}", args.agent_id);
     let content = args.message.resolve()?;
 

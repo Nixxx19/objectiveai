@@ -100,7 +100,7 @@ impl ConfigBuilder {
             commit_author_name: self.commit_author_name,
             commit_author_email: self.commit_author_email,
             github_authorization: self.github_authorization,
-            agent_id: self.agent_id,
+            agent_id: self.agent_id.unwrap_or_else(|| "cli".to_string()),
             mcp_session_id: self.mcp_session_id,
             mcp: self.mcp.unwrap_or(false),
         }
@@ -114,7 +114,13 @@ pub struct Config {
     pub commit_author_name: Option<String>,
     pub commit_author_email: Option<String>,
     pub github_authorization: Option<String>,
-    pub agent_id: Option<String>,
+    /// Always populated. Defaults to `"cli"` for direct CLI invocations
+    /// (the `ConfigBuilder` fills it in if `OBJECTIVEAI_AGENT_ID` is
+    /// unset). Programmatic embedders that build a `Config` directly
+    /// (e.g. `objectiveai-mcp`) supply their own default — `"mcp"`
+    /// for MCP-routed calls, then per-request overridden from the
+    /// `X-OBJECTIVEAI-AGENT-ID` header.
+    pub agent_id: String,
     pub mcp_session_id: Option<String>,
     pub mcp: bool,
 }

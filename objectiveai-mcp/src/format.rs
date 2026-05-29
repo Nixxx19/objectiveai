@@ -30,9 +30,9 @@
 //!
 //! # Per-element rendering inside the array
 //!
-//! - `Output::Error` → the full `Output` JSON, retaining the
-//!   `"type":"error"` discriminator so consumers can tell errors
-//!   apart from notifications in a mixed array.
+//! - `Output::Error` → the full `Output` JSON (`{"type":"error",…}`),
+//!   with `agent_id` always set to `None` before serialization so the
+//!   `skip_serializing_if` drops it from the wire shape.
 //! - `Output::Notification(n)`, **Plugin** mode → `n.value`.
 //! - `Output::Notification(ToolLine(tl))`, **Tool** mode, stderr →
 //!   the bare `ToolLine` struct (no `NotificationValue` wrapper).
@@ -40,18 +40,18 @@
 //!   a JSON string element (the `line` text).
 //! - `Output::Notification(other)`, **Tool** mode → `n.value`.
 //!
-//! # `test_mode`
+//! # `agent_id` stripping
 //!
-//! When `test_mode` is `true`, the `agent_id` field is stripped from
-//! every rendered `Output::Error` value before serialization. Plugin
-//! and tool notification renderings already drop `agent_id` by
-//! construction (the `Notification` envelope is unwrapped to its
-//! inner `NotificationValue`, which has no `agent_id` field). The
-//! bare `ToolLine` likewise has no `agent_id` field. So errors are
-//! the only shape that needs an explicit strip.
+//! The formatter unconditionally drops `agent_id` from every rendered
+//! shape. Notification renderings drop it for free — the formatter
+//! unwraps `Notification` to its inner `NotificationValue`, which has
+//! no `agent_id` field. The bare `ToolLine` likewise has no
+//! `agent_id` field. For `Output::Error` the `agent_id` field is
+//! explicitly cleared on a clone before serialization
+//! (`skip_serializing_if = "Option::is_none"` then omits it).
 
-use objectiveai_sdk::cli::output::{Notification, NotificationValue, Output, ToolLine};
-use serde_json::Value;
+use objectiveai_sdk::cli::output::{Error, Notification, NotificationValue, Output, ToolLine};
+use serde::Serialize;
 
 /// Whether the formatter is rendering a plugin response or a tool
 /// response. The tool path has special handling for `ToolLine`.
@@ -66,9 +66,22 @@ pub enum OutputMode {
 /// empty-response case in single-stdout-line mode.
 const EMPTY_SENTINEL: &str = "<empty>";
 
+/// Per-element shape in the array path. `#[serde(untagged)]`: each
+/// variant serializes as just its inner value, with no enum-level
+/// discriminator. The owned `ErrorOutput` variant exists so we can
+/// serialize an `Error` clone whose `agent_id` has been cleared.
+#[derive(Serialize)]
+#[serde(untagged)]
+enum RenderedElement<'a> {
+    Notification(&'a NotificationValue),
+    Line(&'a str),
+    ToolLine(&'a ToolLine),
+    ErrorOutput(Output),
+}
+
 /// Format collected CLI outputs into an MCP tool response body.
 /// See the module-level docs for the full dispatch table.
-pub fn format_outputs(mode: OutputMode, outputs: &[Output], test_mode: bool) -> String {
+pub fn format_outputs(mode: OutputMode, outputs: &[Output]) -> String {
     if outputs.is_empty() {
         return EMPTY_SENTINEL.to_string();
     }
@@ -79,9 +92,9 @@ pub fn format_outputs(mode: OutputMode, outputs: &[Output], test_mode: bool) -> 
         }
     }
 
-    let elems: Vec<Value> = outputs
+    let elems: Vec<RenderedElement<'_>> = outputs
         .iter()
-        .map(|o| render_array_element(mode, o, test_mode))
+        .map(|o| render_array_element(mode, o))
         .collect();
     serialize_or_fallback(&elems)
 }
@@ -97,23 +110,15 @@ fn render_single_notification(mode: OutputMode, n: &Notification) -> String {
     }
 }
 
-fn render_array_element(mode: OutputMode, output: &Output, test_mode: bool) -> Value {
+fn render_array_element<'a>(mode: OutputMode, output: &'a Output) -> RenderedElement<'a> {
     match output {
-        Output::Error(_) => {
-            let mut v = serde_json::to_value(output).unwrap_or(Value::Null);
-            if test_mode {
-                strip_agent_id(&mut v);
-            }
-            v
-        }
+        Output::Error(e) => RenderedElement::ErrorOutput(Output::Error(strip_error_agent_id(e))),
         Output::Notification(n) => match mode {
-            OutputMode::Plugin => serde_json::to_value(&n.value).unwrap_or(Value::Null),
+            OutputMode::Plugin => RenderedElement::Notification(&n.value),
             OutputMode::Tool => match &n.value {
-                NotificationValue::ToolLine(tl) if is_stderr(tl) => {
-                    serde_json::to_value(tl).unwrap_or(Value::Null)
-                }
-                NotificationValue::ToolLine(tl) => Value::String(tl.line.clone()),
-                other => serde_json::to_value(other).unwrap_or(Value::Null),
+                NotificationValue::ToolLine(tl) if is_stderr(tl) => RenderedElement::ToolLine(tl),
+                NotificationValue::ToolLine(tl) => RenderedElement::Line(&tl.line),
+                other => RenderedElement::Notification(other),
             },
         },
     }
@@ -128,20 +133,21 @@ fn is_stderr(tl: &ToolLine) -> bool {
     tl.stderr == Some(true)
 }
 
-fn strip_agent_id(v: &mut Value) {
-    if let Value::Object(map) = v {
-        map.remove("agent_id");
-    }
+fn strip_error_agent_id(e: &Error) -> Error {
+    let mut stripped = e.clone();
+    stripped.agent_id = None;
+    stripped
 }
 
-fn serialize_or_fallback<T: serde::Serialize>(v: &T) -> String {
+fn serialize_or_fallback<T: Serialize>(v: &T) -> String {
     serde_json::to_string(v).unwrap_or_else(|e| format!("error serializing output: {e}"))
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use objectiveai_sdk::cli::output::{Error, Level, Ok as NotifOk};
+    use objectiveai_sdk::cli::output::{Level, Ok as NotifOk};
+    use serde_json::Value;
 
     fn notif(value: NotificationValue) -> Output {
         Output::Notification(Notification {
@@ -161,7 +167,7 @@ mod tests {
         Output::Error(Error {
             level: Level::Error,
             fatal: false,
-            message: serde_json::Value::String(message.to_string()),
+            message: Value::String(message.to_string()),
             agent_id: None,
         })
     }
@@ -170,7 +176,7 @@ mod tests {
         Output::Error(Error {
             level: Level::Error,
             fatal: false,
-            message: serde_json::Value::String(message.to_string()),
+            message: Value::String(message.to_string()),
             agent_id: Some(agent_id.to_string()),
         })
     }
@@ -193,14 +199,14 @@ mod tests {
 
     #[test]
     fn empty_returns_sentinel_in_both_modes() {
-        assert_eq!(format_outputs(OutputMode::Plugin, &[], false), "<empty>");
-        assert_eq!(format_outputs(OutputMode::Tool, &[], false), "<empty>");
+        assert_eq!(format_outputs(OutputMode::Plugin, &[]), "<empty>");
+        assert_eq!(format_outputs(OutputMode::Tool, &[]), "<empty>");
     }
 
     #[test]
     fn plugin_single_notification_emits_bare_notification_value() {
         let outputs = vec![notif(NotificationValue::Ok(NotifOk { ok: true }))];
-        let body = format_outputs(OutputMode::Plugin, &outputs, false);
+        let body = format_outputs(OutputMode::Plugin, &outputs);
         assert_eq!(body, r#"{"kind":"ok","ok":true}"#);
     }
 
@@ -210,7 +216,7 @@ mod tests {
             NotificationValue::Ok(NotifOk { ok: true }),
             "agent-x",
         )];
-        let body = format_outputs(OutputMode::Plugin, &outputs, false);
+        let body = format_outputs(OutputMode::Plugin, &outputs);
         assert!(!body.contains("agent_id"), "got: {body}");
         assert!(!body.contains("agent-x"), "got: {body}");
     }
@@ -218,21 +224,21 @@ mod tests {
     #[test]
     fn tool_single_notification_non_toolline_matches_plugin() {
         let outputs = vec![notif(NotificationValue::Ok(NotifOk { ok: true }))];
-        let body = format_outputs(OutputMode::Tool, &outputs, false);
+        let body = format_outputs(OutputMode::Tool, &outputs);
         assert_eq!(body, r#"{"kind":"ok","ok":true}"#);
     }
 
     #[test]
     fn tool_single_toolline_stdout_emits_raw_line() {
         let outputs = vec![stdout_line("hello world")];
-        let body = format_outputs(OutputMode::Tool, &outputs, false);
+        let body = format_outputs(OutputMode::Tool, &outputs);
         assert_eq!(body, "hello world");
     }
 
     #[test]
     fn tool_single_toolline_stderr_emits_bare_toolline_object() {
         let outputs = vec![stderr_line("oops")];
-        let body = format_outputs(OutputMode::Tool, &outputs, false);
+        let body = format_outputs(OutputMode::Tool, &outputs);
         let v: Value = serde_json::from_str(&body).expect("parse body");
         assert_eq!(v["line"], "oops");
         assert_eq!(v["stderr"], true);
@@ -243,7 +249,7 @@ mod tests {
     #[test]
     fn plugin_single_toolline_emits_full_notification_value() {
         let outputs = vec![stdout_line("hi")];
-        let body = format_outputs(OutputMode::Plugin, &outputs, false);
+        let body = format_outputs(OutputMode::Plugin, &outputs);
         let v: Value = serde_json::from_str(&body).expect("parse body");
         assert_eq!(v["kind"], "tool_line", "plugin mode keeps the kind tag");
         assert_eq!(v["line"], "hi");
@@ -253,7 +259,7 @@ mod tests {
     #[test]
     fn single_error_uses_array_path() {
         let outputs = vec![err("nope")];
-        let body = format_outputs(OutputMode::Plugin, &outputs, false);
+        let body = format_outputs(OutputMode::Plugin, &outputs);
         let v: Value = serde_json::from_str(&body).expect("parse body");
         let arr = v.as_array().expect("array");
         assert_eq!(arr.len(), 1);
@@ -267,14 +273,14 @@ mod tests {
             notif(NotificationValue::Ok(NotifOk { ok: true })),
             notif(NotificationValue::Ok(NotifOk { ok: true })),
         ];
-        let body = format_outputs(OutputMode::Plugin, &outputs, false);
+        let body = format_outputs(OutputMode::Plugin, &outputs);
         assert_eq!(body, r#"[{"kind":"ok","ok":true},{"kind":"ok","ok":true}]"#);
     }
 
     #[test]
     fn tool_multi_mixed_stdout_stderr_emits_strings_and_toolline_objects() {
         let outputs = vec![stdout_line("a"), stderr_line("b"), stdout_line("c")];
-        let body = format_outputs(OutputMode::Tool, &outputs, false);
+        let body = format_outputs(OutputMode::Tool, &outputs);
         let v: Value = serde_json::from_str(&body).expect("parse body");
         let arr = v.as_array().expect("array");
         assert_eq!(arr.len(), 3);
@@ -292,7 +298,7 @@ mod tests {
             err("boom"),
             notif(NotificationValue::Ok(NotifOk { ok: true })),
         ];
-        let body = format_outputs(OutputMode::Plugin, &outputs, false);
+        let body = format_outputs(OutputMode::Plugin, &outputs);
         let v: Value = serde_json::from_str(&body).expect("parse body");
         let arr = v.as_array().expect("array");
         assert_eq!(arr.len(), 3);
@@ -303,9 +309,9 @@ mod tests {
     }
 
     #[test]
-    fn test_mode_strips_agent_id_from_errors() {
+    fn agent_id_is_always_stripped_from_errors() {
         let outputs = vec![err_with_agent("nope", "agent-x")];
-        let body = format_outputs(OutputMode::Plugin, &outputs, true);
+        let body = format_outputs(OutputMode::Plugin, &outputs);
         let v: Value = serde_json::from_str(&body).expect("parse body");
         assert_eq!(v[0]["type"], "error");
         assert_eq!(v[0].get("agent_id"), None);
@@ -313,10 +319,14 @@ mod tests {
     }
 
     #[test]
-    fn non_test_mode_keeps_agent_id_on_errors() {
-        let outputs = vec![err_with_agent("nope", "agent-x")];
-        let body = format_outputs(OutputMode::Plugin, &outputs, false);
-        let v: Value = serde_json::from_str(&body).expect("parse body");
-        assert_eq!(v[0]["agent_id"], "agent-x");
+    fn agent_id_is_always_stripped_from_errors_in_mixed_array() {
+        let outputs = vec![
+            notif_with_agent(NotificationValue::Ok(NotifOk { ok: true }), "agent-y"),
+            err_with_agent("boom", "agent-z"),
+        ];
+        let body = format_outputs(OutputMode::Plugin, &outputs);
+        assert!(!body.contains("agent_id"), "got: {body}");
+        assert!(!body.contains("agent-y"), "got: {body}");
+        assert!(!body.contains("agent-z"), "got: {body}");
     }
 }

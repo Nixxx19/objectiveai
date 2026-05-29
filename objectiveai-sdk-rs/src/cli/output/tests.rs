@@ -115,6 +115,14 @@ fn nv_spawned_roundtrip() {
 }
 
 #[test]
+fn nv_me_roundtrip() {
+    let out = notif(NotificationValue::Me(Me {
+        agent_id: "agent-xyz".into(),
+    }));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
 fn nv_message_delivered_roundtrip() {
     let out = notif(NotificationValue::MessageDelivered(MessageDelivered {
         agent_id: "cli/foo-123".into(),

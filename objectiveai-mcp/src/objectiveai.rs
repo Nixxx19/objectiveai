@@ -41,12 +41,6 @@ pub struct ToolRequest {
 pub struct ObjectiveAiMcpCli {
     pub tool_router: ToolRouter<Self>,
     pub cli_config: Arc<objectiveai_cli::Config>,
-    /// When `true`, [`run_cli_and_collect`] strips `agent_id` from
-    /// any rendered `Output::Error` in the response body. Set via
-    /// the `TEST_MODE` env var at startup. Off in production. See
-    /// [`crate::format`] for which rendered shapes carry `agent_id`
-    /// (only errors — notification renderings drop it by construction).
-    pub test_mode: bool,
 }
 
 #[tool_router]
@@ -66,7 +60,6 @@ impl ObjectiveAiMcpCli {
         cli_config: Arc<objectiveai_cli::Config>,
         plugins: Vec<PluginManifest>,
         tools: Vec<ToolManifest>,
-        test_mode: bool,
     ) -> Self {
         let mut tool_router = Self::tool_router();
         for plugin in plugins {
@@ -101,7 +94,6 @@ impl ObjectiveAiMcpCli {
                         &cli_config,
                         &parts,
                         args,
-                        test_mode,
                         OutputMode::Plugin,
                     )
                     .await;
@@ -142,7 +134,6 @@ impl ObjectiveAiMcpCli {
                         &cli_config,
                         &parts,
                         args,
-                        test_mode,
                         OutputMode::Tool,
                     )
                     .await;
@@ -154,7 +145,6 @@ impl ObjectiveAiMcpCli {
         Self {
             tool_router,
             cli_config,
-            test_mode,
         }
     }
 
@@ -179,7 +169,6 @@ impl ObjectiveAiMcpCli {
             &self.cli_config,
             &parts,
             args,
-            self.test_mode,
             OutputMode::Plugin,
         )
         .await
@@ -193,16 +182,12 @@ impl ObjectiveAiMcpCli {
 /// independent).
 ///
 /// `mode` selects plugin vs. tool rendering — see [`crate::format`]
-/// for the full dispatch table. When `test_mode` is `true`,
-/// `agent_id` is stripped from rendered errors (notification
-/// renderings drop it by construction). Production callers leave
-/// it off so cross-process correlation stamps survive. See the
-/// `TEST_MODE` env var in `run.rs`.
+/// for the full dispatch table. The formatter always strips
+/// `agent_id` from the response body regardless of any env vars.
 async fn run_cli_and_collect(
     cli_config: &Arc<objectiveai_cli::Config>,
     parts: &Parts,
     args: Vec<String>,
-    test_mode: bool,
     mode: OutputMode,
 ) -> String {
     // Per-request: stamp agent_id + mcp_session_id from headers so
@@ -222,13 +207,19 @@ async fn run_cli_and_collect(
         .headers
         .get("X-OBJECTIVEAI-AGENT-ID")
         .and_then(|h| h.to_str().ok());
-    if let Some(agent_id) = header_agent_id {
-        cfg.agent_id = Some(agent_id.to_string());
-    }
+    // Always populate agent_id for MCP-routed calls. When the upstream
+    // MCP client didn't send the header, default to "MCP" so
+    // `agents me` (and any other code reading the field) reports
+    // the call's actual origin instead of inheriting the server-wide
+    // default ("CLI") — which would be misleading.
+    cfg.agent_id = header_agent_id.unwrap_or("mcp").to_string();
     let header_session_id = parts
         .headers
         .get(objectiveai_sdk::mcp::MCP_SESSION_ID_HEADER)
         .and_then(|h| h.to_str().ok());
+    // session_id falls back to the *header-provided* agent_id only —
+    // not the "MCP" default — so the per-session tool state key stays
+    // meaningful when the client doesn't actually manage sessions.
     cfg.mcp_session_id = match header_session_id {
         Some(s) => Some(s.to_string()),
         None => header_agent_id.map(str::to_string),
@@ -243,12 +234,12 @@ async fn run_cli_and_collect(
     // Vec the runner reassembles below.
     let handle = objectiveai_sdk::cli::output::Handle {
         destination: objectiveai_sdk::cli::output::HandleDestination::Collect(collected.clone()),
-        agent_id: cli_config.agent_id.clone(),
+        agent_id: Some(cli_config.agent_id.clone()),
     };
     let _ = objectiveai_cli::run(args, &cli_config, handle).await;
 
     let outputs = collected.lock().await;
-    format_outputs(mode, &outputs, test_mode)
+    format_outputs(mode, &outputs)
 }
 
 #[tool_handler]
