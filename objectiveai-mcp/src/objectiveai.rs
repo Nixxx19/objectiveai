@@ -17,6 +17,8 @@ use rmcp::{
     schemars, tool, tool_handler, tool_router,
 };
 
+use crate::format::{OutputMode, format_outputs};
+
 #[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
 pub struct ObjectiveAiRequest {
     #[schemars(description = "The command arguments to pass to the ObjectiveAI CLI (e.g. [\"agents\", \"list\"] or [\"functions\", \"executions\", \"create\", \"--help\"])")]
@@ -40,8 +42,10 @@ pub struct ObjectiveAiMcpCli {
     pub tool_router: ToolRouter<Self>,
     pub cli_config: Arc<objectiveai_cli::Config>,
     /// When `true`, [`run_cli_and_collect`] strips `agent_id` from
-    /// every JSON line in the response body. Set via the `TEST_MODE`
-    /// env var at startup. Off in production.
+    /// any rendered `Output::Error` in the response body. Set via
+    /// the `TEST_MODE` env var at startup. Off in production. See
+    /// [`crate::format`] for which rendered shapes carry `agent_id`
+    /// (only errors — notification renderings drop it by construction).
     pub test_mode: bool,
 }
 
@@ -93,7 +97,14 @@ impl ObjectiveAiMcpCli {
                             .into_iter()
                             .chain(req.args.into_iter())
                             .collect();
-                    let buf = run_cli_and_collect(&cli_config, &parts, args, test_mode).await;
+                    let buf = run_cli_and_collect(
+                        &cli_config,
+                        &parts,
+                        args,
+                        test_mode,
+                        OutputMode::Plugin,
+                    )
+                    .await;
                     Ok(CallToolResult::success(vec![Content::text(buf)]))
                 }
                 .boxed()
@@ -127,7 +138,14 @@ impl ObjectiveAiMcpCli {
                             .into_iter()
                             .chain(req.args.into_iter())
                             .collect();
-                    let buf = run_cli_and_collect(&cli_config, &parts, args, test_mode).await;
+                    let buf = run_cli_and_collect(
+                        &cli_config,
+                        &parts,
+                        args,
+                        test_mode,
+                        OutputMode::Tool,
+                    )
+                    .await;
                     Ok(CallToolResult::success(vec![Content::text(buf)]))
                 }
                 .boxed()
@@ -152,24 +170,40 @@ impl ObjectiveAiMcpCli {
         let args: Vec<String> = std::iter::once("objectiveai".to_string())
             .chain(req.command)
             .collect();
-        run_cli_and_collect(&self.cli_config, &parts, args, self.test_mode).await
+        // Catch-all dispatches arbitrary `objectiveai …` commands.
+        // Plugin mode preserves the most structure (full
+        // NotificationValue rather than extracting ToolLine.line),
+        // which is the safer default when the underlying command
+        // is unknown.
+        run_cli_and_collect(
+            &self.cli_config,
+            &parts,
+            args,
+            self.test_mode,
+            OutputMode::Plugin,
+        )
+        .await
     }
 }
 
 /// Run the ObjectiveAI CLI in-process with `args`, collecting every
-/// JSONL `Output` into a single response body. Applies the
-/// per-request `X-OBJECTIVEAI-AGENT-ID` header override (clones the
-/// server-wide `cli_config` so concurrent requests stay independent).
+/// emitted `Output`, and format the result for the MCP response.
+/// Applies the per-request `X-OBJECTIVEAI-AGENT-ID` header override
+/// (clones the server-wide `cli_config` so concurrent requests stay
+/// independent).
 ///
-/// When `test_mode` is `true`, the final body has `agent_id`
-/// scrubbed from every JSON line — gated so production callers
-/// still see the cross-process correlation stamp. See the
+/// `mode` selects plugin vs. tool rendering — see [`crate::format`]
+/// for the full dispatch table. When `test_mode` is `true`,
+/// `agent_id` is stripped from rendered errors (notification
+/// renderings drop it by construction). Production callers leave
+/// it off so cross-process correlation stamps survive. See the
 /// `TEST_MODE` env var in `run.rs`.
 async fn run_cli_and_collect(
     cli_config: &Arc<objectiveai_cli::Config>,
     parts: &Parts,
     args: Vec<String>,
     test_mode: bool,
+    mode: OutputMode,
 ) -> String {
     // Per-request: stamp agent_id + mcp_session_id from headers so
     // every cli invocation (and every tool subprocess the cli spawns
@@ -214,18 +248,7 @@ async fn run_cli_and_collect(
     let _ = objectiveai_cli::run(args, &cli_config, handle).await;
 
     let outputs = collected.lock().await;
-    let mut buf = String::new();
-    for output in outputs.iter() {
-        match serde_json::to_string(output) {
-            Ok(line) => buf.push_str(&line),
-            Err(e) => buf.push_str(&format!("error serializing output: {e}")),
-        }
-        buf.push('\n');
-    }
-    if test_mode {
-        buf = objectiveai_sdk::cli::output::strip_agent_id_lines(&buf);
-    }
-    buf
+    format_outputs(mode, &outputs, test_mode)
 }
 
 #[tool_handler]
