@@ -4,7 +4,7 @@
 //! On disk:
 //!
 //! ```json
-//! { "type": "reference", "path": "agents/completions/response/messages/acc-1_0.json" }
+//! { "type": "reference", "path": "agents/completions/response/messages/assistant/acc-1_0.json" }
 //! ```
 //!
 //! For references that carry additional per-context metadata (an
@@ -20,6 +20,47 @@
 //! - `functions::executions::response::streaming::function_execution_task_log_reference::LogReference`
 //! - `functions::executions::response::streaming::vector_completion_task_log_reference::LogReference`
 //! - `functions::executions::response::streaming::task_log_reference::LogReference` (untagged enum dispatch)
+//!
+//! # Nested-sub-folder rule (absolute)
+//!
+//! Every `LogReference` (and every `*_log_reference::LogReference`
+//! variant) inside a log file MUST point at a path that lives inside
+//! a sub-folder of the directory containing the referencing file.
+//! Sibling references (same directory) and uncle references (a
+//! different sub-tree) are disallowed — they make `(response_id,
+//! path)` ambiguous across kinds (assistant vs. tool), let two
+//! writers race for the same on-disk filename, and break the
+//! "delete the parent dir, lose everything it owns" cleanup model.
+//!
+//! Two carve-outs, each documented at the call site:
+//!
+//! 1. **Cross-endpoint chunk reuse.** A `FunctionExecutionChunk` log
+//!    references its inner reasoning-summary `AgentCompletionChunk`
+//!    log under `agents/completions/response/{inner_id}.json`,
+//!    not under `functions/executions/response/...` — the same is
+//!    true for vector-completion → agent-completion,
+//!    function-invention → agent-completion, and
+//!    function-invention-recursive → function-invention. These
+//!    inner chunks are *the same log* whether you read them via
+//!    their own endpoint or via the outer one; re-rooting them
+//!    would shatter that identity. The outer log lives in its
+//!    own sub-tree; the cross-endpoint reference is sideways by
+//!    design.
+//!
+//! 2. **Notifications.** Notification files live under
+//!    `agents/completions/request/notifications/...` and are
+//!    keyed by the target agent-completion's `response_id` (see
+//!    `AgentCompletionNotifyParams::response_id`), not by the
+//!    referencing request log's id — they're delivered to a
+//!    long-running completion's WebSocket stream, not produced by
+//!    the request that names them.
+//!
+//! Everything else nests: `messages/{assistant,tool}/{response_id}_{idx}.json`,
+//! `messages/{kind}/{logprobs,reasoning,refusal,tool_calls,text,
+//! image,audio,video,file}/...`, `continuation/{id}.json`,
+//! `response_format/{id}.json`, `retry_token/{id}.json`, etc. —
+//! the parent log file's `LogReference`s only ever cross *deeper*
+//! into its own subtree.
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};

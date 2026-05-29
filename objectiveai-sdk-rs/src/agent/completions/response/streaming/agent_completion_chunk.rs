@@ -169,9 +169,15 @@ impl AgentCompletionChunk {
             let idx = m.index();
             Some(MessageRow {
                 agent_id: id.to_string(),
+                // Same value as agent_id at this stage — the writer
+                // will lineage-stamp `agent_id` but `response_id`
+                // stays bare so the reader doesn't have to parse it
+                // back out of a stamped string.
+                response_id: id.to_string(),
                 kind,
                 index: idx,
-                // Bare id — agent_id and route are reconstructed from columns + kind.
+                // Bare id — the route is reconstructed from
+                // (kind, response_id, path) by `MessageKind::file_path`.
                 path: format!("{idx}"),
                 timestamp: created,
             })

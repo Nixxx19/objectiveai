@@ -53,25 +53,25 @@ impl MessageKind {
     }
 
     /// Reconstruct the on-disk file path (relative to `logs_dir`)
-    /// from a (kind, agent_id, path) row.
+    /// from a (kind, response_id, path) row.
     ///
-    /// - Request rows have `path` already set to the full filesystem
-    ///   path (the writer stores it as `agents/completions/request/<id>.json`);
-    ///   we return it verbatim.
-    /// - Assistant / tool / notification rows are keyed by the bare
-    ///   chunk.id (the last `/`-segment of `agent_id`) — the writer
-    ///   writes the file under the bare chunk.id regardless of the
-    ///   caller-lineage prefix the DB row's `agent_id` column carries.
-    pub fn file_path(&self, agent_id: &str, path: &str) -> String {
-        // Bare chunk.id = the last `/`-segment of agent_id, defaulting
-        // to agent_id itself for older bare-form rows.
-        let chunk_id = agent_id.rsplit('/').next().unwrap_or(agent_id);
+    /// `response_id` is the bare agent-completion chunk id and is
+    /// passed in explicitly. We do **not** recover it by parsing
+    /// `agent_id`'s trailing segment — `agent_id` is constructed
+    /// from `response_id` (by lineage-stamping) and the reverse
+    /// direction is unsafe (bare/unstamped agent_ids, sub-lineages,
+    /// etc.). For notifications, the on-disk filename is keyed by
+    /// `response_id` too (the target agent-completion's id) so the
+    /// rule holds uniformly.
+    ///
+    /// Request rows have `path` already set to the full filesystem
+    /// path (the writer stores it as
+    /// `agents/completions/request/<id>.json`); we return it
+    /// verbatim. The fallback `{prefix}/{path}.json` form keeps
+    /// backwards compat for any bare-stem rows.
+    pub fn file_path(&self, response_id: &str, path: &str) -> String {
         match self {
             MessageKind::AgentCompletionRequest => {
-                // The writer stores the full path in the `path` column
-                // (`agents/completions/request/<id>.json`); use it as-is
-                // when it already starts with the route, or treat it as
-                // a bare stem otherwise.
                 if path.starts_with("agents/completions/request/")
                     && path.ends_with(".json")
                 {
@@ -98,11 +98,20 @@ impl MessageKind {
                     format!("functions/inventions/recursive/request/{path}.json")
                 }
             }
-            MessageKind::AssistantResponse | MessageKind::ToolResponse => {
-                format!("agents/completions/response/messages/{chunk_id}_{path}.json")
+            MessageKind::AssistantResponse => {
+                format!(
+                    "agents/completions/response/messages/assistant/{response_id}_{path}.json"
+                )
+            }
+            MessageKind::ToolResponse => {
+                format!(
+                    "agents/completions/response/messages/tool/{response_id}_{path}.json"
+                )
             }
             MessageKind::AgentCompletionNotification => {
-                format!("agents/completions/request/notifications/{chunk_id}_{path}.json")
+                format!(
+                    "agents/completions/request/notifications/{response_id}_{path}.json"
+                )
             }
         }
     }
@@ -112,8 +121,13 @@ impl MessageKind {
 /// by chunk types' `produce_message_rows()`.
 #[derive(Debug, Clone)]
 pub struct MessageRow {
-    /// Which agent the row is about (column).
+    /// Which agent the row is about (column). Lineage-stamped by the
+    /// writer (`{caller}/{response_id}` or just `{response_id}` at the
+    /// root).
     pub agent_id: String,
+    /// The bare chunk id (the agent completion's response id). Set
+    /// explicitly by the producer; never re-derived from `agent_id`.
+    pub response_id: String,
     pub kind: MessageKind,
     /// The chunk-given message index (assistant/tool: `MessageChunk::index()`).
     pub index: u64,
@@ -141,12 +155,13 @@ pub struct MessageRow {
 pub fn init_tables(conn: &Connection) -> Result<(), super::super::Error> {
     conn.execute_batch(
         "CREATE TABLE IF NOT EXISTS messages (\
-            id        INTEGER PRIMARY KEY AUTOINCREMENT, \
-            agent_id  TEXT NOT NULL, \
-            kind      TEXT NOT NULL, \
-            path      TEXT NOT NULL, \
-            timestamp INTEGER NOT NULL, \
-            \"index\" INTEGER NOT NULL\
+            id          INTEGER PRIMARY KEY AUTOINCREMENT, \
+            agent_id    TEXT NOT NULL, \
+            response_id TEXT NOT NULL, \
+            kind        TEXT NOT NULL, \
+            path        TEXT NOT NULL, \
+            timestamp   INTEGER NOT NULL, \
+            \"index\"   INTEGER NOT NULL\
         );\
         CREATE INDEX IF NOT EXISTS messages_agent_index_idx ON messages(agent_id, \"index\");\
         CREATE INDEX IF NOT EXISTS messages_agent_idx ON messages(agent_id);\
@@ -281,17 +296,33 @@ pub fn max_index(
 }
 
 /// Insert a single row.
+///
+/// `agent_id` is the lineage-stamped composite (`{caller}/{response_id}`
+/// or just `{response_id}` for the unstamped root case). `response_id`
+/// is the *bare* chunk id, passed in explicitly — we never recover it
+/// by parsing `agent_id`, both because `agent_id` may be unstamped and
+/// because the trailing-segment trick is a one-way invariant that
+/// callers shouldn't rely on.
 pub fn insert(
     conn: &Connection,
     agent_id: &str,
+    response_id: &str,
     kind: MessageKind,
     path: &str,
     timestamp: u64,
     index: u64,
 ) -> Result<(), super::super::Error> {
     conn.execute(
-        "INSERT INTO messages (agent_id, kind, path, timestamp, \"index\") VALUES (?1, ?2, ?3, ?4, ?5)",
-        rusqlite::params![agent_id, kind.as_str(), path, timestamp as i64, index as i64],
+        "INSERT INTO messages (agent_id, response_id, kind, path, timestamp, \"index\") \
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+        rusqlite::params![
+            agent_id,
+            response_id,
+            kind.as_str(),
+            path,
+            timestamp as i64,
+            index as i64
+        ],
     )?;
     Ok(())
 }
@@ -302,6 +333,7 @@ pub fn insert(
 pub async fn insert_async(
     conn: Arc<Mutex<Connection>>,
     agent_id: String,
+    response_id: String,
     kind: MessageKind,
     path: String,
     timestamp: u64,
@@ -309,7 +341,7 @@ pub async fn insert_async(
 ) -> Result<(), super::super::Error> {
     tokio::task::spawn_blocking(move || {
         let conn = conn.lock().expect("filesystem db mutex poisoned");
-        insert(&conn, &agent_id, kind, &path, timestamp, index)
+        insert(&conn, &agent_id, &response_id, kind, &path, timestamp, index)
     })
     .await
     .map_err(spawn_blocking_join_err)?

@@ -173,10 +173,15 @@ impl AssistantResponseChunk {
 
         let mut files = Vec::new();
 
+        // All assistant-only extracts live under the kind subdir so
+        // every reference from the parent assistant message log file
+        // points strictly inside its own directory subtree — see the
+        // nested-sub-folder rule on `LogReference`.
+
         // Extract logprobs to a separate file (if present).
         let logprobs_ref = self.logprobs.as_ref().map(|logprobs| {
             let logprobs_file = LogFile {
-                route: format!("{route_base}/messages/logprobs"),
+                route: format!("{route_base}/messages/assistant/logprobs"),
                 id: id.to_string(),
                 message_index: Some(self.index),
                 media_index: None,
@@ -191,7 +196,7 @@ impl AssistantResponseChunk {
         // Extract reasoning to its own file (if present).
         let reasoning_ref = self.reasoning.as_ref().map(|reasoning| {
             let f = LogFile {
-                route: format!("{route_base}/messages/reasoning"),
+                route: format!("{route_base}/messages/assistant/reasoning"),
                 id: id.to_string(),
                 message_index: Some(self.index),
                 media_index: None,
@@ -206,7 +211,7 @@ impl AssistantResponseChunk {
         // Extract refusal to its own file (if present).
         let refusal_ref = self.refusal.as_ref().map(|refusal| {
             let f = LogFile {
-                route: format!("{route_base}/messages/refusal"),
+                route: format!("{route_base}/messages/assistant/refusal"),
                 id: id.to_string(),
                 message_index: Some(self.index),
                 media_index: None,
@@ -223,7 +228,7 @@ impl AssistantResponseChunk {
             tcs.iter()
                 .map(|tc| {
                     let f = LogFile {
-                        route: format!("{route_base}/messages/tool_calls"),
+                        route: format!("{route_base}/messages/assistant/tool_calls"),
                         id: id.to_string(),
                         message_index: Some(self.index),
                         media_index: Some(tc.index),
@@ -237,10 +242,16 @@ impl AssistantResponseChunk {
                 .collect::<Vec<_>>()
         });
 
-        // Extract media from content (if present).
+        // Extract media from content (if present). Routed under the
+        // kind-specific subdir so the (response_id, index) stems don't
+        // collide with a tool message at the same index.
         let content_log = self.content.clone().map(|mut content| {
             content.prepare();
-            let (content_log, media_files) = content.extract_media(&format!("{route_base}/messages"), id, self.index);
+            let (content_log, media_files) = content.extract_media(
+                &format!("{route_base}/messages/assistant"),
+                id,
+                self.index,
+            );
             files.extend(media_files);
             content_log
         });
@@ -265,7 +276,10 @@ impl AssistantResponseChunk {
         };
 
         let msg_file = LogFile {
-            route: format!("{route_base}/messages"),
+            // Kind-specific subdir so this file can't collide with a
+            // tool message at the same (response_id, index) — see
+            // `MessageKind::file_path` for the reader-side mirror.
+            route: format!("{route_base}/messages/assistant"),
             id: id.to_string(),
             message_index: Some(self.index),
             media_index: None,

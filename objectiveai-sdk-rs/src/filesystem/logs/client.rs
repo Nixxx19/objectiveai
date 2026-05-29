@@ -562,7 +562,7 @@ impl Client {
         use crate::filesystem::db::schema::MessageKind;
         use super::queue::QueueItem;
 
-        let rel_path = row.kind.file_path(&row.agent_id, &row.path);
+        let rel_path = row.kind.file_path(&row.response_id, &row.path);
 
         match row.kind {
             MessageKind::FunctionExecutionRequest => {

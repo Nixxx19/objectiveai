@@ -88,8 +88,14 @@ where
     // notification channel carries `RichContent` notifications from
     // the pipe readers into the writer task's local pending queue.
     let (tx, rx) = tokio::sync::mpsc::unbounded_channel::<Chunk>();
-    let (notif_tx, notif_rx) =
-        tokio::sync::mpsc::unbounded_channel::<(String, RichContent)>();
+    // Tuple: (lineage_agent_id, response_id, content). Threading both
+    // axes keeps the writer from having to re-derive `response_id`
+    // from `agent_id` — see the LogReference doc comment for the rule.
+    let (notif_tx, notif_rx) = tokio::sync::mpsc::unbounded_channel::<(
+        String,
+        String,
+        RichContent,
+    )>();
     let writer_push = push.clone();
     let writer_handle = handle.clone();
     let writer_task = tokio::spawn(async move {
@@ -124,6 +130,7 @@ where
                     registry
                         .ensure_pipe(
                             &lineage_id,
+                            raw,
                             &pipes_root,
                             notifier.clone(),
                             notif_tx.clone(),
@@ -212,7 +219,11 @@ where
 /// is flushed by `log_writer.finalize`.
 async fn writer_loop<Chunk, F>(
     mut rx: tokio::sync::mpsc::UnboundedReceiver<Chunk>,
-    mut notif_rx: tokio::sync::mpsc::UnboundedReceiver<(String, RichContent)>,
+    mut notif_rx: tokio::sync::mpsc::UnboundedReceiver<(
+        String,
+        String,
+        RichContent,
+    )>,
     mut log_writer: LogWriter<Chunk>,
     push: F,
     handle: Handle,
@@ -248,9 +259,9 @@ where
                             }
                         }
                         // Drain any notifs that arrived in the same window.
-                        while let Ok((aid, content)) = notif_rx.try_recv() {
+                        while let Ok((aid, response_id, content)) = notif_rx.try_recv() {
                             let p = log_writer
-                                .write_notification(&aid, &content)
+                                .write_notification(&aid, &response_id, &content)
                                 .await?;
                             pending.push(p);
                         }
@@ -275,9 +286,9 @@ where
             }
             notif = notif_rx.recv(), if notif_channel_open => {
                 match notif {
-                    Some((aid, content)) => {
+                    Some((aid, response_id, content)) => {
                         let p = log_writer
-                            .write_notification(&aid, &content)
+                            .write_notification(&aid, &response_id, &content)
                             .await?;
                         pending.push(p);
                     }

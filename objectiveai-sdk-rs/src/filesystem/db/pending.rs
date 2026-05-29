@@ -8,7 +8,15 @@
 /// via the writer's `finalize`.
 #[derive(Debug, Clone)]
 pub struct PendingNotification {
+    /// Lineage-stamped agent id (`{caller}/{response_id}` or
+    /// `{response_id}` at the root). Used as the per-agent
+    /// reservation namespace and as the agent column on the row.
     pub agent_id: String,
+    /// The bare agent-completion response id the notification targets
+    /// (the same value `AgentCompletionNotifyParams.response_id`
+    /// carries on the wire). Stored explicitly so the reader doesn't
+    /// have to parse it out of `agent_id`.
+    pub response_id: String,
     pub index: u64,
     pub path: String,
     pub timestamp: u64,

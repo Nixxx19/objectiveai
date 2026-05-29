@@ -39,7 +39,26 @@ struct AgentEntry {
 struct AgentMutableState {
     next_index: u64,
     request_inserted: bool,
-    inserted_paths: HashSet<String>,
+    /// Per-(kind, path) dedup, scoped per agent (per `response_id`
+    /// after lineage-stamping) via the enclosing `agents` HashMap.
+    /// The full unique tuple is `(response_id, kind, path)` —
+    /// `(kind, path)`, `(kind, response_id)`, and `(response_id, path)`
+    /// can each collide alone:
+    ///   - one writer drives multiple agent completions in the same
+    ///     stream (e.g. inside a function execution), so two agents
+    ///     can land identical `(kind, path)` rows — distinguished by
+    ///     `response_id`.
+    ///   - within one agent completion, the same chunk gets re-emitted
+    ///     each `write` as the agg grows, so two consecutive calls can
+    ///     produce identical `(kind, response_id)` rows — distinguished
+    ///     by `path` (the bare message index).
+    ///   - assistant and tool messages can land at distinct paths but
+    ///     the reader dispatches by `kind`, so omitting `kind` would
+    ///     let an assistant row mask a later tool row at the same
+    ///     `(response_id, path)`.
+    /// The HashMap key gives `response_id` for free; this set adds the
+    /// remaining `(kind, path)`.
+    inserted_paths: HashSet<(MessageKind, String)>,
 }
 
 impl Queue {
@@ -72,10 +91,13 @@ impl Queue {
         Ok(idx)
     }
 
-    /// Insert one row at a caller-given index.
+    /// Insert one row at a caller-given index. `response_id` is the
+    /// bare agent-completion chunk id; it's stored in its own column
+    /// so the reader doesn't have to parse it back out of `agent_id`.
     pub async fn insert(
         &self,
         agent_id: &str,
+        response_id: &str,
         kind: MessageKind,
         path: String,
         timestamp: u64,
@@ -85,6 +107,7 @@ impl Queue {
         schema::insert_async(
             Arc::clone(&self.inner.conn),
             agent_id.to_string(),
+            response_id.to_string(),
             kind,
             path,
             timestamp,
@@ -100,6 +123,7 @@ impl Queue {
     pub async fn insert_request_once(
         &self,
         agent_id: &str,
+        response_id: &str,
         kind: MessageKind,
         path: String,
         timestamp: u64,
@@ -118,6 +142,7 @@ impl Queue {
         schema::insert_async(
             Arc::clone(&self.inner.conn),
             agent_id.to_string(),
+            response_id.to_string(),
             kind,
             path,
             timestamp,
@@ -127,32 +152,48 @@ impl Queue {
         Ok(true)
     }
 
-    /// Register a path for dedup. Returns `true` if newly inserted,
-    /// `false` if already present (caller should skip the insert).
+    /// Register a `(kind, path)` pair for dedup under `agent_id`.
+    /// Returns `true` if newly inserted, `false` if already present
+    /// (caller should skip the insert).
+    ///
+    /// The effective unique tuple is `(response_id, kind, path)` —
+    /// `agent_id`'s trailing segment is the response id (set by the
+    /// chunk producer and lineage-stamped here), so the per-agent
+    /// HashMap entry contributes `response_id` and this set adds
+    /// `(kind, path)`. None of the pairwise subsets is unique on its
+    /// own; see the `inserted_paths` field comment for the cases each
+    /// missing axis would alias.
     pub async fn register_path(
         &self,
         agent_id: &str,
+        kind: MessageKind,
         path: &str,
     ) -> Result<bool, super::super::Error> {
         let entry = self.ensure_agent(agent_id).await?;
         let mut state = entry.state.lock().expect("agent state mutex poisoned");
-        Ok(state.inserted_paths.insert(path.to_string()))
+        Ok(state.inserted_paths.insert((kind, path.to_string())))
     }
 
     /// Write a notification's content out as per-leaf files (text /
     /// media parts under
     /// `agents/completions/request/notifications/{text,image,...}/`)
     /// plus a parent `RichContentLog` envelope at
-    /// `agents/completions/request/notifications/<agent_id>_<idx>.json`,
+    /// `agents/completions/request/notifications/<response_id>_<idx>.json`,
     /// reserve the agent's next index, and return a
     /// [`PendingNotification`] the caller queues locally for a later
     /// [`Self::insert_notification`] call. Same extract-to-leaves
     /// pattern that messages use; the on-disk DB row's `path` column
-    /// holds just `{idx}` (the agent_id is its own column and the
-    /// route is implied by the kind).
+    /// holds just `{idx}` (route + `response_id` are reconstructed
+    /// from the kind + the new column).
+    ///
+    /// `response_id` is the agent completion the notification targets
+    /// — the same value `AgentCompletionNotifyParams.response_id`
+    /// carries on the wire. Stored explicitly; never re-derived from
+    /// `agent_id`.
     pub async fn write_notification(
         &self,
         agent_id: &str,
+        response_id: &str,
         content: &RichContent,
     ) -> Result<PendingNotification, super::super::Error> {
         let entry = self.ensure_agent(agent_id).await?;
@@ -165,9 +206,11 @@ impl Queue {
 
         // 1. Extract the content into per-leaf files; their parent
         //    directory is `request/notifications/{text,image,...}/`.
+        //    `response_id` keys every extracted leaf so it stays
+        //    aligned with the envelope filename below.
         let (content_log, leaf_files) = content.clone().extract_media(
             "agents/completions/request/notifications",
-            agent_id,
+            response_id,
             index,
         );
 
@@ -186,7 +229,7 @@ impl Queue {
 
         // 3. Write the parent envelope (a bare `RichContentLog`).
         let rel_path = format!(
-            "agents/completions/request/notifications/{agent_id}_{index}.json"
+            "agents/completions/request/notifications/{response_id}_{index}.json"
         );
         let full_path = self.inner.logs_dir.join(&rel_path);
         if let Some(parent) = full_path.parent() {
@@ -202,6 +245,7 @@ impl Queue {
 
         Ok(PendingNotification {
             agent_id: agent_id.to_string(),
+            response_id: response_id.to_string(),
             index,
             // DB column stores just the bare index.
             path: format!("{index}"),
@@ -217,6 +261,7 @@ impl Queue {
     ) -> Result<(), super::super::Error> {
         self.insert(
             &notification.agent_id,
+            &notification.response_id,
             MessageKind::AgentCompletionNotification,
             notification.path,
             notification.timestamp,
@@ -262,16 +307,17 @@ impl Queue {
                 .unwrap_or(0);
             // 2. Fetch unread rows.
             let mut stmt = conn.prepare_cached(
-                "SELECT kind, path, timestamp, \"index\" FROM messages \
+                "SELECT kind, response_id, path, timestamp, \"index\" FROM messages \
                  WHERE agent_id = ?1 AND \"index\" > ?2 ORDER BY \"index\"",
             )?;
             let rows = stmt
                 .query_map(rusqlite::params![&spawned, watermark], |r| {
                     let kind_str: String = r.get(0)?;
-                    let path: String = r.get(1)?;
-                    let timestamp: i64 = r.get(2)?;
-                    let index: i64 = r.get(3)?;
-                    Ok((kind_str, path, timestamp, index))
+                    let response_id: String = r.get(1)?;
+                    let path: String = r.get(2)?;
+                    let timestamp: i64 = r.get(3)?;
+                    let index: i64 = r.get(4)?;
+                    Ok((kind_str, response_id, path, timestamp, index))
                 })?
                 .collect::<rusqlite::Result<Vec<_>>>()?;
             // Drop the prepared-statement borrow before doing the
@@ -281,9 +327,10 @@ impl Queue {
             // so we can surface a typed error before the upsert).
             let rows: Vec<MessageRow> = rows
                 .into_iter()
-                .map(|(kind_str, path, ts, idx)| {
+                .map(|(kind_str, response_id, path, ts, idx)| {
                     Ok(MessageRow {
                         agent_id: spawned.clone(),
+                        response_id,
                         kind: MessageKind::from_str(&kind_str)?,
                         path,
                         timestamp: ts.max(0) as u64,
@@ -330,24 +377,26 @@ impl Queue {
         tokio::task::spawn_blocking(move || -> Result<Vec<MessageRow>, super::super::Error> {
             let conn = conn.lock().expect("filesystem db mutex poisoned");
             let mut stmt = conn.prepare_cached(
-                "SELECT kind, path, timestamp, \"index\" FROM messages \
+                "SELECT kind, response_id, path, timestamp, \"index\" FROM messages \
                  WHERE agent_id = ?1 ORDER BY \"index\"",
             )?;
             let rows = stmt
                 .query_map(rusqlite::params![&spawned], |r| {
                     let kind_str: String = r.get(0)?;
-                    let path: String = r.get(1)?;
-                    let timestamp: i64 = r.get(2)?;
-                    let index: i64 = r.get(3)?;
-                    Ok((kind_str, path, timestamp, index))
+                    let response_id: String = r.get(1)?;
+                    let path: String = r.get(2)?;
+                    let timestamp: i64 = r.get(3)?;
+                    let index: i64 = r.get(4)?;
+                    Ok((kind_str, response_id, path, timestamp, index))
                 })?
                 .collect::<rusqlite::Result<Vec<_>>>()?;
             drop(stmt);
             let rows: Vec<MessageRow> = rows
                 .into_iter()
-                .map(|(kind_str, path, ts, idx)| {
+                .map(|(kind_str, response_id, path, ts, idx)| {
                     Ok(MessageRow {
                         agent_id: spawned.clone(),
+                        response_id,
                         kind: MessageKind::from_str(&kind_str)?,
                         path,
                         timestamp: ts.max(0) as u64,

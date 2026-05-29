@@ -30,10 +30,16 @@ impl ToolResponse {
         let mut files = Vec::new();
 
         // Extract media from content (flattened on disk via the
-        // wire chunk's `serde(flatten)` on `inner`).
+        // wire chunk's `serde(flatten)` on `inner`). Routed under the
+        // kind-specific subdir so the (response_id, index) stems don't
+        // collide with an assistant message at the same index.
         let mut content = self.inner.content.clone();
         content.prepare();
-        let (content_log, media_files) = content.extract_media(&format!("{route_base}/messages"), id, self.index);
+        let (content_log, media_files) = content.extract_media(
+            &format!("{route_base}/messages/tool"),
+            id,
+            self.index,
+        );
         files.extend(media_files);
 
         let log = super::ToolResponseLog {
@@ -45,7 +51,10 @@ impl ToolResponse {
         };
 
         let msg_file = LogFile {
-            route: format!("{route_base}/messages"),
+            // Kind-specific subdir so this file can't collide with an
+            // assistant message at the same (response_id, index) —
+            // see `MessageKind::file_path` for the reader-side mirror.
+            route: format!("{route_base}/messages/tool"),
             id: id.to_string(),
             message_index: Some(self.index),
             media_index: None,

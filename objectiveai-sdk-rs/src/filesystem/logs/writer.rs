@@ -197,15 +197,20 @@ impl<C> LogWriter<C> {
     /// Reserve the agent's next db index, write the notification log
     /// file immediately, and return a [`PendingNotification`] handle
     /// the caller queues locally. Delegates to [`Queue::write_notification`].
+    /// `response_id` is the target agent-completion's id (the same
+    /// value `AgentCompletionNotifyParams.response_id` carries on
+    /// the wire); the caller threads it down from the pipe binding.
     pub async fn write_notification(
         &mut self,
         agent_id: &str,
+        response_id: &str,
         content: &RichContent,
     ) -> Result<PendingNotification, super::super::Error> {
         match &self.queue {
-            Some(q) => q.write_notification(agent_id, content).await,
+            Some(q) => q.write_notification(agent_id, response_id, content).await,
             None => Ok(PendingNotification {
                 agent_id: agent_id.to_string(),
+                response_id: response_id.to_string(),
                 index: 0,
                 path: String::new(),
                 timestamp: now_secs(),
@@ -332,16 +337,26 @@ impl<C> LogWriter<C> {
                 // caller prefix so two agents that happen to share
                 // `chunk.id` under different callers can't collide
                 // in `messages.agent_id`.
-                let agent_ids: Vec<String> = chunk
+                // (agent_id, response_id) pairs — `raw` is the bare
+                // response id straight from the chunk; lineage-stamping
+                // produces the column value. We thread both so the
+                // reader doesn't have to reverse the stamp.
+                let id_pairs: Vec<(String, String)> = chunk
                     .agent_completion_ids()
-                    .map(|raw| self.lineage_agent_id(raw))
+                    .map(|raw| (self.lineage_agent_id(raw), raw.to_string()))
                     .collect();
-                for agent_id in agent_ids {
+                for (agent_id, response_id) in id_pairs {
                     let queue = queue.clone();
                     let req_path = req_path.clone();
                     ops.push(Box::pin(async move {
                         queue
-                            .insert_request_once(&agent_id, kind, req_path, now)
+                            .insert_request_once(
+                                &agent_id,
+                                &response_id,
+                                kind,
+                                req_path,
+                                now,
+                            )
                             .await
                             .map(|_| ())
                     }));
@@ -357,9 +372,12 @@ impl<C> LogWriter<C> {
                     })
                     .collect();
                 for row in rows {
-                    // Dedup by path via the queue.
+                    // Dedup by (kind, path) via the queue — kind
+                    // matters because assistant and tool messages can
+                    // share the same `path` (the bare index) but
+                    // dispatch to different parsers on read.
                     let inserted = queue
-                        .register_path(&row.agent_id, &row.path)
+                        .register_path(&row.agent_id, row.kind, &row.path)
                         .await?;
                     if !inserted {
                         continue;
@@ -394,8 +412,11 @@ impl<C> LogWriter<C> {
                     let kind = row.kind;
                     let ts = row.timestamp;
                     let agent_id = row.agent_id;
+                    let response_id = row.response_id;
                     ops.push(Box::pin(async move {
-                        queue.insert(&agent_id, kind, path, ts, index).await
+                        queue
+                            .insert(&agent_id, &response_id, kind, path, ts, index)
+                            .await
                     }));
                 }
             }
