@@ -299,6 +299,7 @@ mod tests {
             github_authorization: None,
             agent_id: None,
             mcp_session_id: None,
+            mcp: false,
         };
         let result = try_pipe_delivery(
             &cli_config,

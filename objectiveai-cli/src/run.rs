@@ -38,6 +38,12 @@ struct EnvConfigBuilder {
     /// `Mcp-Session-Id` HTTP header.
     #[envconfig(from = "MCP_SESSION_ID")]
     mcp_session_id: Option<String>,
+    /// Boolean marker set by `objectiveai-mcp` at startup. When true,
+    /// every plugin / tool subprocess this cli spawns also gets the
+    /// flag in its env so descendants can tell they're under MCP.
+    /// Constant: `objectiveai_sdk::mcp::OBJECTIVEAI_MCP_ENV`.
+    #[envconfig(from = "OBJECTIVEAI_MCP")]
+    mcp: Option<String>,
 }
 
 impl EnvConfigBuilder {
@@ -54,6 +60,7 @@ impl EnvConfigBuilder {
             github_authorization: self.github_authorization,
             agent_id: self.agent_id,
             mcp_session_id: self.mcp_session_id,
+            mcp: self.mcp.map(|s| parse_bool(&s)),
         }
     }
 }
@@ -67,6 +74,7 @@ pub struct ConfigBuilder {
     pub github_authorization: Option<String>,
     pub agent_id: Option<String>,
     pub mcp_session_id: Option<String>,
+    pub mcp: Option<bool>,
 }
 
 impl Envconfig for ConfigBuilder {
@@ -94,6 +102,7 @@ impl ConfigBuilder {
             github_authorization: self.github_authorization,
             agent_id: self.agent_id,
             mcp_session_id: self.mcp_session_id,
+            mcp: self.mcp.unwrap_or(false),
         }
     }
 }
@@ -107,6 +116,7 @@ pub struct Config {
     pub github_authorization: Option<String>,
     pub agent_id: Option<String>,
     pub mcp_session_id: Option<String>,
+    pub mcp: bool,
 }
 
 #[derive(Parser)]

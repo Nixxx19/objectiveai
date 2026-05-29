@@ -242,11 +242,19 @@ pub async fn dispatch_external(
         None => return Err(crate::error::Error::PluginNotFound(name_str)),
     };
 
-    let mut child = tokio::process::Command::new(&exe)
-        .args(&rest)
+    let mut cmd = tokio::process::Command::new(&exe);
+    cmd.args(&rest)
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
-        .stderr(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped());
+    // Re-emit the "we're under objectiveai-mcp" marker so the plugin
+    // (and anything it spawns) can tell. Mirrors `dispatch_tool` in
+    // `crate::tools` — same env, same condition.
+    if cli_config.mcp {
+        cmd.env(objectiveai_sdk::mcp::OBJECTIVEAI_MCP_ENV, "true");
+    }
+
+    let mut child = cmd
         .spawn()
         .map_err(crate::error::Error::PluginSpawn)?;
 

@@ -144,6 +144,9 @@ pub async fn dispatch_tool(
             session_id,
         );
     }
+    if cli_config.mcp {
+        cmd.env(objectiveai_sdk::mcp::OBJECTIVEAI_MCP_ENV, "true");
+    }
 
     let mut child = cmd
         .spawn()
