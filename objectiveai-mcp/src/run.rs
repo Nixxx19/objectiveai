@@ -126,6 +126,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         commit_author_email: commit_author_email.clone(),
         github_authorization: None,
         agent_id: None,
+        mcp_session_id: None,
     });
 
     let fs_client = objectiveai_sdk::filesystem::Client::new(

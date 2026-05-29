@@ -465,6 +465,10 @@ async fn push_forwarded_args(
         cmd.args(["--objectiveai-agent-id", v]);
     }
 
+    if let Some(ref v) = cli_config.mcp_session_id {
+        cmd.args(["--mcp-session-id", v]);
+    }
+
     // config_base_dir is required for cli-stream's pipes + log layout.
     if let Some(ref base) = cli_config.config_base_dir {
         cmd.args(["--config-base-dir", base]);

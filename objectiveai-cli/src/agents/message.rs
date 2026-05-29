@@ -298,6 +298,7 @@ mod tests {
             commit_author_email: None,
             github_authorization: None,
             agent_id: None,
+            mcp_session_id: None,
         };
         let result = try_pipe_delivery(
             &cli_config,

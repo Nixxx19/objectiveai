@@ -32,6 +32,12 @@ struct EnvConfigBuilder {
     github_authorization: Option<String>,
     #[envconfig(from = "OBJECTIVEAI_AGENT_ID")]
     agent_id: Option<String>,
+    /// MCP session id, propagated by `objectiveai-mcp` when it
+    /// invokes this cli to run a tool, and by the cli further
+    /// into every tool subprocess it spawns. Same string as the
+    /// `Mcp-Session-Id` HTTP header.
+    #[envconfig(from = "MCP_SESSION_ID")]
+    mcp_session_id: Option<String>,
 }
 
 impl EnvConfigBuilder {
@@ -47,6 +53,7 @@ impl EnvConfigBuilder {
             commit_author_email: self.commit_author_email,
             github_authorization: self.github_authorization,
             agent_id: self.agent_id,
+            mcp_session_id: self.mcp_session_id,
         }
     }
 }
@@ -59,6 +66,7 @@ pub struct ConfigBuilder {
     pub commit_author_email: Option<String>,
     pub github_authorization: Option<String>,
     pub agent_id: Option<String>,
+    pub mcp_session_id: Option<String>,
 }
 
 impl Envconfig for ConfigBuilder {
@@ -85,6 +93,7 @@ impl ConfigBuilder {
             commit_author_email: self.commit_author_email,
             github_authorization: self.github_authorization,
             agent_id: self.agent_id,
+            mcp_session_id: self.mcp_session_id,
         }
     }
 }
@@ -97,6 +106,7 @@ pub struct Config {
     pub commit_author_email: Option<String>,
     pub github_authorization: Option<String>,
     pub agent_id: Option<String>,
+    pub mcp_session_id: Option<String>,
 }
 
 #[derive(Parser)]

@@ -71,6 +71,14 @@ pub struct HttpArgs {
     /// `X-OBJECTIVEAI-AGENT-ID` header. Maps to `OBJECTIVEAI_AGENT_ID`.
     #[arg(long, global = true)]
     pub objectiveai_agent_id: Option<String>,
+
+    /// `Mcp-Session-Id` header. Forwarded into cli-stream by the
+    /// cli's `push_forwarded_args` so that downstream tool
+    /// invocations (transitive through `objectiveai-mcp` or directly
+    /// via the cli's tool surface) see the session id under
+    /// `MCP_SESSION_ID`.
+    #[arg(long, global = true)]
+    pub mcp_session_id: Option<String>,
 }
 
 impl HttpArgs {
@@ -116,6 +124,7 @@ impl HttpArgs {
             self.commit_author_name.clone(),
             self.commit_author_email.clone(),
             self.objectiveai_agent_id.clone(),
+            self.mcp_session_id.clone(),
         ))
     }
 }

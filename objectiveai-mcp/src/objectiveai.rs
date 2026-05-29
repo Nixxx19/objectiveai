@@ -171,22 +171,35 @@ async fn run_cli_and_collect(
     args: Vec<String>,
     test_mode: bool,
 ) -> String {
-    // Per-request: if the caller sent X-OBJECTIVEAI-AGENT-ID,
-    // override the server-wide cli_config.agent_id for this
-    // invocation only. Clone-then-mutate-then-Arc so concurrent
-    // requests see independent values.
-    let cli_config: Arc<objectiveai_cli::Config> = match parts
+    // Per-request: stamp agent_id + mcp_session_id from headers so
+    // every cli invocation (and every tool subprocess the cli spawns
+    // transitively) sees the values relevant to *this* request.
+    // Clone-then-mutate-then-Arc so concurrent requests see
+    // independent values.
+    //
+    // The MCP session id is read from `Mcp-Session-Id` (the rmcp
+    // transport's standard header). When the upstream MCP client
+    // doesn't actually manage sessions, fall back to the per-agent
+    // lineage id from `X-OBJECTIVEAI-AGENT-ID` — stable per agent and
+    // unique across agents, which is exactly what session-keyed tool
+    // state (e.g. per-session counters) wants.
+    let mut cfg = (**cli_config).clone();
+    let header_agent_id = parts
         .headers
         .get("X-OBJECTIVEAI-AGENT-ID")
-        .and_then(|h| h.to_str().ok())
-    {
-        Some(agent_id) => {
-            let mut cfg = (**cli_config).clone();
-            cfg.agent_id = Some(agent_id.to_string());
-            Arc::new(cfg)
-        }
-        None => cli_config.clone(),
+        .and_then(|h| h.to_str().ok());
+    if let Some(agent_id) = header_agent_id {
+        cfg.agent_id = Some(agent_id.to_string());
+    }
+    let header_session_id = parts
+        .headers
+        .get(objectiveai_sdk::mcp::MCP_SESSION_ID_HEADER)
+        .and_then(|h| h.to_str().ok());
+    cfg.mcp_session_id = match header_session_id {
+        Some(s) => Some(s.to_string()),
+        None => header_agent_id.map(str::to_string),
     };
+    let cli_config: Arc<objectiveai_cli::Config> = Arc::new(cfg);
 
     let collected = Arc::new(tokio::sync::Mutex::new(Vec::new()));
     // Per-request handle: stamp the agent_id from the per-request

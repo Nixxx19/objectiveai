@@ -55,28 +55,54 @@ impl MessageKind {
     /// Reconstruct the on-disk file path (relative to `logs_dir`)
     /// from a (kind, agent_id, path) row.
     ///
-    /// - Request rows carry the top-level response_id in `path`; the
-    ///   file lives at `{route}/request/{path}.json`.
-    /// - Assistant / tool rows carry the server message index in
-    ///   `path`; the file is at `agents/completions/response/messages/{agent_id}_{path}.json`.
-    /// - Notification rows carry the writer-reserved index in `path`;
-    ///   the file is at `agents/completions/request/notifications/{agent_id}_{path}.json`.
+    /// - Request rows have `path` already set to the full filesystem
+    ///   path (the writer stores it as `agents/completions/request/<id>.json`);
+    ///   we return it verbatim.
+    /// - Assistant / tool / notification rows are keyed by the bare
+    ///   chunk.id (the last `/`-segment of `agent_id`) — the writer
+    ///   writes the file under the bare chunk.id regardless of the
+    ///   caller-lineage prefix the DB row's `agent_id` column carries.
     pub fn file_path(&self, agent_id: &str, path: &str) -> String {
+        // Bare chunk.id = the last `/`-segment of agent_id, defaulting
+        // to agent_id itself for older bare-form rows.
+        let chunk_id = agent_id.rsplit('/').next().unwrap_or(agent_id);
         match self {
             MessageKind::AgentCompletionRequest => {
-                format!("agents/completions/request/{path}.json")
+                // The writer stores the full path in the `path` column
+                // (`agents/completions/request/<id>.json`); use it as-is
+                // when it already starts with the route, or treat it as
+                // a bare stem otherwise.
+                if path.starts_with("agents/completions/request/")
+                    && path.ends_with(".json")
+                {
+                    path.to_string()
+                } else {
+                    format!("agents/completions/request/{path}.json")
+                }
             }
             MessageKind::FunctionExecutionRequest => {
-                format!("functions/executions/request/{path}.json")
+                if path.starts_with("functions/executions/request/")
+                    && path.ends_with(".json")
+                {
+                    path.to_string()
+                } else {
+                    format!("functions/executions/request/{path}.json")
+                }
             }
             MessageKind::FunctionInventionRecursiveRequest => {
-                format!("functions/inventions/recursive/request/{path}.json")
+                if path.starts_with("functions/inventions/recursive/request/")
+                    && path.ends_with(".json")
+                {
+                    path.to_string()
+                } else {
+                    format!("functions/inventions/recursive/request/{path}.json")
+                }
             }
             MessageKind::AssistantResponse | MessageKind::ToolResponse => {
-                format!("agents/completions/response/messages/{agent_id}_{path}.json")
+                format!("agents/completions/response/messages/{chunk_id}_{path}.json")
             }
             MessageKind::AgentCompletionNotification => {
-                format!("agents/completions/request/notifications/{agent_id}_{path}.json")
+                format!("agents/completions/request/notifications/{chunk_id}_{path}.json")
             }
         }
     }
