@@ -92,8 +92,12 @@ pub async fn handle(
     cli_config: &crate::Config,
     handle: &Handle,
 ) -> Result<(), crate::error::Error> {
-    let caller = cli_config.agent_id.as_deref().unwrap_or("cli");
-    let full_agent_id = format!("{caller}/{}", args.agent_id);
+    // The `agent_id` arg is whatever cli-stream's `Spawned.agent_id`
+    // emitted — which IS the chunk.id the api server returned, used
+    // verbatim as the per-agent pipe path AND the DB row's `agent_id`
+    // column. No caller-prefix glue: the messages table is keyed by
+    // chunk.id directly (see `LogWriter::process_chunk`).
+    let full_agent_id = args.agent_id.clone();
     let content = args.message.resolve()?;
 
     // Try live delivery first. Any failure here triggers the

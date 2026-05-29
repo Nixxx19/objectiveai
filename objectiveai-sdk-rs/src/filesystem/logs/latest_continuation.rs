@@ -172,8 +172,15 @@ impl Client {
         Ok(LatestContinuationOutcome::NoContinuationsFound { request_count })
     }
 
-    /// Every `AgentCompletionRequest.path` (which is the response_id)
-    /// for `agent_id`, ordered by `"index"` descending — newest first.
+    /// Every `AgentCompletionRequest` row's response_id for
+    /// `agent_id`, ordered by `"index"` descending — newest first.
+    ///
+    /// The `messages.path` column for AgentCompletionRequest rows
+    /// actually holds the full on-disk path of the request log
+    /// (`agents/completions/request/<id>.json`) — not the bare
+    /// response_id, despite what the schema docs imply. Strip the
+    /// well-known prefix + extension here so callers always see the
+    /// bare id.
     pub async fn agent_completion_request_ids_newest_first(
         &self,
         agent_id: &str,
@@ -197,7 +204,18 @@ impl Client {
             )?;
             let mut out = Vec::new();
             for row in rows {
-                out.push(row?);
+                let path = row?;
+                // Strip `agents/completions/request/` prefix + `.json`
+                // suffix to recover the bare response_id. Fallback to
+                // the raw path if the prefix/suffix doesn't match —
+                // surfacing the discrepancy is more useful than
+                // silently dropping the row.
+                let bare = path
+                    .strip_prefix("agents/completions/request/")
+                    .and_then(|s| s.strip_suffix(".json"))
+                    .map(str::to_string)
+                    .unwrap_or(path);
+                out.push(bare);
             }
             Ok(out)
         })
@@ -249,7 +267,12 @@ mod tests {
         let mut ids = Vec::with_capacity(count);
         for i in 0..count {
             let response_id = format!("resp-{i:03}");
-            // DB row.
+            // DB row. The writer stores the FULL on-disk path in
+            // messages.path (not the bare id) — mirror that here so
+            // the test exercises the production code path through
+            // `agent_completion_request_ids_newest_first`.
+            let stored_path =
+                format!("agents/completions/request/{response_id}.json");
             {
                 let c = conn.lock().expect("conn lock");
                 init_tables(&c).expect("init tables idempotent");
@@ -257,7 +280,7 @@ mod tests {
                     &c,
                     agent_id,
                     MessageKind::AgentCompletionRequest,
-                    &response_id,
+                    &stored_path,
                     1_700_000_000 + i as u64,
                     i as u64,
                 )
