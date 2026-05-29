@@ -67,7 +67,6 @@ impl ProxySpawner {
     pub async fn get(&self) -> std::io::Result<Arc<ProxyHandle>> {
         self.cell
             .get_or_try_init(|| async {
-                objectiveai_sdk::diag!("api.proxy_spawner.init_closure_entered");
                 let mut builder = (self.config_builder_fn)();
                 builder.address = Some("127.0.0.1".into());
                 builder.port = Some(0);
@@ -80,10 +79,8 @@ impl ProxySpawner {
                     tokio::sync::oneshot::channel::<std::io::Result<std::net::SocketAddr>>();
 
                 let task = async move {
-                    objectiveai_sdk::diag!("api.proxy_spawner.mcp_proxy_setup_begin");
                     match objectiveai_mcp_proxy::setup(config).await {
                         Ok((listener, router)) => {
-                            objectiveai_sdk::diag!("api.proxy_spawner.mcp_proxy_setup_done");
                             let addr = listener.local_addr();
                             let send_result = match addr {
                                 Ok(a) => addr_tx.send(Ok(a)),
@@ -96,17 +93,11 @@ impl ProxySpawner {
                                 // Caller dropped before we sent the addr; bail.
                                 return;
                             }
-                            objectiveai_sdk::diag!("api.proxy_spawner.axum_serve_begin");
                             let _ = axum::serve(listener, router)
                                 .with_graceful_shutdown(token.cancelled_owned())
                                 .await;
-                            objectiveai_sdk::diag!("api.proxy_spawner.axum_serve_end");
                         }
                         Err(e) => {
-                            objectiveai_sdk::diag!(
-                                "api.proxy_spawner.mcp_proxy_setup_err",
-                                err = format!("{e}"),
-                            );
                             let _ = addr_tx.send(Err(e));
                         }
                     }
@@ -124,10 +115,6 @@ impl ProxySpawner {
                 let addr = addr_rx
                     .await
                     .map_err(|_| std::io::Error::other("proxy task dropped before reporting addr"))??;
-                objectiveai_sdk::diag!(
-                    "api.proxy_spawner.init_closure_done",
-                    addr = format!("{addr}"),
-                );
 
                 Ok(Arc::new(ProxyHandle {
                     url: format!("http://{addr}"),

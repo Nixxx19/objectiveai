@@ -73,35 +73,12 @@ impl Commands {
 
 #[tokio::main]
 async fn main() -> Result<(), String> {
-    // Belt-and-suspenders: capture any panic in our diagnostic log
-    // before the default hook tears us down. cli-stream is a
-    // detached background process — if it dies silently we lose all
-    // forensic evidence, so route panics through `diag!` first.
-    let default_hook = std::panic::take_hook();
-    std::panic::set_hook(Box::new(move |info| {
-        let loc = info
-            .location()
-            .map(|l| format!("{}:{}:{}", l.file(), l.line(), l.column()))
-            .unwrap_or_else(|| "unknown".into());
-        let msg = info
-            .payload()
-            .downcast_ref::<&'static str>()
-            .copied()
-            .or_else(|| info.payload().downcast_ref::<String>().map(|s| s.as_str()))
-            .unwrap_or("<non-string panic payload>");
-        objectiveai_sdk::diag!("stream.main.panic", loc = loc, msg = msg);
-        default_hook(info);
-    }));
-    objectiveai_sdk::diag!("stream.main.entry");
     let cli = Cli::parse();
-    objectiveai_sdk::diag!("stream.main.argv_parsed");
     // Stamp the handle's agent_id from --objectiveai-agent-id so
     // every emitted Notification/Error line carries it — mirrors
     // objectiveai-cli/src/main.rs:16-17.
     let mut handle = Handle::stdout();
     handle.agent_id = cli.http.objectiveai_agent_id.clone();
 
-    let result = cli.command.handle(&cli.http, &cli.pipes, &handle).await;
-    objectiveai_sdk::diag!("stream.main.exit", ok = result.is_ok());
-    result
+    cli.command.handle(&cli.http, &cli.pipes, &handle).await
 }

@@ -119,10 +119,6 @@ impl Handle {
                         // Parent's read end closed. Detached writers
                         // (e.g. cli-stream after its CLI parent
                         // exited on `LogStreamReady`) keep running.
-                        crate::diag!(
-                            "handle.stdout.broken_pipe",
-                            err = format!("{e}"),
-                        );
                     }
                     Err(e) => {
                         panic!("emit to stdout failed: {e}");

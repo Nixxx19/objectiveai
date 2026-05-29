@@ -127,6 +127,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         github_authorization: None,
         agent_id: None,
         mcp_session_id: None,
+        mcp: true,
     });
 
     let fs_client = objectiveai_sdk::filesystem::Client::new(

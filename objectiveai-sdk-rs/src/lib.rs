@@ -33,7 +33,6 @@
 pub mod agent;
 pub mod arbitrary_util;
 pub mod auth;
-pub mod diagnostic;
 pub mod swarm;
 pub mod error;
 pub mod functions;

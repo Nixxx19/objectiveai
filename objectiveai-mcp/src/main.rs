@@ -18,7 +18,13 @@ async fn main() -> std::io::Result<()> {
     // even without explicit propagation). The cli further re-emits it
     // explicitly on plugin / tool spawn sites — see
     // `objectiveai-cli/src/{plugins,tools}/mod.rs`.
-    std::env::set_var(objectiveai_sdk::mcp::OBJECTIVEAI_MCP_ENV, "true");
+    //
+    // SAFETY: set_var is sound at this point because main hasn't
+    // spawned any worker threads yet and dotenv (which races for
+    // env access) is the only follow-up reader.
+    unsafe {
+        std::env::set_var(objectiveai_sdk::mcp::OBJECTIVEAI_MCP_ENV, "true");
+    }
 
     let _ = dotenv::dotenv();
     let config = objectiveai_mcp::ConfigBuilder::init_from_env()

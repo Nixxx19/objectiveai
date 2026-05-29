@@ -62,14 +62,8 @@ pub async fn create_agent_completion_streaming<H: McpHandler>(
     HttpError,
 > {
     params.stream = Some(true);
-    crate::diag!("sdk.create_agent_completion_streaming.begin");
-    let result = client
+    client
         .send_streaming_ws(reqwest::Method::POST, "agent/completions", params, handler)
-        .await;
-    crate::diag!(
-        "sdk.create_agent_completion_streaming.done",
-        ok = result.is_ok(),
-    );
-    result
+        .await
 }
 

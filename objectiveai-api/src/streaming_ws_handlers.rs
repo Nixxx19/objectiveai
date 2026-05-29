@@ -115,7 +115,6 @@ pub(crate) async fn create_agent_completion_ws(
     ws: WebSocketUpgrade,
 ) -> axum::response::Response {
     ws.on_upgrade(move |mut socket| async move {
-        objectiveai_sdk::diag!("api.agent_completion_ws.on_upgrade_entered");
         let body: objectiveai_sdk::agent::completions::request::AgentCompletionCreateParams =
             match streaming_ws::recv_body_frame(&mut socket).await {
                 Ok(b) => b,
@@ -125,7 +124,6 @@ pub(crate) async fn create_agent_completion_ws(
                     return;
                 }
             };
-        objectiveai_sdk::diag!("api.agent_completion_ws.body_recv");
         // Build the reverse-attach plumbing BEFORE the stream so the
         // agent client can register per-agent `ws_session_id`s
         // (synthesized for `client_objectiveai_mcp` URLs) against
@@ -153,7 +151,6 @@ pub(crate) async fn create_agent_completion_ws(
         let send_sink = sink.clone();
         let send_tracker = tracker.clone();
         let send = async move {
-            objectiveai_sdk::diag!("api.agent_completion_ws.create_streaming_begin");
             let stream = match client
                 .create_streaming_handle_usage(
                     ctx,
@@ -171,15 +168,8 @@ pub(crate) async fn create_agent_completion_ws(
                 )
                 .await
             {
-                Ok(s) => {
-                    objectiveai_sdk::diag!("api.agent_completion_ws.create_streaming_ok");
-                    s
-                }
+                Ok(s) => s,
                 Err(e) => {
-                    objectiveai_sdk::diag!(
-                        "api.agent_completion_ws.create_streaming_err",
-                        err = format!("{e:?}"),
-                    );
                     streaming_ws::fatal_setup_error_split(
                         &send_sink,
                         &ResponseError::from(&e),
@@ -189,26 +179,13 @@ pub(crate) async fn create_agent_completion_ws(
                 }
             };
             let mut stream = Box::pin(stream);
-            let mut chunk_n: usize = 0;
             while let Some(item) = stream.next().await {
                 let agent::completions::StreamItem::Chunk(chunk) = item else { continue };
-                if chunk_n == 0 {
-                    objectiveai_sdk::diag!("api.agent_completion_ws.first_chunk_to_client");
-                }
-                chunk_n += 1;
                 send_tracker.observe(&chunk);
                 if streaming_ws::send_chunk_split(&send_sink, &chunk).await.is_err() {
-                    objectiveai_sdk::diag!(
-                        "api.agent_completion_ws.send_chunk_err",
-                        chunks = chunk_n,
-                    );
                     return;
                 }
             }
-            objectiveai_sdk::diag!(
-                "api.agent_completion_ws.stream_complete",
-                chunks = chunk_n,
-            );
             streaming_ws::send_close_split(&send_sink, close_code::NORMAL).await;
         };
 

@@ -76,15 +76,6 @@ pub async fn handle_post(
     headers: HeaderMap,
     body: Bytes,
 ) -> Response {
-    let session_in = headers
-        .get(SESSION_ID_HEADER)
-        .and_then(|v| v.to_str().ok())
-        .unwrap_or("");
-    objectiveai_sdk::diag!(
-        "proxy.handle_post.entry",
-        session_in = session_in,
-        body_len = body.len(),
-    );
     if let Err(resp) = require_streamable_http_accept(&headers) {
         return resp;
     }
@@ -95,14 +86,6 @@ pub async fn handle_post(
         Ok(v) => v,
         Err(e) => return parse_error_response(format!("invalid JSON: {e}")),
     };
-    let method_dbg = body
-        .get("method")
-        .and_then(|v| v.as_str())
-        .unwrap_or("");
-    objectiveai_sdk::diag!(
-        "proxy.handle_post.parsed",
-        method = method_dbg,
-    );
 
     // Notifications (no `id`) and responses get 202 Accepted with no body.
     // notifications/cancelled is the one notification we actually act on:

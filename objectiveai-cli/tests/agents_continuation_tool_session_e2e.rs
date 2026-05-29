@@ -199,10 +199,7 @@ async fn wait_for_completion(base_dir: &Path, spawn_id: &str) {
     .await
     .unwrap_or_else(|()| {
         panic!(
-            "cli-stream did not flush continuation + tear down socket for {spawn_id} in 180s — \
-             cont_file={} socket_still_present={}",
-            response_cont_path.exists(),
-            socket_path.exists(),
+            "cli-stream did not flush continuation + tear down socket for {spawn_id} in 180s",
         )
     });
 }

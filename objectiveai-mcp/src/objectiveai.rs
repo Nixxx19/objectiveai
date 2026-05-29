@@ -114,10 +114,6 @@ impl ObjectiveAiMcpCli {
                 let cli_config = cli_config_for_route.clone();
                 let tool_name = tool_name.clone();
                 async move {
-                    objectiveai_sdk::diag!(
-                        "mcp.tool_route.entry",
-                        tool = tool_name,
-                    );
                     let arguments = ctx.arguments.unwrap_or_default();
                     let req: ToolRequest = parse_json_object(arguments)?;
                     let parts = ctx
@@ -132,11 +128,6 @@ impl ObjectiveAiMcpCli {
                             .chain(req.args.into_iter())
                             .collect();
                     let buf = run_cli_and_collect(&cli_config, &parts, args, test_mode).await;
-                    objectiveai_sdk::diag!(
-                        "mcp.tool_route.done",
-                        tool = tool_name,
-                        out_len = buf.len(),
-                    );
                     Ok(CallToolResult::success(vec![Content::text(buf)]))
                 }
                 .boxed()
