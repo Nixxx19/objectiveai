@@ -70,6 +70,7 @@ pub async fn handle(
     cli_config: &crate::Config,
     handle: &objectiveai_sdk::cli::output::Handle,
 ) -> Result<(), crate::error::Error> {
+    objectiveai_sdk::diag!("cli.agents_spawn.entry", seed = args.seed.unwrap_or(0));
     let messages = args.prompt.resolve()?;
     let agent = args
         .agent
@@ -78,6 +79,7 @@ pub async fn handle(
             c.agents().get_favorites().to_vec()
         })
         .await?;
+    objectiveai_sdk::diag!("cli.agents_spawn.args_resolved");
 
     let params = objectiveai_sdk::agent::completions::request::AgentCompletionCreateParams {
         messages,
@@ -89,11 +91,17 @@ pub async fn handle(
         continuation: None,
     };
 
-    crate::api::stream_subprocess::run_detached(
+    objectiveai_sdk::diag!("cli.agents_spawn.run_detached_begin");
+    let result = crate::api::stream_subprocess::run_detached(
         cli_config,
         &["agents", "spawn"],
         &params,
         handle,
     )
-    .await
+    .await;
+    objectiveai_sdk::diag!(
+        "cli.agents_spawn.run_detached_done",
+        ok = result.is_ok(),
+    );
+    result
 }

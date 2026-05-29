@@ -537,7 +537,9 @@ impl HttpClient {
                     .unwrap(),
             )))?;
 
+        crate::diag!("sdk.ws.connect_begin");
         let (ws_stream, _resp) = tokio_tungstenite::connect_async(req).await?;
+        crate::diag!("sdk.ws.connect_done");
         let (mut sink, rx_stream): (
             _,
             SplitStream<WebSocketStream<MaybeTlsStream<TcpStream>>>,
@@ -546,9 +548,11 @@ impl HttpClient {
         // Send the body as the first text frame.
         let body_frame = serde_json::to_string(&body)
             .map_err(super::HttpError::NotifySerialize)?;
+        crate::diag!("sdk.ws.first_send_begin", body_len = body_frame.len());
         sink.send(tungstenite::Message::Text(body_frame.into()))
             .await
             .map_err(super::HttpError::NotifySend)?;
+        crate::diag!("sdk.ws.first_send_done");
 
         // Build the per-connection state shared with Notifier + demux.
         let sink: super::notifier::SharedSink = Arc::new(tokio::sync::Mutex::new(sink));
@@ -565,15 +569,22 @@ impl HttpClient {
         let demux_pending = pending.clone();
         let handler = Arc::new(handler);
         tokio::spawn(async move {
+            crate::diag!("sdk.ws.recv_loop_entered");
             let mut rx_stream = rx_stream;
             let mut chunk_tx = chunk_tx;
+            let mut first_recv = true;
             loop {
                 let msg = match rx_stream.next().await {
                     Some(m) => m,
                     None => {
+                        crate::diag!("sdk.ws.recv_loop_eof");
                         break;
                     }
                 };
+                if first_recv {
+                    crate::diag!("sdk.ws.first_msg_recv");
+                    first_recv = false;
+                }
                 let text = match msg {
                     Ok(tungstenite::Message::Text(t)) => {
                         let s = t.to_string();

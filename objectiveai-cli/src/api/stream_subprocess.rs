@@ -259,19 +259,34 @@ where
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
 
-    // On Windows, detach the child from the parent's job object so
-    // it survives when the parent exits. Same flag `api/detach.rs`
-    // uses for the parent→child CLI re-exec.
+    // On Windows, detach the child from the parent's console + job
+    // object so it survives when the parent exits.
+    //   CREATE_NEW_PROCESS_GROUP (0x00000200): same flag
+    //     `api/detach.rs` uses for the parent→child CLI re-exec.
+    //   DETACHED_PROCESS (0x00000008): drop the inherited console so
+    //     the child isn't taken down with the parent's console
+    //     session — required because the cli parent exits as soon
+    //     as it sees `LogStreamReady`, while cli-stream keeps
+    //     streaming chunks for the rest of the request.
     #[cfg(windows)]
     {
         use std::os::windows::process::CommandExt;
         const CREATE_NEW_PROCESS_GROUP: u32 = 0x00000200;
-        cmd.creation_flags(CREATE_NEW_PROCESS_GROUP);
+        const DETACHED_PROCESS: u32 = 0x00000008;
+        cmd.creation_flags(CREATE_NEW_PROCESS_GROUP | DETACHED_PROCESS);
     }
 
+    objectiveai_sdk::diag!(
+        "cli.run_detached.spawn_attempt",
+        endpoint = endpoint_path.join("/"),
+    );
     let mut child = cmd
         .spawn()
         .map_err(|e| crate::error::Error::Spawn("objectiveai-cli-stream".into(), e))?;
+    objectiveai_sdk::diag!(
+        "cli.run_detached.child_spawned",
+        child_pid = child.id().unwrap_or(0),
+    );
     let stdout = child.stdout.take().expect("stdout piped");
     let stderr = child.stderr.take().expect("stderr piped");
 
@@ -312,6 +327,10 @@ where
                 // other Notification (chunks) is dropped since the
                 // caller does not wait for the completion.
                 if let NotificationValue::LogStreamReady(ready) = n.value {
+                    objectiveai_sdk::diag!(
+                        "cli.run_detached.log_stream_ready_seen",
+                        id = ready.log_stream_ready,
+                    );
                     Output::Notification(Notification {
                         agent_id: None,
                         value: make_notification(ready.log_stream_ready),
@@ -324,6 +343,7 @@ where
         }
     }
 
+    objectiveai_sdk::diag!("cli.run_detached.stdout_eof_before_log_stream_ready");
     // Stdout EOF before LogStreamReady — child failed early.
     let stderr_buf = stderr_task.await.unwrap_or_default();
     let status = child

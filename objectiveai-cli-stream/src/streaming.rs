@@ -96,10 +96,15 @@ where
         writer_loop(rx, notif_rx, log_writer, writer_push, writer_handle).await
     });
 
+    objectiveai_sdk::diag!("stream.run_chunk_loop.entered");
     let mut stream_err: Option<String> = None;
     while let Some(item) = stream.next().await {
         match item {
             Ok(chunk) => {
+                objectiveai_sdk::diag!(
+                    "stream.run_chunk_loop.chunk",
+                    n = chunk_count,
+                );
                 // 1. Emit the chunk to stdout as one NDJSON line.
                 emit_chunk(&chunk, handle).await;
 
@@ -141,11 +146,20 @@ where
                 chunk_count += 1;
             }
             Err(e) => {
+                objectiveai_sdk::diag!(
+                    "stream.run_chunk_loop.stream_err",
+                    err = e,
+                );
                 stream_err = Some(format!("{e}"));
                 break;
             }
         }
     }
+    objectiveai_sdk::diag!(
+        "stream.run_chunk_loop.exited",
+        chunks = chunk_count,
+        err = stream_err.as_deref().unwrap_or(""),
+    );
 
     // Close the writer channel — the writer task drains the final
     // batch and returns.
@@ -158,11 +172,16 @@ where
     registry.shutdown();
     drop(notif_tx);
 
+    objectiveai_sdk::diag!("stream.run_chunk_loop.writer_join_begin");
     // Collect the writer task's outcome. A JoinError means the
     // writer panicked; a writer Err means a disk write failed.
     let writer_outcome = writer_task
         .await
         .map_err(|e| format!("log writer task panicked: {e}"))?;
+    objectiveai_sdk::diag!(
+        "stream.run_chunk_loop.writer_join_done",
+        ok = writer_outcome.is_ok(),
+    );
     if let Err(e) = writer_outcome {
         return Err(format!("log writer failed: {e}"));
     }
@@ -240,6 +259,10 @@ where
                         }
                         if !logged_id {
                             if let Some(id) = log_writer.primary_id() {
+                                objectiveai_sdk::diag!(
+                                    "stream.writer.log_stream_ready_emit",
+                                    id = id,
+                                );
                                 emit_log_stream_ready(id, &handle).await;
                                 logged_id = true;
                             }

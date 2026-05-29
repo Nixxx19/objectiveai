@@ -601,11 +601,13 @@ where
         //    connect per agent in parallel. Awaiting each `JoinHandle`
         //    inside the per-agent branch later means the round-trips
         //    overlap rather than serializing.
+        objectiveai_sdk::diag!("api.client.proxy_get_begin");
         let proxy_handle = self
             .proxy_spawner
             .get()
             .await
             .map_err(|e| send_viewer_err(super::Error::McpProxyBootstrap(e.to_string())))?;
+        objectiveai_sdk::diag!("api.client.proxy_get_done");
         let proxy_url = proxy_handle.url.clone();
 
         let request_mcp_auth_owned = request_mcp_auth.clone();
@@ -665,6 +667,10 @@ where
             .collect();
         let api_port_for_synth = ctx.api_port();
 
+        objectiveai_sdk::diag!(
+            "api.client.connect_handles_build_begin",
+            n = filtered_agents.len(),
+        );
         let connect_handles: Vec<
             Option<
                 tokio::task::JoinHandle<
@@ -883,6 +889,7 @@ where
             /// id (see step 6.5 above).
             agent_id: String,
         }
+        objectiveai_sdk::diag!("api.client.connect_handles_build_done");
         let mut attempts: Vec<AgentAttempt> = filtered_agents
             .into_iter()
             .zip(connect_handles)
@@ -916,6 +923,11 @@ where
             let mut errors: Vec<super::Error> = Vec::new();
 
             for (idx, attempt) in attempts.iter_mut().enumerate() {
+                objectiveai_sdk::diag!(
+                    "api.client.attempt_visit",
+                    idx = idx,
+                    agent_id = attempt.agent_id,
+                );
                 // Resolve the per-agent proxy connect handle on first
                 // visit. All N connects were spawned up-front so the
                 // initialize round-trips overlap; awaiting individual
@@ -928,8 +940,17 @@ where
                 if !attempt_connect_done[idx] {
                     attempt_connect_done[idx] = true;
                     if let Some(handle) = attempt.connect_handle.take() {
+                        objectiveai_sdk::diag!(
+                            "api.client.connect_handle_await_begin",
+                            idx = idx,
+                        );
                         match handle.await.unwrap() {
                             Ok((conn, tools_opt)) => {
+                                objectiveai_sdk::diag!(
+                                    "api.client.connect_handle_await_ok",
+                                    idx = idx,
+                                    n_tools = tools_opt.as_ref().map(|t| t.len()).unwrap_or(0),
+                                );
                                 // Validate the agent's
                                 // `client_objectiveai_mcp.tools`
                                 // declaration against the actual
@@ -977,7 +998,14 @@ where
                                     }
                                 }
                             }
-                            Err(e) => errors.push(super::Error::McpConnectionArc(e)),
+                            Err(e) => {
+                                objectiveai_sdk::diag!(
+                                    "api.client.connect_handle_await_err",
+                                    idx = idx,
+                                    err = format!("{e:?}"),
+                                );
+                                errors.push(super::Error::McpConnectionArc(e));
+                            }
                         }
                     }
                 }
@@ -1249,6 +1277,7 @@ where
         RC: Send + Sync + Clone + Into<objectiveai_sdk::agent::Continuation> + 'static,
         CONT: Send + 'static,
     {
+        objectiveai_sdk::diag!("api.run_agent_loop.entry", id = id);
         // --- Merge messages, drain proxy-queued notifications, prepare,
         // and apply transform. ---
         //
@@ -1265,6 +1294,7 @@ where
         let mut messages = agent_base.merged_messages(params.messages.clone());
 
         if let Some(conn) = &mcp_connection {
+            objectiveai_sdk::diag!("api.run_agent_loop.drain_notifications_begin");
             let blocks = conn.drain_notifications().await.map_err(|error| {
                 super::Error::McpDrainNotifications {
                     url: conn.url.clone(),

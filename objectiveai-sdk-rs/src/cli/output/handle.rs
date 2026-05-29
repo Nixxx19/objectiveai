@@ -83,8 +83,13 @@ impl Handle {
         Handle::default()
     }
 
-    /// Emit `output` to this destination. Panics on write failure to
-    /// match `println!` semantics.
+    /// Emit `output` to this destination. Best-effort for `Stdout`:
+    /// if the parent's read end of our pipe has closed (broken pipe)
+    /// we silently swallow the error so a detached background writer
+    /// can keep running after the parent exits — matches the
+    /// `Stream`/`Collect` destinations' "drop on closed receiver"
+    /// behaviour. Non-broken-pipe write errors fall through to a
+    /// panic so genuine bugs still surface.
     pub async fn emit(&self, output: &Output) {
         // Single Value round-trip when we have an agent_id to stamp.
         // Both remaining variants (Notification + Error) are
@@ -106,9 +111,26 @@ impl Handle {
         };
         match &self.destination {
             HandleDestination::Stdout => {
-                println!("{json}");
+                use std::io::Write;
+                let mut out = std::io::stdout().lock();
+                match writeln!(out, "{json}") {
+                    Ok(()) => {}
+                    Err(e) if e.kind() == std::io::ErrorKind::BrokenPipe => {
+                        // Parent's read end closed. Detached writers
+                        // (e.g. cli-stream after its CLI parent
+                        // exited on `LogStreamReady`) keep running.
+                        crate::diag!(
+                            "handle.stdout.broken_pipe",
+                            err = format!("{e}"),
+                        );
+                    }
+                    Err(e) => {
+                        panic!("emit to stdout failed: {e}");
+                    }
+                }
                 if matches!(output, Output::Error(e) if e.fatal) {
-                    eprintln!("{json}");
+                    let mut err = std::io::stderr().lock();
+                    let _ = writeln!(err, "{json}");
                 }
             }
             HandleDestination::Stdin(stdin) => {

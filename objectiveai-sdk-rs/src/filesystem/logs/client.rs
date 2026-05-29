@@ -660,7 +660,21 @@ impl Client {
         let bytes = tokio::fs::read(&full)
             .await
             .map_err(|e| Error::Read(full.clone(), e))?;
-        serde_json::from_slice(&bytes).map_err(|e| Error::Parse(full, e))
+        match serde_json::from_slice(&bytes) {
+            Ok(v) => Ok(v),
+            Err(e) => {
+                // Diagnostic: dump the file content alongside the error
+                // so we can see what shape was actually written.
+                let content = String::from_utf8_lossy(&bytes);
+                crate::diag!(
+                    "filesystem.read_log_file.parse_err",
+                    path = full.display(),
+                    err = e,
+                    content = content,
+                );
+                Err(Error::Parse(full, e))
+            }
+        }
     }
 
     /// Resolve a logs-relative path to its (stable) SQL row id in the
