@@ -17,6 +17,24 @@ use super::LogFile;
 pub type ProduceRows<C> =
     for<'a> fn(&'a C) -> Box<dyn Iterator<Item = MessageRow> + Send + 'a>;
 
+/// Deferred request-side file producer attached via
+/// [`LogWriter::with_request`]. The closure captures the cloned
+/// request and runs at first-chunk flush time, when the response id
+/// is known.
+struct PendingRequest {
+    /// Route prefix for the request log tree, e.g.
+    /// `"agents/completions/request"`. Retained so the writer can
+    /// match the produced summary file against its expected location
+    /// (currently unused for matching, kept for future tooling).
+    #[allow(dead_code)]
+    route: String,
+    /// Walks the request, returns every [`LogFile`] under
+    /// `<route>/...` plus the top-level summary file. The summary
+    /// is conventionally the last element — see each
+    /// [`super::ProducesRequestFiles`] impl.
+    produce: Box<dyn FnOnce(&str) -> Vec<LogFile> + Send>,
+}
+
 /// Writes streaming chunks to the log file structure on disk, and
 /// in parallel inserts request / assistant_response / tool_response /
 /// agent_completion_notification rows into per-agent SQLite databases.
@@ -36,10 +54,12 @@ pub struct LogWriter<C> {
     produce: fn(&C) -> Option<Vec<LogFile>>,
     primary_id: Option<String>,
     buffer: HashMap<String, Vec<u8>>,
-    /// A pre-serialized request body waiting to be written once the
-    /// response ID becomes known. Carries `(route, bytes)`. Cleared
-    /// after the first chunk is written.
-    pending_request: Option<(String, Vec<u8>)>,
+    /// A deferred request-side file producer waiting on the response
+    /// ID. Holds the route + a [`super::ProducesRequestFiles`]
+    /// closure that, given the discovered id, walks the request and
+    /// returns every on-disk [`LogFile`] (leaves plus the top-level
+    /// summary). Cleared after the first chunk is written.
+    pending_request: Option<PendingRequest>,
     /// Shared per-agent-id db API. `None` disables per-agent SQLite
     /// writes entirely.
     queue: Option<Queue>,
@@ -116,18 +136,31 @@ impl<C> LogWriter<C> {
     }
 
     /// Attach a request body that will be written alongside the first
-    /// response chunk. The request is serialized eagerly, but its
-    /// filename depends on the response ID which is only learned from
-    /// the first chunk — so the on-disk write is deferred to that
-    /// moment.
-    pub fn with_request<R: serde::Serialize>(
+    /// response chunk. The request itself is captured eagerly (cloned
+    /// into a closure), but the on-disk extraction is deferred until
+    /// the response ID is known — the per-leaf filenames embed the
+    /// id, so we can't materialize anything until the first chunk
+    /// arrives. The closure produces the full Log envelope
+    /// (`<route>/<id>.json`) plus every extracted child (messages,
+    /// response_format, continuation, …) using each request type's
+    /// [`super::ProducesRequestFiles`] impl.
+    pub fn with_request<R>(
         mut self,
         route: impl Into<String>,
         request: &R,
-    ) -> Result<Self, super::super::Error> {
-        let bytes = serde_json::to_vec_pretty(request)
-            .map_err(super::super::Error::Serialize)?;
-        self.pending_request = Some((route.into(), bytes));
+    ) -> Result<Self, super::super::Error>
+    where
+        R: super::ProducesRequestFiles + Clone + Send + 'static,
+    {
+        let route = route.into();
+        let cloned = request.clone();
+        let route_for_closure = route.clone();
+        let produce: Box<dyn FnOnce(&str) -> Vec<LogFile> + Send> =
+            Box::new(move |id: &str| {
+                let (_, files) = cloned.produce_files(id, &route_for_closure);
+                files
+            });
+        self.pending_request = Some(PendingRequest { route, produce });
         Ok(self)
     }
 
@@ -226,22 +259,20 @@ impl<C> LogWriter<C> {
         };
 
         // First-chunk: capture primary_id, flush the pending request
-        // file alongside this chunk's files, and remember the request
-        // file's path for per-agent request-row inserts.
+        // file tree alongside this chunk's files, and remember the
+        // top-level request summary's path for per-agent request-row
+        // inserts. Each `ProducesRequestFiles` impl appends the
+        // summary last, so `files.last()` after the extend points at
+        // `<route>/<id>.json`.
         if self.primary_id.is_none() {
             if let Some(last) = files.last() {
                 self.primary_id = Some(last.id.clone());
-                if let Some((route, bytes)) = self.pending_request.take() {
-                    let request_file = LogFile {
-                        route,
-                        id: last.id.clone(),
-                        message_index: None,
-                        media_index: None,
-                        extension: "json".to_string(),
-                        content: bytes,
-                    };
-                    self.request_file_path = Some(request_file.path());
-                    files.push(request_file);
+                if let Some(pending) = self.pending_request.take() {
+                    let request_files = (pending.produce)(&last.id.clone());
+                    if let Some(summary) = request_files.last() {
+                        self.request_file_path = Some(summary.path());
+                    }
+                    files.extend(request_files);
                 }
             }
         }
