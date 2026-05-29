@@ -1,4 +1,6 @@
 mod client;
+#[cfg(feature = "conduit")]
+pub mod conduit;
 mod connection;
 mod error;
 pub mod initialize_result;
