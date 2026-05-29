@@ -183,8 +183,11 @@ async fn spawn_then_message_propagates_response_continuation() {
         .and_then(|v| v.as_str())
         .expect("MessageQueued.agent_id");
     assert_eq!(
-        echoed_agent_id, spawn_id,
-        "MessageQueued should re-emit the same agent_id Spawned originally surfaced"
+        echoed_agent_id,
+        format!("cli/{spawn_id}"),
+        "MessageQueued.agent_id should be the full lineage form — \
+         caller (`cli` by default) glued onto the spawn's chunk.id, \
+         matching what the writer stamps into `messages.agent_id`"
     );
     // Continuations from the api server reuse the original chunk.id
     // as the new turn's response_id (the agent's stable lineage id

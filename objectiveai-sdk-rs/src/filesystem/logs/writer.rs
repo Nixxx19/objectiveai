@@ -57,6 +57,14 @@ pub struct LogWriter<C> {
     /// Captured once on the first chunk so it can be reused as the
     /// `path` column for every agent's request row.
     request_file_path: Option<String>,
+    /// Optional caller lineage prefix prepended to every
+    /// `chunk.agent_completion_ids()` value before it lands in the
+    /// `messages.agent_id` column. `None` keeps the bare form (the
+    /// original behaviour) for callers that don't go through a cli
+    /// boundary; `Some("cli")`, `Some("cli/parent-X")`, etc. for
+    /// stamped runs. Disambiguates two agents that happen to share
+    /// the same `chunk.id` under different callers.
+    caller_agent_id: Option<String>,
     /// The most recently-received chunk, buffered awaiting a
     /// successor. Processed on the NEXT `write` call or by
     /// `finalize`. `None` before the first `write` and again once
@@ -82,7 +90,28 @@ impl<C> LogWriter<C> {
             request_kind: None,
             produce_rows: None,
             request_file_path: None,
+            caller_agent_id: None,
             pending_chunk: None,
+        }
+    }
+
+    /// Stamp the caller's lineage onto every `messages.agent_id` this
+    /// writer inserts. `Some("cli")` prepends `"cli/"`; `None` keeps
+    /// the bare chunk-emitted id. Passed verbatim — slashes inside
+    /// `caller` (e.g. nested-spawn case `"cli/parent-X"`) become
+    /// real subdir segments when the pipe path is derived from the
+    /// same lineage string elsewhere in cli-stream.
+    pub fn with_caller_agent_id(mut self, caller: Option<String>) -> Self {
+        self.caller_agent_id = caller;
+        self
+    }
+
+    /// Apply [`Self::with_caller_agent_id`]'s lineage transform to
+    /// a single chunk-derived `agent_id`. `None` caller passes through.
+    fn lineage_agent_id(&self, raw: &str) -> String {
+        match self.caller_agent_id.as_deref() {
+            Some(c) => format!("{c}/{raw}"),
+            None => raw.to_string(),
         }
     }
 
@@ -268,9 +297,13 @@ impl<C> LogWriter<C> {
                 (self.request_kind, self.request_file_path.clone())
             {
                 let now = now_secs();
+                // Lineage-stamp every chunk-emitted id with the
+                // caller prefix so two agents that happen to share
+                // `chunk.id` under different callers can't collide
+                // in `messages.agent_id`.
                 let agent_ids: Vec<String> = chunk
                     .agent_completion_ids()
-                    .map(String::from)
+                    .map(|raw| self.lineage_agent_id(raw))
                     .collect();
                 for agent_id in agent_ids {
                     let queue = queue.clone();
@@ -286,7 +319,12 @@ impl<C> LogWriter<C> {
 
             // 2. Per-message rows + per-tool-response notification drain.
             if let Some(rows_fn) = self.produce_rows {
-                let rows: Vec<MessageRow> = rows_fn(chunk).collect();
+                let rows: Vec<MessageRow> = rows_fn(chunk)
+                    .map(|mut row| {
+                        row.agent_id = self.lineage_agent_id(&row.agent_id);
+                        row
+                    })
+                    .collect();
                 for row in rows {
                     // Dedup by path via the queue.
                     let inserted = queue

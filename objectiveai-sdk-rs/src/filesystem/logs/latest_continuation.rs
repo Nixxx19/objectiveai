@@ -315,6 +315,12 @@ mod tests {
     #[tokio::test]
     async fn read_latest_continuation_walks_back_past_missing() {
         let tmp = tempfile::tempdir().expect("tempdir");
+        // The writer stamps the caller's lineage onto `messages.agent_id`,
+        // so the query key includes the prefix (`cli/foo/<chunk.id>`)
+        // for every row inserted under caller `cli/foo`. The bare
+        // chunk.id stays the on-disk filename stem for the response
+        // continuation, so the response_id we expect to surface is
+        // the un-prefixed `resp-N` string.
         let agent_id = "cli/foo";
         let ids = seed_requests(tmp.path(), agent_id, 3).await;
         // Only the OLDER turns have continuation files. The newest

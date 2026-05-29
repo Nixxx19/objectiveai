@@ -66,6 +66,7 @@ pub async fn run_chunk_loop<S, Chunk, E, F>(
     mut stream: S,
     notifier: Notifier,
     pipes_root: PathBuf,
+    caller_agent_id: Option<String>,
     log_writer: LogWriter<Chunk>,
     handle: &Handle,
     push: F,
@@ -104,11 +105,20 @@ where
 
                 // 2. Ensure a pipe is bound for every agent id this
                 //    chunk references. `ensure_pipe` is idempotent —
-                //    repeat ids are no-ops.
-                for agent_id in chunk.agent_completion_ids() {
+                //    repeat ids are no-ops. Lineage-stamp each raw
+                //    chunk-emitted id with the caller prefix so the
+                //    pipe path matches the `messages.agent_id` form
+                //    the writer stores; slashes inside the caller
+                //    (multi-segment callers like `cli/parent-X`)
+                //    become real subdirs via `pipes_root.join(...)`.
+                for raw in chunk.agent_completion_ids() {
+                    let lineage_id = match &caller_agent_id {
+                        Some(c) => format!("{c}/{raw}"),
+                        None => raw.to_string(),
+                    };
                     registry
                         .ensure_pipe(
-                            agent_id,
+                            &lineage_id,
                             &pipes_root,
                             notifier.clone(),
                             notif_tx.clone(),

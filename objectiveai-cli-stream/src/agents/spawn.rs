@@ -26,9 +26,11 @@ pub async fn handle(
         None::<String>,
         None::<String>,
     );
+    let caller_agent_id = http.objectiveai_agent_id.clone();
     let log_writer = fs_client
         .write_agent_completion(&params)
-        .map_err(|e| format!("failed to build agent-completion log writer: {e}"))?;
+        .map_err(|e| format!("failed to build agent-completion log writer: {e}"))?
+        .with_caller_agent_id(caller_agent_id.clone());
 
     let (stream, notifier) =
         objectiveai_sdk::agent::completions::create_agent_completion_streaming(
@@ -43,6 +45,7 @@ pub async fn handle(
         stream,
         notifier,
         pipes_root,
+        caller_agent_id,
         log_writer,
         handle,
         |agg: &mut AgentCompletionChunk, chunk: &AgentCompletionChunk| agg.push(chunk),

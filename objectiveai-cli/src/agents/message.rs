@@ -92,12 +92,14 @@ pub async fn handle(
     cli_config: &crate::Config,
     handle: &Handle,
 ) -> Result<(), crate::error::Error> {
-    // The `agent_id` arg is whatever cli-stream's `Spawned.agent_id`
-    // emitted — which IS the chunk.id the api server returned, used
-    // verbatim as the per-agent pipe path AND the DB row's `agent_id`
-    // column. No caller-prefix glue: the messages table is keyed by
-    // chunk.id directly (see `LogWriter::process_chunk`).
-    let full_agent_id = args.agent_id.clone();
+    // Glue the caller's lineage onto the user-supplied sub-id —
+    // matches what `LogWriter::with_caller_agent_id` stores in
+    // `messages.agent_id` and what `streaming.rs` binds the per-agent
+    // socket at (`pipes/<caller>/<sub-id>/socket`). Same convention
+    // every other agent-lookup command (e.g. `agents read pending`)
+    // uses on the read side.
+    let caller = cli_config.agent_id.as_deref().unwrap_or("cli");
+    let full_agent_id = format!("{caller}/{}", args.agent_id);
     let content = args.message.resolve()?;
 
     // Try live delivery first. Any failure here triggers the
