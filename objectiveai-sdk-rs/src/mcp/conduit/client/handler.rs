@@ -29,8 +29,11 @@
 //!   [`parse_json_or_sse`] (rmcp's `StreamableHttpService` may pick
 //!   either shape).
 
-use crate::client_objectiveai_mcp::{server_request, server_response};
-use crate::http::McpHandler;
+use crate::client_objectiveai_mcp::{
+    client_request::{McpListChanged, McpListChangedKind},
+    server_request, server_response,
+};
+use crate::http::{McpHandler, Notifier};
 use dashmap::DashMap;
 use indexmap::IndexMap;
 use std::sync::Arc;
@@ -42,7 +45,12 @@ struct ConduitState {
 /// Client-side conduit. One instance per WebSocket; dispatches every
 /// `server_request` frame the api pushes down to a real upstream MCP
 /// server, caching one [`crate::mcp::Connection`] per remote-minted
-/// `Mcp-Session-Id`.
+/// `Mcp-Session-Id`. On every fresh dial it installs
+/// `set_on_tools_list_changed` / `set_on_resources_list_changed`
+/// callbacks that forward each fire as a
+/// [`crate::client_objectiveai_mcp::client_request::Payload::McpListChanged`]
+/// up the WS via the supplied [`Notifier`], so the API can re-emit
+/// it on its matching MCP GET-SSE stream.
 #[derive(Clone)]
 pub struct Conduit {
     inner: Arc<Inner>,
@@ -55,20 +63,33 @@ struct Inner {
     /// would.
     mcp_url: Option<String>,
     client: crate::mcp::Client,
+    /// Used to push `McpListChanged` notifications back up the WS
+    /// when an upstream `mcp::Connection` fires its list-changed
+    /// callback. Cloned into each per-Connection callback closure.
+    notifier: Notifier,
     connections: DashMap<String, Arc<ConduitState>>,
 }
 
 impl Conduit {
     /// Construct a conduit that dials `mcp_url` on first use, sharing
-    /// the supplied [`crate::mcp::Client`] across every dial.
+    /// the supplied [`crate::mcp::Client`] across every dial, and
+    /// pushes list-changed notifications back up the WS through the
+    /// supplied [`Notifier`] (typically the one returned alongside
+    /// the chunk stream by `Client::send_streaming_ws`).
     ///
-    /// `None` makes every [`McpHandler::handle`] call reject with 501
-    /// — the same shape [`crate::http::RejectHandler`] produces.
-    pub fn new(mcp_url: Option<String>, client: crate::mcp::Client) -> Self {
+    /// `None` `mcp_url` makes every [`McpHandler::handle`] call reject
+    /// with 501 — the same shape [`crate::http::RejectHandler`]
+    /// produces.
+    pub fn new(
+        mcp_url: Option<String>,
+        client: crate::mcp::Client,
+        notifier: Notifier,
+    ) -> Self {
         Self {
             inner: Arc::new(Inner {
                 mcp_url,
                 client,
+                notifier,
                 connections: DashMap::new(),
             }),
         }
@@ -86,8 +107,57 @@ impl Conduit {
             .client
             .connect(url, session_id, Some(connect_headers))
             .await?;
+        // Install list-changed pumps. The Connection's callback slots
+        // fire after the listener task installs a refreshed cache, so
+        // the API's downstream consumers see the new list (or live
+        // Err) by the time they re-fetch.
+        install_list_changed_pump(
+            &connection,
+            self.inner.notifier.clone(),
+            connection.session_id.clone(),
+        );
         Ok(Arc::new(ConduitState { connection }))
     }
+}
+
+/// Wire `set_on_{tools,resources}_list_changed` to fire-and-forget
+/// notifier sends. The notifier round-trips through the WS and the
+/// API's recv loop; on send failure we drop the error (the next
+/// reconnect / refresh will pick up where we left off).
+fn install_list_changed_pump(
+    connection: &crate::mcp::Connection,
+    notifier: Notifier,
+    mcp_session_id: String,
+) {
+    let notifier_tools = notifier.clone();
+    let session_tools = mcp_session_id.clone();
+    connection.set_on_tools_list_changed(move || {
+        let notifier = notifier_tools.clone();
+        let mcp_session_id = session_tools.clone();
+        tokio::spawn(async move {
+            let _ = notifier
+                .notify_list_changed(McpListChanged {
+                    mcp_session_id,
+                    kind: McpListChangedKind::Tools,
+                })
+                .await;
+        });
+    });
+
+    let notifier_resources = notifier;
+    let session_resources = mcp_session_id;
+    connection.set_on_resources_list_changed(move || {
+        let notifier = notifier_resources.clone();
+        let mcp_session_id = session_resources.clone();
+        tokio::spawn(async move {
+            let _ = notifier
+                .notify_list_changed(McpListChanged {
+                    mcp_session_id,
+                    kind: McpListChangedKind::Resources,
+                })
+                .await;
+        });
+    });
 }
 
 impl McpHandler for Conduit {
@@ -191,21 +261,16 @@ async fn forward(
     // `initialize`: synthesize from the SDK Connection's cached
     // InitializeResult; don't re-handshake. Stamp the remote-minted
     // session id on the response so the proxy adopts it.
+    //
+    // `tools.listChanged` / `resources.listChanged` are advertised
+    // verbatim now — the conduit's `install_list_changed_pump`
+    // forwards each fire up the WS as `client_request::Payload::McpListChanged`,
+    // which the API surfaces on its GET-SSE notifications stream so
+    // the proxy's `mcp::Connection` to this endpoint sees real MCP
+    // list_changed events.
     if rpc_method.as_deref() == Some("initialize") {
-        let mut init_value = serde_json::to_value(&state.connection.initialize_result)
+        let init_value = serde_json::to_value(&state.connection.initialize_result)
             .map_err(ConduitError::Serialize)?;
-        if let Some(caps) = init_value.pointer_mut("/capabilities") {
-            if let Some(obj) = caps.as_object_mut() {
-                if let Some(tools) = obj.get_mut("tools").and_then(|t| t.as_object_mut()) {
-                    tools.remove("listChanged");
-                }
-                if let Some(resources) =
-                    obj.get_mut("resources").and_then(|r| r.as_object_mut())
-                {
-                    resources.remove("listChanged");
-                }
-            }
-        }
         let body = serde_json::json!({
             "jsonrpc": "2.0",
             "id": rpc_id.unwrap(),

@@ -529,6 +529,16 @@ pub async fn recv_loop<F, Fut>(
                     });
                     continue;
                 }
+                // McpListChanged handling lives in the SDK's
+                // `mcp::conduit::server::recv_loop`, which the api
+                // switches over to in the next commit. Until then,
+                // an inbound `McpListChanged` is dropped — the CLI
+                // sees `Ok` because we don't ack it, but the api
+                // doesn't yet do anything useful with it either.
+                ClientPayload::McpListChanged(_) => {
+                    let _ = id;
+                    continue;
+                }
             }
         }
 

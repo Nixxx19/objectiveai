@@ -28,6 +28,7 @@
 //! canonical path for code inside the conduit module tree.
 
 pub mod client;
+pub mod server;
 
 /// Re-export of the conduit's wire shapes. The types physically live
 /// at [`crate::client_objectiveai_mcp`] (un-gated) so non-conduit
