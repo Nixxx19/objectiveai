@@ -297,7 +297,7 @@ mod tests {
             commit_author_name: None,
             commit_author_email: None,
             github_authorization: None,
-            agent_id: None,
+            agent_id: "cli".to_string(),
             mcp_session_id: None,
             mcp: false,
         };
