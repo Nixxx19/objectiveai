@@ -102,6 +102,9 @@ async fn handle_post(
     headers: HeaderMap,
     body: Bytes,
 ) -> Response {
+    if let Err(resp) = require_streamable_http_accept(&headers) {
+        return resp;
+    }
     let response_id = match route(&state, &headers) {
         Ok(id) => id,
         Err(resp) => return resp,
@@ -292,6 +295,44 @@ fn parse_error_response(message: String) -> Response {
         })),
     )
         .into_response()
+}
+
+/// MCP Streamable-HTTP transport requires `Accept` to list both
+/// `application/json` AND `text/event-stream` (or a wildcard); mirrors
+/// `objectiveai-mcp-proxy/src/mcp.rs::require_streamable_http_accept`.
+fn require_streamable_http_accept(headers: &HeaderMap) -> Result<(), Response> {
+    let raw = headers
+        .get(axum::http::header::ACCEPT)
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
+
+    let mut json = false;
+    let mut sse = false;
+    let mut wildcard = false;
+    for part in raw.split(',') {
+        let media = part
+            .split(';')
+            .next()
+            .unwrap_or("")
+            .trim()
+            .to_ascii_lowercase();
+        match media.as_str() {
+            "application/json" => json = true,
+            "text/event-stream" => sse = true,
+            "*/*" | "application/*" | "text/*" => wildcard = true,
+            _ => {}
+        }
+    }
+
+    if (json && sse) || wildcard {
+        Ok(())
+    } else {
+        Err((
+            StatusCode::NOT_ACCEPTABLE,
+            "Accept header must list both application/json and text/event-stream",
+        )
+            .into_response())
+    }
 }
 
 fn mcp_error_to_http(e: handlers::McpError) -> Response {
