@@ -711,15 +711,16 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     // handlers populate this on upgrade; the MCP endpoint route reads
     // it when a proxy upstream dials in for a session.
     let reverse_channels = streaming_ws::new_reverse_channel_registry();
-    let reverse_attach = streaming_ws::ReverseAttachConfig {
-        registry: reverse_channels.clone(),
-        api_port: port,
-    };
     // SSE listener registry: per-(ws_session_id, mcp_session_id)
     // broadcast feeding the MCP GET notifications stream. The conduit
     // WS recv loop publishes here when the CLI pushes `McpListChanged`;
     // the GET handler subscribes from here.
     let mcp_listeners = crate::objectiveai_mcp::McpListenerRegistry::new();
+    let reverse_attach = streaming_ws::ReverseAttachConfig {
+        registry: reverse_channels.clone(),
+        api_port: port,
+        mcp_listeners: mcp_listeners.clone(),
+    };
 
     // Vector Completions Client
     let vector_completions_client = Arc::new(vector::completions::Client::new(

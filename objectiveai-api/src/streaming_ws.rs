@@ -232,6 +232,8 @@ pub async fn recv_loop<F, Fut>(
     tracker: Arc<SessionTracker>,
     sink: SharedSink,
     pending: PendingRequests,
+    mcp_listeners: crate::objectiveai_mcp::McpListenerRegistry,
+    attach_handle: Arc<ReverseAttachHandle>,
     notify_fn: F,
 ) where
     F: Fn(objectiveai_sdk::agent::completions::request::AgentCompletionNotifyParams) -> Fut
@@ -326,15 +328,31 @@ pub async fn recv_loop<F, Fut>(
                     });
                     continue;
                 }
-                // McpListChanged dispatch: should fan out to every
-                // (ws_session_id, mcp_session_id) registered on this
-                // WS via `crate::objectiveai_mcp::McpListenerRegistry::publish`.
-                // Wiring requires threading the registry + the
-                // reverse-attach handle through this recv_loop's
-                // signature; tracked as a follow-up. Today the frame
-                // is dropped silently.
-                ClientPayload::McpListChanged(_) => {
-                    let _ = id;
+                // McpListChanged dispatch: fan out to every
+                // (ws_session_id, mcp_session_id) keyed under this WS.
+                // The GET-SSE subscriber for whichever agent's
+                // response_id is currently active will receive the
+                // event; idle keys publish to a no-op broadcast.
+                // Always Ok the ack — publish to a broadcast can't
+                // fail in a way the CLI should care about.
+                ClientPayload::McpListChanged(change) => {
+                    for ws_session_id in attach_handle.registered_ids() {
+                        mcp_listeners.publish(
+                            &ws_session_id,
+                            &change.mcp_session_id,
+                            change.kind,
+                        );
+                    }
+                    let response = ClientResponse::Ok { id };
+                    let frame = match serde_json::to_string(&response) {
+                        Ok(s) => s,
+                        Err(_) => continue,
+                    };
+                    let sink = sink.clone();
+                    tokio::spawn(async move {
+                        let mut guard = sink.lock().await;
+                        let _ = guard.send(Message::Text(frame.into())).await;
+                    });
                     continue;
                 }
             }

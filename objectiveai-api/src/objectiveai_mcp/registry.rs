@@ -6,6 +6,7 @@
 //! and registered against by every `_ws` upgrade handler in
 //! `streaming_ws_handlers`.
 
+use super::listeners::McpListenerRegistry;
 use axum::extract::ws::{Message, WebSocket};
 use dashmap::DashMap;
 use futures::stream::SplitSink;
@@ -87,15 +88,20 @@ pub fn new_reverse_channel_registry() -> ReverseChannelRegistry {
 }
 
 /// Bundle of the things each `_ws` handler needs to wire up the
-/// reverse-attach: the global [`ReverseChannelRegistry`] (so it can
-/// insert/remove its session) plus the API's own listening port (so
-/// the agent client can build a synthetic
-/// `http://127.0.0.1:<port>/objectiveai-mcp` URL the proxy will
-/// dial).
+/// reverse-attach:
+///
+/// - [`ReverseChannelRegistry`] so the handler can insert/remove its
+///   session.
+/// - `api_port` so the agent client can build a synthetic
+///   `http://127.0.0.1:<port>/objectiveai-mcp` URL the proxy will dial.
+/// - [`McpListenerRegistry`] so the recv loop's `McpListChanged`
+///   dispatch can publish to the per-(ws_session_id, mcp_session_id)
+///   broadcast feeding the API's GET-SSE notifications stream.
 #[derive(Clone)]
 pub struct ReverseAttachConfig {
     pub registry: ReverseChannelRegistry,
     pub api_port: u16,
+    pub mcp_listeners: McpListenerRegistry,
 }
 
 /// Arc-shareable handle the agent client uses to register per-agent
