@@ -768,7 +768,7 @@ where
                     }
                 }
                 // For the synthetic `client_objectiveai_mcp` URL, stamp
-                // two headers the API needs on every proxy-originated
+                // three headers the API needs on every proxy-originated
                 // request:
                 //
                 // - `X-OBJECTIVEAI-RESPONSE-ID` — the `ws_session_id`
@@ -782,6 +782,16 @@ where
                 //   `client_objectiveai_mcp` spec, base64url-no-pad
                 //   encoded so the CLI's conduit (or any real client)
                 //   can see what tools the agent expects exposed.
+                // - `X-OBJECTIVEAI-TOOLS-ALLOWED` — the slim filter
+                //   list the CLI applies to its `tools/list` response:
+                //   bare `tools[].name` ∪ `plugins[].name`, plus an
+                //   `objectiveai_builtins` flag mirroring
+                //   `client_objectiveai_mcp.objectiveai`. The CLI
+                //   keeps tools matching any allowed name (exact or
+                //   `_name` suffix), plus (if the builtins flag is
+                //   set) any tool the CLI doesn't recognize as a
+                //   locally-installed plugin or tool — those are
+                //   treated as objectiveai-mcp built-ins.
                 if let Some(url) = client_mcp_synthetic_url.as_ref() {
                     let entry = per_url_headers
                         .entry(url.clone())
@@ -802,31 +812,39 @@ where
                             "X-Objectiveai-Client-Mcp".to_string(),
                             encoded,
                         );
+
+                        #[derive(serde::Serialize)]
+                        struct ToolsAllowed<'a> {
+                            names: Vec<&'a str>,
+                            objectiveai_builtins: bool,
+                        }
+                        let allowed = ToolsAllowed {
+                            names: client_mcp
+                                .plugins
+                                .iter()
+                                .map(|e| e.name.as_str())
+                                .chain(client_mcp.tools.iter().map(|e| e.name.as_str()))
+                                .collect(),
+                            objectiveai_builtins: client_mcp
+                                .objectiveai
+                                .unwrap_or(false),
+                        };
+                        let allowed_json = serde_json::to_string(&allowed).unwrap_or_default();
+                        let allowed_encoded = base64::engine::general_purpose::URL_SAFE_NO_PAD
+                            .encode(allowed_json);
+                        entry.insert(
+                            "X-OBJECTIVEAI-TOOLS-ALLOWED".to_string(),
+                            allowed_encoded,
+                        );
                     }
                 }
 
-                let mut proxy_request_headers: indexmap::IndexMap<String, String> =
+                let proxy_request_headers: indexmap::IndexMap<String, String> =
                     indexmap::indexmap! {
                         "X-MCP-Servers".to_string() => serde_json::to_string(&urls).unwrap(),
                         "X-MCP-Headers".to_string() => serde_json::to_string(&per_url_headers).unwrap(),
                         "X-OBJECTIVEAI-AGENT-ID".to_string() => agent_id.clone(),
                     };
-                // When the agent declares `client_objectiveai_mcp`, we
-                // want the post-connect `list_tools()` call to return
-                // ONLY the tools that came from the synthetic
-                // reverse-attach upstream (not the union with the
-                // agent's other declared `mcp_servers`). The proxy
-                // honors this per-request via the `X-List-Filter`
-                // header (applies to both `tools/list` and
-                // `resources/list`), baked into the agent's
-                // `Connection` headers so it's stamped on every
-                // request — but only the list operations consult it.
-                if let Some(ref url) = client_mcp_synthetic_url {
-                    proxy_request_headers.insert(
-                        "X-List-Filter".to_string(),
-                        url.clone(),
-                    );
-                }
 
                 let mcp_client = self.mcp_client.clone();
                 let proxy_url = proxy_url.clone();
@@ -847,8 +865,10 @@ where
                 // AND (for agents that need it) list_tools fan out
                 // in parallel too — each task pipelines list_tools
                 // immediately after its own connect completes. The
-                // filter-url header scopes the returned tools to the
-                // synthetic upstream only.
+                // returned list is the union across every declared
+                // upstream; the CLI applies `X-OBJECTIVEAI-TOOLS-ALLOWED`
+                // filtering to its synthetic-upstream slice before the
+                // union forms.
                 //
                 // Error type is `Arc<mcp::Error>` because the SDK's
                 // `list_tools` returns shared-ref errors (the cached
@@ -936,9 +956,9 @@ where
                 // initialize round-trips overlap; awaiting individual
                 // handles here is cheap on later retry iterations. The
                 // spawned task also calls `list_tools()` on the new
-                // connection (scoped by `X-MCP-Tools-Filter-Url` to the
-                // synthetic `client_objectiveai_mcp` upstream only), so
-                // we can immediately validate the agent's declared
+                // connection — the union list returned across every
+                // upstream — so we can immediately validate the
+                // agent's declared
                 // tools without an extra round-trip.
                 if !attempt_connect_done[idx] {
                     attempt_connect_done[idx] = true;

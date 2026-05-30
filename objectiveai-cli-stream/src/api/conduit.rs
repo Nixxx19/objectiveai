@@ -48,8 +48,18 @@ use objectiveai_sdk::client_objectiveai_mcp::client_request::{
 };
 use objectiveai_sdk::client_objectiveai_mcp::{server_request, server_response};
 use objectiveai_sdk::http::McpHandler;
+use std::collections::HashSet;
+use std::path::PathBuf;
 use std::sync::{Arc, OnceLock};
 use std::time::Duration;
+use tokio::sync::OnceCell;
+
+/// Header on every API-originated request to the synthetic
+/// `/objectiveai-mcp` URL when the agent declared
+/// `client_objectiveai_mcp`. Base64url-no-pad JSON `{names, objectiveai_builtins}`.
+/// Consumed by [`forward`]'s `tools/list` branch and stripped from
+/// the upstream-forwarded headers.
+const TOOLS_ALLOWED_HEADER: &str = "X-OBJECTIVEAI-TOOLS-ALLOWED";
 
 struct ConduitState {
     connection: objectiveai_sdk::mcp::Connection,
@@ -72,12 +82,28 @@ struct Inner {
     /// after the WS-creating call returns the notifier. Pump
     /// closures read it at fire time.
     notifier: OnceLock<Notifier>,
+    /// Filesystem root for resolving installed plugin/tool manifest
+    /// names — used by the `tools/list` filter to recognize
+    /// `objectiveai-mcp` built-ins (any returned tool not in this set
+    /// is presumed a built-in when the allow-list's
+    /// `objectiveai_builtins` flag is set). `None` means filesystem
+    /// is unavailable; the `objectiveai_builtins` flag effectively
+    /// becomes a no-op (only explicit names match).
+    config_base_dir: Option<PathBuf>,
+    /// Lazy cache of installed plugin + tool manifest names. Populated
+    /// on first `tools/list` arrival with the `objectiveai_builtins`
+    /// flag set. Empty `HashSet` when filesystem is unavailable or
+    /// nothing is installed.
+    installed_names: OnceCell<HashSet<String>>,
 }
 
 impl ConduitMcpHandler {
     /// Construct a handler that dials the given URL on first use.
-    /// `None` makes every `handle()` call reject with 501.
-    pub fn new(mcp_url: Option<String>) -> Self {
+    /// `mcp_url = None` makes every `handle()` call reject with 501.
+    /// `config_base_dir` is the filesystem root the CLI consults to
+    /// recognize objectiveai-mcp built-ins for the `tools/list`
+    /// filter — `None` keeps the filter pure-explicit-names.
+    pub fn new(mcp_url: Option<String>, config_base_dir: Option<PathBuf>) -> Self {
         let http = reqwest::Client::builder()
             .build()
             .expect("reqwest::Client::build is infallible without rustls toggles");
@@ -101,6 +127,8 @@ impl ConduitMcpHandler {
                 client,
                 connections: DashMap::new(),
                 notifier: OnceLock::new(),
+                config_base_dir,
+                installed_names: OnceCell::new(),
             }),
         }
     }
@@ -185,7 +213,7 @@ impl McpHandler for ConduitMcpHandler {
             }
         };
 
-        match forward(&state, request).await {
+        match forward(&self.inner, &state, request).await {
             Ok(resp) => resp,
             Err(e) => conduit_error(id_for_err, e.to_string()),
         }
@@ -255,6 +283,7 @@ fn sanitize_connect_headers(
 }
 
 async fn forward(
+    inner: &Arc<Inner>,
     state: &ConduitState,
     request: server_request::Request,
 ) -> Result<server_response::Response, ConduitError> {
@@ -318,7 +347,10 @@ async fn forward(
             || k.eq_ignore_ascii_case("accept")
             || k.eq_ignore_ascii_case("content-type")
             || k.eq_ignore_ascii_case("mcp-session-id")
+            || k.eq_ignore_ascii_case(TOOLS_ALLOWED_HEADER)
         {
+            // X-OBJECTIVEAI-TOOLS-ALLOWED is an API↔CLI signal; the
+            // upstream MCP server doesn't need to see it.
             continue;
         }
         req = req.header(k, v);
@@ -352,7 +384,20 @@ async fn forward(
         }
     }
     let resp_text = resp.text().await.map_err(ConduitError::Body)?;
-    let resp_body = parse_json_or_sse(&resp_text);
+    let mut resp_body = parse_json_or_sse(&resp_text);
+
+    // `tools/list`: if the API stamped `X-OBJECTIVEAI-TOOLS-ALLOWED`,
+    // narrow `result.tools[]` to only the entries the agent's
+    // `client_objectiveai_mcp` declaration referenced. The API does
+    // the validation pass (assert each required tool present);
+    // filtering is the CLI's job now.
+    if rpc_method.as_deref() == Some("tools/list") {
+        if let Some(allowed) = read_tools_allowed_header(&request.headers) {
+            if let Some(body) = resp_body.as_mut() {
+                apply_tools_filter(inner, body, &allowed).await;
+            }
+        }
+    }
 
     Ok(server_response::Response {
         id: request.id,
@@ -360,6 +405,100 @@ async fn forward(
         headers: resp_headers,
         body: resp_body,
     })
+}
+
+/// Decoded `X-OBJECTIVEAI-TOOLS-ALLOWED` payload.
+#[derive(Debug, serde::Deserialize)]
+struct ToolsAllowed {
+    #[serde(default)]
+    names: Vec<String>,
+    #[serde(default)]
+    objectiveai_builtins: bool,
+}
+
+fn read_tools_allowed_header(
+    headers: &IndexMap<String, String>,
+) -> Option<ToolsAllowed> {
+    use base64::Engine;
+    let raw = headers
+        .iter()
+        .find(|(k, _)| k.eq_ignore_ascii_case(TOOLS_ALLOWED_HEADER))?
+        .1;
+    let bytes = base64::engine::general_purpose::URL_SAFE_NO_PAD
+        .decode(raw.as_bytes())
+        .ok()?;
+    serde_json::from_slice::<ToolsAllowed>(&bytes).ok()
+}
+
+/// In-place filter on a JSON-RPC `tools/list` response body. Keeps a
+/// returned tool iff either:
+///
+/// - its name matches an explicit `allowed.names` entry exactly OR
+///   with a `_<name>` suffix (mirrors the API's existing match
+///   tolerance for upstream-namespaced tool names), OR
+/// - `allowed.objectiveai_builtins` is set AND the tool's name isn't
+///   among the CLI's locally-installed plugin/tool manifests (so it
+///   must be an `objectiveai-mcp` built-in).
+///
+/// Drops everything else. No-op on bodies that don't carry a
+/// `result.tools` array.
+async fn apply_tools_filter(
+    inner: &Arc<Inner>,
+    body: &mut serde_json::Value,
+    allowed: &ToolsAllowed,
+) {
+    let Some(tools) = body
+        .get_mut("result")
+        .and_then(|r| r.get_mut("tools"))
+        .and_then(|t| t.as_array_mut())
+    else {
+        return;
+    };
+
+    let installed: Option<&HashSet<String>> = if allowed.objectiveai_builtins {
+        Some(inner.installed_names.get_or_init(|| load_installed_names(inner)).await)
+    } else {
+        None
+    };
+
+    tools.retain(|tool| {
+        let Some(name) = tool.get("name").and_then(|n| n.as_str()) else {
+            return false;
+        };
+        if allowed.names.iter().any(|declared| {
+            name == declared || name.ends_with(&format!("_{declared}"))
+        }) {
+            return true;
+        }
+        if let Some(installed) = installed {
+            return !installed.contains(name);
+        }
+        false
+    });
+}
+
+/// Enumerate installed plugin + tool manifest names under
+/// `config_base_dir`. Returns an empty set if the dir is unset or
+/// neither directory exists. Used by the `objectiveai_builtins`
+/// branch of [`apply_tools_filter`] to recognize built-ins by
+/// elimination.
+async fn load_installed_names(inner: &Arc<Inner>) -> HashSet<String> {
+    let mut names: HashSet<String> = HashSet::new();
+    let Some(base_dir) = inner.config_base_dir.clone() else {
+        return names;
+    };
+    let fs = objectiveai_sdk::filesystem::Client::new(
+        Some(base_dir),
+        None::<String>,
+        None::<String>,
+    );
+    for entry in fs.list_plugins(0, usize::MAX).await {
+        names.insert(entry.name);
+    }
+    for entry in fs.list_tools(0, usize::MAX).await {
+        names.insert(entry.name);
+    }
+    names
 }
 
 fn reject_no_mcp(id: String) -> server_response::Response {

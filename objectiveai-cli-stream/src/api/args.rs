@@ -156,9 +156,15 @@ pub struct PipeArgs {
 
 impl PipeArgs {
     /// Build the MCP conduit handler. `--mcp-address` of `None`
-    /// makes the handler 501 every inbound request.
+    /// makes the handler 501 every inbound request. The conduit's
+    /// `tools/list` filter consults `config_base_dir` to recognize
+    /// `objectiveai-mcp` built-ins by elimination — `None` keeps the
+    /// filter pure-explicit-names.
     pub fn build_conduit(&self) -> crate::api::conduit::ConduitMcpHandler {
-        crate::api::conduit::ConduitMcpHandler::new(self.mcp_address.clone())
+        crate::api::conduit::ConduitMcpHandler::new(
+            self.mcp_address.clone(),
+            self.config_base_dir.clone(),
+        )
     }
 
     /// The raw `--config-base-dir`. Required at the endpoint level
