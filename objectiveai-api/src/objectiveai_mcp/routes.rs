@@ -126,8 +126,35 @@ async fn handle_post(
 
     let ctx = build_ctx(&state, response_id, headers);
 
+    // `initialize` is special-cased: the API replaces the CLI's
+    // response body with its canonical `InitializeResult` AND stamps
+    // the aggregate `Mcp-Session-Id` returned by the CLI on the
+    // outbound HTTP response header. Other methods stay on the
+    // uniform `dispatch_*` → `Ok(Value)` pipeline.
+    if method == "initialize" {
+        let params = match serde_json::from_value(params) {
+            Ok(p) => p,
+            Err(e) => {
+                return json_rpc_error(id, invalid_params(format!("initialize: {e}")));
+            }
+        };
+        return match handlers::handle_initialize(ctx, params).await {
+            Ok((result, session_id)) => {
+                let value = serde_json::to_value(result)
+                    .expect("InitializeResult serializes");
+                let mut response = json_rpc_success(id, value);
+                if let Ok(v) = axum::http::HeaderValue::from_str(&session_id) {
+                    response
+                        .headers_mut()
+                        .insert("Mcp-Session-Id", v);
+                }
+                response
+            }
+            Err(e) => json_rpc_error(id, e),
+        };
+    }
+
     let result = match method.as_str() {
-        "initialize" => dispatch_initialize(ctx, params).await,
         "ping" => dispatch_ping(ctx).await,
         "tools/list" => dispatch_tools_list(ctx, params).await,
         "tools/call" => dispatch_tools_call(ctx, params).await,
@@ -146,16 +173,6 @@ async fn handle_post(
 // Per-method dispatchers — parse params, call delegate, re-erase
 // result to serde_json::Value for the success branch.
 // ────────────────────────────────────────────────────────────────
-
-async fn dispatch_initialize(
-    ctx: McpRequestContext,
-    params: serde_json::Value,
-) -> Result<serde_json::Value, handlers::McpError> {
-    let params = serde_json::from_value(params)
-        .map_err(|e| invalid_params(format!("initialize: {e}")))?;
-    let result = handlers::handle_initialize(ctx, params).await?;
-    Ok(serde_json::to_value(result).expect("InitializeResult serializes"))
-}
 
 async fn dispatch_ping(
     ctx: McpRequestContext,

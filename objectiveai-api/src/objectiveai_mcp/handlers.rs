@@ -9,7 +9,10 @@ use crate::objectiveai_mcp::context::McpRequestContext;
 use axum::http::HeaderMap;
 use indexmap::IndexMap;
 use objectiveai_sdk::client_objectiveai_mcp::server_request;
-use objectiveai_sdk::mcp::initialize_result::InitializeResult;
+use objectiveai_sdk::mcp::initialize_result::{
+    Implementation, InitializeResult, ResourcesCapability, ServerCapabilities,
+    ToolsCapability,
+};
 use objectiveai_sdk::mcp::resource::{
     ListResourcesRequest, ListResourcesResult, ReadResourceRequestParams,
     ReadResourceResult,
@@ -116,13 +119,107 @@ pub struct InitializeRequestParams {
 // JSON-RPC method delegates (POST /objectiveai-mcp)
 // ────────────────────────────────────────────────────────────────
 
+/// Protocol version the API advertises on `initialize`. Pinned —
+/// mirrors `objectiveai-mcp-proxy/src/mcp.rs::PROTOCOL_VERSION`.
+const PROTOCOL_VERSION: &str = "2025-06-18";
+
+/// Canonical `InitializeResult` the API replaces the CLI's body
+/// with. The CLI no longer advertises any capabilities — every
+/// session presents the same surface: `tools.listChanged=true` +
+/// `resources.listChanged=true`, server name `"oai"`. Matches the
+/// shape of `objectiveai-mcp-proxy::server_capabilities` exactly,
+/// with the server name shortened from `"oaip"` to `"oai"`.
+fn canonical_initialize_result() -> InitializeResult {
+    InitializeResult {
+        protocol_version: PROTOCOL_VERSION.into(),
+        capabilities: ServerCapabilities {
+            experimental: None,
+            logging: None,
+            completions: None,
+            prompts: None,
+            tools: Some(ToolsCapability {
+                list_changed: Some(true),
+            }),
+            resources: Some(ResourcesCapability {
+                subscribe: None,
+                list_changed: Some(true),
+            }),
+            tasks: None,
+        },
+        server_info: Implementation {
+            name: "oai".into(),
+            title: None,
+            version: env!("CARGO_PKG_VERSION").into(),
+            website_url: None,
+            description: None,
+            icons: None,
+        },
+        instructions: None,
+        _meta: None,
+    }
+}
+
+/// `initialize` — forwards to the CLI for the aggregate
+/// `Mcp-Session-Id`, then returns the API's canonical result. The
+/// CLI's response body is discarded (it returns `body: None` on
+/// initialize); only the `Mcp-Session-Id` response header is
+/// extracted via [`forward_initialize_session_id`].
+///
+/// Caller (the route layer) stamps `Mcp-Session-Id` from the
+/// returned `String` onto the outbound HTTP response header so the
+/// proxy adopts it.
 pub async fn handle_initialize(
     ctx: McpRequestContext,
-    params: InitializeRequestParams,
-) -> Result<InitializeResult, McpError> {
-    let params = serde_json::to_value(params)
-        .map_err(|e| McpError::serialize(format!("initialize params: {e}")))?;
-    forward_jsonrpc(&ctx, "initialize", params).await
+    _params: InitializeRequestParams,
+) -> Result<(InitializeResult, String), McpError> {
+    let session_id = forward_initialize_session_id(&ctx).await?;
+    Ok((canonical_initialize_result(), session_id))
+}
+
+/// Forward `initialize` to the CLI conduit and return its
+/// `Mcp-Session-Id` response header (the aggregate). Body is
+/// ignored — the API replaces it with [`canonical_initialize_result`].
+async fn forward_initialize_session_id(
+    ctx: &McpRequestContext,
+) -> Result<String, McpError> {
+    let rc = ctx
+        .registry
+        .get(&ctx.response_id)
+        .ok_or_else(|| McpError::no_session(&ctx.response_id))?
+        .clone();
+
+    let request_id = uuid::Uuid::new_v4().to_string();
+    let envelope = serde_json::json!({
+        "jsonrpc": "2.0",
+        "id": request_id,
+        "method": "initialize",
+        "params": serde_json::Value::Null,
+    });
+    let request = server_request::Request {
+        id: request_id,
+        method: "POST".to_string(),
+        headers: forward_headers(&ctx.headers),
+        body: Some(envelope),
+    };
+
+    let rx = send_server_request(&rc.sink, &rc.pending, request)
+        .await
+        .map_err(|_| McpError::reverse_channel_closed())?;
+
+    let response = match tokio::time::timeout(FORWARD_TIMEOUT, rx).await {
+        Ok(Ok(r)) => r,
+        Ok(Err(_)) => return Err(McpError::reverse_channel_dropped()),
+        Err(_) => return Err(McpError::reverse_channel_timeout()),
+    };
+
+    response
+        .headers
+        .iter()
+        .find(|(k, _)| k.eq_ignore_ascii_case("Mcp-Session-Id"))
+        .map(|(_, v)| v.clone())
+        .ok_or_else(|| McpError::parse(
+            "initialize response missing Mcp-Session-Id header".into(),
+        ))
 }
 
 pub async fn handle_ping(_ctx: McpRequestContext) -> Result<(), McpError> {
