@@ -497,6 +497,7 @@ fn error_response(
 impl McpHandler for ConduitMcpHandler {
     async fn handle(&self, request: server_request::Request) -> server_response::Response {
         let id_for_err = request.id.clone();
+        let rpc_id_for_err = jsonrpc_id_from_body(&request.body);
 
         // Sentinel method: the API uses `PLUGIN_MCP_CONNECT` to ask
         // the CLI to start a plugin's MCP server, dial it locally,
@@ -509,7 +510,7 @@ impl McpHandler for ConduitMcpHandler {
         }
 
         let Some(mcp_url) = self.inner.mcp_url.as_ref() else {
-            return reject_no_mcp(id_for_err);
+            return reject_no_mcp(id_for_err, rpc_id_for_err);
         };
 
         let incoming_session_id: Option<String> = request
@@ -533,7 +534,11 @@ impl McpHandler for ConduitMcpHandler {
                             st
                         }
                         Err(e) => {
-                            return conduit_error(id_for_err, format!("connect (resume): {e}"));
+                            return conduit_error(
+                                id_for_err,
+                                rpc_id_for_err,
+                                format!("connect (resume): {e}"),
+                            );
                         }
                     }
                 }
@@ -548,7 +553,11 @@ impl McpHandler for ConduitMcpHandler {
                         st
                     }
                     Err(e) => {
-                        return conduit_error(id_for_err, format!("connect: {e}"));
+                        return conduit_error(
+                            id_for_err,
+                            rpc_id_for_err,
+                            format!("connect: {e}"),
+                        );
                     }
                 }
             }
@@ -556,7 +565,7 @@ impl McpHandler for ConduitMcpHandler {
 
         match forward(&self.inner, &state, request).await {
             Ok(resp) => resp,
-            Err(e) => conduit_error(id_for_err, e.to_string()),
+            Err(e) => conduit_error(id_for_err, rpc_id_for_err, e.to_string()),
         }
     }
 }
@@ -1182,7 +1191,12 @@ async fn try_route_tools_call(
     }
 
     // No match anywhere.
-    Ok(Some(json_rpc_not_found(request.id.clone(), &requested, "tool")))
+    Ok(Some(json_rpc_not_found(
+        request.id.clone(),
+        envelope.get("id").cloned().unwrap_or(serde_json::Value::Null),
+        &requested,
+        "tool",
+    )))
 }
 
 /// Try routing a `resources/read` to the upstream that exposes the
@@ -1257,7 +1271,12 @@ async fn try_route_resources_read(
         }
     }
 
-    Ok(Some(json_rpc_not_found(request.id.clone(), &requested, "resource")))
+    Ok(Some(json_rpc_not_found(
+        request.id.clone(),
+        envelope.get("id").cloned().unwrap_or(serde_json::Value::Null),
+        &requested,
+        "resource",
+    )))
 }
 
 /// Clone the envelope and overwrite the named field on its `params`
@@ -1278,14 +1297,22 @@ fn rewrite_params_field(
 
 /// Synthesize a 200 response carrying a JSON-RPC `-32601` error
 /// envelope when no upstream owns the requested `name` / `uri`.
-fn json_rpc_not_found(id: String, name: &str, kind: &str) -> server_response::Response {
+/// `rpc_id` is echoed on the inner envelope so the proxy can
+/// correlate the error to the in-flight `tools/call` /
+/// `resources/read` request.
+fn json_rpc_not_found(
+    id: String,
+    rpc_id: serde_json::Value,
+    name: &str,
+    kind: &str,
+) -> server_response::Response {
     server_response::Response {
         id,
         status: 200,
         headers: IndexMap::new(),
         body: Some(serde_json::json!({
             "jsonrpc": "2.0",
-            "id": serde_json::Value::Null,
+            "id": rpc_id,
             "error": {
                 "code": -32601,
                 "message": format!("{kind} not found: {name}"),
@@ -1426,14 +1453,14 @@ fn get_or_create_session(inner: &Arc<Inner>, ws_session_id: &str) -> Arc<Session
         .clone()
 }
 
-fn reject_no_mcp(id: String) -> server_response::Response {
+fn reject_no_mcp(id: String, rpc_id: serde_json::Value) -> server_response::Response {
     server_response::Response {
         id,
         status: 501,
         headers: IndexMap::new(),
         body: Some(serde_json::json!({
             "jsonrpc": "2.0",
-            "id": serde_json::Value::Null,
+            "id": rpc_id,
             "error": {
                 "code": -32601,
                 "message": "this client has no MCP server configured (pass --mcp-address)",
@@ -1442,7 +1469,11 @@ fn reject_no_mcp(id: String) -> server_response::Response {
     }
 }
 
-fn conduit_error(id: String, message: impl Into<String>) -> server_response::Response {
+fn conduit_error(
+    id: String,
+    rpc_id: serde_json::Value,
+    message: impl Into<String>,
+) -> server_response::Response {
     let message = message.into();
     server_response::Response {
         id,
@@ -1450,13 +1481,26 @@ fn conduit_error(id: String, message: impl Into<String>) -> server_response::Res
         headers: IndexMap::new(),
         body: Some(serde_json::json!({
             "jsonrpc": "2.0",
-            "id": serde_json::Value::Null,
+            "id": rpc_id,
             "error": {
                 "code": -32603,
                 "message": format!("conduit: {message}"),
             },
         })),
     }
+}
+
+/// Extract the JSON-RPC request id from a `server_request::Request`'s
+/// inbound body, if any. Used to echo the request's `id` on every
+/// synthesized JSON-RPC error envelope so the proxy can correlate
+/// the error to the in-flight request that triggered it. Defaults
+/// to `null` for non-JSON-RPC bodies (e.g. PLUGIN_MCP_CONNECT) or
+/// when the body lacks an `id` field.
+fn jsonrpc_id_from_body(body: &Option<serde_json::Value>) -> serde_json::Value {
+    body.as_ref()
+        .and_then(|b| b.get("id"))
+        .cloned()
+        .unwrap_or(serde_json::Value::Null)
 }
 
 /// Parses bare JSON; falls back to stripping `data:` prefixes and
