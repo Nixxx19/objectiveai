@@ -1,30 +1,105 @@
-//! Typed delegate functions, one per MCP route. Every body is
-//! `todo!()` for now — this file defines the stable shape future
-//! commits will fill in.
+//! Typed delegate functions, one per MCP route. Every forwarding
+//! delegate wraps the same primitive: re-build the JSON-RPC envelope,
+//! ship it to the CLI via `send_server_request`, await the matching
+//! `server_response`, unwrap `result` (or propagate `error`) into the
+//! delegate's typed return.
 
 use crate::objectiveai_mcp::context::McpRequestContext;
+use axum::http::HeaderMap;
+use indexmap::IndexMap;
+use objectiveai_sdk::client_objectiveai_mcp::server_request;
+use objectiveai_sdk::mcp::conduit::server::send_server_request;
 use objectiveai_sdk::mcp::initialize_result::InitializeResult;
 use objectiveai_sdk::mcp::resource::{
     ListResourcesRequest, ListResourcesResult, ReadResourceRequestParams,
     ReadResourceResult,
 };
 use objectiveai_sdk::mcp::tool::{
-    CallToolRequestParams, CallToolResult, ContentBlock, ListToolsRequest,
-    ListToolsResult,
+    CallToolRequestParams, CallToolResult, ListToolsRequest, ListToolsResult,
 };
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
+use std::time::Duration;
 
-/// Common error shape every delegate returns. The route layer
-/// renders this into either a JSON-RPC error envelope (under
-/// `POST /`) or an HTTP status response (for `/notify` + `DELETE`).
-///
-/// Codes follow JSON-RPC conventions even on the non-JSON-RPC routes
-/// so the route layer's shape is uniform — see `routes::mcp_error_to_http`.
+/// How long to wait for a `server_response` over the WS before failing
+/// the request as a gateway timeout. Mirrors the SDK conduit endpoint's
+/// `REVERSE_CHANNEL_TIMEOUT`.
+const FORWARD_TIMEOUT: Duration = Duration::from_secs(30);
+
+/// Common error shape every delegate returns. The route layer renders
+/// this into either a JSON-RPC error envelope (under `POST /`) or an
+/// HTTP status response (for `DELETE`). Codes follow JSON-RPC
+/// conventions; see `routes::mcp_error_to_http` for the mapping.
 #[derive(Debug)]
 pub struct McpError {
     pub code: i64,
     pub message: String,
     pub data: Option<serde_json::Value>,
+}
+
+impl McpError {
+    pub fn no_session(id: &str) -> Self {
+        Self {
+            code: -32001,
+            message: format!("no reverse channel for response_id {id:?}"),
+            data: None,
+        }
+    }
+
+    pub fn reverse_channel_closed() -> Self {
+        Self {
+            code: -32002,
+            message: "reverse channel closed before request could be sent".into(),
+            data: None,
+        }
+    }
+
+    pub fn reverse_channel_dropped() -> Self {
+        Self {
+            code: -32002,
+            message: "reverse channel dropped before response arrived".into(),
+            data: None,
+        }
+    }
+
+    pub fn reverse_channel_timeout() -> Self {
+        Self {
+            code: -32003,
+            message: "reverse channel timed out waiting for response".into(),
+            data: None,
+        }
+    }
+
+    pub fn empty_response() -> Self {
+        Self {
+            code: -32004,
+            message: "empty response body from reverse channel".into(),
+            data: None,
+        }
+    }
+
+    pub fn missing_result(body: &serde_json::Value) -> Self {
+        Self {
+            code: -32004,
+            message: "reverse channel response missing both `result` and `error`".into(),
+            data: Some(body.clone()),
+        }
+    }
+
+    pub fn parse(message: String) -> Self {
+        Self {
+            code: -32603,
+            message,
+            data: None,
+        }
+    }
+
+    pub fn serialize(message: String) -> Self {
+        Self {
+            code: -32603,
+            message,
+            data: None,
+        }
+    }
 }
 
 /// Minimal `initialize` params struct — only `protocolVersion` is
@@ -38,88 +113,175 @@ pub struct InitializeRequestParams {
 }
 
 // ────────────────────────────────────────────────────────────────
-// JSON-RPC method delegates (POST /objectiveai-mcp/{session_id})
+// JSON-RPC method delegates (POST /objectiveai-mcp)
 // ────────────────────────────────────────────────────────────────
 
 pub async fn handle_initialize(
     ctx: McpRequestContext,
     params: InitializeRequestParams,
 ) -> Result<InitializeResult, McpError> {
-    let _ = (ctx, params);
-    todo!("API MCP: initialize — synthesize ServerInfo + capabilities + advertise list_changed");
+    let params = serde_json::to_value(params)
+        .map_err(|e| McpError::serialize(format!("initialize params: {e}")))?;
+    forward_jsonrpc(&ctx, "initialize", params).await
 }
 
-pub async fn handle_ping(ctx: McpRequestContext) -> Result<(), McpError> {
-    let _ = ctx;
-    todo!("API MCP: ping — return empty result");
+pub async fn handle_ping(_ctx: McpRequestContext) -> Result<(), McpError> {
+    // Local. The route layer 404'd already if the response_id was
+    // bogus; we just confirm liveness.
+    Ok(())
 }
 
 pub async fn handle_tools_list(
     ctx: McpRequestContext,
     params: ListToolsRequest,
 ) -> Result<ListToolsResult, McpError> {
-    let _ = (ctx, params);
-    todo!("API MCP: tools/list — forward to CLI via send_server_request, return aggregated list");
+    let params = serde_json::to_value(params)
+        .map_err(|e| McpError::serialize(format!("tools/list params: {e}")))?;
+    forward_jsonrpc(&ctx, "tools/list", params).await
 }
 
 pub async fn handle_tools_call(
     ctx: McpRequestContext,
     params: CallToolRequestParams,
 ) -> Result<CallToolResult, McpError> {
-    let _ = (ctx, params);
-    todo!("API MCP: tools/call — forward to CLI via send_server_request, prepend pending notifications");
+    let params = serde_json::to_value(params)
+        .map_err(|e| McpError::serialize(format!("tools/call params: {e}")))?;
+    forward_jsonrpc(&ctx, "tools/call", params).await
 }
 
 pub async fn handle_resources_list(
     ctx: McpRequestContext,
     params: ListResourcesRequest,
 ) -> Result<ListResourcesResult, McpError> {
-    let _ = (ctx, params);
-    todo!("API MCP: resources/list — forward to CLI via send_server_request");
+    let params = serde_json::to_value(params)
+        .map_err(|e| McpError::serialize(format!("resources/list params: {e}")))?;
+    forward_jsonrpc(&ctx, "resources/list", params).await
 }
 
 pub async fn handle_resources_read(
     ctx: McpRequestContext,
     params: ReadResourceRequestParams,
 ) -> Result<ReadResourceResult, McpError> {
-    let _ = (ctx, params);
-    todo!("API MCP: resources/read — forward to CLI via send_server_request");
+    let params = serde_json::to_value(params)
+        .map_err(|e| McpError::serialize(format!("resources/read params: {e}")))?;
+    forward_jsonrpc(&ctx, "resources/read", params).await
 }
 
 // ────────────────────────────────────────────────────────────────
-// Session lifecycle (DELETE /objectiveai-mcp/{session_id})
+// Session lifecycle (DELETE /objectiveai-mcp)
 // ────────────────────────────────────────────────────────────────
 
 pub async fn handle_session_terminate(
     ctx: McpRequestContext,
 ) -> Result<(), McpError> {
-    let _ = ctx;
-    todo!("API MCP: DELETE — terminate the WS session, drop reverse-attach registration");
+    let rc = ctx
+        .registry
+        .get(&ctx.response_id)
+        .ok_or_else(|| McpError::no_session(&ctx.response_id))?
+        .clone();
+
+    let request_id = uuid::Uuid::new_v4().to_string();
+    let request = server_request::Request {
+        id: request_id,
+        method: "DELETE".to_string(),
+        headers: forward_headers(&ctx.headers),
+        body: None,
+    };
+
+    let rx = send_server_request(&rc.sink, &rc.pending, request)
+        .await
+        .map_err(|_| McpError::reverse_channel_closed())?;
+
+    match tokio::time::timeout(FORWARD_TIMEOUT, rx).await {
+        Ok(Ok(_response)) => Ok(()),
+        Ok(Err(_)) => Err(McpError::reverse_channel_dropped()),
+        Err(_) => Err(McpError::reverse_channel_timeout()),
+    }
 }
 
 // ────────────────────────────────────────────────────────────────
-// /notify extensions (ObjectiveAI-specific, mirrors proxy's POST
-// /notify / GET /notify / GET /notify/queued)
+// Internal: forward one JSON-RPC method over the WS reverse channel.
 // ────────────────────────────────────────────────────────────────
 
-pub async fn handle_notify_enqueue(
-    ctx: McpRequestContext,
-    blocks: Vec<ContentBlock>,
-) -> Result<(), McpError> {
-    let _ = (ctx, blocks);
-    todo!("API MCP: POST /notify — append to pending-notifications queue for this session");
+async fn forward_jsonrpc<R: DeserializeOwned>(
+    ctx: &McpRequestContext,
+    method: &str,
+    params: serde_json::Value,
+) -> Result<R, McpError> {
+    let rc = ctx
+        .registry
+        .get(&ctx.response_id)
+        .ok_or_else(|| McpError::no_session(&ctx.response_id))?
+        .clone();
+
+    let request_id = uuid::Uuid::new_v4().to_string();
+    let envelope = serde_json::json!({
+        "jsonrpc": "2.0",
+        "id": request_id,
+        "method": method,
+        "params": params,
+    });
+    let request = server_request::Request {
+        id: request_id,
+        method: "POST".to_string(),
+        headers: forward_headers(&ctx.headers),
+        body: Some(envelope),
+    };
+
+    let rx = send_server_request(&rc.sink, &rc.pending, request)
+        .await
+        .map_err(|_| McpError::reverse_channel_closed())?;
+
+    let response = match tokio::time::timeout(FORWARD_TIMEOUT, rx).await {
+        Ok(Ok(r)) => r,
+        Ok(Err(_)) => return Err(McpError::reverse_channel_dropped()),
+        Err(_) => return Err(McpError::reverse_channel_timeout()),
+    };
+
+    let body = response.body.ok_or_else(McpError::empty_response)?;
+
+    // Upstream returned a JSON-RPC error envelope — preserve its
+    // code/message/data verbatim.
+    if let Some(err) = body.get("error") {
+        let code = err.get("code").and_then(|c| c.as_i64()).unwrap_or(-32603);
+        let message = err
+            .get("message")
+            .and_then(|m| m.as_str())
+            .unwrap_or("upstream MCP error")
+            .to_string();
+        let data = err.get("data").cloned();
+        return Err(McpError { code, message, data });
+    }
+
+    let result = body
+        .get("result")
+        .ok_or_else(|| McpError::missing_result(&body))?
+        .clone();
+    serde_json::from_value(result)
+        .map_err(|e| McpError::parse(format!("{method} result: {e}")))
 }
 
-pub async fn handle_notify_drain(
-    ctx: McpRequestContext,
-) -> Result<Vec<ContentBlock>, McpError> {
-    let _ = ctx;
-    todo!("API MCP: GET /notify — atomic drain of pending-notifications queue");
-}
-
-pub async fn handle_notify_peek(
-    ctx: McpRequestContext,
-) -> Result<bool, McpError> {
-    let _ = ctx;
-    todo!("API MCP: GET /notify/queued — true iff queue non-empty, no drain");
+/// Copy inbound headers for forwarding, dropping hop-by-hop and
+/// transport-routing ones. `Mcp-Session-Id` passes through — that's the
+/// standard MCP transport identifier minted by the upstream server.
+fn forward_headers(headers: &HeaderMap) -> IndexMap<String, String> {
+    headers
+        .iter()
+        .filter_map(|(k, v)| {
+            let name = k.as_str();
+            let drop = matches!(
+                name.to_ascii_lowercase().as_str(),
+                "host"
+                    | "content-length"
+                    | "connection"
+                    | "accept"
+                    | "content-type"
+                    | "x-objectiveai-response-id"
+            );
+            if drop {
+                return None;
+            }
+            Some((name.to_string(), v.to_str().ok()?.to_string()))
+        })
+        .collect()
 }

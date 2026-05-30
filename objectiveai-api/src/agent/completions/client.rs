@@ -698,22 +698,21 @@ where
                 urls.extend(extra_mcp_servers.iter().map(|s| s.url.clone()));
 
                 // If the agent declares `client_objectiveai_mcp`,
-                // append a synthetic URL that points back at this
-                // very API process's `/objectiveai-mcp/{ws_session_id}`
-                // endpoint. The proxy will dial it; the API forwards
-                // each request over the WS reverse channel registered
-                // under that ws_session_id; the CLI conduit on the
-                // other side picks per-agent MCP connections out of
-                // its `Mcp-Session-Id` DashMap.
-                let client_mcp_synthetic_url: Option<String> = match (
-                    agent_ws_session_id.as_deref(),
-                    api_port_for_synth,
-                ) {
-                    (Some(ws_session_id), Some(api_port)) => Some(format!(
-                        "http://127.0.0.1:{api_port}/objectiveai-mcp/{ws_session_id}"
-                    )),
-                    _ => None,
-                };
+                // append a synthetic URL that points back at this very
+                // API process's `/objectiveai-mcp` endpoint. The proxy
+                // will dial it, stamping the per-URL headers (built
+                // below) on every request — including the
+                // `X-OBJECTIVEAI-RESPONSE-ID` that the API routes off
+                // to find the matching WS reverse channel. The CLI
+                // conduit on the other side picks per-agent MCP
+                // connections out of its `Mcp-Session-Id` DashMap.
+                let client_mcp_synthetic_url: Option<String> =
+                    match (agent_ws_session_id.as_deref(), api_port_for_synth) {
+                        (Some(_), Some(api_port)) => Some(format!(
+                            "http://127.0.0.1:{api_port}/objectiveai-mcp"
+                        )),
+                        _ => None,
+                    };
                 if let Some(ref url) = client_mcp_synthetic_url {
                     urls.push(url.clone());
                 }
@@ -768,26 +767,42 @@ where
                         }
                     }
                 }
-                // For the synthetic `client_objectiveai_mcp` URL,
-                // attach the declaration as a header so the CLI's
-                // conduit (or any real client) can see what tools
-                // the agent expects the calling client to expose.
-                // Encoded as base64url-no-pad to keep it header-safe.
-                if let (Some(url), Some(client_mcp)) = (
-                    client_mcp_synthetic_url.as_ref(),
-                    agent.base().client_objectiveai_mcp(),
-                ) {
-                    use base64::Engine;
-                    let serialized = serde_json::to_string(client_mcp).unwrap_or_default();
-                    let encoded = base64::engine::general_purpose::URL_SAFE_NO_PAD
-                        .encode(serialized);
+                // For the synthetic `client_objectiveai_mcp` URL, stamp
+                // two headers the API needs on every proxy-originated
+                // request:
+                //
+                // - `X-OBJECTIVEAI-RESPONSE-ID` — the `ws_session_id`
+                //   the API's MCP router uses to look up the matching
+                //   WS reverse channel. Same value formerly carried in
+                //   the URL path; now header-shaped so a single WS can
+                //   host many MCP sessions without overloading
+                //   `Mcp-Session-Id` (which is reserved for whatever
+                //   upstream MCP server sits behind the CLI conduit).
+                // - `X-Objectiveai-Client-Mcp` — the agent's declared
+                //   `client_objectiveai_mcp` spec, base64url-no-pad
+                //   encoded so the CLI's conduit (or any real client)
+                //   can see what tools the agent expects exposed.
+                if let Some(url) = client_mcp_synthetic_url.as_ref() {
                     let entry = per_url_headers
                         .entry(url.clone())
                         .or_insert_with(|| extra_mcp_headers.clone());
-                    entry.insert(
-                        "X-Objectiveai-Client-Mcp".to_string(),
-                        encoded,
-                    );
+                    if let Some(ws_session_id) = agent_ws_session_id.as_deref() {
+                        entry.insert(
+                            "X-OBJECTIVEAI-RESPONSE-ID".to_string(),
+                            ws_session_id.to_string(),
+                        );
+                    }
+                    if let Some(client_mcp) = agent.base().client_objectiveai_mcp() {
+                        use base64::Engine;
+                        let serialized =
+                            serde_json::to_string(client_mcp).unwrap_or_default();
+                        let encoded = base64::engine::general_purpose::URL_SAFE_NO_PAD
+                            .encode(serialized);
+                        entry.insert(
+                            "X-Objectiveai-Client-Mcp".to_string(),
+                            encoded,
+                        );
+                    }
                 }
 
                 let mut proxy_request_headers: indexmap::IndexMap<String, String> =

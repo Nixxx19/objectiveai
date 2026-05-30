@@ -1,12 +1,16 @@
-//! ObjectiveAI MCP server — Streamable HTTP MCP + the `/notify`
-//! extensions the agent client uses to inject inter-tool-call
-//! `<system-reminder>` content.
+//! ObjectiveAI MCP server — Streamable HTTP MCP, mounted under
+//! `/objectiveai-mcp` with three routes (POST / GET / DELETE) and
+//! routed by the `X-OBJECTIVEAI-RESPONSE-ID` header. Route surface
+//! mirrors the MCP-spec subset of `objectiveai-mcp-proxy/src/mcp.rs`;
+//! the proxy's ObjectiveAI-specific `/notify` extensions are not
+//! mirrored.
 //!
-//! Route surface mirrors `objectiveai-mcp-proxy/src/mcp.rs`. Each
-//! method delegates to a typed function in [`handlers`] whose body
-//! is currently `todo!()` — the dispatch (envelope parse, params
-//! `from_value`, response framing) is real and exercisable; the
-//! handler bodies panic when reached.
+//! Each JSON-RPC method delegates to a typed function in [`handlers`]
+//! that re-wraps the call as a `server_request::Request` and ships it
+//! over the matching reverse-channel WS (see
+//! `objectiveai_sdk::mcp::conduit::server`). The CLI conduit on the
+//! other side fans out to per-`Mcp-Session-Id` upstream MCP
+//! connections.
 
 mod context;
 mod handlers;
