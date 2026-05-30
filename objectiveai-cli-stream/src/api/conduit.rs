@@ -43,6 +43,8 @@
 use dashmap::DashMap;
 use indexmap::IndexMap;
 use objectiveai_sdk::Notifier;
+use objectiveai_sdk::cli::output::NotificationValue;
+use objectiveai_sdk::cli::plugins::PluginOutput;
 use objectiveai_sdk::client_objectiveai_mcp::client_request::{
     McpListChanged, McpListChangedKind,
 };
@@ -161,11 +163,224 @@ impl ConduitMcpHandler {
         );
         Ok(Arc::new(ConduitState { connection }))
     }
+
+    /// Handle a `method = "PLUGIN_MCP_BEGIN"` server_request: verify
+    /// the plugin is installed and declares the named MCP server in
+    /// its manifest, spawn its binary with `mcp <name> begin`,
+    /// capture the first `Mcp { url }` notification it emits on
+    /// stdout, and return the URL in a 200 response body. Errors
+    /// (deserialization, missing plugin, missing manifest entry,
+    /// spawn failure, plugin error notification, timeout, no-mcp-
+    /// emit) map to 4xx/5xx with a `{"error": "..."}` body.
+    ///
+    /// The spawned plugin process keeps running after the URL is
+    /// captured — it IS the MCP server. A background task drains
+    /// its stdout/stderr so the pipes don't fill up.
+    async fn handle_plugin_mcp_begin(
+        &self,
+        request: server_request::Request,
+    ) -> server_response::Response {
+        let id = request.id;
+
+        #[derive(serde::Deserialize)]
+        struct Params {
+            plugin_name: String,
+            mcp_name: String,
+        }
+        let Some(body) = request.body else {
+            return error_response(id, 400, "PLUGIN_MCP_BEGIN: missing request body");
+        };
+        let Params { plugin_name, mcp_name } = match serde_json::from_value(body) {
+            Ok(p) => p,
+            Err(e) => {
+                return error_response(
+                    id,
+                    400,
+                    format!("PLUGIN_MCP_BEGIN: invalid body: {e}"),
+                );
+            }
+        };
+
+        let Some(base_dir) = self.inner.config_base_dir.clone() else {
+            return error_response(
+                id,
+                500,
+                "PLUGIN_MCP_BEGIN: filesystem unavailable (no config_base_dir)",
+            );
+        };
+        let fs = objectiveai_sdk::filesystem::Client::new(
+            Some(base_dir),
+            None::<String>,
+            None::<String>,
+        );
+
+        let Some(plugin) = fs.get_plugin(&plugin_name).await else {
+            return error_response(
+                id,
+                404,
+                format!("plugin {plugin_name:?} not installed"),
+            );
+        };
+
+        // Manifest verification gate — run BEFORE any subprocess
+        // spawn so a bogus mcp_name fails fast.
+        if !plugin
+            .manifest
+            .mcp_servers
+            .iter()
+            .any(|s| s.name == mcp_name)
+        {
+            return error_response(
+                id,
+                404,
+                format!(
+                    "plugin {plugin_name:?} manifest does not declare mcp server {mcp_name:?}"
+                ),
+            );
+        }
+
+        let Some(exe) = fs.resolve_plugin(&plugin_name).await else {
+            return error_response(
+                id,
+                404,
+                format!("plugin {plugin_name:?} binary not found"),
+            );
+        };
+
+        let mut child = match tokio::process::Command::new(&exe)
+            .arg("mcp")
+            .arg(&mcp_name)
+            .arg("begin")
+            .stdin(std::process::Stdio::null())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+        {
+            Ok(c) => c,
+            Err(e) => {
+                return error_response(
+                    id,
+                    500,
+                    format!("PLUGIN_MCP_BEGIN: spawn failed: {e}"),
+                );
+            }
+        };
+
+        let stdout = child.stdout.take().expect("stdout was piped");
+        let stderr = child.stderr.take().expect("stderr was piped");
+
+        use tokio::io::AsyncBufReadExt;
+        let reader = tokio::io::BufReader::new(stdout);
+        let mut lines = reader.lines();
+
+        let timeout = std::time::Duration::from_secs(30);
+        let begin_result = tokio::time::timeout(timeout, async {
+            loop {
+                let line = match lines.next_line().await {
+                    Ok(Some(l)) => l,
+                    Ok(None) => {
+                        return Err::<objectiveai_sdk::cli::output::Mcp, String>(
+                            "plugin exited without emitting mcp{url}".into(),
+                        );
+                    }
+                    Err(e) => return Err(format!("plugin stdout read error: {e}")),
+                };
+                let out = match serde_json::from_str::<PluginOutput>(&line) {
+                    Ok(o) => o,
+                    Err(_) => continue,
+                };
+                match out {
+                    PluginOutput::Notification(value) => {
+                        if let Ok(NotificationValue::Mcp(mcp)) =
+                            serde_json::from_value::<NotificationValue>(value)
+                        {
+                            return Ok(mcp);
+                        }
+                    }
+                    PluginOutput::Error(err) => {
+                        return Err(format!(
+                            "plugin emitted error: {}",
+                            err.message
+                        ));
+                    }
+                    PluginOutput::Command { .. } => {}
+                }
+            }
+        })
+        .await;
+
+        // Hand off child + remaining IO to a detached task so the
+        // plugin keeps running after we've captured (or failed to
+        // capture) the URL. Drains stdout and forwards stderr so
+        // pipe buffers don't fill up.
+        tokio::spawn(async move {
+            let stderr_task = tokio::spawn(forward_stderr(stderr));
+            while let Ok(Some(_)) = lines.next_line().await {
+                // discard
+            }
+            let _ = stderr_task.await;
+            let _ = child.wait().await;
+        });
+
+        match begin_result {
+            Ok(Ok(mcp)) => mcp_success_response(id, mcp),
+            Ok(Err(message)) => error_response(id, 502, message),
+            Err(_) => error_response(id, 504, "PLUGIN_MCP_BEGIN timed out"),
+        }
+    }
+}
+
+async fn forward_stderr(mut stderr: tokio::process::ChildStderr) {
+    use tokio::io::AsyncReadExt;
+    let mut buf = [0u8; 4096];
+    loop {
+        match stderr.read(&mut buf).await {
+            Ok(0) | Err(_) => return,
+            Ok(n) => {
+                use std::io::Write;
+                let _ = std::io::stderr().write_all(&buf[..n]);
+            }
+        }
+    }
+}
+
+fn mcp_success_response(
+    id: String,
+    mcp: objectiveai_sdk::cli::output::Mcp,
+) -> server_response::Response {
+    let body = serde_json::to_value(&mcp).unwrap_or_else(|_| serde_json::json!({}));
+    server_response::Response {
+        id,
+        status: 200,
+        headers: IndexMap::new(),
+        body: Some(body),
+    }
+}
+
+fn error_response(
+    id: String,
+    status: u16,
+    message: impl Into<String>,
+) -> server_response::Response {
+    server_response::Response {
+        id,
+        status,
+        headers: IndexMap::new(),
+        body: Some(serde_json::json!({ "error": message.into() })),
+    }
 }
 
 impl McpHandler for ConduitMcpHandler {
     async fn handle(&self, request: server_request::Request) -> server_response::Response {
         let id_for_err = request.id.clone();
+
+        // Sentinel method: the API uses `PLUGIN_MCP_BEGIN` to ask
+        // the CLI to start a plugin's MCP server and return its
+        // URL. Dispatches before the dial-to-upstream path because
+        // this RPC bypasses the upstream MCP server entirely.
+        if request.method.eq_ignore_ascii_case("PLUGIN_MCP_BEGIN") {
+            return self.handle_plugin_mcp_begin(request).await;
+        }
 
         let Some(mcp_url) = self.inner.mcp_url.as_ref() else {
             return reject_no_mcp(id_for_err);

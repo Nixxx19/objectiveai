@@ -100,14 +100,15 @@ pub struct Manifest {
     pub mobile_ready: bool,
 
     /// MCP servers the plugin wants the host to expose. Each entry
-    /// shares the wire shape of [`crate::agent::McpServer`] —
-    /// `{url, authorization}` — so plugin-declared and agent-declared
-    /// MCP servers are interchangeable downstream. Auth-requiring
-    /// entries flag `authorization = true`; credentials are resolved
-    /// by the host (env vars / config), not the manifest.
+    /// has a `name` (the identifier agents reference via
+    /// [`crate::agent::ClientObjectiveaiMcpPluginEntry::mcp_servers`])
+    /// plus the same `url` + `authorization` shape
+    /// [`crate::agent::McpServer`] uses. Auth-requiring entries flag
+    /// `authorization = true`; credentials are resolved by the host
+    /// (env vars / config), not the manifest.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     #[schemars(extend("omitempty" = true))]
-    pub mcp_servers: crate::agent::McpServers,
+    pub mcp_servers: Vec<McpServer>,
 }
 
 impl Manifest {
@@ -137,12 +138,28 @@ impl Manifest {
         if let Some(url) = self.viewer_url.as_deref() {
             validate_viewer_url(url)?;
         }
-        // Reject manifests with duplicate or per-entry-invalid MCP
-        // server URLs. `mcp_servers::validate` returns owned-String
-        // errors; collapse to a static description — manifests don't
-        // surface the offending URL anywhere user-facing.
-        crate::agent::mcp_servers::validate(&self.mcp_servers)
-            .map_err(|_| "mcp_servers is invalid (duplicate or malformed entry)")?;
+        // Each MCP-server entry: non-empty name + url; the list as a
+        // whole must have no `name` duplicates (since agents reference
+        // by name) AND no `url` duplicates (no point declaring two
+        // entries pointing at the same upstream).
+        for entry in &self.mcp_servers {
+            if entry.name.is_empty() {
+                return Err("mcp_servers[i].name cannot be empty");
+            }
+            if entry.url.is_empty() {
+                return Err("mcp_servers[i].url cannot be empty");
+            }
+        }
+        for (i, a) in self.mcp_servers.iter().enumerate() {
+            for b in &self.mcp_servers[i + 1..] {
+                if a.name == b.name {
+                    return Err("mcp_servers contains duplicate name");
+                }
+                if a.url == b.url {
+                    return Err("mcp_servers contains duplicate url");
+                }
+            }
+        }
         Ok(())
     }
 }
@@ -252,6 +269,26 @@ impl Binaries {
         .filter(|o| o.is_some())
         .count()
     }
+}
+
+/// MCP server entry inside [`Manifest::mcp_servers`]. Same `url` +
+/// `authorization` semantics as [`crate::agent::McpServer`] plus a
+/// `name` field that agent declarations reference (via
+/// [`crate::agent::ClientObjectiveaiMcpPluginEntry::mcp_servers`]).
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, JsonSchema)]
+#[schemars(rename = "filesystem.plugins.McpServer")]
+pub struct McpServer {
+    /// Author-chosen identifier. Unique per plugin manifest. Agents
+    /// declare which subset of the plugin's MCP servers they want
+    /// exposed by listing names here.
+    pub name: String,
+    /// Upstream MCP server URL.
+    pub url: String,
+    /// Whether the host should attach an `Authorization` header
+    /// when dialing this upstream. Credentials are resolved by the
+    /// host (env vars / config), not the manifest.
+    #[serde(default)]
+    pub authorization: bool,
 }
 
 /// One HTTP route a plugin's viewer registers on the host viewer's

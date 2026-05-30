@@ -822,6 +822,12 @@ where
                             names: client_mcp
                                 .plugins
                                 .iter()
+                                // Only `executable` plugins
+                                // contribute a tool name to the
+                                // allow-list — non-executable plugin
+                                // entries are present purely for
+                                // their declared `mcp_servers`.
+                                .filter(|e| e.executable)
                                 .map(|e| e.name.as_str())
                                 .chain(client_mcp.tools.iter().map(|e| e.name.as_str()))
                                 .collect(),
