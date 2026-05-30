@@ -35,10 +35,11 @@ pub async fn handle(
 
     let (stream, notifier) =
         objectiveai_sdk::functions::inventions::recursive::create_function_invention_recursive_streaming(
-            &client, params, conduit,
+            &client, params, conduit.clone(),
         )
         .await
         .map_err(|e| format!("failed to open function-invention-recursive stream: {e}"))?;
+    conduit.install_notifier(notifier.clone());
 
     let stream = Box::pin(stream);
 

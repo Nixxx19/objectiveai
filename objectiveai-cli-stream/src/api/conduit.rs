@@ -1,42 +1,54 @@
-//! `ConduitMcpHandler` — reverse-attach MCP forwarder.
-//!
-//! Inlined into `objectiveai-cli-stream` so this crate has no dep
-//! on `objectiveai-cli`. The implementation mirrors
-//! `objectiveai-cli/src/api/conduit.rs` 1:1 (the canonical version
-//! will be consolidated into a shared home — likely the SDK — when
-//! `objectiveai-cli`'s streaming subcommands are removed and its
-//! copy goes with them).
+//! `ConduitMcpHandler` — reverse-attach MCP forwarder for the
+//! client-app side of the conduit. Hosted by cli-stream; dispatches
+//! every `server_request` frame the API pushes down to a real
+//! upstream MCP server, caches one `mcp::Connection` per
+//! remote-minted `Mcp-Session-Id`, and forwards each upstream
+//! `notifications/{tools,resources}/list_changed` back up the WS as
+//! a `client_request::Payload::McpListChanged` so the API's
+//! `/objectiveai-mcp` GET-SSE stream can re-emit it standard-MCP-shaped.
 //!
 //! Dispatch on an inbound `server_request`:
 //! - **No `Mcp-Session-Id` header (fresh `initialize`).** Dial the
 //!   remote with `session_id = None`; the remote mints one and we
-//!   key the new [`Connection`] under it. The synthesized
-//!   `initialize` response stamps that id back in the response
-//!   `Mcp-Session-Id` header so the proxy adopts it.
+//!   key the new `Connection` under it. The synthesized `initialize`
+//!   response stamps that id back in the response `Mcp-Session-Id`
+//!   header so the proxy adopts it.
 //! - **Header present + already in the map.** Reuse the cached
-//!   [`Connection`].
-//! - **Header present + not in the map (continuation resume).**
-//!   Dial the remote with `session_id = Some(incoming)`. The SDK
-//!   handles the resume branch — many servers don't echo the
-//!   header back on resume, so the SDK falls back to the caller's
-//!   provided id.
+//!   `Connection`.
+//! - **Header present + not in the map (continuation resume).** Dial
+//!   the remote with `session_id = Some(incoming)`. The SDK handles
+//!   the resume branch — many servers don't echo the header back on
+//!   resume, so the SDK falls back to the caller's provided id.
 //!
 //! Then:
 //! - `initialize` → synthesize from `connection.initialize_result`
-//!   (the SDK already handshook on `connect`). Strip
-//!   `{tools,resources}.listChanged` from advertised capabilities
-//!   so the proxy never subscribes — the chain stays single-shot.
+//!   (the SDK already handshook on `connect`). `tools.listChanged` /
+//!   `resources.listChanged` are advertised verbatim — the dial-time
+//!   `install_list_changed_pump` makes that honest.
 //! - notifications (no `id`) → 202 Accepted, no body, never round-trip.
 //! - everything else → raw POST through `connection.http_client` +
 //!   `connection.url` + `connection.session_id`. Response parsed by
-//!   [`parse_json_or_sse`] (rmcp's `StreamableHttpService` may pick
+//!   `parse_json_or_sse` (rmcp's `StreamableHttpService` may pick
 //!   either shape).
+//!
+//! `Notifier` is late-bound: the pump needs one, but the `Notifier`
+//! is output of `send_streaming_ws(handler, ...)` and the handler is
+//! input. The caller constructs the conduit, threads its clone into
+//! `send_streaming_ws`, then calls [`ConduitMcpHandler::install_notifier`]
+//! on the original handle once the notifier is in hand. Pump closures
+//! read the slot at fire time; events that fire before install are
+//! dropped (the window is bounded by a few statements at stream
+//! startup — see the plan doc).
 
 use dashmap::DashMap;
 use indexmap::IndexMap;
+use objectiveai_sdk::Notifier;
+use objectiveai_sdk::client_objectiveai_mcp::client_request::{
+    McpListChanged, McpListChangedKind,
+};
 use objectiveai_sdk::client_objectiveai_mcp::{server_request, server_response};
 use objectiveai_sdk::http::McpHandler;
-use std::sync::Arc;
+use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
 struct ConduitState {
@@ -56,6 +68,10 @@ struct Inner {
     mcp_url: Option<String>,
     client: objectiveai_sdk::mcp::Client,
     connections: DashMap<String, Arc<ConduitState>>,
+    /// Late-bound: filled by [`ConduitMcpHandler::install_notifier`]
+    /// after the WS-creating call returns the notifier. Pump
+    /// closures read it at fire time.
+    notifier: OnceLock<Notifier>,
 }
 
 impl ConduitMcpHandler {
@@ -84,8 +100,18 @@ impl ConduitMcpHandler {
                 mcp_url,
                 client,
                 connections: DashMap::new(),
+                notifier: OnceLock::new(),
             }),
         }
+    }
+
+    /// Install the `Notifier` the list-changed pump uses to push
+    /// `McpListChanged` frames up the WS. Idempotent — first set
+    /// wins; later calls are no-ops. Call once, after
+    /// `send_streaming_ws` returns the notifier and before the proxy
+    /// could plausibly have triggered upstream `list_changed` fires.
+    pub fn install_notifier(&self, notifier: Notifier) {
+        let _ = self.inner.notifier.set(notifier);
     }
 
     async fn dial(
@@ -100,6 +126,11 @@ impl ConduitMcpHandler {
             .client
             .connect(url, session_id, Some(connect_headers))
             .await?;
+        install_list_changed_pump(
+            &connection,
+            self.inner.clone(),
+            connection.session_id.clone(),
+        );
         Ok(Arc::new(ConduitState { connection }))
     }
 }
@@ -161,6 +192,50 @@ impl McpHandler for ConduitMcpHandler {
     }
 }
 
+/// Wire `set_on_{tools,resources}_list_changed` to fire-and-forget
+/// notifier sends. Closures read the late-bound `Notifier` from the
+/// `Inner`'s `OnceLock` at fire time — events that fire before
+/// `install_notifier` is called are dropped silently.
+fn install_list_changed_pump(
+    connection: &objectiveai_sdk::mcp::Connection,
+    inner: Arc<Inner>,
+    mcp_session_id: String,
+) {
+    let inner_tools = inner.clone();
+    let session_tools = mcp_session_id.clone();
+    connection.set_on_tools_list_changed(move || {
+        let Some(notifier) = inner_tools.notifier.get().cloned() else {
+            return;
+        };
+        let mcp_session_id = session_tools.clone();
+        tokio::spawn(async move {
+            let _ = notifier
+                .notify_list_changed(McpListChanged {
+                    mcp_session_id,
+                    kind: McpListChangedKind::Tools,
+                })
+                .await;
+        });
+    });
+
+    let inner_resources = inner;
+    let session_resources = mcp_session_id;
+    connection.set_on_resources_list_changed(move || {
+        let Some(notifier) = inner_resources.notifier.get().cloned() else {
+            return;
+        };
+        let mcp_session_id = session_resources.clone();
+        tokio::spawn(async move {
+            let _ = notifier
+                .notify_list_changed(McpListChanged {
+                    mcp_session_id,
+                    kind: McpListChangedKind::Resources,
+                })
+                .await;
+        });
+    });
+}
+
 /// Hop-by-hop and layer-internal headers don't propagate to MCP.
 fn sanitize_connect_headers(
     headers: &IndexMap<String, String>,
@@ -205,21 +280,16 @@ async fn forward(
     // `initialize`: synthesize from the SDK Connection's cached
     // InitializeResult; don't re-handshake. Stamp the remote-minted
     // session id on the response so the proxy adopts it.
+    //
+    // `tools.listChanged` / `resources.listChanged` are advertised
+    // verbatim — `install_list_changed_pump` forwards each fire up
+    // the WS as `client_request::Payload::McpListChanged`, which the
+    // API surfaces on its GET-SSE notifications stream so the proxy's
+    // `mcp::Connection` to this endpoint sees real MCP list_changed
+    // events.
     if rpc_method.as_deref() == Some("initialize") {
-        let mut init_value = serde_json::to_value(&state.connection.initialize_result)
+        let init_value = serde_json::to_value(&state.connection.initialize_result)
             .map_err(ConduitError::Serialize)?;
-        if let Some(caps) = init_value.pointer_mut("/capabilities") {
-            if let Some(obj) = caps.as_object_mut() {
-                if let Some(tools) = obj.get_mut("tools").and_then(|t| t.as_object_mut()) {
-                    tools.remove("listChanged");
-                }
-                if let Some(resources) =
-                    obj.get_mut("resources").and_then(|r| r.as_object_mut())
-                {
-                    resources.remove("listChanged");
-                }
-            }
-        }
         let body = serde_json::json!({
             "jsonrpc": "2.0",
             "id": rpc_id.unwrap(),

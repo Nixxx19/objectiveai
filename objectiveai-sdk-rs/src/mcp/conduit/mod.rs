@@ -1,25 +1,19 @@
 //! `objectiveai-mcp` conduit — bidirectional MCP-over-WebSocket bridge
-//! between an `objectiveai-api` server and an `objectiveai-cli`
-//! (or `objectiveai-cli-stream`) client.
+//! between an `objectiveai-api` server and an `objectiveai-cli-stream`
+//! client.
 //!
-//! The conduit factors out logic that previously lived duplicated
-//! across `objectiveai-cli`, `objectiveai-cli-stream`, and
-//! `objectiveai-api`. Two sides:
+//! Only the **server** half lives here now — the API consumes it for
+//! its `/objectiveai-mcp` reverse-attach plumbing, recv loop, SSE
+//! list-changed forwarding, and `send_server_request` helper. The
+//! client half (the per-WS handler that forwards `server_request`
+//! frames to a real upstream MCP server and pumps `list_changed`
+//! events back) lives in `objectiveai-cli-stream/src/api/conduit.rs`
+//! as `ConduitMcpHandler`; the canonical place for new code on the
+//! client side is the CLI itself, not this crate.
 //!
-//! - [`client`] — the **client-app** side (CLI / cli-stream). Hosts
-//!   an [`crate::http::McpHandler`] that forwards inbound
-//!   `server_request` frames to a real upstream MCP server, caches
-//!   one [`super::Connection`] per `Mcp-Session-Id` it observes, and
-//!   (once the list-changed forwarding lands) pushes the upstream's
-//!   `notifications/{tools,resources}/list_changed` events back up
-//!   the WebSocket as `client_request` frames.
-//!
-//! - `server` (future) — the **api-host** side. Owns the
-//!   reverse-attach registration that lets the api forward proxy
-//!   traffic over an in-flight WebSocket, receives the CLI's
-//!   list-changed push notifications, and fans them out as SSE
-//!   events on the API's `/objectiveai-mcp/{session_id}` MCP
-//!   endpoint so the agent's `mcp::Connection` sees them.
+//! Eventual end-state: this `server` submodule moves into
+//! `objectiveai-api/src/objectiveai_mcp/` too and this whole conduit
+//! module is deleted. Tracked separately.
 //!
 //! Wire shapes (`client_request` / `client_response` / `server_request`
 //! / `server_response`) live at [`crate::client_objectiveai_mcp`] —
@@ -27,7 +21,6 @@
 //! without pulling in `mcp`. The [`wire`] re-export here is the
 //! canonical path for code inside the conduit module tree.
 
-pub mod client;
 pub mod server;
 
 /// Re-export of the conduit's wire shapes. The types physically live

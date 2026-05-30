@@ -50,10 +50,11 @@ pub async fn handle(
 
     let (stream, notifier) =
         objectiveai_sdk::functions::executions::create_function_execution_streaming(
-            &client, params, conduit,
+            &client, params, conduit.clone(),
         )
         .await
         .map_err(|e| format!("failed to open function-executions stream: {e}"))?;
+    conduit.install_notifier(notifier.clone());
 
     let stream = Box::pin(stream);
 
