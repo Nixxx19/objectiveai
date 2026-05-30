@@ -33,3 +33,16 @@ pub struct Plugin {
 pub struct Installed {
     pub installed: bool,
 }
+
+/// Wire shape: `{"type":"notification","value":{"kind":"mcp","url":"…"}}`.
+/// Emitted by a running plugin to announce an MCP server URL it wants
+/// the host to expose. The host routes this through the standard
+/// plugin-notification pipeline and dials the URL the same way it
+/// would for an entry in the plugin's manifest `mcp_servers` —
+/// runtime announcements are functionally identical to manifest-time
+/// declarations.
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
+#[schemars(rename = "cli.output.notification.Mcp")]
+pub struct Mcp {
+    pub url: String,
+}

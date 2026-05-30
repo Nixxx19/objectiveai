@@ -98,6 +98,16 @@ pub struct Manifest {
     /// to false (desktop-only).
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     pub mobile_ready: bool,
+
+    /// MCP servers the plugin wants the host to expose. Each entry
+    /// shares the wire shape of [`crate::agent::McpServer`] —
+    /// `{url, authorization}` — so plugin-declared and agent-declared
+    /// MCP servers are interchangeable downstream. Auth-requiring
+    /// entries flag `authorization = true`; credentials are resolved
+    /// by the host (env vars / config), not the manifest.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    #[schemars(extend("omitempty" = true))]
+    pub mcp_servers: crate::agent::McpServers,
 }
 
 impl Manifest {
@@ -127,6 +137,12 @@ impl Manifest {
         if let Some(url) = self.viewer_url.as_deref() {
             validate_viewer_url(url)?;
         }
+        // Reject manifests with duplicate or per-entry-invalid MCP
+        // server URLs. `mcp_servers::validate` returns owned-String
+        // errors; collapse to a static description — manifests don't
+        // surface the offending URL anywhere user-facing.
+        crate::agent::mcp_servers::validate(&self.mcp_servers)
+            .map_err(|_| "mcp_servers is invalid (duplicate or malformed entry)")?;
         Ok(())
     }
 }
