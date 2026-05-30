@@ -280,6 +280,18 @@ pub async fn dispatch_external(
             Ok(PluginOutput::Error(e)) => {
                 Output::Error(e).emit(handle).await;
             }
+            Ok(PluginOutput::Mcp(mcp)) => {
+                // Forward to the host's notification stream so
+                // subscribers see it on the standard channel — the
+                // wire variant is direct, but the host's emit
+                // surface keeps the `Mcp` value typed.
+                Output::Notification(Notification {
+                    value: mcp.into(),
+                    agent_id: None,
+                })
+                .emit(handle)
+                .await;
+            }
             Ok(PluginOutput::Notification(value)) => {
                 Output::Notification(Notification { value: objectiveai_sdk::cli::output::NotificationValue::other(&value), agent_id: None })
                     .emit(handle)

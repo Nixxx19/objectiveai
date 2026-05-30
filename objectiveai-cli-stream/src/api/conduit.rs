@@ -43,7 +43,6 @@
 use dashmap::DashMap;
 use indexmap::IndexMap;
 use objectiveai_sdk::Notifier;
-use objectiveai_sdk::cli::output::NotificationValue;
 use objectiveai_sdk::cli::plugins::PluginOutput;
 use objectiveai_sdk::client_objectiveai_mcp::client_request::{
     McpListChanged, McpListChangedKind,
@@ -290,20 +289,19 @@ impl ConduitMcpHandler {
                     Err(_) => continue,
                 };
                 match out {
-                    PluginOutput::Notification(value) => {
-                        if let Ok(NotificationValue::Mcp(mcp)) =
-                            serde_json::from_value::<NotificationValue>(value)
-                        {
-                            return Ok(mcp);
-                        }
-                    }
+                    PluginOutput::Mcp(mcp) => return Ok(mcp),
                     PluginOutput::Error(err) => {
                         return Err(format!(
                             "plugin emitted error: {}",
                             err.message
                         ));
                     }
-                    PluginOutput::Command { .. } => {}
+                    // Other notifications / commands before the
+                    // mcp announcement are tolerated and skipped —
+                    // the host's plugin-MCP-begin path is one-shot
+                    // on the Mcp variant.
+                    PluginOutput::Notification(_)
+                    | PluginOutput::Command { .. } => {}
                 }
             }
         })
