@@ -60,7 +60,7 @@ use tokio::sync::OnceCell;
 /// `client_objectiveai_mcp`. Base64url-no-pad JSON `{names, objectiveai_builtins}`.
 /// Consumed by [`forward`]'s `tools/list` branch and stripped from
 /// the upstream-forwarded headers.
-const TOOLS_ALLOWED_HEADER: &str = "X-OBJECTIVEAI-TOOLS-ALLOWED";
+const MCP_CONFIG_HEADER: &str = "X-OBJECTIVEAI-MCP-CONFIG";
 
 struct ConduitState {
     connection: objectiveai_sdk::mcp::Connection,
@@ -71,8 +71,26 @@ struct ConduitState {
 /// grow the per-connection state (proxy routes, request handlers,
 /// listener tasks, …) without churning the storage type.
 struct PluginMcpState {
-    #[allow(dead_code)]
     connection: objectiveai_sdk::mcp::Connection,
+    /// ws_session_ids that have selected this `(plugin, mcp_name)`
+    /// in their most recent `tools/list` (via the `mcp_servers`
+    /// field on the `X-OBJECTIVEAI-MCP-CONFIG` header). Read by the
+    /// `set_on_{tools,resources}_list_changed` callbacks installed
+    /// on `connection` to fan out `McpListChanged` frames per
+    /// interested session. Mutated by the diff logic in the
+    /// `tools/list` arm.
+    interested_sessions: dashmap::DashSet<String>,
+}
+
+/// Per-`ws_session_id` state derived from inbound requests. Holds
+/// the most recent plugin-mcp selection (for diff-based
+/// `interested_sessions` maintenance) and the primary upstream's
+/// `mcp_session_id` (recorded the first time `initialize` lands for
+/// this ws_session_id, used as the `mcp_session_id` on
+/// `McpListChanged` frames fanned out from plugin upstreams).
+struct SessionState {
+    last_selected: std::sync::Mutex<Vec<(String, String)>>,
+    primary_mcp_session_id: OnceLock<String>,
 }
 
 #[derive(Clone)]
@@ -113,10 +131,20 @@ struct Inner {
     /// with the WS session, which tears down each `Connection`'s
     /// SSE listener and HTTP stream.
     ///
-    /// Not yet consumed downstream — this commit lands the storage
-    /// primitive only. Follow-ups will route inbound MCP requests
-    /// through these.
+    /// Populated by the background dial in
+    /// `handle_plugin_mcp_connect`. Consumed by `tools/list`
+    /// aggregation (when the per-session selection lists this
+    /// `(plugin, mcp_name)`) and by the per-connection
+    /// `set_on_{tools,resources}_list_changed` callbacks installed
+    /// at dial time, which fan list_changed events out to every
+    /// `ws_session_id` in `interested_sessions`.
     plugin_mcp_connections: DashMap<(String, String), Arc<PluginMcpState>>,
+    /// Per-`ws_session_id` `SessionState`, lazily created on first
+    /// inbound request that carries an `X-OBJECTIVEAI-RESPONSE-ID`
+    /// (or first `initialize` we see). Tracks the most recent
+    /// plugin-mcp selection and the primary upstream's
+    /// `mcp_session_id` for `list_changed` routing.
+    sessions: DashMap<String, Arc<SessionState>>,
 }
 
 impl ConduitMcpHandler {
@@ -152,6 +180,7 @@ impl ConduitMcpHandler {
                 config_base_dir,
                 installed_names: OnceCell::new(),
                 plugin_mcp_connections: DashMap::new(),
+                sessions: DashMap::new(),
             }),
         }
     }
@@ -387,9 +416,37 @@ impl ConduitMcpHandler {
                     if let Ok(connection) =
                         inner.client.connect(url, None, None).await
                     {
+                        // Build the per-connection state and install
+                        // both list_changed pumps BEFORE storing.
+                        // Callbacks read `interested_sessions` at fire
+                        // time and fan one `McpListChanged` out per
+                        // session via `fan_list_changed`. Empty set =
+                        // silent no-op.
+                        let state = Arc::new(PluginMcpState {
+                            connection,
+                            interested_sessions: dashmap::DashSet::new(),
+                        });
+                        let inner_t = inner.clone();
+                        let state_t = state.clone();
+                        state.connection.set_on_tools_list_changed(move || {
+                            fan_list_changed(
+                                &inner_t,
+                                &state_t,
+                                McpListChangedKind::Tools,
+                            );
+                        });
+                        let inner_r = inner.clone();
+                        let state_r = state.clone();
+                        state.connection.set_on_resources_list_changed(move || {
+                            fan_list_changed(
+                                &inner_r,
+                                &state_r,
+                                McpListChangedKind::Resources,
+                            );
+                        });
                         inner.plugin_mcp_connections.insert(
                             (plugin_name, mcp_name),
-                            Arc::new(PluginMcpState { connection }),
+                            state,
                         );
                     }
                 });
@@ -548,6 +605,49 @@ fn install_list_changed_pump(
     });
 }
 
+/// Fan a `list_changed` event from a plugin MCP connection out to
+/// every interested ws_session_id via the WS notifier. The frame's
+/// `mcp_session_id` is the PRIMARY upstream's session id for the
+/// session (recorded during `initialize` handling) — that's the id
+/// the API's GET-SSE handler uses to route the event to the proxy's
+/// subscriber.
+///
+/// Drops events for sessions that haven't yet completed `initialize`
+/// (no primary mcp_session_id recorded); the next `tools/list` for
+/// that session will refresh state anyway. Drops the whole fan-out
+/// if the WS notifier isn't installed yet.
+fn fan_list_changed(
+    inner: &Arc<Inner>,
+    state: &Arc<PluginMcpState>,
+    kind: McpListChangedKind,
+) {
+    let Some(notifier) = inner.notifier.get().cloned() else {
+        return;
+    };
+    let interested: Vec<String> = state
+        .interested_sessions
+        .iter()
+        .map(|s| s.clone())
+        .collect();
+    for ws_session_id in interested {
+        let Some(sess) = inner.sessions.get(&ws_session_id) else {
+            continue;
+        };
+        let Some(mcp_session_id) = sess.primary_mcp_session_id.get().cloned() else {
+            continue;
+        };
+        let notifier = notifier.clone();
+        tokio::spawn(async move {
+            let _ = notifier
+                .notify_list_changed(McpListChanged {
+                    mcp_session_id,
+                    kind,
+                })
+                .await;
+        });
+    }
+}
+
 /// Hop-by-hop and layer-internal headers don't propagate to MCP.
 fn sanitize_connect_headers(
     headers: &IndexMap<String, String>,
@@ -601,6 +701,20 @@ async fn forward(
     // `mcp::Connection` to this endpoint sees real MCP list_changed
     // events.
     if rpc_method.as_deref() == Some("initialize") {
+        // Record the primary upstream's mcp_session_id on this
+        // ws_session_id's `SessionState` — the `list_changed`
+        // fan-out from selected plugin upstreams needs it as the
+        // `mcp_session_id` field on every `McpListChanged` frame so
+        // the API routes the event to the proxy's GET-SSE
+        // subscriber correctly. `OnceLock::set` is first-write-wins
+        // — harmless on resumes / repeated initializes.
+        if let Some(ws_session_id) = ws_session_id_from_headers(&request.headers) {
+            let sess = get_or_create_session(inner, &ws_session_id);
+            let _ = sess
+                .primary_mcp_session_id
+                .set(state.connection.session_id.clone());
+        }
+
         let init_value = serde_json::to_value(&state.connection.initialize_result)
             .map_err(ConduitError::Serialize)?;
         let body = serde_json::json!({
@@ -631,7 +745,7 @@ async fn forward(
             || k.eq_ignore_ascii_case("accept")
             || k.eq_ignore_ascii_case("content-type")
             || k.eq_ignore_ascii_case("mcp-session-id")
-            || k.eq_ignore_ascii_case(TOOLS_ALLOWED_HEADER)
+            || k.eq_ignore_ascii_case(MCP_CONFIG_HEADER)
         {
             // X-OBJECTIVEAI-TOOLS-ALLOWED is an API↔CLI signal; the
             // upstream MCP server doesn't need to see it.
@@ -670,15 +784,27 @@ async fn forward(
     let resp_text = resp.text().await.map_err(ConduitError::Body)?;
     let mut resp_body = parse_json_or_sse(&resp_text);
 
-    // `tools/list`: if the API stamped `X-OBJECTIVEAI-TOOLS-ALLOWED`,
-    // narrow `result.tools[]` to only the entries the agent's
-    // `client_objectiveai_mcp` declaration referenced. The API does
-    // the validation pass (assert each required tool present);
-    // filtering is the CLI's job now.
+    // `tools/list`: apply the API↔CLI control surface stamped on
+    // the request via `X-OBJECTIVEAI-MCP-CONFIG`.
+    //
+    // 1. Filter `result.tools[]` (from the primary upstream) by
+    //    `names` + `objectiveai_builtins` — existing behavior.
+    // 2. Aggregate the selected plugin MCP connections' tools into
+    //    the same `result.tools[]`, prefix-namespaced by `mcp_name`.
+    //    Reconcile `interested_sessions` against the diff between
+    //    this session's previous selection and the current one.
     if rpc_method.as_deref() == Some("tools/list") {
-        if let Some(allowed) = read_tools_allowed_header(&request.headers) {
+        if let Some(config) = read_mcp_config_header(&request.headers) {
             if let Some(body) = resp_body.as_mut() {
-                apply_tools_filter(inner, body, &allowed).await;
+                apply_tools_filter(inner, body, &config).await;
+                let ws_session_id = ws_session_id_from_headers(&request.headers);
+                aggregate_plugin_tools(
+                    inner,
+                    body,
+                    &config.mcp_servers,
+                    ws_session_id.as_deref(),
+                )
+                .await?;
             }
         }
     }
@@ -691,27 +817,167 @@ async fn forward(
     })
 }
 
-/// Decoded `X-OBJECTIVEAI-TOOLS-ALLOWED` payload.
-#[derive(Debug, serde::Deserialize)]
-struct ToolsAllowed {
-    #[serde(default)]
-    names: Vec<String>,
-    #[serde(default)]
-    objectiveai_builtins: bool,
+/// Aggregate tools from the selected plugin MCP connections into the
+/// primary upstream's `tools/list` response. Per the agent's
+/// `client_objectiveai_mcp.plugins[i].mcp_servers` selection (carried
+/// through `X-OBJECTIVEAI-MCP-CONFIG.mcp_servers`), look up each
+/// matching `PluginMcpState`, call `Connection::list_tools` on it
+/// concurrently, prefix each returned tool name `<mcp_name>_<tool>`
+/// (mirrors `objectiveai-mcp-proxy/src/session.rs::prefix_name`'s
+/// `<server>_<tool>` shape), and append to `result.tools[]`. If any
+/// prefixed plugin tool collides with a primary tool's name, prefix
+/// every primary tool with `objectiveai-mcp_` (the conventional
+/// server-name for the local objectiveai-mcp upstream). Finally sort
+/// the merged array by name for stable ordering.
+///
+/// Also reconciles `interested_sessions` on each `PluginMcpState`:
+/// pairs added since the last `tools/list` for this ws_session_id
+/// get this session added; removed pairs get it removed. Mutation
+/// is gated by the session's `last_selected` mutex.
+async fn aggregate_plugin_tools(
+    inner: &Arc<Inner>,
+    body: &mut serde_json::Value,
+    selection: &[(String, String)],
+    ws_session_id: Option<&str>,
+) -> Result<(), ConduitError> {
+    // Diff selection against this session's previous selection and
+    // update interested_sessions accordingly.
+    if let Some(ws_session_id) = ws_session_id {
+        let sess = get_or_create_session(inner, ws_session_id);
+        let mut last = sess.last_selected.lock().unwrap();
+        let new_set: HashSet<(String, String)> = selection.iter().cloned().collect();
+        let old_set: HashSet<(String, String)> = last.iter().cloned().collect();
+        for removed in old_set.difference(&new_set) {
+            if let Some(state) = inner.plugin_mcp_connections.get(removed) {
+                state.interested_sessions.remove(ws_session_id);
+            }
+        }
+        for added in new_set.difference(&old_set) {
+            if let Some(state) = inner.plugin_mcp_connections.get(added) {
+                state.interested_sessions.insert(ws_session_id.to_string());
+            }
+        }
+        *last = selection.to_vec();
+    }
+
+    if selection.is_empty() {
+        return Ok(());
+    }
+
+    // Fan out list_tools across selected plugin connections.
+    let states: Vec<((String, String), Arc<PluginMcpState>)> = selection
+        .iter()
+        .filter_map(|pair| {
+            inner
+                .plugin_mcp_connections
+                .get(pair)
+                .map(|s| (pair.clone(), s.clone()))
+        })
+        .collect();
+    let plugin_tool_lists: Vec<((String, String), Arc<Vec<objectiveai_sdk::mcp::tool::Tool>>)> =
+        futures::future::try_join_all(states.into_iter().map(|(pair, state)| async move {
+            let tools = state
+                .connection
+                .list_tools()
+                .await
+                .map_err(|_| ConduitError::PluginListTools)?;
+            Ok::<_, ConduitError>((pair, tools))
+        }))
+        .await?;
+
+    let Some(tools_arr) = body
+        .get_mut("result")
+        .and_then(|r| r.get_mut("tools"))
+        .and_then(|t| t.as_array_mut())
+    else {
+        return Ok(());
+    };
+
+    // Build prefixed plugin tool entries.
+    let mut plugin_entries: Vec<serde_json::Value> = Vec::new();
+    for ((_plugin, mcp_name), arc) in plugin_tool_lists {
+        for tool in arc.iter() {
+            let prefixed_name = format!("{mcp_name}_{}", tool.name);
+            let mut value = serde_json::to_value(tool).unwrap_or(serde_json::Value::Null);
+            if let Some(obj) = value.as_object_mut() {
+                obj.insert(
+                    "name".to_string(),
+                    serde_json::Value::String(prefixed_name),
+                );
+            }
+            plugin_entries.push(value);
+        }
+    }
+
+    // Conflict resolution: if any plugin tool name collides with a
+    // primary tool name, prefix every primary tool with the
+    // conventional `objectiveai-mcp_` namespace. Else primary stays
+    // unprefixed.
+    let plugin_names: HashSet<&str> = plugin_entries
+        .iter()
+        .filter_map(|t| t.get("name").and_then(|n| n.as_str()))
+        .collect();
+    let primary_collides = tools_arr.iter().any(|t| {
+        t.get("name")
+            .and_then(|n| n.as_str())
+            .map(|n| plugin_names.contains(n))
+            .unwrap_or(false)
+    });
+    if primary_collides {
+        for tool in tools_arr.iter_mut() {
+            if let Some(obj) = tool.as_object_mut() {
+                if let Some(name) = obj.get("name").and_then(|n| n.as_str()) {
+                    let prefixed = format!("objectiveai-mcp_{name}");
+                    obj.insert("name".to_string(), serde_json::Value::String(prefixed));
+                }
+            }
+        }
+    }
+
+    // Append + sort by name.
+    tools_arr.extend(plugin_entries);
+    tools_arr.sort_by(|a, b| {
+        let an = a.get("name").and_then(|n| n.as_str()).unwrap_or("");
+        let bn = b.get("name").and_then(|n| n.as_str()).unwrap_or("");
+        an.cmp(bn)
+    });
+
+    Ok(())
 }
 
-fn read_tools_allowed_header(
-    headers: &IndexMap<String, String>,
-) -> Option<ToolsAllowed> {
+/// Decoded `X-OBJECTIVEAI-MCP-CONFIG` payload. The JSON control
+/// surface the API stamps on every request to the synthetic
+/// `/objectiveai-mcp` URL — drives both tools/list filtering AND
+/// plugin MCP server selection.
+#[derive(Debug, serde::Deserialize)]
+struct McpConfig {
+    /// Allow-listed primary-upstream tool names. See
+    /// [`apply_tools_filter`].
+    #[serde(default)]
+    names: Vec<String>,
+    /// Whether objectiveai-mcp built-ins pass the filter. See
+    /// [`apply_tools_filter`].
+    #[serde(default)]
+    objectiveai_builtins: bool,
+    /// `(plugin_name, mcp_name)` pairs the server has chosen as
+    /// active for this ws_session_id. Drives `tools/list`
+    /// aggregation across the primary upstream + selected plugin
+    /// MCP connections and `list_changed` fan-out from selected
+    /// plugin upstreams.
+    #[serde(default)]
+    mcp_servers: Vec<(String, String)>,
+}
+
+fn read_mcp_config_header(headers: &IndexMap<String, String>) -> Option<McpConfig> {
     use base64::Engine;
     let raw = headers
         .iter()
-        .find(|(k, _)| k.eq_ignore_ascii_case(TOOLS_ALLOWED_HEADER))?
+        .find(|(k, _)| k.eq_ignore_ascii_case(MCP_CONFIG_HEADER))?
         .1;
     let bytes = base64::engine::general_purpose::URL_SAFE_NO_PAD
         .decode(raw.as_bytes())
         .ok()?;
-    serde_json::from_slice::<ToolsAllowed>(&bytes).ok()
+    serde_json::from_slice::<McpConfig>(&bytes).ok()
 }
 
 /// In-place filter on a JSON-RPC `tools/list` response body. Keeps a
@@ -729,7 +995,7 @@ fn read_tools_allowed_header(
 async fn apply_tools_filter(
     inner: &Arc<Inner>,
     body: &mut serde_json::Value,
-    allowed: &ToolsAllowed,
+    allowed: &McpConfig,
 ) {
     let Some(tools) = body
         .get_mut("result")
@@ -783,6 +1049,32 @@ async fn load_installed_names(inner: &Arc<Inner>) -> HashSet<String> {
         names.insert(entry.name);
     }
     names
+}
+
+/// Extract the API↔CLI routing identifier (the `ws_session_id`) the
+/// agent client stamps on every proxy-forwarded request.
+fn ws_session_id_from_headers(headers: &IndexMap<String, String>) -> Option<String> {
+    headers
+        .iter()
+        .find(|(k, _)| k.eq_ignore_ascii_case("X-OBJECTIVEAI-RESPONSE-ID"))
+        .map(|(_, v)| v.clone())
+}
+
+/// Get-or-create the per-ws_session_id [`SessionState`]. Lazy: the
+/// first request that carries an `X-OBJECTIVEAI-RESPONSE-ID` for a
+/// given id materialises the entry; subsequent calls return the
+/// same `Arc`.
+fn get_or_create_session(inner: &Arc<Inner>, ws_session_id: &str) -> Arc<SessionState> {
+    inner
+        .sessions
+        .entry(ws_session_id.to_string())
+        .or_insert_with(|| {
+            Arc::new(SessionState {
+                last_selected: std::sync::Mutex::new(Vec::new()),
+                primary_mcp_session_id: OnceLock::new(),
+            })
+        })
+        .clone()
 }
 
 fn reject_no_mcp(id: String) -> server_response::Response {
@@ -845,4 +1137,6 @@ enum ConduitError {
     Body(reqwest::Error),
     #[error("serializing InitializeResult failed: {0}")]
     Serialize(serde_json::Error),
+    #[error("plugin upstream list_tools failed")]
+    PluginListTools,
 }

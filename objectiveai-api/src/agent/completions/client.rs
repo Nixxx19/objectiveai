@@ -815,16 +815,19 @@ where
                 //   `client_objectiveai_mcp` spec, base64url-no-pad
                 //   encoded so the CLI's conduit (or any real client)
                 //   can see what tools the agent expects exposed.
-                // - `X-OBJECTIVEAI-TOOLS-ALLOWED` — the slim filter
-                //   list the CLI applies to its `tools/list` response:
-                //   bare `tools[].name` ∪ `plugins[].name`, plus an
-                //   `objectiveai_builtins` flag mirroring
-                //   `client_objectiveai_mcp.objectiveai`. The CLI
-                //   keeps tools matching any allowed name (exact or
-                //   `_name` suffix), plus (if the builtins flag is
-                //   set) any tool the CLI doesn't recognize as a
-                //   locally-installed plugin or tool — those are
-                //   treated as objectiveai-mcp built-ins.
+                // - `X-OBJECTIVEAI-MCP-CONFIG` — the JSON control
+                //   surface the CLI uses for both `tools/list`
+                //   filtering AND plugin-MCP-server selection. Fields:
+                //     * `names`: allow-listed primary-upstream tool
+                //       names (bare `tools[].name` ∪
+                //       executable `plugins[].name`).
+                //     * `objectiveai_builtins`: mirror of
+                //       `client_objectiveai_mcp.objectiveai`.
+                //     * `mcp_servers`: `(plugin, mcp_name)` pairs the
+                //       CLI should make active for this
+                //       ws_session_id — drives `tools/list`
+                //       aggregation and `list_changed` fan-out from
+                //       each `plugins[i].mcp_servers` selection.
                 if let Some(url) = client_mcp_synthetic_url.as_ref() {
                     let entry = per_url_headers
                         .entry(url.clone())
@@ -847,11 +850,12 @@ where
                         );
 
                         #[derive(serde::Serialize)]
-                        struct ToolsAllowed<'a> {
+                        struct McpConfig<'a> {
                             names: Vec<&'a str>,
                             objectiveai_builtins: bool,
+                            mcp_servers: Vec<(&'a str, &'a str)>,
                         }
-                        let allowed = ToolsAllowed {
+                        let config = McpConfig {
                             names: client_mcp
                                 .plugins
                                 .iter()
@@ -867,13 +871,27 @@ where
                             objectiveai_builtins: client_mcp
                                 .objectiveai
                                 .unwrap_or(false),
+                            mcp_servers: client_mcp
+                                .plugins
+                                .iter()
+                                .flat_map(|plugin| {
+                                    plugin
+                                        .mcp_servers
+                                        .as_deref()
+                                        .unwrap_or(&[])
+                                        .iter()
+                                        .map(move |name| {
+                                            (plugin.name.as_str(), name.as_str())
+                                        })
+                                })
+                                .collect(),
                         };
-                        let allowed_json = serde_json::to_string(&allowed).unwrap_or_default();
-                        let allowed_encoded = base64::engine::general_purpose::URL_SAFE_NO_PAD
-                            .encode(allowed_json);
+                        let config_json = serde_json::to_string(&config).unwrap_or_default();
+                        let config_encoded = base64::engine::general_purpose::URL_SAFE_NO_PAD
+                            .encode(config_json);
                         entry.insert(
-                            "X-OBJECTIVEAI-TOOLS-ALLOWED".to_string(),
-                            allowed_encoded,
+                            "X-OBJECTIVEAI-MCP-CONFIG".to_string(),
+                            config_encoded,
                         );
                     }
                 }
