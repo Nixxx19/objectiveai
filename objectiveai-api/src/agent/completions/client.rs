@@ -665,6 +665,38 @@ where
             .collect();
         let api_port_for_synth = ctx.api_port();
 
+        // Per-agent `(plugin_name, mcp_name)` pairs to fire as
+        // `PLUGIN_MCP_BEGIN` requests over the WS reverse channel
+        // concurrently with the proxy connect. Pulled from each
+        // agent's `client_objectiveai_mcp.plugins[i].mcp_servers`.
+        // Agents without a declaration get an empty vec — the
+        // helper short-circuits to `Ok(Vec::new())`.
+        let agent_plugin_mcp_pairs: Vec<Vec<(String, String)>> = filtered_agents
+            .iter()
+            .map(|agent| {
+                let Some(cm) = agent.base().client_objectiveai_mcp() else {
+                    return Vec::new();
+                };
+                cm.plugins
+                    .iter()
+                    .flat_map(|plugin| {
+                        plugin
+                            .mcp_servers
+                            .as_deref()
+                            .unwrap_or(&[])
+                            .iter()
+                            .map(move |name| (plugin.name.clone(), name.clone()))
+                    })
+                    .collect()
+            })
+            .collect();
+        // Channel used by `start_plugin_mcps` to send `PLUGIN_MCP_BEGIN`
+        // frames. Resolved once for the whole batch — every per-agent
+        // `ws_session_id` registered on this WS shares the same
+        // underlying channel.
+        let reverse_channel_for_plugin_mcps: Option<crate::objectiveai_mcp::ReverseChannel> =
+            ctx.reverse_attach().map(|h| h.channel().clone());
+
         let connect_handles: Vec<
             Option<
                 tokio::task::JoinHandle<
@@ -683,7 +715,8 @@ where
             .iter()
             .zip(agent_ids.iter())
             .zip(agent_ws_session_ids.iter())
-            .map(|((agent, agent_id), agent_ws_session_id)| {
+            .zip(agent_plugin_mcp_pairs.iter())
+            .map(|(((agent, agent_id), agent_ws_session_id), plugin_mcp_pairs)| {
                 // Build the per-agent X-MCP-* header set: the agent's
                 // declared `mcp_servers` plus any caller-supplied
                 // `extra_mcp_servers` (e.g. the function-inventions
@@ -865,32 +898,49 @@ where
                 // with only `mcp_servers` / `extra_mcp_servers` skip
                 // it and pay one fewer round-trip.
                 let needs_list_tools = agent.base().client_objectiveai_mcp().is_some();
-                // Combine connect + list_tools into one spawned task:
-                // every agent's task runs concurrently with every
-                // other agent's, so connects fan out in parallel
-                // AND (for agents that need it) list_tools fan out
-                // in parallel too — each task pipelines list_tools
-                // immediately after its own connect completes. The
-                // returned list is the union across every declared
-                // upstream; the CLI applies `X-OBJECTIVEAI-TOOLS-ALLOWED`
-                // filtering to its synthetic-upstream slice before the
-                // union forms.
+                // Combine connect + list_tools + plugin MCP starts
+                // into one spawned task: every agent's task runs
+                // concurrently with every other agent's, so all three
+                // arms fan out in parallel across agents. Within one
+                // agent's task, connect → list_tools runs sequentially
+                // (list_tools needs the Connection), and that arm
+                // races against `start_plugin_mcps` via `try_join!`
+                // — first error wins, on success the per-agent
+                // returns `(Connection, Option<Tools>, Vec<plugin_urls>)`.
+                //
+                // The list_tools result is the union across every
+                // declared upstream; the CLI applies
+                // `X-OBJECTIVEAI-TOOLS-ALLOWED` filtering to its
+                // synthetic-upstream slice before the union forms.
                 //
                 // Error type is `Arc<mcp::Error>` because the SDK's
                 // `list_tools` returns shared-ref errors (the cached
                 // refresh-tools task fills the same slot), so wrapping
                 // the `connect` error in `Arc` matches the downstream
-                // error handling shape uniformly.
+                // error handling shape uniformly. `start_plugin_mcps`
+                // produces the same `Arc<mcp::Error>` shape via
+                // `BadStatus` / `MalformedResponse` so the retry loop
+                // treats plugin-start failures the same way as
+                // connect / list_tools failures: skip agent.
+                let pairs_for_task = plugin_mcp_pairs.clone();
+                let channel_for_task = reverse_channel_for_plugin_mcps.clone();
                 Some(tokio::spawn(async move {
-                    let conn = mcp_client
-                        .connect(proxy_url, session_id, Some(proxy_request_headers))
-                        .await
-                        .map_err(std::sync::Arc::new)?;
-                    let tools = if needs_list_tools {
-                        Some(conn.list_tools().await?)
-                    } else {
-                        None
+                    let connect_and_list_tools = async {
+                        let conn = mcp_client
+                            .connect(proxy_url, session_id, Some(proxy_request_headers))
+                            .await
+                            .map_err(std::sync::Arc::new)?;
+                        let tools = if needs_list_tools {
+                            Some(conn.list_tools().await?)
+                        } else {
+                            None
+                        };
+                        Ok::<_, std::sync::Arc<objectiveai_sdk::mcp::Error>>((conn, tools))
                     };
+                    let plugin_mcp_connects =
+                        start_plugin_mcps(channel_for_task, pairs_for_task);
+                    let ((conn, tools), ()) =
+                        tokio::try_join!(connect_and_list_tools, plugin_mcp_connects)?;
                     Ok::<_, std::sync::Arc<objectiveai_sdk::mcp::Error>>((conn, tools))
                 }))
             })
@@ -1823,6 +1873,103 @@ fn make_tool_chunk(
         })],
         ..Default::default()
     }
+}
+
+/// Fan out `PLUGIN_MCP_CONNECT` requests over the WS reverse channel
+/// for every `(plugin_name, mcp_name)` pair declared on an agent's
+/// `client_objectiveai_mcp.plugins[i].mcp_servers`. The CLI dials
+/// each plugin's MCP server in the background and discards the
+/// connection — the API only observes the ack (200 = called the
+/// plugin command successfully). On any non-2xx (or transport
+/// failure) the agent attempt is short-circuited via `Err`.
+///
+/// Empty pairs short-circuit to `Ok(())` — agents that don't
+/// declare any plugin MCPs pay nothing.
+///
+/// Failure mapping uses existing [`objectiveai_sdk::mcp::Error`]
+/// variants so callers stay on the same `Arc<mcp::Error>` channel as
+/// the connect + list_tools fan-out: `BadStatus` for non-200
+/// responses, `MalformedResponse` for transport / parse / timeout.
+/// The synthetic `url` field is `plugin://<plugin>/<mcp_name>` so
+/// the existing error formatting prints a recognizable identifier.
+async fn start_plugin_mcps(
+    channel: Option<crate::objectiveai_mcp::ReverseChannel>,
+    pairs: Vec<(String, String)>,
+) -> Result<(), std::sync::Arc<objectiveai_sdk::mcp::Error>> {
+    if pairs.is_empty() {
+        return Ok(());
+    }
+    let Some(channel) = channel else {
+        return Err(std::sync::Arc::new(
+            objectiveai_sdk::mcp::Error::MalformedResponse {
+                url: "reverse-attach".into(),
+                message: "no reverse channel for plugin mcp connect".into(),
+            },
+        ));
+    };
+    let futures = pairs.into_iter().map(|(plugin, mcp)| {
+        let sink = channel.sink.clone();
+        let pending = channel.pending.clone();
+        async move {
+            let id = uuid::Uuid::new_v4().to_string();
+            let synthetic_url = format!("plugin://{plugin}/{mcp}");
+            let request = objectiveai_sdk::client_objectiveai_mcp::server_request::Request {
+                id,
+                method: "PLUGIN_MCP_CONNECT".into(),
+                headers: indexmap::IndexMap::new(),
+                body: Some(serde_json::json!({
+                    "plugin_name": plugin,
+                    "mcp_name": mcp,
+                })),
+            };
+            let rx = crate::objectiveai_mcp::send_server_request(&sink, &pending, request)
+                .await
+                .map_err(|_| {
+                    std::sync::Arc::new(objectiveai_sdk::mcp::Error::MalformedResponse {
+                        url: synthetic_url.clone(),
+                        message: "send failed".into(),
+                    })
+                })?;
+            let response = match tokio::time::timeout(std::time::Duration::from_secs(60), rx)
+                .await
+            {
+                Ok(Ok(r)) => r,
+                Ok(Err(_)) => {
+                    return Err(std::sync::Arc::new(
+                        objectiveai_sdk::mcp::Error::MalformedResponse {
+                            url: synthetic_url,
+                            message: "reverse channel dropped".into(),
+                        },
+                    ));
+                }
+                Err(_) => {
+                    return Err(std::sync::Arc::new(
+                        objectiveai_sdk::mcp::Error::MalformedResponse {
+                            url: synthetic_url,
+                            message: "timeout".into(),
+                        },
+                    ));
+                }
+            };
+            if response.status != 200 {
+                let body = response
+                    .body
+                    .as_ref()
+                    .map(|v| v.to_string())
+                    .unwrap_or_default();
+                return Err(std::sync::Arc::new(
+                    objectiveai_sdk::mcp::Error::BadStatus {
+                        url: synthetic_url,
+                        code: reqwest::StatusCode::from_u16(response.status)
+                            .unwrap_or(reqwest::StatusCode::INTERNAL_SERVER_ERROR),
+                        body,
+                    },
+                ));
+            }
+            Ok::<(), std::sync::Arc<objectiveai_sdk::mcp::Error>>(())
+        }
+    });
+    futures::future::try_join_all(futures).await.map(|_| ())
 }
 
 #[cfg(test)]

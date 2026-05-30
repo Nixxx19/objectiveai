@@ -145,6 +145,16 @@ impl ReverseAttachHandle {
     pub fn registered_ids(&self) -> Vec<String> {
         self.registered.lock().unwrap().clone()
     }
+
+    /// The WS reverse channel this upgrade registered against. Every
+    /// per-agent `ws_session_id` registered through this handle
+    /// resolves to the same underlying channel — callers that need
+    /// to send `server_request` frames (e.g. plugin-MCP-begin) reach
+    /// the sink + pending registry through here without going through
+    /// the full `ReverseChannelRegistry` lookup.
+    pub fn channel(&self) -> &ReverseChannel {
+        &self.channel
+    }
 }
 
 /// RAII guard for one CLI WS upgrade. Owns the registration handle;

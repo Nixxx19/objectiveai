@@ -163,19 +163,24 @@ impl ConduitMcpHandler {
         Ok(Arc::new(ConduitState { connection }))
     }
 
-    /// Handle a `method = "PLUGIN_MCP_BEGIN"` server_request: verify
-    /// the plugin is installed and declares the named MCP server in
-    /// its manifest, spawn its binary with `mcp <name> begin`,
-    /// capture the first `Mcp { url }` notification it emits on
-    /// stdout, and return the URL in a 200 response body. Errors
+    /// Handle a `method = "PLUGIN_MCP_CONNECT"` server_request:
+    /// verify the plugin is installed and declares the named MCP
+    /// server in its manifest, spawn its binary with `mcp <name>
+    /// begin`, capture the first `Mcp { url }` notification it emits
+    /// on stdout, then **dial that URL in a background task and
+    /// discard the connection** before returning a 200 ack (no body).
+    ///
+    /// The API never sees the URL. Errors before the URL is captured
     /// (deserialization, missing plugin, missing manifest entry,
     /// spawn failure, plugin error notification, timeout, no-mcp-
-    /// emit) map to 4xx/5xx with a `{"error": "..."}` body.
+    /// emit) map to 4xx/5xx with a `{"error": "..."}` body. The
+    /// background dial's outcome is not reported.
     ///
     /// The spawned plugin process keeps running after the URL is
     /// captured — it IS the MCP server. A background task drains
-    /// its stdout/stderr so the pipes don't fill up.
-    async fn handle_plugin_mcp_begin(
+    /// its stdout/stderr so the pipes don't fill up. A second
+    /// background task dials the MCP connection and drops it.
+    async fn handle_plugin_mcp_connect(
         &self,
         request: server_request::Request,
     ) -> server_response::Response {
@@ -321,9 +326,22 @@ impl ConduitMcpHandler {
         });
 
         match begin_result {
-            Ok(Ok(mcp)) => mcp_success_response(id, mcp),
+            Ok(Ok(mcp)) => {
+                // Dial the captured URL in the background — discard
+                // the connection. This is the "non-blocking" leg:
+                // the API gets its ack immediately after URL capture
+                // and isn't gated on the upstream MCP initialize
+                // round-trip. Future commits will track this
+                // connection instead of dropping it.
+                let client = self.inner.client.clone();
+                let url = mcp.url;
+                tokio::spawn(async move {
+                    let _ = client.connect(url, None, None).await;
+                });
+                ok_response(id)
+            }
             Ok(Err(message)) => error_response(id, 502, message),
-            Err(_) => error_response(id, 504, "PLUGIN_MCP_BEGIN timed out"),
+            Err(_) => error_response(id, 504, "PLUGIN_MCP_CONNECT timed out"),
         }
     }
 }
@@ -342,16 +360,12 @@ async fn forward_stderr(mut stderr: tokio::process::ChildStderr) {
     }
 }
 
-fn mcp_success_response(
-    id: String,
-    mcp: objectiveai_sdk::cli::output::Mcp,
-) -> server_response::Response {
-    let body = serde_json::to_value(&mcp).unwrap_or_else(|_| serde_json::json!({}));
+fn ok_response(id: String) -> server_response::Response {
     server_response::Response {
         id,
         status: 200,
         headers: IndexMap::new(),
-        body: Some(body),
+        body: None,
     }
 }
 
@@ -372,12 +386,14 @@ impl McpHandler for ConduitMcpHandler {
     async fn handle(&self, request: server_request::Request) -> server_response::Response {
         let id_for_err = request.id.clone();
 
-        // Sentinel method: the API uses `PLUGIN_MCP_BEGIN` to ask
-        // the CLI to start a plugin's MCP server and return its
-        // URL. Dispatches before the dial-to-upstream path because
-        // this RPC bypasses the upstream MCP server entirely.
-        if request.method.eq_ignore_ascii_case("PLUGIN_MCP_BEGIN") {
-            return self.handle_plugin_mcp_begin(request).await;
+        // Sentinel method: the API uses `PLUGIN_MCP_CONNECT` to ask
+        // the CLI to start a plugin's MCP server, dial it locally,
+        // and discard the connection. Dispatches before the
+        // dial-to-upstream path because this RPC bypasses the
+        // upstream MCP server entirely. The API only receives an
+        // ack — no URL.
+        if request.method.eq_ignore_ascii_case("PLUGIN_MCP_CONNECT") {
+            return self.handle_plugin_mcp_connect(request).await;
         }
 
         let Some(mcp_url) = self.inner.mcp_url.as_ref() else {
