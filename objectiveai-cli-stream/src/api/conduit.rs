@@ -66,10 +66,10 @@ struct ConduitState {
     connection: objectiveai_sdk::mcp::Connection,
 }
 
-/// One MCP connection the CLI has dialed via a `PLUGIN_MCP_CONNECT`
-/// request. Wraps the bare `mcp::Connection` so future commits can
-/// grow the per-connection state (proxy routes, request handlers,
-/// listener tasks, …) without churning the storage type.
+/// One MCP connection the CLI has dialed during `initialize`. Wraps
+/// the bare `mcp::Connection` so future commits can grow the
+/// per-connection state (proxy routes, request handlers, listener
+/// tasks, …) without churning the storage type.
 struct PluginMcpState {
     connection: objectiveai_sdk::mcp::Connection,
     /// ws_session_ids that have selected this `(plugin, mcp_name)`
@@ -128,21 +128,19 @@ struct Inner {
     /// flag set. Empty `HashSet` when filesystem is unavailable or
     /// nothing is installed.
     installed_names: OnceCell<HashSet<String>>,
-    /// MCP connections the CLI has dialed via `PLUGIN_MCP_CONNECT`,
+    /// MCP connections the CLI has dialed during `initialize`,
     /// keyed by `(plugin_name, mcp_name)` — the same vocabulary the
-    /// API uses on the wire. Populated lazily by the background dial
-    /// in `handle_plugin_mcp_connect` (on `mcp::Client::connect`
-    /// success). Lives for the lifetime of `Inner`; entries drop
-    /// with the WS session, which tears down each `Connection`'s
-    /// SSE listener and HTTP stream.
+    /// API uses on the wire. Populated by [`dial_plugin_upstream`]
+    /// when the inbound `initialize` aggregate enumerates a plugin
+    /// upstream. Lives for the lifetime of `Inner`; entries drop with
+    /// the WS session, which tears down each `Connection`'s SSE
+    /// listener and HTTP stream.
     ///
-    /// Populated by the background dial in
-    /// `handle_plugin_mcp_connect`. Consumed by `tools/list`
-    /// aggregation (when the per-session selection lists this
-    /// `(plugin, mcp_name)`) and by the per-connection
-    /// `set_on_{tools,resources}_list_changed` callbacks installed
-    /// at dial time, which fan list_changed events out to every
-    /// `ws_session_id` in `interested_sessions`.
+    /// Consumed by `tools/list` aggregation (when the per-session
+    /// selection lists this `(plugin, mcp_name)`) and by the
+    /// per-connection `set_on_{tools,resources}_list_changed`
+    /// callbacks installed at dial time, which fan list_changed
+    /// events out to every `ws_session_id` in `interested_sessions`.
     plugin_mcp_connections: DashMap<(String, String), Arc<PluginMcpState>>,
     /// Per-`ws_session_id` `SessionState`, lazily created on first
     /// inbound request that carries an `X-OBJECTIVEAI-RESPONSE-ID`
@@ -219,248 +217,145 @@ impl ConduitMcpHandler {
         Ok(Arc::new(ConduitState { connection }))
     }
 
-    /// Handle a `method = "PLUGIN_MCP_CONNECT"` server_request:
-    /// verify the plugin is installed and declares the named MCP
-    /// server in its manifest, spawn its binary with `mcp <name>
-    /// begin`, capture the first `Mcp { url }` notification it emits
-    /// on stdout, then **dial that URL in a background task and
-    /// discard the connection** before returning a 200 ack (no body).
-    ///
-    /// The API never sees the URL. Errors before the URL is captured
-    /// (deserialization, missing plugin, missing manifest entry,
-    /// spawn failure, plugin error notification, timeout, no-mcp-
-    /// emit) map to 4xx/5xx with a `{"error": "..."}` body. The
-    /// background dial's outcome is not reported.
-    ///
-    /// The spawned plugin process keeps running after the URL is
-    /// captured — it IS the MCP server. A background task drains
-    /// its stdout/stderr so the pipes don't fill up. A second
-    /// background task dials the MCP connection and drops it.
-    async fn handle_plugin_mcp_connect(
-        &self,
-        request: server_request::Request,
-    ) -> server_response::Response {
-        let id = request.id;
+}
 
-        #[derive(serde::Deserialize)]
-        struct Params {
-            plugin_name: String,
-            mcp_name: String,
-        }
-        let Some(body) = request.body else {
-            return error_response(id, 400, "PLUGIN_MCP_BEGIN: missing request body");
-        };
-        let Params { plugin_name, mcp_name } = match serde_json::from_value(body) {
-            Ok(p) => p,
-            Err(e) => {
-                return error_response(
-                    id,
-                    400,
-                    format!("PLUGIN_MCP_CONNECT: invalid body: {e}"),
-                );
-            }
-        };
+/// Dial a plugin's MCP upstream: verify the plugin manifest declares
+/// the requested `mcp_name`, spawn `<plugin> mcp <mcp_name> begin`,
+/// capture the first `Mcp { url }` notification from its stdout, dial
+/// that URL (resuming with `stored_session_id` when present), install
+/// list-changed callbacks, and store the resulting connection under
+/// `(plugin_name, mcp_name)` in `inner.plugin_mcp_connections`.
+///
+/// Returns the dialed connection's `session_id` on success. Any step
+/// failing (manifest miss, spawn failure, timeout, plugin error,
+/// dial failure) returns [`ConduitError::PluginDialFailed`] with the
+/// identifying pair so the caller's error envelope is actionable.
+async fn dial_plugin_upstream(
+    inner: &Arc<Inner>,
+    plugin_name: String,
+    mcp_name: String,
+    stored_session_id: Option<String>,
+) -> Result<String, ConduitError> {
+    let fail = |reason: String| ConduitError::PluginDialFailed {
+        plugin_name: plugin_name.clone(),
+        mcp_name: mcp_name.clone(),
+        reason,
+    };
 
-        // Idempotency gate: if we already have a live connection for
-        // this (plugin, mcp_name), skip the manifest verify, plugin
-        // spawn, and dial entirely. Re-dialing would waste a plugin
-        // process and replace a working connection for no reason.
-        // The lookup uses an owned-key clone because DashMap doesn't
-        // borrow tuple keys; cheap (two short Strings).
-        if self
-            .inner
-            .plugin_mcp_connections
-            .contains_key(&(plugin_name.clone(), mcp_name.clone()))
-        {
-            return ok_response(id);
-        }
+    let Some(base_dir) = inner.config_base_dir.clone() else {
+        return Err(fail(
+            "filesystem unavailable (no config_base_dir)".into(),
+        ));
+    };
+    let fs = objectiveai_sdk::filesystem::Client::new(
+        Some(base_dir),
+        None::<String>,
+        None::<String>,
+    );
 
-        let Some(base_dir) = self.inner.config_base_dir.clone() else {
-            return error_response(
-                id,
-                500,
-                "PLUGIN_MCP_BEGIN: filesystem unavailable (no config_base_dir)",
-            );
-        };
-        let fs = objectiveai_sdk::filesystem::Client::new(
-            Some(base_dir),
-            None::<String>,
-            None::<String>,
-        );
-
-        let Some(plugin) = fs.get_plugin(&plugin_name).await else {
-            return error_response(
-                id,
-                404,
-                format!("plugin {plugin_name:?} not installed"),
-            );
-        };
-
-        // Manifest verification gate — run BEFORE any subprocess
-        // spawn so a bogus mcp_name fails fast.
-        if !plugin
-            .manifest
-            .mcp_servers
-            .iter()
-            .any(|s| s.name == mcp_name)
-        {
-            return error_response(
-                id,
-                404,
-                format!(
-                    "plugin {plugin_name:?} manifest does not declare mcp server {mcp_name:?}"
-                ),
-            );
-        }
-
-        let Some(exe) = fs.resolve_plugin(&plugin_name).await else {
-            return error_response(
-                id,
-                404,
-                format!("plugin {plugin_name:?} binary not found"),
-            );
-        };
-
-        let mut child = match tokio::process::Command::new(&exe)
-            .arg("mcp")
-            .arg(&mcp_name)
-            .arg("begin")
-            .stdin(std::process::Stdio::null())
-            .stdout(std::process::Stdio::piped())
-            .stderr(std::process::Stdio::piped())
-            .spawn()
-        {
-            Ok(c) => c,
-            Err(e) => {
-                return error_response(
-                    id,
-                    500,
-                    format!("PLUGIN_MCP_BEGIN: spawn failed: {e}"),
-                );
-            }
-        };
-
-        let stdout = child.stdout.take().expect("stdout was piped");
-        let stderr = child.stderr.take().expect("stderr was piped");
-
-        use tokio::io::AsyncBufReadExt;
-        let reader = tokio::io::BufReader::new(stdout);
-        let mut lines = reader.lines();
-
-        let timeout = std::time::Duration::from_secs(30);
-        let begin_result = tokio::time::timeout(timeout, async {
-            loop {
-                let line = match lines.next_line().await {
-                    Ok(Some(l)) => l,
-                    Ok(None) => {
-                        return Err::<objectiveai_sdk::cli::output::Mcp, String>(
-                            "plugin exited without emitting mcp{url}".into(),
-                        );
-                    }
-                    Err(e) => return Err(format!("plugin stdout read error: {e}")),
-                };
-                let out = match serde_json::from_str::<PluginOutput>(&line) {
-                    Ok(o) => o,
-                    Err(_) => continue,
-                };
-                match out {
-                    PluginOutput::Mcp(mcp) => return Ok(mcp),
-                    PluginOutput::Error(err) => {
-                        return Err(format!(
-                            "plugin emitted error: {}",
-                            err.message
-                        ));
-                    }
-                    // Other notifications / commands before the
-                    // mcp announcement are tolerated and skipped —
-                    // the host's plugin-MCP-begin path is one-shot
-                    // on the Mcp variant.
-                    PluginOutput::Notification(_)
-                    | PluginOutput::Command { .. } => {}
-                }
-            }
-        })
-        .await;
-
-        // Hand off child + remaining IO to a detached task so the
-        // plugin keeps running after we've captured (or failed to
-        // capture) the URL. Drains stdout and forwards stderr so
-        // pipe buffers don't fill up.
-        tokio::spawn(async move {
-            let stderr_task = tokio::spawn(forward_stderr(stderr));
-            while let Ok(Some(_)) = lines.next_line().await {
-                // discard
-            }
-            let _ = stderr_task.await;
-            let _ = child.wait().await;
-        });
-
-        match begin_result {
-            Ok(Ok(mcp)) => {
-                // Dial the captured URL in the background; on
-                // success, store the `Connection` in
-                // `inner.plugin_mcp_connections` keyed by
-                // `(plugin_name, mcp_name)`. This is the
-                // "non-blocking" leg: the API gets its ack
-                // immediately after URL capture and isn't gated on
-                // the upstream MCP initialize round-trip. Dial
-                // failures are silent at this layer — the API was
-                // already acked; future commits will surface them
-                // through a separate channel if needed.
-                //
-                // Race: two simultaneous connects for the same key
-                // both pass the idempotency gate above, both dial,
-                // and the later insert overwrites the earlier (the
-                // displaced `Arc` drops, killing its `Connection`
-                // and orphaning that plugin process). Acceptable
-                // for now; a follow-up can claim the slot eagerly
-                // via DashMap's entry API.
-                let inner = self.inner.clone();
-                let url = mcp.url;
-                tokio::spawn(async move {
-                    if let Ok(connection) =
-                        inner.client.connect(url, None, None).await
-                    {
-                        // Build the per-connection state and install
-                        // both list_changed pumps BEFORE storing.
-                        // Callbacks read `interested_sessions` at fire
-                        // time and fan one `McpListChanged` out per
-                        // session via `fan_list_changed`. Empty set =
-                        // silent no-op.
-                        let state = Arc::new(PluginMcpState {
-                            connection,
-                            interested_sessions: dashmap::DashSet::new(),
-                        });
-                        let inner_t = inner.clone();
-                        let state_t = state.clone();
-                        state.connection.set_on_tools_list_changed(move || {
-                            fan_list_changed(
-                                &inner_t,
-                                &state_t,
-                                McpListChangedKind::Tools,
-                            );
-                        });
-                        let inner_r = inner.clone();
-                        let state_r = state.clone();
-                        state.connection.set_on_resources_list_changed(move || {
-                            fan_list_changed(
-                                &inner_r,
-                                &state_r,
-                                McpListChangedKind::Resources,
-                            );
-                        });
-                        inner.plugin_mcp_connections.insert(
-                            (plugin_name, mcp_name),
-                            state,
-                        );
-                    }
-                });
-                ok_response(id)
-            }
-            Ok(Err(message)) => error_response(id, 502, message),
-            Err(_) => error_response(id, 504, "PLUGIN_MCP_CONNECT timed out"),
-        }
+    let Some(plugin) = fs.get_plugin(&plugin_name).await else {
+        return Err(fail(format!("plugin {plugin_name:?} not installed")));
+    };
+    if !plugin
+        .manifest
+        .mcp_servers
+        .iter()
+        .any(|s| s.name == mcp_name)
+    {
+        return Err(fail(format!(
+            "plugin {plugin_name:?} manifest does not declare mcp server {mcp_name:?}"
+        )));
     }
+    let Some(exe) = fs.resolve_plugin(&plugin_name).await else {
+        return Err(fail(format!("plugin {plugin_name:?} binary not found")));
+    };
+
+    let mut child = tokio::process::Command::new(&exe)
+        .arg("mcp")
+        .arg(&mcp_name)
+        .arg("begin")
+        .stdin(std::process::Stdio::null())
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .map_err(|e| fail(format!("spawn failed: {e}")))?;
+
+    let stdout = child.stdout.take().expect("stdout was piped");
+    let stderr = child.stderr.take().expect("stderr was piped");
+
+    use tokio::io::AsyncBufReadExt;
+    let reader = tokio::io::BufReader::new(stdout);
+    let mut lines = reader.lines();
+
+    let timeout = std::time::Duration::from_secs(30);
+    let begin_result = tokio::time::timeout(timeout, async {
+        loop {
+            let line = match lines.next_line().await {
+                Ok(Some(l)) => l,
+                Ok(None) => {
+                    return Err::<objectiveai_sdk::cli::output::Mcp, String>(
+                        "plugin exited without emitting mcp{url}".into(),
+                    );
+                }
+                Err(e) => return Err(format!("plugin stdout read error: {e}")),
+            };
+            let out = match serde_json::from_str::<PluginOutput>(&line) {
+                Ok(o) => o,
+                Err(_) => continue,
+            };
+            match out {
+                PluginOutput::Mcp(mcp) => return Ok(mcp),
+                PluginOutput::Error(err) => {
+                    return Err(format!("plugin emitted error: {}", err.message));
+                }
+                PluginOutput::Notification(_) | PluginOutput::Command { .. } => {}
+            }
+        }
+    })
+    .await;
+
+    // Hand off child + remaining IO to a detached task so the plugin
+    // keeps running after we've captured the URL. Drains stdout and
+    // forwards stderr so pipe buffers don't fill up.
+    tokio::spawn(async move {
+        let stderr_task = tokio::spawn(forward_stderr(stderr));
+        while let Ok(Some(_)) = lines.next_line().await {}
+        let _ = stderr_task.await;
+        let _ = child.wait().await;
+    });
+
+    let mcp = match begin_result {
+        Ok(Ok(mcp)) => mcp,
+        Ok(Err(message)) => return Err(fail(message)),
+        Err(_) => return Err(fail("plugin mcp begin timed out".into())),
+    };
+
+    let connection = inner
+        .client
+        .connect(mcp.url, stored_session_id, None)
+        .await
+        .map_err(|e| fail(format!("connect: {e}")))?;
+    let session_id = connection.session_id.clone();
+
+    let state = Arc::new(PluginMcpState {
+        connection,
+        interested_sessions: dashmap::DashSet::new(),
+    });
+    let inner_t = inner.clone();
+    let state_t = state.clone();
+    state.connection.set_on_tools_list_changed(move || {
+        fan_list_changed(&inner_t, &state_t, McpListChangedKind::Tools);
+    });
+    let inner_r = inner.clone();
+    let state_r = state.clone();
+    state.connection.set_on_resources_list_changed(move || {
+        fan_list_changed(&inner_r, &state_r, McpListChangedKind::Resources);
+    });
+    inner
+        .plugin_mcp_connections
+        .insert((plugin_name, mcp_name), state);
+
+    Ok(session_id)
 }
 
 async fn forward_stderr(mut stderr: tokio::process::ChildStderr) {
@@ -477,50 +372,16 @@ async fn forward_stderr(mut stderr: tokio::process::ChildStderr) {
     }
 }
 
-fn ok_response(id: String) -> server_response::Response {
-    server_response::Response {
-        id,
-        status: 200,
-        headers: IndexMap::new(),
-        body: None,
-    }
-}
-
-fn error_response(
-    id: String,
-    status: u16,
-    message: impl Into<String>,
-) -> server_response::Response {
-    server_response::Response {
-        id,
-        status,
-        headers: IndexMap::new(),
-        body: Some(serde_json::json!({ "error": message.into() })),
-    }
-}
-
 impl McpHandler for ConduitMcpHandler {
     async fn handle(&self, request: server_request::Request) -> server_response::Response {
         let id_for_err = request.id.clone();
         let rpc_id_for_err = jsonrpc_id_from_body(&request.body);
 
-        // Sentinel method: the API uses `PLUGIN_MCP_CONNECT` to ask
-        // the CLI to start a plugin's MCP server, dial it locally,
-        // and discard the connection. Dispatches before the
-        // dial-to-upstream path because this RPC bypasses the
-        // upstream MCP server entirely. The API only receives an
-        // ack — no URL.
-        if request.method.eq_ignore_ascii_case("PLUGIN_MCP_CONNECT") {
-            return self.handle_plugin_mcp_connect(request).await;
-        }
-
-        let Some(mcp_url) = self.inner.mcp_url.as_ref() else {
-            return reject_no_mcp(id_for_err, rpc_id_for_err);
-        };
-
         // Parse method from JSON-RPC body so we can branch on
-        // `initialize` (no inbound aggregate yet — build one) vs.
-        // every other method (aggregate rides on `Mcp-Session-Id`).
+        // `initialize` (the only path that dials upstreams — all of
+        // them, gated by the inbound aggregate `Mcp-Session-Id`) vs.
+        // every other method (aggregate rides on `Mcp-Session-Id`
+        // and we route through the cached `ConduitState`s).
         let rpc_method = request
             .body
             .as_ref()
@@ -529,87 +390,69 @@ impl McpHandler for ConduitMcpHandler {
             .unwrap_or("");
 
         let config = read_mcp_config_header(&request.headers);
-        let needs_primary = config
-            .as_ref()
-            .map(|c| !c.names.is_empty() || c.objectiveai_builtins)
-            // Header is API-stamped on every request; absence is
-            // a bug. Default to dialing primary so we degrade
-            // toward today's behavior rather than dropping the call.
-            .unwrap_or(true);
 
-        let primary_state: Option<Arc<ConduitState>> = if rpc_method == "initialize" {
-            // Fresh initialize. No inbound `Mcp-Session-Id` (the
-            // proxy hasn't received the aggregate yet). Dial primary
-            // only when needed; plugin connections already live in
-            // `plugin_mcp_connections` from prior PLUGIN_MCP_CONNECTs.
-            if needs_primary {
-                match self.dial(mcp_url.clone(), None, &request.headers).await {
-                    Ok(st) => {
-                        self.inner
-                            .connections
-                            .insert(st.connection.session_id.clone(), st.clone());
-                        Some(st)
-                    }
-                    Err(e) => {
-                        return conduit_error(
-                            id_for_err,
-                            rpc_id_for_err,
-                            format!("connect: {e}"),
-                        );
-                    }
-                }
-            } else {
-                None
-            }
-        } else {
-            // Non-initialize: the inbound `Mcp-Session-Id` is the
-            // aggregate. Decode it to find primary's session id (if
-            // primary participates) so we can route through the
-            // matching `ConduitState`.
-            let aggregate_id = request.headers.iter().find_map(|(k, v)| {
-                k.eq_ignore_ascii_case("mcp-session-id").then(|| v.clone())
-            });
-            let Some(aggregate_id) = aggregate_id else {
-                return conduit_error(
-                    id_for_err,
-                    rpc_id_for_err,
-                    "missing Mcp-Session-Id",
-                );
+        // For `initialize`, all dialing — primary + every selected
+        // plugin upstream — happens in `forward`'s initialize arm,
+        // where the inbound aggregate is decoded and each upstream
+        // gets resumed against its stored session id. `handle()` is
+        // just dispatch.
+        if rpc_method == "initialize" {
+            return match forward(&self.inner, None, config.as_ref(), request).await {
+                Ok(resp) => resp,
+                Err(e) => conduit_error(id_for_err, rpc_id_for_err, e.to_string()),
             };
-            let Some(aggregate) = AggregateSession::decode(&aggregate_id) else {
-                return conduit_error(
-                    id_for_err,
-                    rpc_id_for_err,
-                    "invalid Mcp-Session-Id (decode failed)",
-                );
-            };
-            match aggregate.primary {
-                Some(primary_sid) => {
-                    if let Some(existing) = self.inner.connections.get(&primary_sid) {
-                        Some(existing.clone())
-                    } else {
-                        // Resume primary with its original session
-                        // id (e.g. fresh WS after reconnect).
-                        match self
-                            .dial(mcp_url.clone(), Some(primary_sid.clone()), &request.headers)
-                            .await
-                        {
-                            Ok(st) => {
-                                self.inner.connections.insert(primary_sid, st.clone());
-                                Some(st)
-                            }
-                            Err(e) => {
-                                return conduit_error(
-                                    id_for_err,
-                                    rpc_id_for_err,
-                                    format!("connect (resume): {e}"),
-                                );
-                            }
+        }
+
+        // Non-initialize: the inbound `Mcp-Session-Id` is the
+        // aggregate. Decode it to find primary's session id (if
+        // primary participates) so we can route through the matching
+        // `ConduitState`. Primary's `mcp_url` is only needed when
+        // the aggregate names a primary that's no longer cached
+        // (e.g. fresh WS after reconnect).
+        let aggregate_id = request.headers.iter().find_map(|(k, v)| {
+            k.eq_ignore_ascii_case("mcp-session-id").then(|| v.clone())
+        });
+        let Some(aggregate_id) = aggregate_id else {
+            return conduit_error(
+                id_for_err,
+                rpc_id_for_err,
+                "missing Mcp-Session-Id",
+            );
+        };
+        let Some(aggregate) = AggregateSession::decode(&aggregate_id) else {
+            return conduit_error(
+                id_for_err,
+                rpc_id_for_err,
+                "invalid Mcp-Session-Id (decode failed)",
+            );
+        };
+        let primary_state: Option<Arc<ConduitState>> = match aggregate.primary {
+            Some(primary_sid) => {
+                if let Some(existing) = self.inner.connections.get(&primary_sid) {
+                    Some(existing.clone())
+                } else {
+                    let Some(mcp_url) = self.inner.mcp_url.as_ref() else {
+                        return reject_no_mcp(id_for_err, rpc_id_for_err);
+                    };
+                    match self
+                        .dial(mcp_url.clone(), Some(primary_sid.clone()), &request.headers)
+                        .await
+                    {
+                        Ok(st) => {
+                            self.inner.connections.insert(primary_sid, st.clone());
+                            Some(st)
+                        }
+                        Err(e) => {
+                            return conduit_error(
+                                id_for_err,
+                                rpc_id_for_err,
+                                format!("connect (resume): {e}"),
+                            );
                         }
                     }
                 }
-                None => None,
             }
+            None => None,
         };
 
         match forward(
@@ -756,23 +599,42 @@ async fn forward(
         });
     }
 
-    // `initialize`: build the `AggregateSession` from the dialed
-    // primary (if any) + every selected plugin's session id, encode
-    // it to base62 → return as the `Mcp-Session-Id` response
-    // header. The body is `None` — the API replaces it with its own
-    // canonical `InitializeResult` (oai serverInfo + canonical
-    // capabilities + protocol version). CLI no longer advertises
-    // capabilities.
+    // `initialize`: this is the only path that dials upstreams.
+    // Decode the inbound aggregate (present on a continuation,
+    // absent on a fresh session), then dial primary (when needed)
+    // and every selected plugin upstream concurrently, resuming each
+    // against its stored session id. The dialed `Mcp-Session-Id`s
+    // get re-aggregated and returned as the outbound
+    // `Mcp-Session-Id` response header. The body is `None` — the
+    // API replaces it with its own canonical `InitializeResult`
+    // (oai serverInfo + canonical capabilities + protocol version).
+    // CLI no longer advertises capabilities.
     //
-    // The proxy adopts the aggregate as its `Mcp-Session-Id` and
-    // sends it back on every subsequent request, letting us route
-    // to the right primary `ConduitState` AND (future commit)
-    // resume each upstream by its individual session id.
+    // First dial failure aborts the whole initialize via
+    // `try_join_all`'s cancel-on-error. Partial-success connections
+    // already stored in `plugin_mcp_connections` leak until the next
+    // initialize overwrites — cleanup is a follow-up.
     if rpc_method.as_deref() == Some("initialize") {
-        // `agent declaration must reference at least one upstream`
-        // — defensive. The API should never send this.
-        let has_plugins = config.map(|c| !c.mcp_servers.is_empty()).unwrap_or(false);
-        if primary.is_none() && !has_plugins {
+        // Decode inbound aggregate. `None` on a fresh session;
+        // `Some(_)` on a continuation. Each upstream's stored
+        // session id rides through unchanged so the dial below can
+        // resume it.
+        let inbound_aggregate: Option<AggregateSession> = request
+            .headers
+            .iter()
+            .find(|(k, _)| k.eq_ignore_ascii_case("mcp-session-id"))
+            .and_then(|(_, v)| AggregateSession::decode(v));
+
+        let needs_primary = config
+            .map(|c| !c.names.is_empty() || c.objectiveai_builtins)
+            // Header is API-stamped on every request; absence is a
+            // bug. Default to dialing primary so we degrade toward
+            // today's behavior rather than dropping the call.
+            .unwrap_or(true);
+        let plugin_pairs: Vec<(String, String)> =
+            config.map(|c| c.mcp_servers.clone()).unwrap_or_default();
+
+        if !needs_primary && plugin_pairs.is_empty() {
             return Ok(jsonrpc_error_envelope(
                 request.id,
                 rpc_id.unwrap_or(serde_json::Value::Null),
@@ -781,24 +643,76 @@ async fn forward(
             ));
         }
 
-        let mut aggregate = AggregateSession::default();
-        if let Some(p) = primary {
-            aggregate.primary = Some(p.connection.session_id.clone());
-        }
-        if let Some(c) = config {
-            for (plugin_name, mcp_name) in &c.mcp_servers {
-                if let Some(state) = inner
-                    .plugin_mcp_connections
-                    .get(&(plugin_name.clone(), mcp_name.clone()))
-                {
-                    aggregate.plugins.push(AggregatePluginEntry {
-                        plugin_name: plugin_name.clone(),
-                        mcp_name: mcp_name.clone(),
-                        mcp_session_id: state.connection.session_id.clone(),
-                    });
-                }
+        // Primary future. Skipped when `needs_primary = false`; the
+        // `expect` is unreachable in that branch.
+        let stored_primary_sid =
+            inbound_aggregate.as_ref().and_then(|a| a.primary.clone());
+        let primary_headers = sanitize_connect_headers(&request.headers);
+        let primary_fut = async {
+            if !needs_primary {
+                return Ok::<Option<String>, ConduitError>(None);
             }
-        }
+            let mcp_url = inner
+                .mcp_url
+                .as_ref()
+                .expect("primary only dialed when configured")
+                .clone();
+            let connection = inner
+                .client
+                .connect(mcp_url, stored_primary_sid, Some(primary_headers))
+                .await
+                .map_err(|_| ConduitError::PrimaryDialFailed)?;
+            install_list_changed_pump(
+                &connection,
+                inner.clone(),
+                connection.session_id.clone(),
+            );
+            let session_id = connection.session_id.clone();
+            inner
+                .connections
+                .insert(session_id.clone(), Arc::new(ConduitState { connection }));
+            Ok(Some(session_id))
+        };
+
+        // Plugin futures: one per `(plugin, mcp_name)` pair in the
+        // agent declaration. Each resumes its upstream session if
+        // the inbound aggregate carries a matching entry.
+        let plugin_futs: Vec<_> = plugin_pairs
+            .iter()
+            .cloned()
+            .map(|(plugin, mcp)| {
+                let stored_sid = inbound_aggregate.as_ref().and_then(|a| {
+                    a.plugins
+                        .iter()
+                        .find(|e| e.plugin_name == plugin && e.mcp_name == mcp)
+                        .map(|e| e.mcp_session_id.clone())
+                });
+                let inner = inner.clone();
+                async move { dial_plugin_upstream(&inner, plugin, mcp, stored_sid).await }
+            })
+            .collect();
+
+        let plugin_joined = futures::future::try_join_all(plugin_futs);
+        let (primary_sid_opt, plugin_results) =
+            tokio::try_join!(primary_fut, plugin_joined)?;
+
+        // Build the outbound aggregate from the dialed session ids.
+        // Input ordering of `plugin_pairs` is preserved through
+        // `try_join_all`'s `Vec<Output>`.
+        let aggregate = AggregateSession {
+            primary: primary_sid_opt,
+            plugins: plugin_pairs
+                .into_iter()
+                .zip(plugin_results.into_iter())
+                .map(|((plugin_name, mcp_name), mcp_session_id)| {
+                    AggregatePluginEntry {
+                        plugin_name,
+                        mcp_name,
+                        mcp_session_id,
+                    }
+                })
+                .collect(),
+        };
         let aggregate_encoded = aggregate.encode();
 
         // Record the aggregate on this ws_session_id's
@@ -1662,8 +1576,7 @@ fn conduit_error(
 /// inbound body, if any. Used to echo the request's `id` on every
 /// synthesized JSON-RPC error envelope so the proxy can correlate
 /// the error to the in-flight request that triggered it. Defaults
-/// to `null` for non-JSON-RPC bodies (e.g. PLUGIN_MCP_CONNECT) or
-/// when the body lacks an `id` field.
+/// to `null` when the body is absent or lacks an `id` field.
 fn jsonrpc_id_from_body(body: &Option<serde_json::Value>) -> serde_json::Value {
     body.as_ref()
         .and_then(|b| b.get("id"))
@@ -1700,6 +1613,14 @@ enum ConduitError {
     Serialize(serde_json::Error),
     #[error("plugin upstream list_tools / list_resources failed")]
     PluginListFailed,
+    #[error("primary upstream connect failed")]
+    PrimaryDialFailed,
+    #[error("plugin upstream {plugin_name:?}/{mcp_name:?} dial failed: {reason}")]
+    PluginDialFailed {
+        plugin_name: String,
+        mcp_name: String,
+        reason: String,
+    },
 }
 
 /// Aggregate session id returned to the proxy on `initialize`.
