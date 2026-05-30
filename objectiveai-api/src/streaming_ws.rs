@@ -45,11 +45,12 @@ use tokio::sync::oneshot;
 use crate::error::ResponseErrorExt;
 
 // The reverse-attach / session-tracker / pending-request types are
-// now canonical in `objectiveai_sdk::mcp::conduit::server`. The
-// `pub use` shims keep `crate::streaming_ws::SharedSink`,
+// now canonical in `crate::objectiveai_mcp`. The `pub use` shims
+// keep `crate::streaming_ws::SharedSink`,
 // `crate::streaming_ws::SessionTracker`, etc. resolving for every
-// existing call site in the api — the underlying type IS the SDK's.
-pub use objectiveai_sdk::mcp::conduit::server::{
+// existing call site in the api — the underlying type IS the
+// objectiveai_mcp one.
+pub use crate::objectiveai_mcp::{
     PendingRequests, ReverseAttachConfig, ReverseAttachGuard,
     ReverseAttachHandle, ReverseChannel, ReverseChannelRegistry,
     SessionTracker, SharedSink, new_pending_requests,
@@ -90,17 +91,6 @@ where
     }
 }
 
-/// Render a `400 Bad Request` response with the given message in a
-/// JSON `ResponseError` envelope. Used by the transport dispatcher
-/// when the client's combination of method + headers + body doesn't
-/// match the transport they asked for.
-pub fn bad_request(message: &str) -> Response {
-    ResponseError {
-        code: 400,
-        message: serde_json::Value::String(message.to_string()),
-    }
-    .into_response()
-}
 use serde::de::DeserializeOwned;
 
 /// Read exactly one text frame from `socket` and deserialize it as `T`.
@@ -169,18 +159,11 @@ pub async fn send_error_and_close(socket: &mut WebSocket, err: &ResponseError, c
         .await;
 }
 
-/// Close the socket with `Close(1011)` after sending the given
-/// `ResponseError` as a text frame. Used when setup (e.g.
-/// `create_streaming_handle_usage`) fails before any chunk has been
-/// produced.
-pub async fn fatal_setup_error(socket: &mut WebSocket, err: &ResponseError) {
-    send_error_and_close(socket, err, close_code::ERROR).await;
-}
-
-/// Split-sink variant of [`fatal_setup_error`]. Used after the
-/// socket has already been split (which is the order the WS
-/// handlers now use so the reverse-attach guard can be built
-/// before stream creation).
+/// Split-sink variant. Used after the socket has already been split
+/// (which is the order the WS handlers now use so the reverse-attach
+/// guard can be built before stream creation). Closes the socket
+/// with `Close(1011)` after sending `err` as a text frame; used when
+/// setup fails before any chunk has been produced.
 pub async fn fatal_setup_error_split(sink: &SharedSink, err: &ResponseError) {
     let frame = serde_json::to_string(err).unwrap_or_else(|_| String::from("{}"));
     {
@@ -225,43 +208,8 @@ pub async fn send_close_split(sink: &SharedSink, code: CloseCode) {
 // PendingRequests, ReverseChannel, ReverseChannelRegistry,
 // ReverseAttachConfig, ReverseAttachGuard, ReverseAttachHandle and
 // the `new_*` constructors are re-exported at the top of this file
-// from `objectiveai_sdk::mcp::conduit::server`. The local
-// duplicates that used to live here have been removed.
-
-/// Register a oneshot under `request.id`, write the request as a
-/// text frame, and return the receiver. The caller is responsible
-/// for minting the id (and putting it on the request) and applying
-/// a timeout (via `tokio::time::timeout`) on the await. On
-/// connection drop the recv loop returns and pending oneshots are
-/// dropped — receivers observe the close as `Err(RecvError)`.
-pub async fn send_server_request(
-    sink: &SharedSink,
-    pending: &PendingRequests,
-    request: objectiveai_sdk::client_objectiveai_mcp::server_request::Request,
-) -> Result<
-    oneshot::Receiver<objectiveai_sdk::client_objectiveai_mcp::server_response::Response>,
-    (),
-> {
-    let id = request.id.clone();
-    let (tx, rx) = oneshot::channel();
-    pending.insert(id.clone(), tx);
-
-    let frame = match serde_json::to_string(&request) {
-        Ok(s) => s,
-        Err(_) => {
-            pending.remove(&id);
-            return Err(());
-        }
-    };
-    let mut guard = sink.lock().await;
-    let send_result = guard.send(Message::Text(frame.into())).await;
-    if send_result.is_err() {
-        drop(guard);
-        pending.remove(&id);
-        return Err(());
-    }
-    Ok(rx)
-}
+// from `crate::objectiveai_mcp`. `send_server_request` (used by the
+// MCP route layer) also lives there as `objectiveai_mcp::send`.
 
 /// Recv loop: drain the split stream, parse each text frame, and
 /// dispatch based on shape.
@@ -378,12 +326,13 @@ pub async fn recv_loop<F, Fut>(
                     });
                     continue;
                 }
-                // McpListChanged handling lives in the SDK's
-                // `mcp::conduit::server::recv_loop`, which the api
-                // switches over to in the next commit. Until then,
-                // an inbound `McpListChanged` is dropped — the CLI
-                // sees `Ok` because we don't ack it, but the api
-                // doesn't yet do anything useful with it either.
+                // McpListChanged dispatch: should fan out to every
+                // (ws_session_id, mcp_session_id) registered on this
+                // WS via `crate::objectiveai_mcp::McpListenerRegistry::publish`.
+                // Wiring requires threading the registry + the
+                // reverse-attach handle through this recv_loop's
+                // signature; tracked as a follow-up. Today the frame
+                // is dropped silently.
                 ClientPayload::McpListChanged(_) => {
                     let _ = id;
                     continue;

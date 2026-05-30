@@ -4,11 +4,11 @@
 //! `server_response`, unwrap `result` (or propagate `error`) into the
 //! delegate's typed return.
 
+use super::send::send_server_request;
 use crate::objectiveai_mcp::context::McpRequestContext;
 use axum::http::HeaderMap;
 use indexmap::IndexMap;
 use objectiveai_sdk::client_objectiveai_mcp::server_request;
-use objectiveai_sdk::mcp::conduit::server::send_server_request;
 use objectiveai_sdk::mcp::initialize_result::InitializeResult;
 use objectiveai_sdk::mcp::resource::{
     ListResourcesRequest, ListResourcesResult, ReadResourceRequestParams,

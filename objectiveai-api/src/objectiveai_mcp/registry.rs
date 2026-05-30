@@ -1,16 +1,15 @@
 //! Reverse-attach registry + handle types.
 //!
-//! Lets the API's `/objectiveai-mcp/{session_id}` HTTP route forward
-//! a proxy's request as a `server_request::Request` over the matching
-//! in-flight WebSocket. Originally
-//! `objectiveai-api/src/streaming_ws.rs`; relocated here so every
-//! caller (api, future test harness, future second consumer) shares
-//! one canonical type set.
+//! Lets the API's `/objectiveai-mcp` route forward a proxy's request
+//! as a `server_request::Request` over the matching in-flight
+//! WebSocket. Used by the JSON-RPC handlers in [`super::handlers`]
+//! and registered against by every `_ws` upgrade handler in
+//! `streaming_ws_handlers`.
 
-use crate::client_objectiveai_mcp::server_response;
 use axum::extract::ws::{Message, WebSocket};
 use dashmap::DashMap;
 use futures::stream::SplitSink;
+use objectiveai_sdk::client_objectiveai_mcp::server_response;
 use std::sync::Arc;
 use tokio::sync::{Mutex, oneshot};
 
@@ -40,7 +39,7 @@ impl SessionTracker {
     /// `insert` itself.
     pub fn observe<C>(&self, chunk: &C)
     where
-        C: crate::agent::completions::response::streaming::AgentCompletionIds,
+        C: objectiveai_sdk::agent::completions::response::streaming::AgentCompletionIds,
     {
         for id in chunk.agent_completion_ids() {
             self.ids.insert(id.to_string());
@@ -53,7 +52,7 @@ impl SessionTracker {
 }
 
 /// Per-WS-connection registry of outstanding
-/// [`server_request::Request`](crate::client_objectiveai_mcp::server_request::Request)s
+/// [`server_request::Request`](objectiveai_sdk::client_objectiveai_mcp::server_request::Request)s
 /// the API has emitted and is awaiting a matching
 /// [`server_response::Response`] for. Keys are the API-minted `id`;
 /// values are the oneshot the awaiting future is parked on. The recv
@@ -78,10 +77,9 @@ pub struct ReverseChannel {
 
 /// Process-wide registry of live [`ReverseChannel`]s keyed by an
 /// opaque session id minted on WS upgrade. Populated by the
-/// per-endpoint `_ws` handlers (typically via
-/// [`super::builder::Conduit::attach`]); consulted by the
-/// `/objectiveai-mcp/<session_id>` route and by the agent-completion
-/// verification probe.
+/// per-endpoint `_ws` handlers; consulted by the `/objectiveai-mcp`
+/// route (via the `X-OBJECTIVEAI-RESPONSE-ID` header) and by the
+/// agent-completion verification probe.
 pub type ReverseChannelRegistry = Arc<DashMap<String, ReverseChannel>>;
 
 pub fn new_reverse_channel_registry() -> ReverseChannelRegistry {
@@ -91,9 +89,9 @@ pub fn new_reverse_channel_registry() -> ReverseChannelRegistry {
 /// Bundle of the things each `_ws` handler needs to wire up the
 /// reverse-attach: the global [`ReverseChannelRegistry`] (so it can
 /// insert/remove its session) plus the API's own listening port (so
-/// the agent client can build a
-/// `http://127.0.0.1:<port>/objectiveai-mcp/<session>` URL the proxy
-/// will dial).
+/// the agent client can build a synthetic
+/// `http://127.0.0.1:<port>/objectiveai-mcp` URL the proxy will
+/// dial).
 #[derive(Clone)]
 pub struct ReverseAttachConfig {
     pub registry: ReverseChannelRegistry,

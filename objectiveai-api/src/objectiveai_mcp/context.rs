@@ -1,7 +1,7 @@
 //! Shared per-request context handed to every MCP delegate.
 
+use super::ReverseChannelRegistry;
 use axum::http::HeaderMap;
-use objectiveai_sdk::mcp::conduit::server::ReverseChannelRegistry;
 
 /// Shared state every MCP delegate receives. Built once per HTTP
 /// request by the axum handler before calling the delegate; cheap
@@ -22,7 +22,6 @@ pub struct McpRequestContext {
     /// forwarding delegate. `Mcp-Session-Id` rides through here.
     pub headers: HeaderMap,
     /// Reverse-channel registry. Delegates look up their target WS
-    /// by `response_id` and call
-    /// [`objectiveai_sdk::mcp::conduit::server::send_server_request`].
+    /// by `response_id` and call [`super::send_server_request`].
     pub registry: ReverseChannelRegistry,
 }

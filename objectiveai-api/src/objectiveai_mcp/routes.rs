@@ -21,9 +21,7 @@ use axum::{
     http::{HeaderMap, StatusCode},
     response::{IntoResponse, Response},
 };
-use objectiveai_sdk::mcp::conduit::server::{
-    McpListenerRegistry, ReverseChannelRegistry, handle_get_sse,
-};
+use super::{McpListenerRegistry, ReverseChannelRegistry, handle_get_sse};
 
 const JSON_RPC: &str = "2.0";
 const RESPONSE_ID_HEADER: &str = "X-OBJECTIVEAI-RESPONSE-ID";

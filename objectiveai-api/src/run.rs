@@ -719,7 +719,7 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
     // broadcast feeding the MCP GET notifications stream. The conduit
     // WS recv loop publishes here when the CLI pushes `McpListChanged`;
     // the GET handler subscribes from here.
-    let mcp_listeners = objectiveai_sdk::mcp::conduit::server::McpListenerRegistry::new();
+    let mcp_listeners = crate::objectiveai_mcp::McpListenerRegistry::new();
 
     // Vector Completions Client
     let vector_completions_client = Arc::new(vector::completions::Client::new(

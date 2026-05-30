@@ -1,5 +1,5 @@
 //! Per-`(ws_session_id, mcp_session_id)` broadcast registry feeding
-//! the API's `/objectiveai-mcp/{ws_session_id}` MCP GET-SSE stream.
+//! the API's `/objectiveai-mcp` MCP GET-SSE stream.
 //!
 //! - [`McpListenerRegistry::subscribe`] runs from the GET-SSE handler
 //!   when a downstream MCP proxy opens its notification stream.
@@ -9,8 +9,8 @@
 //!   GET-SSE stream's drop guard calls it after the last subscriber
 //!   hangs up so we don't leak empty `broadcast::Sender`s.
 
-use crate::client_objectiveai_mcp::client_request::McpListChangedKind;
 use dashmap::DashMap;
+use objectiveai_sdk::client_objectiveai_mcp::client_request::McpListChangedKind;
 use std::sync::Arc;
 use tokio::sync::broadcast;
 
@@ -26,9 +26,9 @@ const CHANNEL_CAPACITY: usize = 8;
 /// subscribes from.
 ///
 /// Cheap to clone (`Arc<DashMap<...>>` internally). One instance
-/// lives in the API's shared state and is handed to both the
-/// `Conduit::builder()` and the `/objectiveai-mcp/{session_id}`
-/// route's GET branch.
+/// lives in the API's shared state and is handed to both the recv
+/// loop's list-changed dispatcher and the `/objectiveai-mcp` route's
+/// GET branch.
 #[derive(Clone, Default)]
 pub struct McpListenerRegistry {
     inner: Arc<DashMap<(String, String), broadcast::Sender<McpListChangedKind>>>,
