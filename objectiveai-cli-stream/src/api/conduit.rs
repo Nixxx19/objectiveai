@@ -66,6 +66,15 @@ struct ConduitState {
     connection: objectiveai_sdk::mcp::Connection,
 }
 
+/// One MCP connection the CLI has dialed via a `PLUGIN_MCP_CONNECT`
+/// request. Wraps the bare `mcp::Connection` so future commits can
+/// grow the per-connection state (proxy routes, request handlers,
+/// listener tasks, …) without churning the storage type.
+struct PluginMcpState {
+    #[allow(dead_code)]
+    connection: objectiveai_sdk::mcp::Connection,
+}
+
 #[derive(Clone)]
 pub struct ConduitMcpHandler {
     inner: Arc<Inner>,
@@ -96,6 +105,18 @@ struct Inner {
     /// flag set. Empty `HashSet` when filesystem is unavailable or
     /// nothing is installed.
     installed_names: OnceCell<HashSet<String>>,
+    /// MCP connections the CLI has dialed via `PLUGIN_MCP_CONNECT`,
+    /// keyed by `(plugin_name, mcp_name)` — the same vocabulary the
+    /// API uses on the wire. Populated lazily by the background dial
+    /// in `handle_plugin_mcp_connect` (on `mcp::Client::connect`
+    /// success). Lives for the lifetime of `Inner`; entries drop
+    /// with the WS session, which tears down each `Connection`'s
+    /// SSE listener and HTTP stream.
+    ///
+    /// Not yet consumed downstream — this commit lands the storage
+    /// primitive only. Follow-ups will route inbound MCP requests
+    /// through these.
+    plugin_mcp_connections: DashMap<(String, String), Arc<PluginMcpState>>,
 }
 
 impl ConduitMcpHandler {
@@ -130,6 +151,7 @@ impl ConduitMcpHandler {
                 notifier: OnceLock::new(),
                 config_base_dir,
                 installed_names: OnceCell::new(),
+                plugin_mcp_connections: DashMap::new(),
             }),
         }
     }
@@ -200,10 +222,24 @@ impl ConduitMcpHandler {
                 return error_response(
                     id,
                     400,
-                    format!("PLUGIN_MCP_BEGIN: invalid body: {e}"),
+                    format!("PLUGIN_MCP_CONNECT: invalid body: {e}"),
                 );
             }
         };
+
+        // Idempotency gate: if we already have a live connection for
+        // this (plugin, mcp_name), skip the manifest verify, plugin
+        // spawn, and dial entirely. Re-dialing would waste a plugin
+        // process and replace a working connection for no reason.
+        // The lookup uses an owned-key clone because DashMap doesn't
+        // borrow tuple keys; cheap (two short Strings).
+        if self
+            .inner
+            .plugin_mcp_connections
+            .contains_key(&(plugin_name.clone(), mcp_name.clone()))
+        {
+            return ok_response(id);
+        }
 
         let Some(base_dir) = self.inner.config_base_dir.clone() else {
             return error_response(
@@ -327,16 +363,35 @@ impl ConduitMcpHandler {
 
         match begin_result {
             Ok(Ok(mcp)) => {
-                // Dial the captured URL in the background — discard
-                // the connection. This is the "non-blocking" leg:
-                // the API gets its ack immediately after URL capture
-                // and isn't gated on the upstream MCP initialize
-                // round-trip. Future commits will track this
-                // connection instead of dropping it.
-                let client = self.inner.client.clone();
+                // Dial the captured URL in the background; on
+                // success, store the `Connection` in
+                // `inner.plugin_mcp_connections` keyed by
+                // `(plugin_name, mcp_name)`. This is the
+                // "non-blocking" leg: the API gets its ack
+                // immediately after URL capture and isn't gated on
+                // the upstream MCP initialize round-trip. Dial
+                // failures are silent at this layer — the API was
+                // already acked; future commits will surface them
+                // through a separate channel if needed.
+                //
+                // Race: two simultaneous connects for the same key
+                // both pass the idempotency gate above, both dial,
+                // and the later insert overwrites the earlier (the
+                // displaced `Arc` drops, killing its `Connection`
+                // and orphaning that plugin process). Acceptable
+                // for now; a follow-up can claim the slot eagerly
+                // via DashMap's entry API.
+                let inner = self.inner.clone();
                 let url = mcp.url;
                 tokio::spawn(async move {
-                    let _ = client.connect(url, None, None).await;
+                    if let Ok(connection) =
+                        inner.client.connect(url, None, None).await
+                    {
+                        inner.plugin_mcp_connections.insert(
+                            (plugin_name, mcp_name),
+                            Arc::new(PluginMcpState { connection }),
+                        );
+                    }
                 });
                 ok_response(id)
             }
