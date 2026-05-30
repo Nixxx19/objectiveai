@@ -753,23 +753,28 @@ async fn forward(
     // error envelope.
     if let Some(method) = rpc_method.as_deref() {
         if method == "tools/call" || method == "resources/read" {
-            if let Some(config) = read_mcp_config_header(&request.headers) {
-                if !config.mcp_servers.is_empty() {
-                    let routed = if method == "tools/call" {
-                        try_route_tools_call(inner, &state.connection, &request, &config)
-                            .await?
-                    } else {
-                        try_route_resources_read(
-                            inner,
-                            &state.connection,
-                            &request,
-                            &config,
-                        )
-                        .await?
-                    };
-                    if let Some(resp) = routed {
-                        return Ok(resp);
-                    }
+            // The API always stamps `X-OBJECTIVEAI-MCP-CONFIG` on
+            // every request to the synthetic `/objectiveai-mcp` URL;
+            // its absence means an upstream bug (proxy stripped it,
+            // API skipped stamping, …). Crash loudly so it's
+            // unmissable rather than degrading silently.
+            let config = read_mcp_config_header(&request.headers).expect(
+                "X-OBJECTIVEAI-MCP-CONFIG header is required on tools/call and resources/read",
+            );
+            if !config.mcp_servers.is_empty() {
+                let routed = if method == "tools/call" {
+                    try_route_tools_call(inner, &state.connection, &request, &config).await?
+                } else {
+                    try_route_resources_read(
+                        inner,
+                        &state.connection,
+                        &request,
+                        &config,
+                    )
+                    .await?
+                };
+                if let Some(resp) = routed {
+                    return Ok(resp);
                 }
             }
         }
@@ -789,35 +794,38 @@ async fn forward(
     //    Reconcile `interested_sessions` against the diff between
     //    this session's previous selection and the current one.
     if rpc_method.as_deref() == Some("tools/list") {
-        if let Some(config) = read_mcp_config_header(&request.headers) {
-            if let Some(body) = response.body.as_mut() {
-                apply_tools_filter(inner, body, &config).await;
-                let ws_session_id = ws_session_id_from_headers(&request.headers);
-                aggregate_plugin_tools(
-                    inner,
-                    body,
-                    &config.mcp_servers,
-                    ws_session_id.as_deref(),
-                )
-                .await?;
-            }
+        // Header is API-stamped on every request; missing = bug.
+        let config = read_mcp_config_header(&request.headers)
+            .expect("X-OBJECTIVEAI-MCP-CONFIG header is required on tools/list");
+        if let Some(body) = response.body.as_mut() {
+            apply_tools_filter(inner, body, &config).await;
+            let ws_session_id = ws_session_id_from_headers(&request.headers);
+            aggregate_plugin_tools(
+                inner,
+                body,
+                &config.mcp_servers,
+                ws_session_id.as_deref(),
+            )
+            .await?;
         }
     } else if rpc_method.as_deref() == Some("resources/list") {
         // `resources/list`: same shape as `tools/list` aggregation,
         // operating on `result.resources[]` with `uri` as the
         // prefix-namespacing field. No name allow-list applied to
         // primary resources today.
-        if let Some(config) = read_mcp_config_header(&request.headers) {
-            if let Some(body) = response.body.as_mut() {
-                let ws_session_id = ws_session_id_from_headers(&request.headers);
-                aggregate_plugin_resources(
-                    inner,
-                    body,
-                    &config.mcp_servers,
-                    ws_session_id.as_deref(),
-                )
-                .await?;
-            }
+        //
+        // Header is API-stamped on every request; missing = bug.
+        let config = read_mcp_config_header(&request.headers)
+            .expect("X-OBJECTIVEAI-MCP-CONFIG header is required on resources/list");
+        if let Some(body) = response.body.as_mut() {
+            let ws_session_id = ws_session_id_from_headers(&request.headers);
+            aggregate_plugin_resources(
+                inner,
+                body,
+                &config.mcp_servers,
+                ws_session_id.as_deref(),
+            )
+            .await?;
         }
     }
 
