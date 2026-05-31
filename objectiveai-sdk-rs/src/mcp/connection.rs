@@ -981,7 +981,20 @@ impl ConnectionInner {
             .clone()
     }
 
-    /// Calls a tool on the MCP server.
+    /// Calls a tool on the MCP server. The returned
+    /// `CallToolResult.content` is **fully resolved**: every
+    /// `ContentBlock::ResourceLink { uri }` whose URI appears in
+    /// `list_resources` has already been replaced by one or more
+    /// `ContentBlock::EmbeddedResource` blocks carrying the fetched
+    /// contents (via `read_resource`). Unknown-URI links pass through
+    /// untouched — the upstream server may have its own out-of-band
+    /// resolution path the caller should preserve.
+    ///
+    /// Resolving inside `call_tool` (rather than downstream in
+    /// `call_tool_as_message`) means every consumer of the result
+    /// sees `EmbeddedResource` shapes uniformly; the stateless
+    /// `From<ContentBlock>` impl is then enough to convert the whole
+    /// result to `RichContent` with no further connection work.
     async fn call_tool(
         &self,
         params: &super::tool::CallToolRequestParams,
@@ -998,32 +1011,76 @@ impl ConnectionInner {
                 _meta: None,
             });
         }
-        self.rpc("tools/call", params, false).await
+        let mut result: super::tool::CallToolResult =
+            self.rpc("tools/call", params, false).await?;
+
+        // Build the known-resource URI set for ResourceLink
+        // resolution. `list_resources` failure → empty set (same
+        // safe fallback the resolution path used previously).
+        let known_uris: std::collections::HashSet<String> =
+            match self.list_resources().await {
+                Ok(rs) => rs.iter().map(|r| r.uri.clone()).collect(),
+                Err(_) => std::collections::HashSet::new(),
+            };
+
+        // Walk the blocks, replacing each resolvable ResourceLink
+        // with one EmbeddedResource per returned ResourceContentsUnion.
+        // Everything else (Text, Image, Audio, EmbeddedResource,
+        // unknown-URI ResourceLinks) passes through.
+        let mut resolved: Vec<super::tool::ContentBlock> =
+            Vec::with_capacity(result.content.len());
+        for block in std::mem::take(&mut result.content) {
+            match block {
+                super::tool::ContentBlock::ResourceLink(link)
+                    if known_uris.contains(&link.uri) =>
+                {
+                    let read = self.read_resource(&link.uri).await?;
+                    for contents in read.contents {
+                        resolved.push(
+                            super::tool::ContentBlock::EmbeddedResource(
+                                super::tool::EmbeddedResource {
+                                    resource: contents,
+                                    // ResourceLink's annotations
+                                    // don't have a perfect home on
+                                    // EmbeddedResource — both fields
+                                    // exist but they describe different
+                                    // shapes (the link vs the inlined
+                                    // contents). Drop them on the way
+                                    // in; the EmbeddedResource is now
+                                    // a fresh authoritative block.
+                                    annotations: None,
+                                    _meta: None,
+                                },
+                            ),
+                        );
+                    }
+                }
+                other => resolved.push(other),
+            }
+        }
+        result.content = resolved;
+        Ok(result)
     }
 
-    /// Calls a tool and converts the result into a [`ToolMessage`].
+    /// Calls a tool and converts the (already-resolved) result into a
+    /// [`ToolMessage`]. Resource resolution happens inside
+    /// [`Self::call_tool`] — by the time we get the blocks here every
+    /// resolvable `ResourceLink` has already been replaced with an
+    /// `EmbeddedResource`, so the conversion is a pure stateless
+    /// element-wise map through [`From<ContentBlock> for
+    /// RichContentPart`](crate::agent::completions::message::RichContentPart).
     ///
-    /// Content blocks are mapped as follows:
+    /// Content-block mapping (handled by the `From` impl):
     /// - `text` → text part
     /// - `image` → image_url part (data URL)
     /// - `audio` → input_audio part
     /// - `embedded_resource` (text) → text part
-    /// - `embedded_resource` (blob, image mime) → image_url part (data URL)
+    /// - `embedded_resource` (blob, image mime) → image_url part
+    /// - `embedded_resource` (blob, audio mime) → input_audio part
+    /// - `embedded_resource` (blob, video mime) → input_video part
     /// - `embedded_resource` (blob, other mime) → file part
-    /// - `resource_link` → if the URI appears in `list_resources`, fetches
-    ///   via `read_resource` and inlines the content using the same
-    ///   text/blob rules; otherwise serializes the link as JSON text
-    ///
-    /// Every variant other than `ResourceLink` goes through the
-    /// shared stateless `From<ContentBlock> for RichContentPart`
-    /// (which now properly handles `EmbeddedResource` via the
-    /// `From<ResourceContentsUnion>` impl). `ResourceLink` is the
-    /// only case that needs the live connection — it can't be a
-    /// stateless `From` impl because resolving the URI requires
-    /// `read_resource`.
-    ///
-    /// If `is_error` is set on the result, the content is prefixed with
-    /// an error indicator.
+    /// - `resource_link` (unknown URI) → JSON-text fallback
+    ///   (resolvable URIs were already resolved upstream)
     async fn call_tool_as_message(
         &self,
         params: &super::tool::CallToolRequestParams,
@@ -1035,39 +1092,14 @@ impl ConnectionInner {
         use crate::agent::completions::message::{
             RichContentPart, ToolMessage, ToolResponseMetadata,
         };
-        use super::tool::ContentBlock;
 
         let result = self.call_tool(params).await?;
 
-        // Build the set of known resource URIs for resource_link resolution.
-        let known_resource_uris: std::collections::HashSet<String> =
-            match self.list_resources().await {
-                Ok(resources) => {
-                    resources.iter().map(|r| r.uri.clone()).collect()
-                }
-                Err(_) => std::collections::HashSet::new(),
-            };
-
-        let mut parts: Vec<RichContentPart> = Vec::new();
-
-        for block in result.content {
-            match block {
-                // ResourceLink is the only stateful case: when the
-                // URI is known, fetch + inline each returned
-                // `ResourceContentsUnion`. Unknown URIs (and every
-                // other variant) fall through to the shared
-                // stateless `From<ContentBlock>` impl.
-                ContentBlock::ResourceLink(link)
-                    if known_resource_uris.contains(&link.uri) =>
-                {
-                    let read_result = self.read_resource(&link.uri).await?;
-                    for contents in read_result.contents {
-                        parts.push(contents.into());
-                    }
-                }
-                other => parts.push(other.into()),
-            }
-        }
+        let parts: Vec<RichContentPart> = result
+            .content
+            .into_iter()
+            .map(Into::into)
+            .collect();
 
         // Lossy-decode the MCP `_meta` extension bag into our typed
         // `ToolResponseMetadata`. Unknown keys (set by non-objectiveai
