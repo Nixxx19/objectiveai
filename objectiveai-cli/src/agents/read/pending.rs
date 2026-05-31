@@ -15,7 +15,7 @@
 //! caller prefix is glued on internally. So if the caller is `cli`
 //! and the spawned agent is `cli/foo-123`, the invocation is
 //! `agents read pending foo-123` (matches the output shape of
-//! `agents list-active`, which also drops the caller prefix).
+//! `agents list active`, which also drops the caller prefix).
 
 use clap::Args;
 use objectiveai_sdk::cli::output::{AgentItems, Handle, Notification, Output};

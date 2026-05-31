@@ -109,7 +109,7 @@ Internally tagged on `"type"` (snake_case). Defined in [`objectiveai-sdk-rs/src/
 //   fatal   = true terminates the host with exit code 1; false is informational
 
 // 3. A command — the host re-spawns itself with this command, fire-and-forget.
-{"type": "command", "command": "agents list --remote github"}
+{"type": "command", "command": "agents list available all"}
 ```
 
 Unparseable lines (anything that isn't valid JSON or doesn't match a `PluginOutput` variant) are forwarded as string-valued notifications to the host's output — they still appear in the stream rather than being silently dropped.

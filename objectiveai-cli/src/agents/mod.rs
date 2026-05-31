@@ -1,7 +1,7 @@
 pub mod completions;
 pub mod config;
 pub mod favorites;
-pub mod list_active;
+pub mod list;
 pub mod message;
 pub mod read;
 pub mod spawn;
@@ -15,10 +15,11 @@ pub enum Commands {
         #[command(flatten)]
         args: crate::get::GetArgs,
     },
-    /// List agents
+    /// List agents — `active` (direct children) or `available`
+    /// (remote agents by source).
     List {
         #[command(subcommand)]
-        source: crate::list::Source,
+        command: list::Commands,
     },
     /// Agent completions
     Completions {
@@ -53,8 +54,6 @@ pub enum Commands {
         #[command(subcommand)]
         command: read::Commands,
     },
-    /// List direct-child agents + the time of their most recent assistant response
-    ListActive(list_active::CommandArgs),
     /// Deliver a message to a running spawned agent (or resume its most
     /// recent completion via continuation if it's dormant)
     Message(message::CommandArgs),
@@ -64,20 +63,15 @@ pub enum Commands {
     Me,
 }
 
-async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
+/// Read the user's agent-favorites list from local config. `pub(super)`
+/// so the nested `list` submodule can reuse it for `list available
+/// favorites` / `list available all` without re-rooting the config
+/// read.
+pub(super) async fn get_favorites(
+    cli_config: &crate::Config,
+) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
     let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.agents().get_favorites().to_vec()
-}
-
-async fn list_source(
-    http_client: objectiveai_sdk::HttpClient,
-    source: objectiveai_sdk::agent::request::ListAgentsSource,
-) -> Result<Vec<objectiveai_sdk::RemotePath>, crate::error::Error> {
-    let response = objectiveai_sdk::agent::list_agents(
-        &http_client,
-        objectiveai_sdk::agent::request::ListAgentsRequest { source: Some(source) },
-    ).await?;
-    Ok(response.data)
 }
 
 impl Commands {
@@ -94,27 +88,11 @@ impl Commands {
                     Ok(())
                 }).await
             }
-            Commands::List { source } => {
-                use objectiveai_sdk::agent::request::ListAgentsSource;
-                match source {
-                    crate::list::Source::Favorites => crate::list::favorites(|| get_favorites(cli_config), handle).await,
-                    crate::list::Source::Filesystem => crate::list::single(cli_config, |c| Box::pin(list_source(c, ListAgentsSource::Filesystem)), handle).await,
-                    crate::list::Source::Objectiveai => crate::list::single(cli_config, |c| Box::pin(list_source(c, ListAgentsSource::Objectiveai)), handle).await,
-                    crate::list::Source::Mock => crate::list::single(cli_config, |c| Box::pin(list_source(c, ListAgentsSource::Mock)), handle).await,
-                    crate::list::Source::All => crate::list::all(
-                        cli_config,
-                        || get_favorites(cli_config),
-                        |c| Box::pin(list_source(c, ListAgentsSource::Filesystem)),
-                        |c| Box::pin(list_source(c, ListAgentsSource::Objectiveai)),
-                        handle,
-                    ).await,
-                }
-            }
+            Commands::List { command } => command.handle(cli_config, handle).await,
             Commands::Completions { command } => command.handle(cli_config, handle).await,
             Commands::Config { command } => command.handle(cli_config, handle).await,
             Commands::Favorites { command } => command.handle(cli_config, handle).await,
             Commands::Read { command } => command.handle(cli_config, handle).await,
-            Commands::ListActive(args) => list_active::handle(args, cli_config, handle).await,
             Commands::Message(args) => message::handle(args, cli_config, handle).await,
             Commands::Spawn(args) => spawn::handle(args, cli_config, handle).await,
             Commands::Me => {

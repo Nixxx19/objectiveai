@@ -1,4 +1,4 @@
-//! `agents list-active` — list every direct-child agent of a
+//! `agents list active` — list every direct-child agent of a
 //! parent agent id along with the timestamp of its most recent
 //! `assistant_response` row.
 //!
