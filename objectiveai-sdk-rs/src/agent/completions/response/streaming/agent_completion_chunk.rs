@@ -1,16 +1,27 @@
 //! Streaming agent completion chunk type.
 
 use crate::agent::completions::response;
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 /// A chunk of a streaming agent completion response.
 ///
 /// Multiple chunks are received via Server-Sent Events and can be
 /// accumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)
 /// using the [`push`](Self::push) method.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "agent.completions.response.streaming.AgentCompletionChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    Default,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "agent.completions.response.streaming.AgentCompletionChunk"
+)]
 pub struct AgentCompletionChunk {
     pub id: String,
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
@@ -50,7 +61,12 @@ impl AgentCompletionChunk {
     pub fn push(
         &mut self,
         AgentCompletionChunk {
-            messages, usage, error, continuation, messages_queued, ..
+            messages,
+            usage,
+            error,
+            continuation,
+            messages_queued,
+            ..
         }: &AgentCompletionChunk,
     ) {
         self.push_messages(messages);
@@ -81,7 +97,10 @@ impl AgentCompletionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_files(
         &self,
-    ) -> Option<(crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>)> {
+    ) -> Option<(
+        crate::filesystem::logs::LogReference,
+        Vec<crate::filesystem::logs::LogFile>,
+    )> {
         use crate::filesystem::logs::{LogFile, LogReference};
         const ROUTE: &str = "agents/completions/response";
 
@@ -153,7 +172,8 @@ impl AgentCompletionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_ {
+    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_
+    {
         use crate::filesystem::db::schema::{MessageKind, MessageRow};
         let id = self.id.as_str();
         let created = self.created;
@@ -163,7 +183,9 @@ impl AgentCompletionChunk {
                 return None;
             }
             let kind = match m {
-                super::MessageChunk::Assistant(_) => MessageKind::AssistantResponse,
+                super::MessageChunk::Assistant(_) => {
+                    MessageKind::AssistantResponse
+                }
                 super::MessageChunk::Tool(_) => MessageKind::ToolResponse,
             };
             let idx = m.index();

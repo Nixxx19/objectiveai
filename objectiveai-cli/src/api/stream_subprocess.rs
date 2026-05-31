@@ -26,7 +26,8 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 
 use objectiveai_sdk::cli::output::{
-    Error as OutputError, Handle, Level, Notification, NotificationValue, Output, Spawned,
+    Error as OutputError, ErrorType, Handle, Level, Notification, NotificationValue, Output,
+    Spawned, TypedNotificationValue,
 };
 
 /// Spawn `objectiveai-cli-stream <endpoint_path...> --body <JSON>` and
@@ -101,17 +102,14 @@ where
         if trimmed.is_empty() {
             continue;
         }
-        let out: Output = serde_json::from_str(trimmed)
-            .unwrap_or_else(|e| panic!("cli-stream stdout produced a non-JSONL line: {trimmed}; parse error: {e}"));
+        let out: Output = serde_json::from_str(trimmed).unwrap_or_else(|e| {
+            panic!("cli-stream stdout produced a non-JSONL line: {trimmed}; parse error: {e}")
+        });
         match out {
-            Output::Notification(n) => handle_notification::<Chunk>(
-                n,
-                handle,
-                &inner_errors_fn,
-                &push,
-                &mut aggregate,
-            )
-            .await,
+            Output::Notification(n) => {
+                handle_notification::<Chunk>(n, handle, &inner_errors_fn, &push, &mut aggregate)
+                    .await
+            }
             Output::Error(e) => {
                 Output::Error(e).emit(handle).await;
             }
@@ -164,9 +162,8 @@ async fn handle_notification<Chunk>(
     // typed shape varies per endpoint, so cli-stream emits it as a
     // serde_json::Value through the catch-all path).
     match n.value {
-        NotificationValue::LogStreamReady(ready) => {
+        NotificationValue::Typed(TypedNotificationValue::LogStreamReady(ready)) => {
             Output::Notification(Notification {
-                agent_id: None,
                 value: ready.into(),
             })
             .emit(handle)
@@ -179,6 +176,7 @@ async fn handle_notification<Chunk>(
             });
             for inner in inner_errors_fn(&chunk) {
                 Output::Error(OutputError {
+                    r#type: ErrorType::Error,
                     level: Level::Warn,
                     fatal: false,
                     message: inner,
@@ -308,8 +306,9 @@ where
         if trimmed.is_empty() {
             continue;
         }
-        let out: Output = serde_json::from_str(trimmed)
-            .unwrap_or_else(|e| panic!("cli-stream stdout produced a non-JSONL line: {trimmed}; parse error: {e}"));
+        let out: Output = serde_json::from_str(trimmed).unwrap_or_else(|e| {
+            panic!("cli-stream stdout produced a non-JSONL line: {trimmed}; parse error: {e}")
+        });
         match out {
             Output::Error(e) => {
                 Output::Error(e).emit(handle).await;
@@ -318,9 +317,10 @@ where
                 // Only LogStreamReady triggers our handshake; every
                 // other Notification (chunks) is dropped since the
                 // caller does not wait for the completion.
-                if let NotificationValue::LogStreamReady(ready) = n.value {
+                if let NotificationValue::Typed(TypedNotificationValue::LogStreamReady(ready)) =
+                    n.value
+                {
                     Output::Notification(Notification {
-                        agent_id: None,
                         value: make_notification(ready.log_stream_ready),
                     })
                     .emit(handle)
@@ -354,8 +354,8 @@ where
 /// `<dir-of-current-exe>/objectiveai-cli-stream` (`.exe` on Windows).
 /// Same lookup pattern `api/detach.rs` uses via `std::env::current_exe()`.
 fn resolve_cli_stream_binary() -> Result<std::path::PathBuf, crate::error::Error> {
-    let exe = std::env::current_exe()
-        .map_err(|e| crate::error::Error::Spawn("current_exe".into(), e))?;
+    let exe =
+        std::env::current_exe().map_err(|e| crate::error::Error::Spawn("current_exe".into(), e))?;
     let parent = exe.parent().ok_or(crate::error::Error::MissingArgs(
         "current_exe has no parent directory",
     ))?;
@@ -395,15 +395,16 @@ async fn push_forwarded_args(
         cmd.args(["--api-address", &v]);
     }
 
-    if let Some(v) = env("OBJECTIVEAI_AUTHORIZATION")
-        .or_else(|| config.api().get_objectiveai_authorization().map(String::from))
-    {
+    if let Some(v) = env("OBJECTIVEAI_AUTHORIZATION").or_else(|| {
+        config
+            .api()
+            .get_objectiveai_authorization()
+            .map(String::from)
+    }) {
         cmd.args(["--objectiveai-authorization", &v]);
     }
 
-    if let Some(v) =
-        env("USER_AGENT").or_else(|| config.api().get_user_agent().map(String::from))
-    {
+    if let Some(v) = env("USER_AGENT").or_else(|| config.api().get_user_agent().map(String::from)) {
         cmd.args(["--user-agent", &v]);
     }
 
@@ -423,9 +424,12 @@ async fn push_forwarded_args(
         cmd.args(["--github-authorization", &v]);
     }
 
-    if let Some(v) = env("OPENROUTER_AUTHORIZATION")
-        .or_else(|| config.api().get_openrouter_authorization().map(String::from))
-    {
+    if let Some(v) = env("OPENROUTER_AUTHORIZATION").or_else(|| {
+        config
+            .api()
+            .get_openrouter_authorization()
+            .map(String::from)
+    }) {
         cmd.args(["--openrouter-authorization", &v]);
     }
 
@@ -442,8 +446,8 @@ async fn push_forwarded_args(
         cmd.args(["--mcp-authorization", &v]);
     }
 
-    if let Some(v) = env("VIEWER_SIGNATURE")
-        .or_else(|| config.viewer().get_signature().map(String::from))
+    if let Some(v) =
+        env("VIEWER_SIGNATURE").or_else(|| config.viewer().get_signature().map(String::from))
     {
         cmd.args(["--viewer-signature", &v]);
     }

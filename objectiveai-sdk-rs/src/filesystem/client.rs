@@ -28,8 +28,12 @@ impl Client {
                 if let Ok(dir) = std::env::var("CONFIG_BASE_DIR") {
                     return Self {
                         base_dir: PathBuf::from(dir),
-                        commit_author_name: resolve_author_name(commit_author_name),
-                        commit_author_email: resolve_author_email(commit_author_email),
+                        commit_author_name: resolve_author_name(
+                            commit_author_name,
+                        ),
+                        commit_author_email: resolve_author_email(
+                            commit_author_email,
+                        ),
                         db_conn: Arc::new(Mutex::new(None)),
                     };
                 }
@@ -71,7 +75,9 @@ impl Client {
 
     /// Internal accessor to the lazy-init slot. Used by
     /// `filesystem::db::connection` to open the connection on first use.
-    pub(crate) fn db_conn_slot(&self) -> &Mutex<Option<Arc<Mutex<rusqlite::Connection>>>> {
+    pub(crate) fn db_conn_slot(
+        &self,
+    ) -> &Mutex<Option<Arc<Mutex<rusqlite::Connection>>>> {
         &self.db_conn
     }
 }

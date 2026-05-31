@@ -42,15 +42,15 @@ pub use input_value::*;
 pub use input_value_log::*;
 pub use params::*;
 pub use runtime::*;
-pub use special::{FromSpecial, Special};
 pub(crate) use special::impl_from_special_unsupported;
+pub use special::{FromSpecial, Special};
 pub use starlark::{FromStarlarkValue, ToStarlarkValue};
 
 #[cfg(test)]
 mod expression_tests;
 #[cfg(test)]
+mod input_schema_tests;
+#[cfg(test)]
 mod special_tests;
 #[cfg(test)]
 mod starlark_tests;
-#[cfg(test)]
-mod input_schema_tests;

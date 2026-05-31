@@ -66,18 +66,36 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["AlphaScalarBranchState", "AlphaScalarLeafState", "AlphaScalarState", "AlphaVectorBranchState", "AlphaVectorLeafState", "AlphaVectorState", "GetFunctionInventionStateResponse", "InputSchema", "Params", "ParamsState", "ParamsStateOrRemoteCommitOptional", "State"];
+                const NAMES: &[&str] = &[
+                    "AlphaScalarBranchState",
+                    "AlphaScalarLeafState",
+                    "AlphaScalarState",
+                    "AlphaVectorBranchState",
+                    "AlphaVectorLeafState",
+                    "AlphaVectorState",
+                    "GetFunctionInventionStateResponse",
+                    "InputSchema",
+                    "Params",
+                    "ParamsState",
+                    "ParamsStateOrRemoteCommitOptional",
+                    "State",
+                ];
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
-                        }.into(),
+                        }
+                        .into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::AlphaScalarBranchState { .. } => {
@@ -86,10 +104,11 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::AlphaScalarLeafState { .. } => {
@@ -98,10 +117,11 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::AlphaScalarState { .. } => {
@@ -110,10 +130,11 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::AlphaVectorBranchState { .. } => {
@@ -122,10 +143,11 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::AlphaVectorLeafState { .. } => {
@@ -134,10 +156,11 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::AlphaVectorState { .. } => {
@@ -146,10 +169,11 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::GetFunctionInventionStateResponse { .. } => {
@@ -158,10 +182,11 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::InputSchema { .. } => {
@@ -170,10 +195,11 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::Params { .. } => {
@@ -182,10 +208,11 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::ParamsState { .. } => {
@@ -194,10 +221,11 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::ParamsStateOrRemoteCommitOptional { .. } => {
@@ -206,10 +234,11 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::State { .. } => {
@@ -218,10 +247,11 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
         }

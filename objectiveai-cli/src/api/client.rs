@@ -43,23 +43,29 @@ pub fn build_http_client(
         compose_url(api.get_address(), api.get_port())
     });
 
-    let authorization = env("OBJECTIVEAI_AUTHORIZATION")
-        .or_else(|| config.api().get_objectiveai_authorization().map(String::from));
+    let authorization = env("OBJECTIVEAI_AUTHORIZATION").or_else(|| {
+        config
+            .api()
+            .get_objectiveai_authorization()
+            .map(String::from)
+    });
 
-    let user_agent = env("USER_AGENT")
-        .or_else(|| config.api().get_user_agent().map(String::from));
+    let user_agent = env("USER_AGENT").or_else(|| config.api().get_user_agent().map(String::from));
 
-    let x_title = env("X_TITLE")
-        .or_else(|| config.api().get_x_title().map(String::from));
+    let x_title = env("X_TITLE").or_else(|| config.api().get_x_title().map(String::from));
 
-    let http_referer = env("HTTP_REFERER")
-        .or_else(|| config.api().get_http_referer().map(String::from));
+    let http_referer =
+        env("HTTP_REFERER").or_else(|| config.api().get_http_referer().map(String::from));
 
     let x_github_authorization = env("GITHUB_AUTHORIZATION")
         .or_else(|| config.api().get_github_authorization().map(String::from));
 
-    let x_openrouter_authorization = env("OPENROUTER_AUTHORIZATION")
-        .or_else(|| config.api().get_openrouter_authorization().map(String::from));
+    let x_openrouter_authorization = env("OPENROUTER_AUTHORIZATION").or_else(|| {
+        config
+            .api()
+            .get_openrouter_authorization()
+            .map(String::from)
+    });
 
     let x_mcp_authorization: Option<std::collections::HashMap<String, String>> =
         env("MCP_AUTHORIZATION")
@@ -71,8 +77,8 @@ pub fn build_http_client(
                     .map(|m| m.iter().map(|(k, v)| (k.clone(), v.clone())).collect())
             });
 
-    let x_viewer_signature = env("VIEWER_SIGNATURE")
-        .or_else(|| config.viewer().get_signature().map(String::from));
+    let x_viewer_signature =
+        env("VIEWER_SIGNATURE").or_else(|| config.viewer().get_signature().map(String::from));
 
     let x_viewer_address = env("VIEWER_ADDRESS").or_else(|| {
         let viewer = config.viewer();
@@ -134,8 +140,8 @@ pub fn build_viewer_client(
         let viewer = config.viewer();
         compose_url(viewer.get_address(), viewer.get_port())
     });
-    let signature = env("VIEWER_SIGNATURE")
-        .or_else(|| config.viewer().get_signature().map(String::from));
+    let signature =
+        env("VIEWER_SIGNATURE").or_else(|| config.viewer().get_signature().map(String::from));
 
     objectiveai_sdk::http::viewer::Client::new(
         reqwest::Client::new(),

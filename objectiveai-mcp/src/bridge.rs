@@ -11,8 +11,7 @@
 use objectiveai_sdk::mcp::shared::ResourceContentsUnion;
 use objectiveai_sdk::mcp::tool::ContentBlock;
 use rmcp::model::{
-    Annotated, Content, RawAudioContent, RawContent, RawResource,
-    RawTextContent, ResourceContents,
+    Annotated, Content, RawAudioContent, RawContent, RawResource, RawTextContent, ResourceContents,
 };
 
 /// Convert one SDK `ContentBlock` into one rmcp `Content`. Drops

@@ -30,7 +30,7 @@ use crate::api::{HttpArgs, PipeArgs};
 #[command(
     name = "objectiveai-cli-stream",
     version,
-    about = "Per-stream subprocess runner for the ObjectiveAI CLI",
+    about = "Per-stream subprocess runner for the ObjectiveAI CLI"
 )]
 struct Cli {
     #[command(flatten)]

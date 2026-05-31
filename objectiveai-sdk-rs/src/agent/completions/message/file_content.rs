@@ -13,7 +13,9 @@ impl FileContent<'_> {
         use base64::Engine;
         base64::engine::general_purpose::STANDARD
             .decode(self.content)
-            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))
+            .map_err(|e| {
+                std::io::Error::new(std::io::ErrorKind::InvalidData, e)
+            })
     }
 
     /// Writes the decoded content to `path` with the extension appended.

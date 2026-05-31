@@ -28,15 +28,12 @@ use objectiveai_sdk::vector::completions::response::unary::VectorCompletion;
 use std::path::{Path, PathBuf};
 
 fn snapshots_dir() -> PathBuf {
-    Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("assets/vector/completions/snapshots")
+    Path::new(env!("CARGO_MANIFEST_DIR")).join("assets/vector/completions/snapshots")
 }
 
 fn assert_snapshot(actual: &str, name: &str) {
     let path = snapshots_dir().join(format!("{name}.json"));
-    if std::env::var("UPDATE_VECTOR_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS").as_deref()
-        == Ok("1")
-    {
+    if std::env::var("UPDATE_VECTOR_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS").as_deref() == Ok("1") {
         if let Some(parent) = path.parent() {
             std::fs::create_dir_all(parent).unwrap();
         }
@@ -75,8 +72,12 @@ fn test_twenty_agents_json_schema_10x_tools_seed_42() {
     .to_string();
 
     let chunks_json = cli_test_util::run_cli(&[
-        "api", "vector", "completions", "post",
-        "--body-inline", &body,
+        "api",
+        "vector",
+        "completions",
+        "post",
+        "--body-inline",
+        &body,
     ]);
 
     // Deserialize every emitted notification as a typed chunk.

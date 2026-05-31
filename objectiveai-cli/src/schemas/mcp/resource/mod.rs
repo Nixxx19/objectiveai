@@ -38,42 +38,57 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["ListResourcesRequest", "ListResourcesResult", "ReadResourceRequestParams", "ReadResourceResult", "Resource"];
+                const NAMES: &[&str] = &[
+                    "ListResourcesRequest",
+                    "ListResourcesResult",
+                    "ReadResourceRequestParams",
+                    "ReadResourceResult",
+                    "Resource",
+                ];
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
-                        }.into(),
+                        }
+                        .into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::ListResourcesRequest { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../../objectiveai-json-schema/mcp.resource.ListResourcesRequest.json"),
-                ).expect("embedded JSON Schema must parse");
+                let schema: serde_json::Value = serde_json::from_str(include_str!(
+                    "../../../../../objectiveai-json-schema/mcp.resource.ListResourcesRequest.json"
+                ))
+                .expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::ListResourcesResult { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../../objectiveai-json-schema/mcp.resource.ListResourcesResult.json"),
-                ).expect("embedded JSON Schema must parse");
+                let schema: serde_json::Value = serde_json::from_str(include_str!(
+                    "../../../../../objectiveai-json-schema/mcp.resource.ListResourcesResult.json"
+                ))
+                .expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::ReadResourceRequestParams { .. } => {
@@ -82,34 +97,39 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::ReadResourceResult { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../../objectiveai-json-schema/mcp.resource.ReadResourceResult.json"),
-                ).expect("embedded JSON Schema must parse");
+                let schema: serde_json::Value = serde_json::from_str(include_str!(
+                    "../../../../../objectiveai-json-schema/mcp.resource.ReadResourceResult.json"
+                ))
+                .expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::Resource { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../../objectiveai-json-schema/mcp.resource.Resource.json"),
-                ).expect("embedded JSON Schema must parse");
+                let schema: serde_json::Value = serde_json::from_str(include_str!(
+                    "../../../../../objectiveai-json-schema/mcp.resource.Resource.json"
+                ))
+                .expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
         }

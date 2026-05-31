@@ -114,7 +114,9 @@ fn run_and_summarize(base: &Path, name: &str) -> Summary {
         if v.get("type").and_then(|t| t.as_str()) != Some("notification") {
             continue;
         }
-        let Some(value) = v.get("value") else { continue };
+        let Some(value) = v.get("value") else {
+            continue;
+        };
         let Some(text) = value.get("line").and_then(|l| l.as_str()) else {
             continue;
         };

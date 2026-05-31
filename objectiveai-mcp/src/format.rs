@@ -36,10 +36,10 @@
 //! and the result is a **valid JSON array of strings** — the
 //! property the test suite locks in.
 //!
-//! # `kind` stripping
+//! # `type` stripping
 //!
-//! Generic `NotificationValue`s flow through `nv_json_without_kind`
-//! before reaching `from_text_or_data_url`. The `kind` field is an
+//! Generic `NotificationValue`s flow through `nv_json_without_type`
+//! before reaching `from_text_or_data_url`. The `type` field is an
 //! internal-cli wire convenience — MCP consumers don't need it.
 //!
 //! # `agent_id` stripping
@@ -50,7 +50,9 @@
 //! before serialization.
 
 use objectiveai_sdk::agent::completions::message::RichContentPart;
-use objectiveai_sdk::cli::output::{Error, NotificationValue, Output, ToolLine};
+use objectiveai_sdk::cli::output::{
+    Error, NotificationValue, Output, ToolLine, TypedNotificationValue,
+};
 use objectiveai_sdk::filesystem::logs::LogContent;
 use objectiveai_sdk::mcp::tool::ContentBlock;
 use rmcp::model::Content;
@@ -108,27 +110,29 @@ fn output_to_rich_content_part(output: &Output) -> RichContentPart {
             RichContentPart::from_text_or_data_url(body)
         }
         Output::Notification(n) => match &n.value {
-            NotificationValue::ToolLine(tl) if is_stderr(tl) => {
-                let body = serde_json::to_string(tl)
-                    .unwrap_or_else(|_| String::from("<serialize error>"));
+            NotificationValue::Typed(TypedNotificationValue::ToolLine(tl)) if is_stderr(tl) => {
+                let body =
+                    serde_json::to_string(tl).unwrap_or_else(|_| String::from("<serialize error>"));
                 RichContentPart::from_text_or_data_url(body)
             }
-            NotificationValue::ToolLine(tl) => {
+            NotificationValue::Typed(TypedNotificationValue::ToolLine(tl)) => {
                 RichContentPart::from_text_or_data_url(tl.line.clone())
             }
-            NotificationValue::PluginNotification { value: Value::String(s) } => {
-                RichContentPart::from_text_or_data_url(s.clone())
-            }
-            NotificationValue::PluginNotification { value: other } => {
+            NotificationValue::Typed(TypedNotificationValue::PluginNotification {
+                value: Value::String(s),
+            }) => RichContentPart::from_text_or_data_url(s.clone()),
+            NotificationValue::Typed(TypedNotificationValue::PluginNotification {
+                value: other,
+            }) => {
                 let body = serde_json::to_string(other)
                     .unwrap_or_else(|_| String::from("<serialize error>"));
                 RichContentPart::from_text_or_data_url(body)
             }
-            NotificationValue::LogContent(log) => {
+            NotificationValue::Typed(TypedNotificationValue::LogContent(log)) => {
                 RichContentPart::from(log.clone())
             }
             other => {
-                let body = nv_json_without_kind(other);
+                let body = nv_json_without_type(other);
                 RichContentPart::from_text_or_data_url(body)
             }
         },
@@ -176,17 +180,17 @@ fn quoted_text_block(s: &str) -> Content {
     Content::text(format!("\"{}\"", json_escape::escape_str(s)))
 }
 
-/// Serialize a `NotificationValue` to JSON, then drop its `"kind"`
+/// Serialize a `NotificationValue` to JSON, then drop its `"type"`
 /// discriminator. The discriminator is an internal-cli wire
 /// convenience — MCP consumers don't need it.
-fn nv_json_without_kind(nv: &NotificationValue) -> String {
+fn nv_json_without_type(nv: &NotificationValue) -> String {
     let mut v = serde_json::to_value(nv)
         .unwrap_or_else(|_| Value::String(String::from("<serialize error>")));
     if let Value::Object(map) = &mut v {
         // `serde_json::Map` is `indexmap`-backed under the SDK's
         // `preserve_order` feature, so `shift_remove` preserves
         // the remaining fields' source order.
-        map.shift_remove("kind");
+        map.shift_remove("type");
     }
     serde_json::to_string(&v).unwrap_or_else(|_| String::from("<serialize error>"))
 }
@@ -212,29 +216,22 @@ mod tests {
     use objectiveai_sdk::agent::completions::message::{
         File as FileBlob, ImageUrl, InputAudio, VideoUrl,
     };
-    use objectiveai_sdk::cli::output::{
-        Level, Notification, Ok as NotifOk, ToolLine,
-    };
+    use objectiveai_sdk::cli::output::{Level, Notification, Ok as NotifOk, ToolLine};
     use objectiveai_sdk::filesystem::logs::LogContent;
     use rmcp::model::RawContent;
     use serde_json::{Value, json};
 
     fn notif(value: NotificationValue) -> Output {
-        Output::Notification(Notification {
-            value,
-            agent_id: None,
-        })
+        Output::Notification(Notification { value })
     }
 
     fn notif_with_agent(value: NotificationValue, agent_id: &str) -> Output {
-        Output::Notification(Notification {
-            value,
-            agent_id: Some(agent_id.to_string()),
-        })
+        Output::Notification(Notification { value })
     }
 
     fn err(message: &str) -> Output {
         Output::Error(Error {
+            r#type: objectiveai_sdk::cli::output::ErrorType::Error,
             level: Level::Error,
             fatal: false,
             message: Value::String(message.to_string()),
@@ -244,6 +241,7 @@ mod tests {
 
     fn err_with_agent(message: &str, agent_id: &str) -> Output {
         Output::Error(Error {
+            r#type: objectiveai_sdk::cli::output::ErrorType::Error,
             level: Level::Error,
             fatal: false,
             message: Value::String(message.to_string()),
@@ -252,19 +250,23 @@ mod tests {
     }
 
     fn stdout_line(line: &str) -> Output {
-        notif(NotificationValue::ToolLine(ToolLine {
-            line: line.to_string(),
-            stdout: Some(true),
-            stderr: None,
-        }))
+        notif(NotificationValue::Typed(TypedNotificationValue::ToolLine(
+            ToolLine {
+                line: line.to_string(),
+                stdout: Some(true),
+                stderr: None,
+            },
+        )))
     }
 
     fn stderr_line(line: &str) -> Output {
-        notif(NotificationValue::ToolLine(ToolLine {
-            line: line.to_string(),
-            stdout: None,
-            stderr: Some(true),
-        }))
+        notif(NotificationValue::Typed(TypedNotificationValue::ToolLine(
+            ToolLine {
+                line: line.to_string(),
+                stdout: None,
+                stderr: Some(true),
+            },
+        )))
     }
 
     /// Concatenate the response's text-content bodies and skip
@@ -300,7 +302,9 @@ mod tests {
 
     #[test]
     fn single_ok_strips_kind_and_quotes() {
-        let outputs = vec![notif(NotificationValue::Ok(NotifOk { ok: true }))];
+        let outputs = vec![notif(NotificationValue::Typed(TypedNotificationValue::Ok(
+            NotifOk { ok: true },
+        )))];
         let blocks = format_outputs(&outputs);
         let body = collect_body_strip_media(&blocks);
         let arr = parse_array_of_strings(&body);
@@ -331,9 +335,11 @@ mod tests {
 
     #[test]
     fn plugin_notification_string_payload() {
-        let outputs = vec![notif(NotificationValue::PluginNotification {
-            value: Value::String("plain text".into()),
-        })];
+        let outputs = vec![notif(NotificationValue::Typed(
+            TypedNotificationValue::PluginNotification {
+                value: Value::String("plain text".into()),
+            },
+        ))];
         let blocks = format_outputs(&outputs);
         let body = collect_body_strip_media(&blocks);
         let arr = parse_array_of_strings(&body);
@@ -342,9 +348,11 @@ mod tests {
 
     #[test]
     fn plugin_notification_object_payload() {
-        let outputs = vec![notif(NotificationValue::PluginNotification {
-            value: json!({"hello":"world"}),
-        })];
+        let outputs = vec![notif(NotificationValue::Typed(
+            TypedNotificationValue::PluginNotification {
+                value: json!({"hello":"world"}),
+            },
+        ))];
         let blocks = format_outputs(&outputs);
         let body = collect_body_strip_media(&blocks);
         let arr = parse_array_of_strings(&body);
@@ -368,7 +376,9 @@ mod tests {
         let outputs = vec![
             stdout_line("a"),
             stderr_line("b"),
-            notif(NotificationValue::Ok(NotifOk { ok: true })),
+            notif(NotificationValue::Typed(TypedNotificationValue::Ok(
+                NotifOk { ok: true },
+            ))),
         ];
         let blocks = format_outputs(&outputs);
         let body = collect_body_strip_media(&blocks);
@@ -383,8 +393,10 @@ mod tests {
 
     #[test]
     fn log_content_text() {
-        let outputs = vec![notif(NotificationValue::LogContent(
-            LogContent::Text { text: "hello".into() },
+        let outputs = vec![notif(NotificationValue::Typed(
+            TypedNotificationValue::LogContent(LogContent::Text {
+                text: "hello".into(),
+            }),
         ))];
         let blocks = format_outputs(&outputs);
         let body = collect_body_strip_media(&blocks);
@@ -394,8 +406,10 @@ mod tests {
 
     #[test]
     fn log_content_json_value() {
-        let outputs = vec![notif(NotificationValue::LogContent(
-            LogContent::Json { content: json!({"x":1}) },
+        let outputs = vec![notif(NotificationValue::Typed(
+            TypedNotificationValue::LogContent(LogContent::Json {
+                content: json!({"x":1}),
+            }),
         ))];
         let blocks = format_outputs(&outputs);
         let body = collect_body_strip_media(&blocks);
@@ -405,19 +419,17 @@ mod tests {
 
     #[test]
     fn log_content_image_emits_media_block() {
-        let outputs = vec![notif(NotificationValue::LogContent(
-            LogContent::Image {
+        let outputs = vec![notif(NotificationValue::Typed(
+            TypedNotificationValue::LogContent(LogContent::Image {
                 image_url: ImageUrl {
                     url: "data:image/png;base64,iVBORw0KGgo".into(),
                     detail: None,
                 },
-            },
+            }),
         ))];
         let blocks = format_outputs(&outputs);
         assert!(
-            blocks
-                .iter()
-                .any(|b| matches!(b.raw, RawContent::Image(_))),
+            blocks.iter().any(|b| matches!(b.raw, RawContent::Image(_))),
             "expected an Image content block"
         );
         let body = collect_body_strip_media(&blocks);
@@ -427,19 +439,17 @@ mod tests {
 
     #[test]
     fn log_content_audio_emits_audio_block() {
-        let outputs = vec![notif(NotificationValue::LogContent(
-            LogContent::Audio {
+        let outputs = vec![notif(NotificationValue::Typed(
+            TypedNotificationValue::LogContent(LogContent::Audio {
                 input_audio: InputAudio {
                     data: "SUQzBAA".into(),
                     format: "audio/mpeg".into(),
                 },
-            },
+            }),
         ))];
         let blocks = format_outputs(&outputs);
         assert!(
-            blocks
-                .iter()
-                .any(|b| matches!(b.raw, RawContent::Audio(_))),
+            blocks.iter().any(|b| matches!(b.raw, RawContent::Audio(_))),
             "expected an Audio content block"
         );
         let body = collect_body_strip_media(&blocks);
@@ -456,12 +466,12 @@ mod tests {
     /// the data URL survives as a single string in the array.
     #[test]
     fn log_content_video_lands_as_text_carrier() {
-        let outputs = vec![notif(NotificationValue::LogContent(
-            LogContent::Video {
+        let outputs = vec![notif(NotificationValue::Typed(
+            TypedNotificationValue::LogContent(LogContent::Video {
                 video_url: VideoUrl {
                     url: "data:video/mp4;base64,AAAA".into(),
                 },
-            },
+            }),
         ))];
         let blocks = format_outputs(&outputs);
         let body = collect_body_strip_media(&blocks);
@@ -474,15 +484,15 @@ mod tests {
     /// sees a Text-shaped ContentBlock and emits a quoted string.
     #[test]
     fn log_content_file_lands_as_text_carrier() {
-        let outputs = vec![notif(NotificationValue::LogContent(
-            LogContent::File {
+        let outputs = vec![notif(NotificationValue::Typed(
+            TypedNotificationValue::LogContent(LogContent::File {
                 file: FileBlob {
                     file_data: Some("JVBERi0".into()),
                     filename: Some("report.pdf".into()),
                     file_id: None,
                     file_url: None,
                 },
-            },
+            }),
         ))];
         let blocks = format_outputs(&outputs);
         let body = collect_body_strip_media(&blocks);
@@ -500,12 +510,14 @@ mod tests {
         // [stdout "before", image, stderr "after"]
         let outputs = vec![
             stdout_line("before"),
-            notif(NotificationValue::LogContent(LogContent::Image {
-                image_url: ImageUrl {
-                    url: "data:image/png;base64,iVBORw0KGgo".into(),
-                    detail: None,
-                },
-            })),
+            notif(NotificationValue::Typed(
+                TypedNotificationValue::LogContent(LogContent::Image {
+                    image_url: ImageUrl {
+                        url: "data:image/png;base64,iVBORw0KGgo".into(),
+                        detail: None,
+                    },
+                }),
+            )),
             stderr_line("after"),
         ];
         let blocks = format_outputs(&outputs);
@@ -541,7 +553,7 @@ mod tests {
     #[test]
     fn agent_id_stripped_from_notifications() {
         let outputs = vec![notif_with_agent(
-            NotificationValue::Ok(NotifOk { ok: true }),
+            NotificationValue::Typed(TypedNotificationValue::Ok(NotifOk { ok: true })),
             "agent-y",
         )];
         let blocks = format_outputs(&outputs);
@@ -551,7 +563,9 @@ mod tests {
 
     #[test]
     fn kind_discriminator_is_stripped() {
-        let outputs = vec![notif(NotificationValue::Ok(NotifOk { ok: true }))];
+        let outputs = vec![notif(NotificationValue::Typed(TypedNotificationValue::Ok(
+            NotifOk { ok: true },
+        )))];
         let blocks = format_outputs(&outputs);
         let body = collect_body_strip_media(&blocks);
         assert!(

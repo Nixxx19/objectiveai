@@ -16,7 +16,9 @@ pub struct ContinuationFields {
 
 /// Resolves continuation fields into a base64-encoded continuation string,
 /// or None if no continuation was provided.
-pub fn resolve_continuation(fields: ContinuationFields) -> Result<Option<String>, crate::error::Error> {
+pub fn resolve_continuation(
+    fields: ContinuationFields,
+) -> Result<Option<String>, crate::error::Error> {
     // From response — already base64-encoded, pass through.
     if let Some(s) = fields.openrouter_from_response {
         return Ok(Some(s));

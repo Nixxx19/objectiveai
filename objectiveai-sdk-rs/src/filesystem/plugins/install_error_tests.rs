@@ -6,7 +6,8 @@ use std::path::PathBuf;
 fn install_error_display_strings_are_useful() {
     let e = InstallError::ManifestBadStatus {
         code: reqwest::StatusCode::NOT_FOUND,
-        url: "https://raw.githubusercontent.com/o/r/HEAD/objectiveai.json".to_string(),
+        url: "https://raw.githubusercontent.com/o/r/HEAD/objectiveai.json"
+            .to_string(),
         body: "Not Found".to_string(),
     };
     let s = e.to_string();
@@ -16,7 +17,8 @@ fn install_error_display_strings_are_useful() {
 
     let e = InstallError::BinaryBadStatus {
         code: reqwest::StatusCode::FORBIDDEN,
-        url: "https://github.com/o/r/releases/download/v1.0.0/myplugin".to_string(),
+        url: "https://github.com/o/r/releases/download/v1.0.0/myplugin"
+            .to_string(),
     };
     let s = e.to_string();
     assert!(s.contains("403"), "{s}");
@@ -57,7 +59,10 @@ fn build_headers_accepts_valid_pair() {
     let mut h = IndexMap::new();
     h.insert("Authorization".to_string(), "token abc".to_string());
     let map = build_headers(Some(&h)).unwrap();
-    assert_eq!(map.get("authorization").unwrap().to_str().unwrap(), "token abc");
+    assert_eq!(
+        map.get("authorization").unwrap().to_str().unwrap(),
+        "token abc"
+    );
 }
 
 #[test]

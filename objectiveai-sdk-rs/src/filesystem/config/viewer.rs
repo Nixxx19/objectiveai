@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 /// A generated secret/signature pair for viewer authentication.
 ///
@@ -20,19 +20,26 @@ pub struct ViewerSecretSignaturePair {
 /// The secret is a random 64-character hex string. The signature is
 /// `sha256=<SHA256(secret)>` — a one-way derivation that cannot be reversed.
 pub fn generate_viewer_secret_signature_pair() -> ViewerSecretSignaturePair {
-    use sha2::{Sha256, Digest};
+    use sha2::{Digest, Sha256};
 
     let mut bytes = [0u8; 32];
     rand::fill(&mut bytes);
     let secret: String = bytes.iter().map(|b| format!("{:02x}", b)).collect();
 
     let hash = Sha256::digest(secret.as_bytes());
-    let signature = format!("sha256={}", hash.iter().map(|b| format!("{:02x}", b)).collect::<String>());
+    let signature = format!(
+        "sha256={}",
+        hash.iter()
+            .map(|b| format!("{:02x}", b))
+            .collect::<String>()
+    );
 
     ViewerSecretSignaturePair { secret, signature }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(
+    Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema,
+)]
 #[schemars(rename = "filesystem.config.ViewerConfig")]
 pub struct ViewerConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -93,7 +100,10 @@ impl ViewerConfig {
         self.signature = Some(value.into());
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
+    pub fn jq(
+        &self,
+        filter: &str,
+    ) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::super::run_jq(self, filter)
     }
 }

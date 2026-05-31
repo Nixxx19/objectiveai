@@ -36,11 +36,14 @@ fn manifest_minimal_roundtrip() {
 #[test]
 fn manifest_full_roundtrip() {
     let m = Manifest {
-        description: "Generate viral psyops content from a topic spec".to_string(),
+        description: "Generate viral psyops content from a topic spec"
+            .to_string(),
         version: "0.3.1".to_string(),
         owner: "wiggidy".to_string(),
         author: Some("Wiggidy".to_string()),
-        homepage: Some("https://github.com/Wiggidy/psychological-operations".to_string()),
+        homepage: Some(
+            "https://github.com/Wiggidy/psychological-operations".to_string(),
+        ),
         license: Some("MIT".to_string()),
         binaries: Binaries::default(),
         viewer_zip: None,
@@ -76,7 +79,8 @@ fn manifest_with_name_and_source_field_order() {
             mobile_ready: false,
             mcp_servers: Vec::new(),
         },
-        source: "/home/user/.objectiveai/plugins/psyops.manifest.json".to_string(),
+        source: "/home/user/.objectiveai/plugins/psyops.manifest.json"
+            .to_string(),
     };
     let s = serde_json::to_string(&m).unwrap();
     // With preserve_order, name comes first, the flattened manifest
@@ -104,7 +108,10 @@ fn manifest_with_name_and_source_field_order() {
     assert!(back.manifest.homepage.is_none());
     assert_eq!(back.manifest.license.as_deref(), Some("MIT"));
     assert!(back.manifest.binaries.is_empty());
-    assert_eq!(back.source, "/home/user/.objectiveai/plugins/psyops.manifest.json");
+    assert_eq!(
+        back.source,
+        "/home/user/.objectiveai/plugins/psyops.manifest.json"
+    );
 }
 
 #[test]
@@ -152,10 +159,28 @@ fn manifest_with_binaries_roundtrip() {
     let json = serde_json::to_value(&m).unwrap();
     let back: Manifest = serde_json::from_value(json).unwrap();
     assert_eq!(back.binaries.len(), 4);
-    assert_eq!(back.binaries.get(Platform::LinuxX86_64).map(String::as_str), Some("psyops-linux-x86_64"));
-    assert_eq!(back.binaries.get(Platform::LinuxAarch64).map(String::as_str), Some("psyops-linux-aarch64"));
-    assert_eq!(back.binaries.get(Platform::WindowsX86_64).map(String::as_str), Some("psyops-windows-x86_64.exe"));
-    assert_eq!(back.binaries.get(Platform::MacosAarch64).map(String::as_str), Some("psyops-macos-aarch64"));
+    assert_eq!(
+        back.binaries.get(Platform::LinuxX86_64).map(String::as_str),
+        Some("psyops-linux-x86_64")
+    );
+    assert_eq!(
+        back.binaries
+            .get(Platform::LinuxAarch64)
+            .map(String::as_str),
+        Some("psyops-linux-aarch64")
+    );
+    assert_eq!(
+        back.binaries
+            .get(Platform::WindowsX86_64)
+            .map(String::as_str),
+        Some("psyops-windows-x86_64.exe")
+    );
+    assert_eq!(
+        back.binaries
+            .get(Platform::MacosAarch64)
+            .map(String::as_str),
+        Some("psyops-macos-aarch64")
+    );
 }
 
 #[test]
@@ -176,7 +201,10 @@ fn manifest_omits_empty_binaries_field() {
     };
     let json = serde_json::to_value(&m).unwrap();
     let obj = json.as_object().unwrap();
-    assert!(!obj.contains_key("binaries"), "empty map should be skipped, got {obj:?}");
+    assert!(
+        !obj.contains_key("binaries"),
+        "empty map should be skipped, got {obj:?}"
+    );
 }
 
 #[test]
@@ -214,17 +242,38 @@ fn manifest_with_binaries_field_order() {
     let i_la = s.find("linux_aarch64").unwrap();
     let i_wx = s.find("windows_x86_64").unwrap();
     let i_ma = s.find("macos_aarch64").unwrap();
-    assert!(i_lx < i_la, "linux_x86_64 should come before linux_aarch64: {s}");
-    assert!(i_la < i_wx, "linux_aarch64 should come before windows_x86_64: {s}");
-    assert!(i_wx < i_ma, "windows_x86_64 should come before macos_aarch64: {s}");
+    assert!(
+        i_lx < i_la,
+        "linux_x86_64 should come before linux_aarch64: {s}"
+    );
+    assert!(
+        i_la < i_wx,
+        "linux_aarch64 should come before windows_x86_64: {s}"
+    );
+    assert!(
+        i_wx < i_ma,
+        "windows_x86_64 should come before macos_aarch64: {s}"
+    );
 
     let back: Manifest = serde_json::from_str(&s).unwrap();
-    assert_eq!(back.binaries.linux_x86_64.as_deref(), Some("psyops-linux-x86_64"));
-    assert_eq!(back.binaries.linux_aarch64.as_deref(), Some("psyops-linux-aarch64"));
-    assert_eq!(back.binaries.windows_x86_64.as_deref(), Some("psyops-windows-x86_64.exe"));
+    assert_eq!(
+        back.binaries.linux_x86_64.as_deref(),
+        Some("psyops-linux-x86_64")
+    );
+    assert_eq!(
+        back.binaries.linux_aarch64.as_deref(),
+        Some("psyops-linux-aarch64")
+    );
+    assert_eq!(
+        back.binaries.windows_x86_64.as_deref(),
+        Some("psyops-windows-x86_64.exe")
+    );
     assert!(back.binaries.windows_aarch64.is_none());
     assert!(back.binaries.macos_x86_64.is_none());
-    assert_eq!(back.binaries.macos_aarch64.as_deref(), Some("psyops-macos-aarch64"));
+    assert_eq!(
+        back.binaries.macos_aarch64.as_deref(),
+        Some("psyops-macos-aarch64")
+    );
 }
 
 #[test]
@@ -250,7 +299,10 @@ fn manifest_with_sparse_binaries_is_valid() {
     let s = serde_json::to_string(&m).unwrap();
     let back: Manifest = serde_json::from_str(&s).unwrap();
     assert_eq!(back.binaries.len(), 1);
-    assert_eq!(back.binaries.get(Platform::LinuxX86_64).map(String::as_str), Some("psyops-linux-x86_64"));
+    assert_eq!(
+        back.binaries.get(Platform::LinuxX86_64).map(String::as_str),
+        Some("psyops-linux-x86_64")
+    );
     assert!(back.binaries.get(Platform::LinuxAarch64).is_none());
     assert!(back.binaries.get(Platform::WindowsX86_64).is_none());
     assert!(back.binaries.get(Platform::WindowsAarch64).is_none());

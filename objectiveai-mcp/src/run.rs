@@ -8,8 +8,7 @@ use std::sync::Arc;
 
 use envconfig::Envconfig;
 use rmcp::transport::streamable_http_server::{
-    StreamableHttpServerConfig, StreamableHttpService,
-    session::local::LocalSessionManager,
+    StreamableHttpServerConfig, StreamableHttpService, session::local::LocalSessionManager,
 };
 use tokio_util::sync::CancellationToken;
 
@@ -36,9 +35,9 @@ impl EnvConfigBuilder {
         ConfigBuilder {
             address: self.address,
             port: self.port,
-            suppress_output: self.suppress_output.map(|v| {
-                matches!(v.to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on")
-            }),
+            suppress_output: self
+                .suppress_output
+                .map(|v| matches!(v.to_ascii_lowercase().as_str(), "1" | "true" | "yes" | "on")),
             config_base_dir: self.config_base_dir,
             commit_author_name: self.commit_author_name,
             commit_author_email: self.commit_author_email,

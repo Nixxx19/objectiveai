@@ -115,7 +115,11 @@ async fn poll_until<F: Fn() -> bool>(timeout: Duration, pred: F) -> Result<(), (
 /// happens to dispatch one of these tools without setting the env
 /// still gets a valid (just session-less) output.
 fn install_count_tool_over_echo_arglen() {
-    let exec_name = if cfg!(windows) { "echo-arglen.exe" } else { "echo-arglen" };
+    let exec_name = if cfg!(windows) {
+        "echo-arglen.exe"
+    } else {
+        "echo-arglen"
+    };
     let dest = cli_test_util::tests_dir().join("tools").join(exec_name);
     assert!(
         dest.exists(),
@@ -124,8 +128,7 @@ fn install_count_tool_over_echo_arglen() {
         dest.display(),
     );
     let bin = count_tool_binary();
-    std::fs::copy(&bin, &dest)
-        .unwrap_or_else(|e| panic!("overwrite {}: {e}", dest.display()));
+    std::fs::copy(&bin, &dest).unwrap_or_else(|e| panic!("overwrite {}: {e}", dest.display()));
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -165,18 +168,22 @@ fn spawn_agent(base_dir: &Path, agent_json: &str, seed: i64) -> String {
     let lines = run_cli_with_base_dir(
         base_dir,
         &[
-            "agents", "spawn",
-            "--agent-inline", agent_json,
-            "--simple", "go",
-            "--seed", &seed_str,
+            "agents",
+            "spawn",
+            "--agent-inline",
+            agent_json,
+            "--simple",
+            "go",
+            "--seed",
+            &seed_str,
         ],
     );
     let spawned = lines
         .iter()
-        .find(|l| l.pointer("/value/kind") == Some(&json!("spawned")))
+        .find(|l| l.pointer("/type") == Some(&json!("spawned")))
         .expect("agents spawn must emit Spawned");
     spawned
-        .pointer("/value/agent_id")
+        .pointer("/agent_id")
         .and_then(|v| v.as_str())
         .expect("Spawned.agent_id")
         .to_string()
@@ -189,18 +196,13 @@ async fn wait_for_completion(base_dir: &Path, spawn_id: &str) {
     let response_cont_path = base_dir
         .join("logs/agents/completions/response/continuation")
         .join(format!("{spawn_id}.json"));
-    let socket_path = base_dir
-        .join("pipes/cli")
-        .join(spawn_id)
-        .join("socket");
+    let socket_path = base_dir.join("pipes/cli").join(spawn_id).join("socket");
     poll_until(Duration::from_secs(180), || {
         response_cont_path.exists() && !socket_path.exists()
     })
     .await
     .unwrap_or_else(|()| {
-        panic!(
-            "cli-stream did not flush continuation + tear down socket for {spawn_id} in 180s",
-        )
+        panic!("cli-stream did not flush continuation + tear down socket for {spawn_id} in 180s",)
     });
 }
 
@@ -212,9 +214,7 @@ fn continue_agent_sync(base_dir: &Path, spawn_id: &str, seed: i64) {
     let _ = run_cli_with_base_dir(
         base_dir,
         &[
-            "agents", "message", spawn_id,
-            "--simple", "more",
-            "--seed", &seed_str,
+            "agents", "message", spawn_id, "--simple", "more", "--seed", &seed_str,
         ],
     );
 }
@@ -226,10 +226,10 @@ fn read_tool_response_ids(base_dir: &Path, sub_id: &str) -> Vec<i64> {
     let lines = run_cli_with_base_dir(base_dir, &["agents", "read", "all", sub_id]);
     let agent_items = lines
         .iter()
-        .find(|l| l.pointer("/value/kind") == Some(&json!("agent_items")))
+        .find(|l| l.pointer("/type") == Some(&json!("agent_items")))
         .expect("agents read all must emit AgentItems");
     let items = agent_items
-        .pointer("/value/items")
+        .pointer("/items")
         .and_then(|v| v.as_array())
         .expect("AgentItems.items");
 
@@ -267,8 +267,8 @@ fn read_count_for_id(base_dir: &Path, id: i64) -> Option<u64> {
     let lines = run_cli_with_base_dir(base_dir, &["agents", "read", "id", &id_str]);
     let value = lines
         .iter()
-        .find(|l| l.pointer("/value/content").is_some())
-        .and_then(|l| l.pointer("/value/content").cloned())?;
+        .find(|l| l.pointer("/content").is_some())
+        .and_then(|l| l.pointer("/content").cloned())?;
     extract_first_u64(&value)
 }
 
@@ -338,11 +338,9 @@ async fn two_agents_continuations_count_persists_per_session() {
             for _ in 0..2 {
                 let id_c = id.clone();
                 let base_c = base_dir.clone();
-                tokio::task::spawn_blocking(move || {
-                    continue_agent_sync(&base_c, &id_c, seed)
-                })
-                .await
-                .expect("continue_agent task panicked");
+                tokio::task::spawn_blocking(move || continue_agent_sync(&base_c, &id_c, seed))
+                    .await
+                    .expect("continue_agent task panicked");
                 wait_for_completion(&base_dir, &id).await;
             }
             id
@@ -379,13 +377,15 @@ async fn two_agents_continuations_count_persists_per_session() {
     // Per-agent persistence: if the counter had reset across any
     // turn, max would lag behind the total response count.
     assert_eq!(
-        max_a as usize, ids_a.len(),
+        max_a as usize,
+        ids_a.len(),
         "agent A's max count ({max_a}) must equal its tool-response item count ({}) — \
          a reset would leave it lower",
         ids_a.len(),
     );
     assert_eq!(
-        max_b as usize, ids_b.len(),
+        max_b as usize,
+        ids_b.len(),
         "agent B's max count ({max_b}) must equal its tool-response item count ({}) — \
          a reset would leave it lower",
         ids_b.len(),

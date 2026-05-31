@@ -207,7 +207,9 @@ impl<C> LogWriter<C> {
         content: &RichContent,
     ) -> Result<PendingNotification, super::super::Error> {
         match &self.queue {
-            Some(q) => q.write_notification(agent_id, response_id, content).await,
+            Some(q) => {
+                q.write_notification(agent_id, response_id, content).await
+            }
             None => Ok(PendingNotification {
                 agent_id: agent_id.to_string(),
                 response_id: response_id.to_string(),
@@ -378,7 +380,11 @@ impl<C> LogWriter<C> {
                                 now,
                             )
                             .await?;
-                        Ok(if inserted { Some((agent_id, kind)) } else { None })
+                        Ok(if inserted {
+                            Some((agent_id, kind))
+                        } else {
+                            None
+                        })
                     }));
                 }
             }
@@ -440,7 +446,14 @@ impl<C> LogWriter<C> {
                     let response_id = row.response_id;
                     ops.push(Box::pin(async move {
                         queue
-                            .insert(&agent_id, &response_id, kind, path, ts, index)
+                            .insert(
+                                &agent_id,
+                                &response_id,
+                                kind,
+                                path,
+                                ts,
+                                index,
+                            )
                             .await?;
                         Ok(Some((agent_id, kind)))
                     }));
@@ -506,7 +519,10 @@ impl<C> LogWriter<C> {
             let notif_agent = notif.agent_id.clone();
             ops.push(Box::pin(async move {
                 queue.insert_notification(notif).await?;
-                Ok(Some((notif_agent, MessageKind::AgentCompletionNotification)))
+                Ok(Some((
+                    notif_agent,
+                    MessageKind::AgentCompletionNotification,
+                )))
             }));
         }
         while let Some(result) = ops.next().await {

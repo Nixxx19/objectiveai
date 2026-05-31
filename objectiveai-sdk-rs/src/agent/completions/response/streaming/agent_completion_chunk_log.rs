@@ -19,7 +19,9 @@ use crate::agent::completions::response;
 use crate::filesystem::logs::LogReference;
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
-#[schemars(rename = "agent.completions.response.streaming.AgentCompletionChunkLog")]
+#[schemars(
+    rename = "agent.completions.response.streaming.AgentCompletionChunkLog"
+)]
 pub struct AgentCompletionChunkLog {
     pub id: String,
     pub created: u64,

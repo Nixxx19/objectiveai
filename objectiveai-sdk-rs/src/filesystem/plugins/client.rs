@@ -24,7 +24,9 @@ use super::{Manifest, ManifestWithNameAndSource};
 /// / unreadable / malformed files.
 async fn parse_manifest_file(path: &Path) -> Option<ManifestWithNameAndSource> {
     let bytes = tokio::fs::read(path).await.ok()?;
-    if let Ok(full) = serde_json::from_slice::<ManifestWithNameAndSource>(&bytes) {
+    if let Ok(full) =
+        serde_json::from_slice::<ManifestWithNameAndSource>(&bytes)
+    {
         // Same validate gate as the install path: malformed
         // viewer-source combos shouldn't surface as installed plugins.
         full.manifest.validate().ok()?;
@@ -34,7 +36,11 @@ async fn parse_manifest_file(path: &Path) -> Option<ManifestWithNameAndSource> {
     manifest.validate().ok()?;
     let name = path.file_stem()?.to_str()?.to_string();
     let source = path.to_string_lossy().into_owned();
-    Some(ManifestWithNameAndSource { name, manifest, source })
+    Some(ManifestWithNameAndSource {
+        name,
+        manifest,
+        source,
+    })
 }
 
 impl Client {
@@ -55,8 +61,11 @@ impl Client {
     /// Windows. Used by both `install_plugin` (write target) and
     /// `resolve_plugin` (read target) so the two cannot drift.
     pub fn plugin_binary_path(&self, name: &str) -> PathBuf {
-        self.plugin_dir(name)
-            .join(if cfg!(windows) { "plugin.exe" } else { "plugin" })
+        self.plugin_dir(name).join(if cfg!(windows) {
+            "plugin.exe"
+        } else {
+            "plugin"
+        })
     }
 
     /// Resolve a plugin name to its executable path. Lookup order:
@@ -104,7 +113,8 @@ impl Client {
         let mut read_dir = tokio::fs::read_dir(&dir).await.ok()?;
         while let Ok(Some(entry)) = read_dir.next_entry().await {
             let path = entry.path();
-            let Some(file_name) = path.file_name().and_then(|s| s.to_str()) else {
+            let Some(file_name) = path.file_name().and_then(|s| s.to_str())
+            else {
                 continue;
             };
             if file_name == "plugin" || file_name == "plugin.exe" {
@@ -134,7 +144,10 @@ impl Client {
     /// verbatim; otherwise the wrapper is synthesized with
     /// `name = <name>` and `source = absolute_path`. Returns `None`
     /// if the file is missing, unreadable, or malformed.
-    pub async fn get_plugin(&self, name: &str) -> Option<ManifestWithNameAndSource> {
+    pub async fn get_plugin(
+        &self,
+        name: &str,
+    ) -> Option<ManifestWithNameAndSource> {
         let path = self.plugins_dir().join(format!("{name}.json"));
         parse_manifest_file(&path).await
     }
@@ -155,7 +168,11 @@ impl Client {
     /// The directory scan is sequential (intrinsic to `read_dir`) but
     /// per-file read+parse runs concurrently via
     /// [`futures::future::join_all`].
-    pub async fn list_plugins(&self, offset: usize, limit: usize) -> Vec<ManifestWithNameAndSource> {
+    pub async fn list_plugins(
+        &self,
+        offset: usize,
+        limit: usize,
+    ) -> Vec<ManifestWithNameAndSource> {
         let dir = self.plugins_dir();
         let Ok(mut read_dir) = tokio::fs::read_dir(&dir).await else {
             return Vec::new();
@@ -179,11 +196,12 @@ impl Client {
                 .as_secs();
             Some((modified, bundle))
         });
-        let mut entries: Vec<(u64, ManifestWithNameAndSource)> = futures::future::join_all(futures)
-            .await
-            .into_iter()
-            .flatten()
-            .collect();
+        let mut entries: Vec<(u64, ManifestWithNameAndSource)> =
+            futures::future::join_all(futures)
+                .await
+                .into_iter()
+                .flatten()
+                .collect();
         entries.sort_by(|a, b| b.0.cmp(&a.0));
         let iter = entries.into_iter().map(|(_, m)| m);
         if offset > 0 || limit < usize::MAX {
@@ -233,8 +251,10 @@ impl Client {
             .fetch_plugin_manifest(owner, repository, commit_sha, headers)
             .await?;
         let source = raw_manifest_url(owner, repository, commit_sha);
-        self.install_plugin_from_manifest(owner, repository, &manifest, &source, headers, upgrade)
-            .await
+        self.install_plugin_from_manifest(
+            owner, repository, &manifest, &source, headers, upgrade,
+        )
+        .await
     }
 
     /// Step 1 of `install_plugin`: fetch `<owner>/<repo>/<ref>/objectiveai.json`
@@ -305,10 +325,14 @@ impl Client {
     ) -> Result<bool, super::super::Error> {
         validate_install_inputs(owner, repository, commit_sha)?;
         let manifest = self
-            .fetch_plugin_manifest_impl(raw_base, owner, repository, commit_sha, headers)
+            .fetch_plugin_manifest_impl(
+                raw_base, owner, repository, commit_sha, headers,
+            )
             .await?;
         let reference = commit_sha.unwrap_or("HEAD");
-        let source = format!("{raw_base}/{owner}/{repository}/{reference}/objectiveai.json");
+        let source = format!(
+            "{raw_base}/{owner}/{repository}/{reference}/objectiveai.json"
+        );
         self.install_from_manifest_impl(
             releases_base,
             owner,
@@ -331,8 +355,10 @@ impl Client {
         commit_sha: Option<&str>,
         headers: Option<&indexmap::IndexMap<String, String>>,
     ) -> Result<Manifest, super::super::Error> {
-        self.fetch_plugin_manifest_impl(raw_base, owner, repository, commit_sha, headers)
-            .await
+        self.fetch_plugin_manifest_impl(
+            raw_base, owner, repository, commit_sha, headers,
+        )
+        .await
     }
 
     async fn fetch_plugin_manifest_impl(
@@ -346,8 +372,9 @@ impl Client {
         let http = reqwest::Client::new();
         let header_map = build_headers(headers)?;
         let reference = commit_sha.unwrap_or("HEAD");
-        let manifest_url =
-            format!("{raw_base}/{owner}/{repository}/{reference}/objectiveai.json");
+        let manifest_url = format!(
+            "{raw_base}/{owner}/{repository}/{reference}/objectiveai.json"
+        );
         let resp = http
             .get(&manifest_url)
             .headers(header_map)
@@ -464,7 +491,9 @@ impl Client {
                 .to_vec()
         };
 
-        let zip_bytes: Option<Vec<u8>> = if let Some(viewer_zip_name) = &manifest.viewer_zip {
+        let zip_bytes: Option<Vec<u8>> = if let Some(viewer_zip_name) =
+            &manifest.viewer_zip
+        {
             let viewer_url = format!(
                 "{releases_base}/{owner}/{repository}/releases/download/v{version}/{viewer_zip_name}",
                 version = manifest.version,
@@ -504,14 +533,15 @@ impl Client {
                 manifest,
                 source: source.to_string(),
             };
-            serde_json::to_vec_pretty(&bundle).map_err(super::InstallError::ManifestSerialize)?
+            serde_json::to_vec_pretty(&bundle)
+                .map_err(super::InstallError::ManifestSerialize)?
         };
 
         // 5. Plugin dir setup. Idempotent — preserves any pre-existing
         //    "extra data" the plugin's runtime created.
-        tokio::fs::create_dir_all(&plugin_dir)
-            .await
-            .map_err(|e| super::InstallError::PluginDirCreate(plugin_dir.clone(), e))?;
+        tokio::fs::create_dir_all(&plugin_dir).await.map_err(|e| {
+            super::InstallError::PluginDirCreate(plugin_dir.clone(), e)
+        })?;
 
         // 6. Concurrent write phase via try_join!. Three branches fan
         //    out, short-circuit on first error.
@@ -530,9 +560,9 @@ async fn write_binary_branch(
     binary_path: PathBuf,
     bytes: Vec<u8>,
 ) -> Result<(), super::InstallError> {
-    tokio::fs::write(&binary_path, &bytes)
-        .await
-        .map_err(|e| super::InstallError::BinaryWrite(binary_path.clone(), e))?;
+    tokio::fs::write(&binary_path, &bytes).await.map_err(|e| {
+        super::InstallError::BinaryWrite(binary_path.clone(), e)
+    })?;
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -552,9 +582,9 @@ async fn write_viewer_branch(
     let Some(bytes) = zip_bytes else {
         return Ok(());
     };
-    tokio::fs::create_dir_all(&viewer_dir)
-        .await
-        .map_err(|e| super::InstallError::ViewerZipExtract(viewer_dir.clone(), e.to_string()))?;
+    tokio::fs::create_dir_all(&viewer_dir).await.map_err(|e| {
+        super::InstallError::ViewerZipExtract(viewer_dir.clone(), e.to_string())
+    })?;
     let viewer_dir_for_blocking = viewer_dir.clone();
     tokio::task::spawn_blocking(move || {
         let cursor = std::io::Cursor::new(bytes);
@@ -565,8 +595,15 @@ async fn write_viewer_branch(
             .map_err(|e| format!("extract: {e}"))
     })
     .await
-    .map_err(|e| super::InstallError::ViewerZipExtract(viewer_dir.clone(), format!("join: {e}")))?
-    .map_err(|e| super::InstallError::ViewerZipExtract(viewer_dir.clone(), e))?;
+    .map_err(|e| {
+        super::InstallError::ViewerZipExtract(
+            viewer_dir.clone(),
+            format!("join: {e}"),
+        )
+    })?
+    .map_err(|e| {
+        super::InstallError::ViewerZipExtract(viewer_dir.clone(), e)
+    })?;
     Ok(())
 }
 
@@ -575,9 +612,9 @@ async fn write_manifest_branch(
     manifest_path: PathBuf,
     bytes: Vec<u8>,
 ) -> Result<(), super::InstallError> {
-    tokio::fs::write(&manifest_path, &bytes)
-        .await
-        .map_err(|e| super::InstallError::ManifestPersist(manifest_path.clone(), e))
+    tokio::fs::write(&manifest_path, &bytes).await.map_err(|e| {
+        super::InstallError::ManifestPersist(manifest_path.clone(), e)
+    })
 }
 
 /// Reject reserved plugin repository names before any install
@@ -600,7 +637,10 @@ fn check_repository_name(repository: &str) -> Result<(), super::InstallError> {
 /// through cleanly; the `.` -> `-` substitution happens when the tool
 /// name is materialized via [`super::Manifest::tool_name`]).
 #[cfg(feature = "http")]
-fn validate_identifier(kind: &'static str, value: &str) -> Result<(), super::InstallError> {
+fn validate_identifier(
+    kind: &'static str,
+    value: &str,
+) -> Result<(), super::InstallError> {
     let valid_len = !value.is_empty() && value.len() <= 128;
     let valid_chars = value
         .chars()
@@ -639,7 +679,11 @@ fn validate_install_inputs(
 /// for a given (owner, repository, optional commit sha). Defaults to
 /// `HEAD` when no commit is supplied. Lifted out so the cli and the
 /// SDK's own `install_plugin` wrapper share one source of truth.
-pub fn raw_manifest_url(owner: &str, repository: &str, commit_sha: Option<&str>) -> String {
+pub fn raw_manifest_url(
+    owner: &str,
+    repository: &str,
+    commit_sha: Option<&str>,
+) -> String {
     let reference = commit_sha.unwrap_or("HEAD");
     format!(
         "https://raw.githubusercontent.com/{owner}/{repository}/{reference}/objectiveai.json"
@@ -655,12 +699,11 @@ pub(super) fn build_headers(
         return Ok(out);
     };
     for (k, v) in h {
-        let name = reqwest::header::HeaderName::from_bytes(k.as_bytes()).map_err(|e| {
-            super::InstallError::InvalidHeaderName {
+        let name = reqwest::header::HeaderName::from_bytes(k.as_bytes())
+            .map_err(|e| super::InstallError::InvalidHeaderName {
                 name: k.clone(),
                 reason: e.to_string(),
-            }
-        })?;
+            })?;
         let value = reqwest::header::HeaderValue::from_str(v).map_err(|e| {
             super::InstallError::InvalidHeaderValue {
                 name: k.clone(),

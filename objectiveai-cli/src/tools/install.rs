@@ -4,12 +4,9 @@
 use objectiveai_sdk::cli::output::{Handle, Instructions, Notification, Output};
 
 pub(super) async fn emit_instructions(handle: &Handle) -> Result<(), crate::error::Error> {
-    let instructions = include_str!(
-        "../../assets/tools/install/filesystem/INSTRUCTIONS.md"
-    )
-    .to_string();
+    let instructions =
+        include_str!("../../assets/tools/install/filesystem/INSTRUCTIONS.md").to_string();
     Output::Notification(Notification {
-        agent_id: None,
         value: Instructions { instructions }.into(),
     })
     .emit(handle)

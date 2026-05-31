@@ -36,7 +36,6 @@ pub async fn handle(
     let items = client.list_active(parent).await?;
 
     Output::Notification(Notification {
-        agent_id: None,
         value: objectiveai_sdk::cli::output::NotificationValue::other(&(Items { items })),
     })
     .emit(handle)

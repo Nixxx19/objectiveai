@@ -10,9 +10,17 @@ use serde::{Deserialize, Serialize};
 /// structured payloads (e.g. `{"code": ..., "detail": ...}`). Wrap
 /// a plain string as `Value::String(...)` (or use `.into()`) and the
 /// wire bytes stay identical to the old `String`-only shape.
+///
+/// The `type` field is a single-variant `ErrorType` enum that
+/// always serializes to `"error"`. This is what disambiguates the
+/// untagged `Output` enum from a notification — `Output` tries
+/// `Error` first, and the constant `type:"error"` tag is what
+/// rejects every non-error wire shape.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
 #[schemars(rename = "cli.output.Error")]
 pub struct Error {
+    #[serde(rename = "type", default)]
+    pub r#type: ErrorType,
     pub level: Level,
     pub fatal: bool,
     pub message: serde_json::Value,
@@ -24,9 +32,31 @@ pub struct Error {
     pub agent_id: Option<String>,
 }
 
+/// Single-variant discriminator for [`Error`]'s `type` field.
+/// Always `"error"` on the wire.
+#[derive(
+    Default,
+    Serialize,
+    Deserialize,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    JsonSchema,
+)]
+#[serde(rename_all = "snake_case")]
+#[schemars(rename = "cli.output.ErrorType")]
+pub enum ErrorType {
+    #[default]
+    Error,
+}
+
 /// Severity matching the conventions used by bunyan / pino / `log` crate
 /// JSON encoders. `fatal` is encoded separately on [`Error`].
-#[derive(Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, JsonSchema)]
+#[derive(
+    Serialize, Deserialize, Debug, Clone, Copy, PartialEq, Eq, JsonSchema,
+)]
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "cli.output.Level")]
 pub enum Level {

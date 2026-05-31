@@ -191,7 +191,9 @@ fn validate_viewer_url(url: &str) -> Result<(), &'static str> {
         if host == "localhost" || host == "127.0.0.1" {
             return Ok(());
         }
-        return Err("viewer_url with http:// scheme is only allowed for localhost or 127.0.0.1");
+        return Err(
+            "viewer_url with http:// scheme is only allowed for localhost or 127.0.0.1",
+        );
     }
     Err("viewer_url must use https:// or http://localhost / http://127.0.0.1")
 }
@@ -204,7 +206,9 @@ fn validate_viewer_url(url: &str) -> Result<(), &'static str> {
 /// Exposes a [`Self::get`] method that takes a [`Platform`] enum so
 /// callers can read the asset filename for the current host without
 /// pattern-matching the field set themselves.
-#[derive(Debug, Clone, Default, Serialize, Deserialize, JsonSchema, PartialEq, Eq)]
+#[derive(
+    Debug, Clone, Default, Serialize, Deserialize, JsonSchema, PartialEq, Eq,
+)]
 #[schemars(rename = "filesystem.plugins.Binaries")]
 pub struct Binaries {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -316,7 +320,9 @@ pub struct ViewerRoute {
 
 /// HTTP methods supported by [`ViewerRoute`]. Serializes as upper-case
 /// (`"GET"`, `"POST"`, …) on the wire.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, JsonSchema,
+)]
 #[schemars(rename = "filesystem.plugins.HttpMethod")]
 #[serde(rename_all = "UPPERCASE")]
 pub enum HttpMethod {

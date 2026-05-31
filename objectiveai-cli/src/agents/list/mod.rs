@@ -26,9 +26,7 @@ impl Commands {
     ) -> Result<(), crate::error::Error> {
         match self {
             Commands::Active(args) => active::handle(args, cli_config, handle).await,
-            Commands::Available { source } => {
-                available::handle(source, cli_config, handle).await
-            }
+            Commands::Available { source } => available::handle(source, cli_config, handle).await,
         }
     }
 }

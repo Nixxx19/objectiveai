@@ -1,11 +1,11 @@
-pub mod config;
 pub mod address;
+pub mod config;
+pub mod kill;
 pub mod port;
 pub mod secret;
-pub mod signature;
 pub mod send;
+pub mod signature;
 pub mod spawn;
-pub mod kill;
 
 use clap::Subcommand;
 
@@ -57,7 +57,11 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         match self {
             Commands::Config { command } => command.handle(cli_config, handle).await,
             Commands::Address { command } => command.handle(cli_config, handle).await,
@@ -65,7 +69,8 @@ impl Commands {
             Commands::Secret { command } => command.handle(cli_config, handle).await,
             Commands::Signature { command } => command.handle(cli_config, handle).await,
             Commands::GenerateSecretSignaturePair => {
-                let pair = objectiveai_sdk::filesystem::config::generate_viewer_secret_signature_pair();
+                let pair =
+                    objectiveai_sdk::filesystem::config::generate_viewer_secret_signature_pair();
                 crate::config::emit_value(&pair, handle).await;
                 Ok(())
             }

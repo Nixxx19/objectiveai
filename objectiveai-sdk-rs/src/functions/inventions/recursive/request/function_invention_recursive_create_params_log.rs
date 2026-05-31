@@ -19,7 +19,9 @@ use serde::Serialize;
 use crate::filesystem::logs::LogReference;
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
-#[schemars(rename = "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParamsLog")]
+#[schemars(
+    rename = "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParamsLog"
+)]
 pub struct FunctionInventionRecursiveCreateParamsLog {
     pub remote: crate::Remote,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -30,7 +32,8 @@ pub struct FunctionInventionRecursiveCreateParamsLog {
     #[schemars(extend("omitempty" = true))]
     pub provider: Option<agent::completions::request::Provider>,
     pub agent: agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
-    pub prompt: functions::inventions::prompts::InlinePromptOrRemoteCommitOptional,
+    pub prompt:
+        functions::inventions::prompts::InlinePromptOrRemoteCommitOptional,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub seed: Option<i64>,

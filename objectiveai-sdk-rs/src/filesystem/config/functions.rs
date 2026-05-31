@@ -1,6 +1,8 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(
+    Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema,
+)]
 #[schemars(rename = "filesystem.config.FunctionsConfig")]
 pub struct FunctionsConfig {
     #[serde(skip_serializing_if = "FunctionsInventionsConfig::is_none")]
@@ -24,11 +26,13 @@ impl FunctionsConfig {
     }
 
     pub fn inventions(&mut self) -> &mut FunctionsInventionsConfig {
-        self.inventions.get_or_insert_with(FunctionsInventionsConfig::default)
+        self.inventions
+            .get_or_insert_with(FunctionsInventionsConfig::default)
     }
 
     pub fn profiles(&mut self) -> &mut FunctionsProfilesConfig {
-        self.profiles.get_or_insert_with(FunctionsProfilesConfig::default)
+        self.profiles
+            .get_or_insert_with(FunctionsProfilesConfig::default)
     }
 
     pub fn get_favorites(&self) -> &[super::Favorite] {
@@ -39,21 +43,42 @@ impl FunctionsConfig {
         self.favorites.get_or_insert_with(Vec::new).push(favorite);
     }
 
-    pub fn del_favorite(&mut self, name: &str) -> Result<(), super::super::Error> {
-        let favorites = self.favorites.as_mut().ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))?;
-        let pos = favorites.iter().position(|f| f.get_name() == name)
-            .ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))?;
+    pub fn del_favorite(
+        &mut self,
+        name: &str,
+    ) -> Result<(), super::super::Error> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| {
+            super::super::Error::FavoriteNotFound(name.to_string())
+        })?;
+        let pos = favorites
+            .iter()
+            .position(|f| f.get_name() == name)
+            .ok_or_else(|| {
+                super::super::Error::FavoriteNotFound(name.to_string())
+            })?;
         favorites.remove(pos);
         Ok(())
     }
 
-    pub fn edit_favorite(&mut self, name: &str) -> Result<&mut super::Favorite, super::super::Error> {
-        let favorites = self.favorites.as_mut().ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))?;
-        favorites.iter_mut().find(|f| f.get_name() == name)
-            .ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))
+    pub fn edit_favorite(
+        &mut self,
+        name: &str,
+    ) -> Result<&mut super::Favorite, super::super::Error> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| {
+            super::super::Error::FavoriteNotFound(name.to_string())
+        })?;
+        favorites
+            .iter_mut()
+            .find(|f| f.get_name() == name)
+            .ok_or_else(|| {
+                super::super::Error::FavoriteNotFound(name.to_string())
+            })
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
+    pub fn jq(
+        &self,
+        filter: &str,
+    ) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::super::run_jq(self, filter)
     }
 }
@@ -67,7 +92,9 @@ pub struct FunctionsInventionsConfig {
 
 impl Default for FunctionsInventionsConfig {
     fn default() -> Self {
-        Self { remote: Self::default_remote() }
+        Self {
+            remote: Self::default_remote(),
+        }
     }
 }
 
@@ -88,7 +115,10 @@ impl FunctionsInventionsConfig {
         self.remote
     }
 
-    pub fn set_remote(&mut self, remote: crate::Remote) -> Result<(), super::super::Error> {
+    pub fn set_remote(
+        &mut self,
+        remote: crate::Remote,
+    ) -> Result<(), super::super::Error> {
         if matches!(remote, crate::Remote::Mock) {
             return Err(super::super::Error::InvalidRemote(remote));
         }
@@ -96,12 +126,17 @@ impl FunctionsInventionsConfig {
         Ok(())
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
+    pub fn jq(
+        &self,
+        filter: &str,
+    ) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::super::run_jq(self, filter)
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(
+    Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema,
+)]
 #[schemars(rename = "filesystem.config.FunctionsProfilesConfig")]
 pub struct FunctionsProfilesConfig {
     #[serde(skip_serializing_if = "FunctionsProfilesPairsConfig::is_none")]
@@ -123,7 +158,8 @@ impl FunctionsProfilesConfig {
     }
 
     pub fn pairs(&mut self) -> &mut FunctionsProfilesPairsConfig {
-        self.pairs.get_or_insert_with(FunctionsProfilesPairsConfig::default)
+        self.pairs
+            .get_or_insert_with(FunctionsProfilesPairsConfig::default)
     }
 
     pub fn get_favorites(&self) -> &[super::Favorite] {
@@ -134,26 +170,49 @@ impl FunctionsProfilesConfig {
         self.favorites.get_or_insert_with(Vec::new).push(favorite);
     }
 
-    pub fn del_favorite(&mut self, name: &str) -> Result<(), super::super::Error> {
-        let favorites = self.favorites.as_mut().ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))?;
-        let pos = favorites.iter().position(|f| f.get_name() == name)
-            .ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))?;
+    pub fn del_favorite(
+        &mut self,
+        name: &str,
+    ) -> Result<(), super::super::Error> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| {
+            super::super::Error::FavoriteNotFound(name.to_string())
+        })?;
+        let pos = favorites
+            .iter()
+            .position(|f| f.get_name() == name)
+            .ok_or_else(|| {
+                super::super::Error::FavoriteNotFound(name.to_string())
+            })?;
         favorites.remove(pos);
         Ok(())
     }
 
-    pub fn edit_favorite(&mut self, name: &str) -> Result<&mut super::Favorite, super::super::Error> {
-        let favorites = self.favorites.as_mut().ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))?;
-        favorites.iter_mut().find(|f| f.get_name() == name)
-            .ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))
+    pub fn edit_favorite(
+        &mut self,
+        name: &str,
+    ) -> Result<&mut super::Favorite, super::super::Error> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| {
+            super::super::Error::FavoriteNotFound(name.to_string())
+        })?;
+        favorites
+            .iter_mut()
+            .find(|f| f.get_name() == name)
+            .ok_or_else(|| {
+                super::super::Error::FavoriteNotFound(name.to_string())
+            })
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
+    pub fn jq(
+        &self,
+        filter: &str,
+    ) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::super::run_jq(self, filter)
     }
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(
+    Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema,
+)]
 #[schemars(rename = "filesystem.config.FunctionsProfilesPairsConfig")]
 pub struct FunctionsProfilesPairsConfig {
     #[serde(skip_serializing_if = "crate::util::vec_is_none_or_empty")]
@@ -178,21 +237,42 @@ impl FunctionsProfilesPairsConfig {
         self.favorites.get_or_insert_with(Vec::new).push(favorite);
     }
 
-    pub fn del_favorite(&mut self, name: &str) -> Result<(), super::super::Error> {
-        let favorites = self.favorites.as_mut().ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))?;
-        let pos = favorites.iter().position(|f| f.get_name() == name)
-            .ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))?;
+    pub fn del_favorite(
+        &mut self,
+        name: &str,
+    ) -> Result<(), super::super::Error> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| {
+            super::super::Error::FavoriteNotFound(name.to_string())
+        })?;
+        let pos = favorites
+            .iter()
+            .position(|f| f.get_name() == name)
+            .ok_or_else(|| {
+                super::super::Error::FavoriteNotFound(name.to_string())
+            })?;
         favorites.remove(pos);
         Ok(())
     }
 
-    pub fn edit_favorite(&mut self, name: &str) -> Result<&mut super::PairFavorite, super::super::Error> {
-        let favorites = self.favorites.as_mut().ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))?;
-        favorites.iter_mut().find(|f| f.get_name() == name)
-            .ok_or_else(|| super::super::Error::FavoriteNotFound(name.to_string()))
+    pub fn edit_favorite(
+        &mut self,
+        name: &str,
+    ) -> Result<&mut super::PairFavorite, super::super::Error> {
+        let favorites = self.favorites.as_mut().ok_or_else(|| {
+            super::super::Error::FavoriteNotFound(name.to_string())
+        })?;
+        favorites
+            .iter_mut()
+            .find(|f| f.get_name() == name)
+            .ok_or_else(|| {
+                super::super::Error::FavoriteNotFound(name.to_string())
+            })
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
+    pub fn jq(
+        &self,
+        filter: &str,
+    ) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::super::run_jq(self, filter)
     }
 }

@@ -1,39 +1,39 @@
-pub mod config;
 pub mod address;
-pub mod port;
 pub mod claude_agent_sdk;
 pub mod codex_sdk;
+pub mod commit_author_email;
+pub mod commit_author_name;
+pub mod config;
+pub mod detach;
+pub mod github_authorization;
+pub mod http_referer;
+pub mod kill;
+pub mod mcp_authorization;
 pub mod objectiveai_authorization;
 pub mod openrouter_authorization;
-pub mod github_authorization;
-pub mod mcp_authorization;
-pub mod user_agent;
-pub mod http_referer;
-pub mod x_title;
-pub mod commit_author_name;
-pub mod commit_author_email;
-pub mod spawn;
-pub mod kill;
+pub mod port;
 mod run;
-pub mod detach;
+pub mod spawn;
 pub mod stream_subprocess;
+pub mod user_agent;
+pub mod x_title;
 
 // Shared infrastructure for per-endpoint subcommands.
 pub mod agent_id_arg;
 pub mod body;
-pub mod client;
 pub mod call;
+pub mod client;
 
 // One subtree per URL root segment. Every leaf inside these mirrors a
 // route in `objectiveai-api/src/run.rs` 1:1 — see
 // `tests/api_endpoint_coverage.rs`.
 pub mod agent;
-pub mod vector;
-pub mod functions;
-pub mod auth;
-pub mod swarms;
 pub mod agents;
+pub mod auth;
 pub mod error;
+pub mod functions;
+pub mod swarms;
+pub mod vector;
 
 pub use run::*;
 
@@ -155,15 +155,23 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         match self {
             Commands::Config { command } => command.handle(cli_config, handle).await,
             Commands::Address { command } => command.handle(cli_config, handle).await,
             Commands::Port { command } => command.handle(cli_config, handle).await,
             Commands::ClaudeAgentSdk { command } => command.handle(cli_config, handle).await,
             Commands::CodexSdk { command } => command.handle(cli_config, handle).await,
-            Commands::ObjectiveaiAuthorization { command } => command.handle(cli_config, handle).await,
-            Commands::OpenrouterAuthorization { command } => command.handle(cli_config, handle).await,
+            Commands::ObjectiveaiAuthorization { command } => {
+                command.handle(cli_config, handle).await
+            }
+            Commands::OpenrouterAuthorization { command } => {
+                command.handle(cli_config, handle).await
+            }
             Commands::GithubAuthorization { command } => command.handle(cli_config, handle).await,
             Commands::McpAuthorization { command } => command.handle(cli_config, handle).await,
             Commands::UserAgent { command } => command.handle(cli_config, handle).await,

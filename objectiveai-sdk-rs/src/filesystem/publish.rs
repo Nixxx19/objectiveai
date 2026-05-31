@@ -43,7 +43,11 @@ fn validate_repository_name(name: &str) -> Result<(), Error> {
 }
 
 fn repo_path(client: &Client, kind: Kind, repository: &str) -> PathBuf {
-    client.base_dir().join(kind.as_str()).join(&client.commit_author_name).join(repository)
+    client
+        .base_dir()
+        .join(kind.as_str())
+        .join(&client.commit_author_name)
+        .join(repository)
 }
 
 /// Publishes an agent to the local filesystem git repository.
@@ -54,8 +58,17 @@ pub async fn publish_agent(
     message: &str,
     overwrite: bool,
 ) -> Result<String, Error> {
-    let content = serde_json::to_string_pretty(agent).map_err(Error::Serialize)?;
-    publish(client, Kind::Agents, repository, &content, message, overwrite).await
+    let content =
+        serde_json::to_string_pretty(agent).map_err(Error::Serialize)?;
+    publish(
+        client,
+        Kind::Agents,
+        repository,
+        &content,
+        message,
+        overwrite,
+    )
+    .await
 }
 
 /// Publishes a swarm to the local filesystem git repository.
@@ -66,8 +79,17 @@ pub async fn publish_swarm(
     message: &str,
     overwrite: bool,
 ) -> Result<String, Error> {
-    let content = serde_json::to_string_pretty(swarm).map_err(Error::Serialize)?;
-    publish(client, Kind::Swarms, repository, &content, message, overwrite).await
+    let content =
+        serde_json::to_string_pretty(swarm).map_err(Error::Serialize)?;
+    publish(
+        client,
+        Kind::Swarms,
+        repository,
+        &content,
+        message,
+        overwrite,
+    )
+    .await
 }
 
 /// Publishes a function to the local filesystem git repository.
@@ -78,8 +100,17 @@ pub async fn publish_function(
     message: &str,
     overwrite: bool,
 ) -> Result<String, Error> {
-    let content = serde_json::to_string_pretty(function).map_err(Error::Serialize)?;
-    publish(client, Kind::Functions, repository, &content, message, overwrite).await
+    let content =
+        serde_json::to_string_pretty(function).map_err(Error::Serialize)?;
+    publish(
+        client,
+        Kind::Functions,
+        repository,
+        &content,
+        message,
+        overwrite,
+    )
+    .await
 }
 
 /// Publishes a profile to the local filesystem git repository.
@@ -90,8 +121,17 @@ pub async fn publish_profile(
     message: &str,
     overwrite: bool,
 ) -> Result<String, Error> {
-    let content = serde_json::to_string_pretty(profile).map_err(Error::Serialize)?;
-    publish(client, Kind::Profiles, repository, &content, message, overwrite).await
+    let content =
+        serde_json::to_string_pretty(profile).map_err(Error::Serialize)?;
+    publish(
+        client,
+        Kind::Profiles,
+        repository,
+        &content,
+        message,
+        overwrite,
+    )
+    .await
 }
 
 /// Core publish: writes content to a git repository, commits, returns the commit SHA.
@@ -134,7 +174,13 @@ async fn publish(
     let filename = filename.to_string();
 
     tokio::task::spawn_blocking(move || {
-        git_commit(&path, &filename, &commit_author_name, &commit_author_email, &message)
+        git_commit(
+            &path,
+            &filename,
+            &commit_author_name,
+            &commit_author_email,
+            &message,
+        )
     })
     .await
     .map_err(|e| Error::Io(std::io::Error::new(std::io::ErrorKind::Other, e)))?
@@ -188,14 +234,8 @@ fn git_commit(
     // Commit.
     let sig = git2::Signature::now(author_name, author_email)?;
     let parents: Vec<&git2::Commit> = parent.iter().collect();
-    let commit_oid = repo.commit(
-        Some("HEAD"),
-        &sig,
-        &sig,
-        message,
-        &tree,
-        &parents,
-    )?;
+    let commit_oid =
+        repo.commit(Some("HEAD"), &sig, &sig, message, &tree, &parents)?;
 
     Ok(commit_oid.to_string())
 }

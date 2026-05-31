@@ -1,8 +1,8 @@
 mod client;
-mod error;
-mod jq;
 pub mod config;
 pub mod db;
+mod error;
+mod jq;
 pub mod logs;
 pub mod plugins;
 pub mod publish;

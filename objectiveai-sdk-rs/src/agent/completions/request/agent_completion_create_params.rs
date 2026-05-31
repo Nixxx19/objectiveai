@@ -1,7 +1,7 @@
 //! Agent completion request parameters.
 
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 /// Parameters for creating a agent completion.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
@@ -34,7 +34,9 @@ pub struct AgentCompletionCreateParams {
 }
 
 #[cfg(feature = "filesystem")]
-impl crate::filesystem::logs::ProducesRequestFiles for AgentCompletionCreateParams {
+impl crate::filesystem::logs::ProducesRequestFiles
+    for AgentCompletionCreateParams
+{
     /// Break this request out into per-leaf log files:
     /// - each `message` → its own JSON file holding a
     ///   [`super::super::message::MessageLog`] (with content extracted
@@ -60,11 +62,8 @@ impl crate::filesystem::logs::ProducesRequestFiles for AgentCompletionCreatePara
         // 1. messages — each becomes its own MessageLog JSON.
         let mut message_refs = Vec::with_capacity(self.messages.len());
         for (msg_idx, message) in self.messages.iter().cloned().enumerate() {
-            let (msg_log, content_files) = message.extract(
-                route_base,
-                id,
-                msg_idx as u64,
-            );
+            let (msg_log, content_files) =
+                message.extract(route_base, id, msg_idx as u64);
             all_files.extend(content_files);
             let msg_file = LogFile {
                 route: format!("{route_base}/messages"),

@@ -20,7 +20,9 @@ pub enum Error {
     IndexOutOfBounds(usize, usize),
     #[error("favorite not found: {0}")]
     FavoriteNotFound(String),
-    #[error("invalid favorite name (alphanumeric and dashes only, max 64 chars): {0}")]
+    #[error(
+        "invalid favorite name (alphanumeric and dashes only, max 64 chars): {0}"
+    )]
     InvalidFavoriteName(String),
     #[error("invalid favorite note (max 512 chars): {0}")]
     InvalidFavoriteNote(String),
@@ -32,7 +34,9 @@ pub enum Error {
     JqCompile(String),
     #[error("jq runtime error: {0}")]
     JqRuntime(String),
-    #[error("invalid repository name (alphanumeric and dashes only, max 100 chars): {0}")]
+    #[error(
+        "invalid repository name (alphanumeric and dashes only, max 100 chars): {0}"
+    )]
     InvalidRepositoryName(String),
     #[error("io error: {0}")]
     Io(#[from] std::io::Error),

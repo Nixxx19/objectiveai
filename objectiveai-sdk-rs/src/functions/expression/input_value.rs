@@ -5,12 +5,14 @@
 
 use crate::agent;
 use indexmap::IndexMap;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::float::UnpackFloat;
 use starlark::values::list::ListRef as StarlarkListRef;
-use starlark::values::{Heap as StarlarkHeap, UnpackValue, Value as StarlarkValue};
-use schemars::JsonSchema;
+use starlark::values::{
+    Heap as StarlarkHeap, UnpackValue, Value as StarlarkValue,
+};
 
 /// A concrete input value (post-compilation).
 ///
@@ -65,8 +67,8 @@ impl InputValue {
         id: &str,
         key_path: &str,
     ) -> (super::InputValueLog, Vec<crate::filesystem::logs::LogFile>) {
-        use crate::filesystem::logs::{LogFile, LogReference};
         use super::InputValueLog;
+        use crate::filesystem::logs::{LogFile, LogReference};
 
         // Dotted key path → slash-separated subdir under `input/`.
         // Empty key_path → "input"; non-empty → "input/<slashed>".
@@ -90,8 +92,10 @@ impl InputValue {
                         value.extract_to_files(route_base, id, &child_key_path);
                     all_files.extend(child_files);
                     // Write the child's InputValueLog as its own file.
-                    let child_route = format!("{route_base}/input/{}",
-                        child_key_path.replace('.', "/"));
+                    let child_route = format!(
+                        "{route_base}/input/{}",
+                        child_key_path.replace('.', "/")
+                    );
                     let child_file = LogFile {
                         route: child_route,
                         id: id.to_string(),
@@ -118,8 +122,10 @@ impl InputValue {
                     let (child_log, child_files) =
                         value.extract_to_files(route_base, id, &child_key_path);
                     all_files.extend(child_files);
-                    let child_route = format!("{route_base}/input/{}",
-                        child_key_path.replace('.', "/"));
+                    let child_route = format!(
+                        "{route_base}/input/{}",
+                        child_key_path.replace('.', "/")
+                    );
                     let child_file = LogFile {
                         route: child_route,
                         id: id.to_string(),
@@ -170,7 +176,10 @@ impl InputValue {
 }
 
 impl super::ToStarlarkValue for InputValue {
-    fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
+    fn to_starlark_value<'v>(
+        &self,
+        heap: &'v StarlarkHeap,
+    ) -> StarlarkValue<'v> {
         match self {
             InputValue::String(s) => s.to_starlark_value(heap),
             InputValue::Integer(i) => i.to_starlark_value(heap),
@@ -184,9 +193,13 @@ impl super::ToStarlarkValue for InputValue {
 }
 
 impl super::FromStarlarkValue for InputValue {
-    fn from_starlark_value(value: &StarlarkValue) -> Result<Self, super::ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, super::ExpressionError> {
         if value.is_none() {
-            return Err(super::ExpressionError::StarlarkConversionError("Input: expected value".into()));
+            return Err(super::ExpressionError::StarlarkConversionError(
+                "Input: expected value".into(),
+            ));
         }
         if let Ok(Some(b)) = bool::unpack_value(*value) {
             return Ok(InputValue::Boolean(b));
@@ -211,12 +224,24 @@ impl super::FromStarlarkValue for InputValue {
             // Try RichContentPart first if "type" matches a known variant
             let mut type_value = None;
             for (k, v) in dict.iter() {
-                if let Ok(Some("type")) = <&str as UnpackValue>::unpack_value(k) {
-                    type_value = <&str as UnpackValue>::unpack_value(v).ok().flatten();
+                if let Ok(Some("type")) = <&str as UnpackValue>::unpack_value(k)
+                {
+                    type_value =
+                        <&str as UnpackValue>::unpack_value(v).ok().flatten();
                     break;
                 }
             }
-            if matches!(type_value, Some("text" | "image_url" | "input_audio" | "input_video" | "video_url" | "file")) {
+            if matches!(
+                type_value,
+                Some(
+                    "text"
+                        | "image_url"
+                        | "input_audio"
+                        | "input_video"
+                        | "video_url"
+                        | "file"
+                )
+            ) {
                 if let Ok(part) = agent::completions::message::RichContentPart::from_starlark_value(value) {
                     return Ok(InputValue::RichContentPart(part));
                 }
@@ -224,8 +249,16 @@ impl super::FromStarlarkValue for InputValue {
             let mut map = IndexMap::with_capacity(dict.len());
             for (k, v) in dict.iter() {
                 let key = <&str as UnpackValue>::unpack_value(k)
-                    .map_err(|e| super::ExpressionError::StarlarkConversionError(e.to_string()))?
-                    .ok_or_else(|| super::ExpressionError::StarlarkConversionError("Input: expected string key".into()))?
+                    .map_err(|e| {
+                        super::ExpressionError::StarlarkConversionError(
+                            e.to_string(),
+                        )
+                    })?
+                    .ok_or_else(|| {
+                        super::ExpressionError::StarlarkConversionError(
+                            "Input: expected string key".into(),
+                        )
+                    })?
                     .to_owned();
                 map.insert(key, InputValue::from_starlark_value(&v)?);
             }
@@ -276,7 +309,10 @@ impl super::FromSpecial for InputValue {
                     }
                 }
                 let mut result = IndexMap::new();
-                result.insert("items".to_string(), InputValue::Array(merged_items));
+                result.insert(
+                    "items".to_string(),
+                    InputValue::Array(merged_items),
+                );
                 if let Some(ctx) = context {
                     result.insert("context".to_string(), ctx);
                 }
@@ -311,7 +347,10 @@ impl super::FromSpecial for Vec<InputValue> {
                 let mut result = Vec::with_capacity(items.len());
                 for item in items {
                     let mut sub = IndexMap::new();
-                    sub.insert("items".to_string(), InputValue::Array(vec![item.clone()]));
+                    sub.insert(
+                        "items".to_string(),
+                        InputValue::Array(vec![item.clone()]),
+                    );
                     if let Some(ctx) = context {
                         sub.insert("context".to_string(), ctx.clone());
                     }
@@ -348,7 +387,9 @@ impl std::hash::Hash for InputValue {
 }
 
 impl<'a> arbitrary::Arbitrary<'a> for InputValue {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
+    fn arbitrary(
+        u: &mut arbitrary::Unstructured<'a>,
+    ) -> arbitrary::Result<Self> {
         if u.arbitrary().unwrap_or(false) {
             // Compound value
             if u.arbitrary()? {
@@ -369,8 +410,12 @@ impl<'a> arbitrary::Arbitrary<'a> for InputValue {
             match u.int_in_range(0..=4)? {
                 0 => Ok(InputValue::RichContentPart(u.arbitrary()?)),
                 1 => Ok(InputValue::String(u.arbitrary()?)),
-                2 => Ok(InputValue::Integer(crate::arbitrary_util::arbitrary_i64(u)?)),
-                3 => Ok(InputValue::Number(crate::arbitrary_util::arbitrary_f64(u)?)),
+                2 => Ok(InputValue::Integer(
+                    crate::arbitrary_util::arbitrary_i64(u)?,
+                )),
+                3 => Ok(InputValue::Number(
+                    crate::arbitrary_util::arbitrary_f64(u)?,
+                )),
                 _ => Ok(InputValue::Boolean(u.arbitrary()?)),
             }
         }
@@ -402,7 +447,8 @@ impl InputValue {
     pub fn to_rich_content_parts(
         self,
         depth: usize,
-    ) -> impl Iterator<Item = agent::completions::message::RichContentPart> {
+    ) -> impl Iterator<Item = agent::completions::message::RichContentPart>
+    {
         enum Iter {
             RichContentPart(RichContentPartIter),
             Object(Box<ObjectIter>),
@@ -427,16 +473,17 @@ impl InputValue {
                             depth,
                         }))
                     }
-                    InputValue::Array(array) => Iter::Array(Box::new(ArrayIter {
-                        array: array.into_iter(),
-                        first: true,
-                        child: None,
-                        depth,
-                    })),
-                    InputValue::String(string) => Iter::Primitive(Some(format!(
-                        "\"{}\"",
-                        json_escape::escape_str(&string),
-                    ))),
+                    InputValue::Array(array) => {
+                        Iter::Array(Box::new(ArrayIter {
+                            array: array.into_iter(),
+                            first: true,
+                            child: None,
+                            depth,
+                        }))
+                    }
+                    InputValue::String(string) => Iter::Primitive(Some(
+                        format!("\"{}\"", json_escape::escape_str(&string),),
+                    )),
                     InputValue::Integer(integer) => {
                         Iter::Primitive(Some(integer.to_string()))
                     }
@@ -680,18 +727,30 @@ impl InputValueExpression {
                 }
                 Ok(InputValue::Array(compiled_array))
             }
-            InputValueExpression::String(string) => Ok(InputValue::String(string)),
-            InputValueExpression::Integer(integer) => Ok(InputValue::Integer(integer)),
-            InputValueExpression::Number(number) => Ok(InputValue::Number(number)),
-            InputValueExpression::Boolean(boolean) => Ok(InputValue::Boolean(boolean)),
+            InputValueExpression::String(string) => {
+                Ok(InputValue::String(string))
+            }
+            InputValueExpression::Integer(integer) => {
+                Ok(InputValue::Integer(integer))
+            }
+            InputValueExpression::Number(number) => {
+                Ok(InputValue::Number(number))
+            }
+            InputValueExpression::Boolean(boolean) => {
+                Ok(InputValue::Boolean(boolean))
+            }
         }
     }
 }
 
 impl super::FromStarlarkValue for InputValueExpression {
-    fn from_starlark_value(value: &StarlarkValue) -> Result<Self, super::ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, super::ExpressionError> {
         if value.is_none() {
-            return Err(super::ExpressionError::StarlarkConversionError("InputValueExpression: expected value".into()));
+            return Err(super::ExpressionError::StarlarkConversionError(
+                "InputValueExpression: expected value".into(),
+            ));
         }
         if let Ok(Some(b)) = bool::unpack_value(*value) {
             return Ok(InputValueExpression::Boolean(b));
@@ -708,7 +767,9 @@ impl super::FromStarlarkValue for InputValueExpression {
         if let Some(list) = StarlarkListRef::from_value(*value) {
             let mut items = Vec::with_capacity(list.len());
             for v in list.iter() {
-                items.push(super::WithExpression::Value(InputValueExpression::from_starlark_value(&v)?));
+                items.push(super::WithExpression::Value(
+                    InputValueExpression::from_starlark_value(&v)?,
+                ));
             }
             return Ok(InputValueExpression::Array(items));
         }
@@ -716,12 +777,24 @@ impl super::FromStarlarkValue for InputValueExpression {
             // Try RichContentPart first if "type" matches a known variant
             let mut type_value = None;
             for (k, v) in dict.iter() {
-                if let Ok(Some("type")) = <&str as UnpackValue>::unpack_value(k) {
-                    type_value = <&str as UnpackValue>::unpack_value(v).ok().flatten();
+                if let Ok(Some("type")) = <&str as UnpackValue>::unpack_value(k)
+                {
+                    type_value =
+                        <&str as UnpackValue>::unpack_value(v).ok().flatten();
                     break;
                 }
             }
-            if matches!(type_value, Some("text" | "image_url" | "input_audio" | "input_video" | "video_url" | "file")) {
+            if matches!(
+                type_value,
+                Some(
+                    "text"
+                        | "image_url"
+                        | "input_audio"
+                        | "input_video"
+                        | "video_url"
+                        | "file"
+                )
+            ) {
                 if let Ok(part) = agent::completions::message::RichContentPart::from_starlark_value(value) {
                     return Ok(InputValueExpression::RichContentPart(part));
                 }
@@ -729,10 +802,23 @@ impl super::FromStarlarkValue for InputValueExpression {
             let mut map = IndexMap::with_capacity(dict.len());
             for (k, v) in dict.iter() {
                 let key = <&str as UnpackValue>::unpack_value(k)
-                    .map_err(|e| super::ExpressionError::StarlarkConversionError(e.to_string()))?
-                    .ok_or_else(|| super::ExpressionError::StarlarkConversionError("InputValueExpression: expected string key".into()))?
+                    .map_err(|e| {
+                        super::ExpressionError::StarlarkConversionError(
+                            e.to_string(),
+                        )
+                    })?
+                    .ok_or_else(|| {
+                        super::ExpressionError::StarlarkConversionError(
+                            "InputValueExpression: expected string key".into(),
+                        )
+                    })?
                     .to_owned();
-                map.insert(key, super::WithExpression::Value(InputValueExpression::from_starlark_value(&v)?));
+                map.insert(
+                    key,
+                    super::WithExpression::Value(
+                        InputValueExpression::from_starlark_value(&v)?,
+                    ),
+                );
             }
             return Ok(InputValueExpression::Object(map));
         }
@@ -744,7 +830,9 @@ impl super::FromStarlarkValue for InputValueExpression {
 }
 
 impl<'a> arbitrary::Arbitrary<'a> for InputValueExpression {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
+    fn arbitrary(
+        u: &mut arbitrary::Unstructured<'a>,
+    ) -> arbitrary::Result<Self> {
         if u.arbitrary().unwrap_or(false) {
             // Compound value
             if u.arbitrary()? {
@@ -765,8 +853,12 @@ impl<'a> arbitrary::Arbitrary<'a> for InputValueExpression {
             match u.int_in_range(0..=4)? {
                 0 => Ok(InputValueExpression::RichContentPart(u.arbitrary()?)),
                 1 => Ok(InputValueExpression::String(u.arbitrary()?)),
-                2 => Ok(InputValueExpression::Integer(crate::arbitrary_util::arbitrary_i64(u)?)),
-                3 => Ok(InputValueExpression::Number(crate::arbitrary_util::arbitrary_f64(u)?)),
+                2 => Ok(InputValueExpression::Integer(
+                    crate::arbitrary_util::arbitrary_i64(u)?,
+                )),
+                3 => Ok(InputValueExpression::Number(
+                    crate::arbitrary_util::arbitrary_f64(u)?,
+                )),
                 _ => Ok(InputValueExpression::Boolean(u.arbitrary()?)),
             }
         }
@@ -785,20 +877,26 @@ impl super::FromSpecial for InputValueExpression {
 
 fn input_to_input_expression(input: InputValue) -> InputValueExpression {
     match input {
-        InputValue::RichContentPart(p) => InputValueExpression::RichContentPart(p),
+        InputValue::RichContentPart(p) => {
+            InputValueExpression::RichContentPart(p)
+        }
         InputValue::Object(map) => InputValueExpression::Object(
             map.into_iter()
                 .map(|(k, v)| {
                     (
                         k,
-                        super::WithExpression::Value(input_to_input_expression(v)),
+                        super::WithExpression::Value(
+                            input_to_input_expression(v),
+                        ),
                     )
                 })
                 .collect(),
         ),
         InputValue::Array(arr) => InputValueExpression::Array(
             arr.into_iter()
-                .map(|v| super::WithExpression::Value(input_to_input_expression(v)))
+                .map(|v| {
+                    super::WithExpression::Value(input_to_input_expression(v))
+                })
                 .collect(),
         ),
         InputValue::String(s) => InputValueExpression::String(s),

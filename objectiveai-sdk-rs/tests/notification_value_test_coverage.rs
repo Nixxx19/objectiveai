@@ -39,11 +39,12 @@ fn every_notification_value_variant_has_a_roundtrip_test() {
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
     let nv_path = Path::new(manifest_dir)
         .join("src/cli/output/notification/notification_value.rs");
-    let tests_path = Path::new(manifest_dir)
-        .join("src/cli/output/tests.rs");
+    let tests_path = Path::new(manifest_dir).join("src/cli/output/tests.rs");
 
-    let nv_src = fs::read_to_string(&nv_path).expect("read notification_value.rs");
-    let nv_file = syn::parse_file(&nv_src).expect("parse notification_value.rs");
+    let nv_src =
+        fs::read_to_string(&nv_path).expect("read notification_value.rs");
+    let nv_file =
+        syn::parse_file(&nv_src).expect("parse notification_value.rs");
 
     let variants: Vec<String> = nv_file
         .items
@@ -52,7 +53,10 @@ fn every_notification_value_variant_has_a_roundtrip_test() {
             if let Item::Enum(e) = item {
                 if e.ident == "NotificationValue" {
                     return Some(
-                        e.variants.iter().map(|v| v.ident.to_string()).collect(),
+                        e.variants
+                            .iter()
+                            .map(|v| v.ident.to_string())
+                            .collect(),
                     );
                 }
             }

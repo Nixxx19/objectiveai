@@ -17,13 +17,19 @@ use super::{Manifest, ManifestWithNameAndSource};
 /// malformed files.
 async fn parse_manifest_file(path: &Path) -> Option<ManifestWithNameAndSource> {
     let bytes = tokio::fs::read(path).await.ok()?;
-    if let Ok(full) = serde_json::from_slice::<ManifestWithNameAndSource>(&bytes) {
+    if let Ok(full) =
+        serde_json::from_slice::<ManifestWithNameAndSource>(&bytes)
+    {
         return Some(full);
     }
     let manifest: Manifest = serde_json::from_slice(&bytes).ok()?;
     let name = path.file_stem()?.to_str()?.to_string();
     let source = path.to_string_lossy().into_owned();
-    Some(ManifestWithNameAndSource { name, manifest, source })
+    Some(ManifestWithNameAndSource {
+        name,
+        manifest,
+        source,
+    })
 }
 
 impl Client {
@@ -55,7 +61,10 @@ impl Client {
     /// Look up a single tool manifest by name. Reads
     /// `<base_dir>/tools/<name>.json`. Returns `None` on missing /
     /// unreadable / malformed files.
-    pub async fn get_tool(&self, name: &str) -> Option<ManifestWithNameAndSource> {
+    pub async fn get_tool(
+        &self,
+        name: &str,
+    ) -> Option<ManifestWithNameAndSource> {
         let path = self.tools_dir().join(format!("{name}.json"));
         parse_manifest_file(&path).await
     }

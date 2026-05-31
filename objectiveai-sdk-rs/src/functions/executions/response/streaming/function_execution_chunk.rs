@@ -1,10 +1,20 @@
-use crate::{agent, error};
 use crate::agent::completions::response::streaming::AgentCompletionIds;
-use serde::{Deserialize, Serialize};
+use crate::{agent, error};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "functions.executions.response.streaming.FunctionExecutionChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "functions.executions.response.streaming.FunctionExecutionChunk"
+)]
 pub struct FunctionExecutionChunk {
     pub id: String,
     pub tasks: Vec<super::TaskChunk>,
@@ -56,12 +66,15 @@ impl FunctionExecutionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> Box<dyn Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_> {
-        let task_rows = self.tasks.iter().flat_map(|t| t.produce_message_rows());
-        let reasoning_rows = self
-            .reasoning
-            .iter()
-            .flat_map(|r| r.produce_message_rows());
+    ) -> Box<
+        dyn Iterator<Item = crate::filesystem::db::schema::MessageRow>
+            + Send
+            + '_,
+    > {
+        let task_rows =
+            self.tasks.iter().flat_map(|t| t.produce_message_rows());
+        let reasoning_rows =
+            self.reasoning.iter().flat_map(|r| r.produce_message_rows());
         Box::new(task_rows.chain(reasoning_rows))
     }
 }
@@ -88,45 +101,57 @@ impl FunctionExecutionChunk {
         &'a self,
         my_task_path: &'a [u64],
     ) -> Box<dyn Iterator<Item = super::InnerError<'a>> + Send + 'a> {
-        let task_errors = self.tasks.iter().flat_map(
-            |task| -> Box<dyn Iterator<Item = super::InnerError<'a>> + Send + 'a> {
-                match task {
-                    super::TaskChunk::FunctionExecution(wrapper) => {
-                        let own = wrapper.inner.error.as_ref().map(|error| {
-                            super::InnerError::FunctionTaskError {
-                                task_path: wrapper.task_path.clone(),
-                                swiss_pool_index: wrapper.swiss_pool_index,
-                                swiss_round: wrapper.swiss_round,
-                                split_index: wrapper.split_index,
-                                error: std::borrow::Cow::Borrowed(error),
-                            }
-                        });
-                        let nested = wrapper.inner.inner_errors_at(&wrapper.task_path);
-                        Box::new(own.into_iter().chain(nested))
-                    }
-                    super::TaskChunk::VectorCompletion(wrapper) => {
-                        let task_path = &wrapper.task_path;
-                        let own = wrapper.error.as_ref().map(|error| {
-                            super::InnerError::VectorCompletionTaskError {
-                                task_path: task_path.clone(),
-                                agent_completion_index: None,
-                                error: std::borrow::Cow::Borrowed(error),
-                            }
-                        });
-                        let agents = wrapper.inner.completions.iter().filter_map(move |c| {
-                            c.inner.error.as_ref().map(|error| {
+        let task_errors =
+            self.tasks.iter().flat_map(
+                |task| -> Box<
+                    dyn Iterator<Item = super::InnerError<'a>> + Send + 'a,
+                > {
+                    match task {
+                        super::TaskChunk::FunctionExecution(wrapper) => {
+                            let own =
+                                wrapper.inner.error.as_ref().map(|error| {
+                                    super::InnerError::FunctionTaskError {
+                                        task_path: wrapper.task_path.clone(),
+                                        swiss_pool_index: wrapper
+                                            .swiss_pool_index,
+                                        swiss_round: wrapper.swiss_round,
+                                        split_index: wrapper.split_index,
+                                        error: std::borrow::Cow::Borrowed(
+                                            error,
+                                        ),
+                                    }
+                                });
+                            let nested = wrapper
+                                .inner
+                                .inner_errors_at(&wrapper.task_path);
+                            Box::new(own.into_iter().chain(nested))
+                        }
+                        super::TaskChunk::VectorCompletion(wrapper) => {
+                            let task_path = &wrapper.task_path;
+                            let own = wrapper.error.as_ref().map(|error| {
+                                super::InnerError::VectorCompletionTaskError {
+                                    task_path: task_path.clone(),
+                                    agent_completion_index: None,
+                                    error: std::borrow::Cow::Borrowed(error),
+                                }
+                            });
+                            let agents =
+                                wrapper.inner.completions.iter().filter_map(
+                                    move |c| {
+                                        c.inner.error.as_ref().map(|error| {
                                 super::InnerError::VectorCompletionTaskError {
                                     task_path: task_path.clone(),
                                     agent_completion_index: Some(c.index),
                                     error: std::borrow::Cow::Borrowed(error),
                                 }
                             })
-                        });
-                        Box::new(own.into_iter().chain(agents))
+                                    },
+                                );
+                            Box::new(own.into_iter().chain(agents))
+                        }
                     }
-                }
-            },
-        );
+                },
+            );
         let reasoning_errors = self.reasoning.iter().filter_map(move |r| {
             // Intentionally skip r.error (the summary's own .error);
             // only the inner agent completion's failure surfaces here.
@@ -233,7 +258,10 @@ impl FunctionExecutionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_files(
         &self,
-    ) -> Option<(crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>)> {
+    ) -> Option<(
+        crate::filesystem::logs::LogReference,
+        Vec<crate::filesystem::logs::LogFile>,
+    )> {
         use crate::filesystem::logs::{LogFile, LogReference};
         const ROUTE: &str = "functions/executions/response";
 
@@ -243,7 +271,8 @@ impl FunctionExecutionChunk {
         }
 
         let mut files: Vec<LogFile> = Vec::new();
-        let mut task_refs: Vec<super::task_log_reference::LogReference> = Vec::new();
+        let mut task_refs: Vec<super::task_log_reference::LogReference> =
+            Vec::new();
 
         for task in &self.tasks {
             let (reference, task_files) = task.produce_files();

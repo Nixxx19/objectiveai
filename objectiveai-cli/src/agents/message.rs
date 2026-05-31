@@ -18,11 +18,9 @@ use clap::Args;
 
 use interprocess::local_socket::tokio::prelude::*;
 use interprocess::local_socket::{GenericFilePath, ToFsName};
-use objectiveai_sdk::agent::completions::message::{
-    Message, PipeAck, RichContent, UserMessage,
-};
+use objectiveai_sdk::agent::completions::message::{Message, PipeAck, RichContent, UserMessage};
 use objectiveai_sdk::cli::output::{
-    Handle, MessageDelivered, Notification, NotificationValue, Output,
+    Handle, MessageDelivered, Notification, NotificationValue, Output, TypedNotificationValue,
 };
 use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 
@@ -107,14 +105,18 @@ pub async fn handle(
     match try_pipe_delivery(cli_config, &full_agent_id, &content).await {
         Ok(()) => {
             Output::Notification(Notification {
-                agent_id: None,
-                value: MessageDelivered { agent_id: full_agent_id }.into(),
+                value: MessageDelivered {
+                    agent_id: full_agent_id,
+                }
+                .into(),
             })
             .emit(handle)
             .await;
             Ok(())
         }
-        Err(_) => fall_back_to_continuation(cli_config, &full_agent_id, content, args.seed, handle).await,
+        Err(_) => {
+            fall_back_to_continuation(cli_config, &full_agent_id, content, args.seed, handle).await
+        }
     }
 }
 
@@ -150,8 +152,7 @@ async fn try_pipe_delivery(
 
     let (read_half, mut write_half) = stream.split();
 
-    let line = serde_json::to_string(content)
-        .expect("RichContent serializes");
+    let line = serde_json::to_string(content).expect("RichContent serializes");
     write_half
         .write_all(line.as_bytes())
         .await
@@ -175,8 +176,8 @@ async fn try_pipe_delivery(
         return Err(PipeError::Closed);
     }
 
-    let ack: PipeAck = serde_json::from_str(ack_line.trim())
-        .map_err(|e| PipeError::AckParse(e.to_string()))?;
+    let ack: PipeAck =
+        serde_json::from_str(ack_line.trim()).map_err(|e| PipeError::AckParse(e.to_string()))?;
     match ack {
         PipeAck::Ok => Ok(()),
         PipeAck::Error { message } => Err(PipeError::AckError(message)),
@@ -249,7 +250,10 @@ async fn fall_back_to_continuation(
     };
 
     let params = objectiveai_sdk::agent::completions::request::AgentCompletionCreateParams {
-        messages: vec![Message::User(UserMessage { content, name: None })],
+        messages: vec![Message::User(UserMessage {
+            content,
+            name: None,
+        })],
         provider: latest.provider,
         agent: latest.agent,
         response_format: latest.response_format,
@@ -270,10 +274,12 @@ async fn fall_back_to_continuation(
             // continuation; we surface the NEW response_id (cli-stream
             // emits its root log id via `LogStreamReady`) so callers
             // can correlate the freshly-started continuation turn.
-            NotificationValue::MessageQueued(objectiveai_sdk::cli::output::MessageQueued {
-                agent_id: full_agent_id_for_notif,
-                response_id: new_response_id,
-            })
+            NotificationValue::Typed(TypedNotificationValue::MessageQueued(
+                objectiveai_sdk::cli::output::MessageQueued {
+                    agent_id: full_agent_id_for_notif,
+                    response_id: new_response_id,
+                },
+            ))
         },
     )
     .await
@@ -307,6 +313,9 @@ mod tests {
             &RichContent::Text("hi".into()),
         )
         .await;
-        assert!(matches!(result, Err(_)), "expected pipe error, got {result:?}");
+        assert!(
+            matches!(result, Err(_)),
+            "expected pipe error, got {result:?}"
+        );
     }
 }

@@ -1,10 +1,21 @@
-use crate::{error, vector};
 use crate::agent::completions::response::streaming::AgentCompletionIds;
-use serde::{Deserialize, Serialize};
+use crate::{error, vector};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "functions.executions.response.streaming.VectorCompletionTaskChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    Default,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "functions.executions.response.streaming.VectorCompletionTaskChunk"
+)]
 pub struct VectorCompletionTaskChunk {
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub index: u64,
@@ -50,12 +61,13 @@ impl VectorCompletionTaskChunk {
             Some((inner_ref, files)) => (inner_ref.path, files),
             None => (String::new(), Vec::new()),
         };
-        let mut reference = super::vector_completion_task_log_reference::LogReference::new(
-            path,
-            self.index,
-            self.task_index,
-            self.task_path.clone(),
-        );
+        let mut reference =
+            super::vector_completion_task_log_reference::LogReference::new(
+                path,
+                self.index,
+                self.task_index,
+                self.task_path.clone(),
+            );
         if let Some(error) = &self.error {
             reference.error = Some(serde_json::to_value(error).unwrap());
         }
@@ -66,7 +78,8 @@ impl VectorCompletionTaskChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_ {
+    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_
+    {
         self.inner.produce_message_rows()
     }
 }

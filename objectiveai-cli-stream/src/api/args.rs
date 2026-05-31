@@ -98,16 +98,15 @@ impl HttpArgs {
             .as_deref()
             .map(|s| {
                 serde_json::from_str(s).map_err(|e| {
-                    format!(
-                        "--mcp-authorization is not valid JSON for HashMap<String,String>: {e}"
-                    )
+                    format!("--mcp-authorization is not valid JSON for HashMap<String,String>: {e}")
                 })
             })
             .transpose()?;
 
-        let address = self.api_address.clone().ok_or_else(|| {
-            "--api-address is required for streaming endpoints".to_string()
-        })?;
+        let address = self
+            .api_address
+            .clone()
+            .ok_or_else(|| "--api-address is required for streaming endpoints".to_string())?;
 
         Ok(objectiveai_sdk::HttpClient::new(
             reqwest::Client::new(),

@@ -34,7 +34,9 @@ pub async fn handle(
 
     let (stream, notifier) =
         objectiveai_sdk::agent::completions::create_agent_completion_streaming(
-            &client, params, conduit.clone(),
+            &client,
+            params,
+            conduit.clone(),
         )
         .await
         .map_err(|e| format!("failed to open agent-completion stream: {e}"))?;

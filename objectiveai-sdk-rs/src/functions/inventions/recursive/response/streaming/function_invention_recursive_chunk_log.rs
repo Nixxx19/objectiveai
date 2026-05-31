@@ -12,7 +12,9 @@ use crate::agent;
 use crate::filesystem::logs::indexed_reference;
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
-#[schemars(rename = "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunkLog")]
+#[schemars(
+    rename = "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunkLog"
+)]
 pub struct FunctionInventionRecursiveChunkLog {
     pub id: String,
     pub inventions: Vec<indexed_reference::LogReference>,

@@ -1,16 +1,27 @@
 //! Streaming vector completion chunk.
 
-use crate::{agent, vector::completions::response};
 use crate::agent::completions::response::streaming::AgentCompletionIds;
-use serde::{Deserialize, Serialize};
+use crate::{agent, vector::completions::response};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 /// A chunk in a streaming vector completion response.
 ///
 /// Each chunk contains incremental updates to the completion. Use the
 /// [`push`](Self::push) method to accumulate chunks into a complete response.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "vector.completions.response.streaming.VectorCompletionChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    Default,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "vector.completions.response.streaming.VectorCompletionChunk"
+)]
 pub struct VectorCompletionChunk {
     /// Unique identifier for this vector completion.
     pub id: String,
@@ -43,7 +54,9 @@ pub struct VectorCompletionChunk {
 
 impl AgentCompletionIds for VectorCompletionChunk {
     fn agent_completion_ids(&self) -> impl Iterator<Item = &str> {
-        self.completions.iter().flat_map(|c| c.agent_completion_ids())
+        self.completions
+            .iter()
+            .flat_map(|c| c.agent_completion_ids())
     }
 }
 
@@ -52,7 +65,8 @@ impl VectorCompletionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_ {
+    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_
+    {
         self.completions
             .iter()
             .flat_map(|c| c.produce_message_rows())
@@ -166,7 +180,10 @@ impl VectorCompletionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_files(
         &self,
-    ) -> Option<(crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>)> {
+    ) -> Option<(
+        crate::filesystem::logs::LogReference,
+        Vec<crate::filesystem::logs::LogFile>,
+    )> {
         use crate::filesystem::logs::{LogFile, LogReference};
         const ROUTE: &str = "vector/completions/response";
 
@@ -176,8 +193,9 @@ impl VectorCompletionChunk {
         }
 
         let mut files: Vec<LogFile> = Vec::new();
-        let mut completion_refs:
-            Vec<crate::filesystem::logs::indexed_reference::LogReference> = Vec::new();
+        let mut completion_refs: Vec<
+            crate::filesystem::logs::indexed_reference::LogReference,
+        > = Vec::new();
 
         for completion in &self.completions {
             let (reference, completion_files) = completion.produce_files();

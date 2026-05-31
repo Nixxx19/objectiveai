@@ -28,7 +28,11 @@ pub struct ResponseFormatArgs {
     pub response_format_python: bool,
 
     /// Use tool call response format — tool name.
-    #[arg(long, group = "response_format", requires = "response_format_tool_call_description")]
+    #[arg(
+        long,
+        group = "response_format",
+        requires = "response_format_tool_call_description"
+    )]
     pub response_format_tool_call_name: Option<String>,
 
     /// Tool call response format — tool description.
@@ -53,7 +57,12 @@ pub struct ResponseFormatArgs {
 }
 
 impl ResponseFormatArgs {
-    pub fn resolve(self) -> Result<Option<objectiveai_sdk::agent::completions::request::ResponseFormat>, crate::error::Error> {
+    pub fn resolve(
+        self,
+    ) -> Result<
+        Option<objectiveai_sdk::agent::completions::request::ResponseFormat>,
+        crate::error::Error,
+    > {
         use objectiveai_sdk::agent::completions::request::ResponseFormat;
 
         if self.response_format_json_object {
@@ -86,7 +95,9 @@ impl ResponseFormatArgs {
         }
 
         if let Some(name) = self.response_format_tool_call_name {
-            let description = self.response_format_tool_call_description.unwrap_or_default();
+            let description = self
+                .response_format_tool_call_description
+                .unwrap_or_default();
             let schema = if let Some(inline) = self.response_format_tool_call_schema_inline {
                 let mut de = serde_json::Deserializer::from_str(&inline);
                 serde_path_to_error::deserialize(&mut de)
@@ -98,8 +109,17 @@ impl ResponseFormatArgs {
             } else {
                 Default::default()
             };
-            let required = if self.response_format_tool_call_required { Some(true) } else { None };
-            return Ok(Some(ResponseFormat::ToolCall { name, description, schema, required }));
+            let required = if self.response_format_tool_call_required {
+                Some(true)
+            } else {
+                None
+            };
+            return Ok(Some(ResponseFormat::ToolCall {
+                name,
+                description,
+                schema,
+                required,
+            }));
         }
 
         Ok(None)

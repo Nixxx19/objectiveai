@@ -70,7 +70,7 @@ use starlark::values::{UnpackValue, Value as StarlarkValue};
 /// Utilities for working with message prompts.
 pub mod prompt {
     use super::Message;
-use schemars::JsonSchema;
+    use schemars::JsonSchema;
 
     /// Returns whether two messages are the same chainable role
     /// (developer, user, or system) and have compatible names
@@ -137,7 +137,15 @@ use schemars::JsonSchema;
 }
 
 /// A message in the conversation.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[serde(tag = "role")]
 #[schemars(rename = "agent.completions.message.Message")]
 pub enum Message {
@@ -277,7 +285,15 @@ impl FromStarlarkValue for Message {
 /// This is the expression variant of [`Message`] used in function definitions
 /// where message content can be computed from the function input at runtime.
 /// Supports both JMESPath and Starlark expressions.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[serde(tag = "role")]
 #[schemars(rename = "agent.completions.message.MessageExpression")]
 pub enum MessageExpression {

@@ -34,7 +34,9 @@ impl AgentRef {
     {
         let path = self.0.resolve(get_favorites).await?;
         Ok(
-            objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(path),
+            objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional::Remote(
+                path,
+            ),
         )
     }
 }

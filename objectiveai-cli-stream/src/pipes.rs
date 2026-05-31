@@ -63,10 +63,7 @@ pub struct PipeAddress {
     pub fs_path: PathBuf,
 }
 
-pub fn pipe_address_for_agent(
-    pipes_root: &Path,
-    agent_id: &str,
-) -> Result<PipeAddress, String> {
+pub fn pipe_address_for_agent(pipes_root: &Path, agent_id: &str) -> Result<PipeAddress, String> {
     let fs_path = pipes_root.join(agent_id).join("socket");
     let name = fs_path
         .clone()
@@ -81,10 +78,7 @@ pub fn pipe_address_for_agent(
 /// NDJSON lines to. Same per-agent directory, different leaf name —
 /// so the existing cleanup-on-Drop / shutdown story covers both
 /// without extra plumbing.
-pub fn events_address_for_agent(
-    pipes_root: &Path,
-    agent_id: &str,
-) -> Result<PipeAddress, String> {
+pub fn events_address_for_agent(pipes_root: &Path, agent_id: &str) -> Result<PipeAddress, String> {
     let fs_path = pipes_root.join(agent_id).join("events.sock");
     let name = fs_path
         .clone()
@@ -235,11 +229,7 @@ impl PipeRegistry {
         let address = match events_address_for_agent(pipes_root, agent_id) {
             Ok(a) => a,
             Err(e) => {
-                emit_error(
-                    handle,
-                    format!("outbound pipe addr for {agent_id:?}: {e}"),
-                )
-                .await;
+                emit_error(handle, format!("outbound pipe addr for {agent_id:?}: {e}")).await;
                 let (tx, _) = broadcast::channel(OUTBOUND_BROADCAST_CAPACITY);
                 return self.install_outbound_sender(agent_id, tx);
             }
@@ -287,20 +277,16 @@ impl PipeRegistry {
             .inner
             .outbound_cancellers
             .insert(agent_id.to_string(), cancel_tx);
-        debug_assert!(prev.is_none(), "ensure_outbound_pipe race: id already present");
+        debug_assert!(
+            prev.is_none(),
+            "ensure_outbound_pipe race: id already present"
+        );
 
         let task_agent_id = agent_id.to_string();
         let task_tx = tx;
         let task_handle = handle.clone();
         tokio::spawn(async move {
-            run_outbound_listener(
-                listener,
-                task_agent_id,
-                task_tx,
-                task_handle,
-                cancel_rx,
-            )
-            .await;
+            run_outbound_listener(listener, task_agent_id, task_tx, task_handle, cancel_rx).await;
         });
 
         installed
@@ -321,10 +307,7 @@ impl PipeRegistry {
 
     /// Look up the outbound broadcast sender for `agent_id` if one
     /// has been ensured. Returns `None` for unknown ids.
-    pub fn outbound_sender(
-        &self,
-        agent_id: &str,
-    ) -> Option<broadcast::Sender<SubscribeEvent>> {
+    pub fn outbound_sender(&self, agent_id: &str) -> Option<broadcast::Sender<SubscribeEvent>> {
         self.inner
             .outbound_senders
             .get(agent_id)
@@ -454,11 +437,7 @@ async fn handle_connection(
             Ok(Some(l)) => l,
             Ok(None) => return,
             Err(e) => {
-                emit_error(
-                    &handle,
-                    format!("pipe read for {agent_id:?}: {e}"),
-                )
-                .await;
+                emit_error(&handle, format!("pipe read for {agent_id:?}: {e}")).await;
                 return;
             }
         };
@@ -615,6 +594,7 @@ async fn handle_outbound_connection(
 
 async fn emit_error(handle: &Handle, message: String) {
     let out = Output::Error(Error {
+        r#type: objectiveai_sdk::cli::output::ErrorType::Error,
         level: Level::Warn,
         fatal: false,
         message: serde_json::Value::String(message),

@@ -15,7 +15,9 @@ use crate::filesystem::logs::indexed_reference;
 use crate::functions;
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
-#[schemars(rename = "functions.inventions.response.streaming.FunctionInventionChunkLog")]
+#[schemars(
+    rename = "functions.inventions.response.streaming.FunctionInventionChunkLog"
+)]
 pub struct FunctionInventionChunkLog {
     pub id: String,
     pub completions: Vec<indexed_reference::LogReference>,

@@ -52,9 +52,13 @@ pub enum InstallError {
     InvalidHeaderName { name: String, reason: String },
     #[error("invalid header value for {name:?}: {reason}")]
     InvalidHeaderValue { name: String, reason: String },
-    #[error("plugin {repository} is already installed; pass `--upgrade` to replace it")]
+    #[error(
+        "plugin {repository} is already installed; pass `--upgrade` to replace it"
+    )]
     AlreadyInstalled { repository: String },
-    #[error("repository name {repository:?} is reserved and cannot be used as a plugin name")]
+    #[error(
+        "repository name {repository:?} is reserved and cannot be used as a plugin name"
+    )]
     ReservedRepositoryName { repository: String },
     #[error("manifest failed validation: {0}")]
     ManifestInvalid(&'static str),
@@ -65,10 +69,7 @@ pub enum InstallError {
     /// flow through, with `.` -> `-` substitution applied when the tool
     /// name is materialized).
     #[error("invalid {kind}: {value:?} must match ^[A-Za-z0-9_.-]{{1,128}}$")]
-    InvalidIdentifier {
-        kind: &'static str,
-        value: String,
-    },
+    InvalidIdentifier { kind: &'static str, value: String },
     /// The materialized tool name (`{owner}-{name}-{version}` with `.`
     /// substituted to `-`) is longer than the 100-character budget we
     /// reserve. Anthropic's hard cap is 128 chars; the 28-char gap

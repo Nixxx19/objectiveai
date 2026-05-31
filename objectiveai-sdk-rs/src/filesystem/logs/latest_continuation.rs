@@ -80,9 +80,7 @@ pub enum LatestContinuationOutcome {
     /// file was found in any of them — every prior turn is either
     /// still streaming or didn't finish. `request_count` is the total
     /// row count we walked.
-    NoContinuationsFound {
-        request_count: usize,
-    },
+    NoContinuationsFound { request_count: usize },
 }
 
 impl Client {
@@ -260,10 +258,10 @@ mod tests {
             "stream": true
         });
 
-        let requests_dir = client
-            .logs_dir()
-            .join("agents/completions/request");
-        tokio::fs::create_dir_all(&requests_dir).await.expect("mkdir requests");
+        let requests_dir = client.logs_dir().join("agents/completions/request");
+        tokio::fs::create_dir_all(&requests_dir)
+            .await
+            .expect("mkdir requests");
 
         let mut ids = Vec::with_capacity(count);
         for i in 0..count {
@@ -303,9 +301,11 @@ mod tests {
         response_id: &str,
         body: &str,
     ) {
-        let dir = base_dir
-            .join("logs/agents/completions/response/continuation");
-        tokio::fs::create_dir_all(&dir).await.expect("mkdir continuation");
+        let dir =
+            base_dir.join("logs/agents/completions/response/continuation");
+        tokio::fs::create_dir_all(&dir)
+            .await
+            .expect("mkdir continuation");
         // Match the on-disk shape `AgentCompletionChunk::produce_files`
         // writes: pretty JSON-quoted string, `.json` extension.
         let json = serde_json::to_vec_pretty(body).expect("encode cont");
@@ -367,7 +367,9 @@ mod tests {
             .await
             .expect("read_latest_continuation");
         match outcome {
-            LatestContinuationOutcome::NoContinuationsFound { request_count } => {
+            LatestContinuationOutcome::NoContinuationsFound {
+                request_count,
+            } => {
                 assert_eq!(request_count, 2);
             }
             other => panic!("expected NoContinuationsFound, got {other:?}"),

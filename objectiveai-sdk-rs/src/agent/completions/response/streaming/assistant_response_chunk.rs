@@ -1,16 +1,27 @@
 //! Streaming agent completion chunk type.
 
 use crate::agent::completions::{message, response};
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 /// A chunk of a streaming agent completion response.
 ///
 /// Multiple chunks are received via Server-Sent Events and can be
 /// accumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)
 /// using the [`push`](Self::push) method.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "agent.completions.response.streaming.AssistantResponseChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    Default,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "agent.completions.response.streaming.AssistantResponseChunk"
+)]
 pub struct AssistantResponseChunk {
     pub role: response::AssistantRole,
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
@@ -168,7 +179,10 @@ impl AssistantResponseChunk {
         &self,
         id: &str,
         route_base: &str,
-    ) -> (crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>) {
+    ) -> (
+        crate::filesystem::logs::LogReference,
+        Vec<crate::filesystem::logs::LogFile>,
+    ) {
         use crate::filesystem::logs::{LogFile, LogReference};
 
         let mut files = Vec::new();
@@ -228,7 +242,9 @@ impl AssistantResponseChunk {
             tcs.iter()
                 .map(|tc| {
                     let f = LogFile {
-                        route: format!("{route_base}/messages/assistant/tool_calls"),
+                        route: format!(
+                            "{route_base}/messages/assistant/tool_calls"
+                        ),
                         id: id.to_string(),
                         message_index: Some(self.index),
                         media_index: Some(tc.index),

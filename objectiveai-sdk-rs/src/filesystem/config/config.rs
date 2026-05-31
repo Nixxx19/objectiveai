@@ -1,6 +1,8 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(
+    Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema,
+)]
 #[schemars(rename = "filesystem.config.Config")]
 pub struct Config {
     #[serde(skip_serializing_if = "super::ApiConfig::is_none")]
@@ -37,7 +39,8 @@ impl Config {
     }
 
     pub fn functions(&mut self) -> &mut super::FunctionsConfig {
-        self.functions.get_or_insert_with(super::FunctionsConfig::default)
+        self.functions
+            .get_or_insert_with(super::FunctionsConfig::default)
     }
 
     pub fn viewer(&mut self) -> &mut super::ViewerConfig {
@@ -48,7 +51,10 @@ impl Config {
         self.mcp.get_or_insert_with(super::McpConfig::default)
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
+    pub fn jq(
+        &self,
+        filter: &str,
+    ) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::super::run_jq(self, filter)
     }
 }

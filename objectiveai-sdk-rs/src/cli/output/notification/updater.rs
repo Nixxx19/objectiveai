@@ -18,9 +18,7 @@ pub enum Updater {
     /// Refused to proceed with the update — the `reason` carries why.
     /// No binaries were modified.
     #[schemars(title = "Skipped")]
-    Skipped {
-        reason: SkipReason,
-    },
+    Skipped { reason: SkipReason },
     /// All gates passed; about to call
     /// `GET /repos/ObjectiveAI/objectiveai/releases/latest`. The very
     /// first emitted line of any active update run.

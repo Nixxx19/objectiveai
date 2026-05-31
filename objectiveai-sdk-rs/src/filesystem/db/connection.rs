@@ -52,7 +52,9 @@ pub fn execute(
     params: impl rusqlite::Params,
 ) -> Result<usize, Error> {
     let conn = connection(client)?;
-    let conn = conn.lock().expect("filesystem db connection mutex poisoned");
+    let conn = conn
+        .lock()
+        .expect("filesystem db connection mutex poisoned");
     Ok(conn.execute(sql, params)?)
 }
 
@@ -68,7 +70,9 @@ where
     F: FnOnce(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
 {
     let conn = connection(client)?;
-    let conn = conn.lock().expect("filesystem db connection mutex poisoned");
+    let conn = conn
+        .lock()
+        .expect("filesystem db connection mutex poisoned");
     let mut stmt = conn.prepare_cached(sql)?;
     use rusqlite::OptionalExtension as _;
     Ok(stmt.query_row(params, map).optional()?)
@@ -85,7 +89,9 @@ where
     F: FnMut(&rusqlite::Row<'_>) -> rusqlite::Result<T>,
 {
     let conn = connection(client)?;
-    let conn = conn.lock().expect("filesystem db connection mutex poisoned");
+    let conn = conn
+        .lock()
+        .expect("filesystem db connection mutex poisoned");
     let mut stmt = conn.prepare_cached(sql)?;
     let rows = stmt.query_map(params, |row| map(row))?;
     let mut out = Vec::new();

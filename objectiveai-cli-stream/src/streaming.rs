@@ -92,11 +92,8 @@ where
     // Tuple: (lineage_agent_id, response_id, content). Threading both
     // axes keeps the writer from having to re-derive `response_id`
     // from `agent_id` — see the LogReference doc comment for the rule.
-    let (notif_tx, notif_rx) = tokio::sync::mpsc::unbounded_channel::<(
-        String,
-        String,
-        RichContent,
-    )>();
+    let (notif_tx, notif_rx) =
+        tokio::sync::mpsc::unbounded_channel::<(String, String, RichContent)>();
     let writer_push = push.clone();
     let writer_handle = handle.clone();
     let writer_registry = registry.clone();
@@ -242,11 +239,7 @@ where
 /// this task returns) is what closes the listeners.
 async fn writer_loop<Chunk, F>(
     mut rx: tokio::sync::mpsc::UnboundedReceiver<Chunk>,
-    mut notif_rx: tokio::sync::mpsc::UnboundedReceiver<(
-        String,
-        String,
-        RichContent,
-    )>,
+    mut notif_rx: tokio::sync::mpsc::UnboundedReceiver<(String, String, RichContent)>,
     mut log_writer: LogWriter<Chunk>,
     push: F,
     handle: Handle,
@@ -340,17 +333,19 @@ where
 fn broadcast_rows(registry: &PipeRegistry, inserted: &[(String, MessageKind)]) {
     for (agent_id, kind) in inserted {
         if let Some(tx) = registry.outbound_sender(agent_id) {
-            let _ = tx.send(SubscribeEvent::Row { message_kind: *kind });
+            let _ = tx.send(SubscribeEvent::Row {
+                message_kind: *kind,
+            });
         }
     }
 }
 
 async fn emit_log_stream_ready(id: &str, handle: &Handle) {
     let out = Output::Notification(Notification {
-        agent_id: None,
         value: (LogStreamReady {
             log_stream_ready: id.to_string(),
-        }).into(),
+        })
+        .into(),
     });
     out.emit(handle).await;
 }
@@ -366,7 +361,6 @@ async fn emit_chunk<C: Serialize>(chunk: &C, handle: &Handle) {
     // same NDJSON envelope every other cli output line uses.
     let value: serde_json::Value = serde_json::from_str(&line).unwrap_or(serde_json::Value::Null);
     let out = Output::Notification(Notification {
-        agent_id: None,
         value: objectiveai_sdk::cli::output::NotificationValue::other(&value),
     });
     out.emit(handle).await;

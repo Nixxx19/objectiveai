@@ -11,7 +11,11 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         let (client, mut config) = crate::config::read(cli_config).await?;
         match self {
             Commands::Get => {
@@ -21,13 +25,25 @@ impl Commands {
             Commands::Add { key, value } => {
                 config.api().add_mcp_authorization(key, value);
                 crate::config::write(&client, &config, cli_config).await?;
-                objectiveai_sdk::cli::output::Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (objectiveai_sdk::cli::output::OK).into() }).emit(handle).await;
+                objectiveai_sdk::cli::output::Output::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: (objectiveai_sdk::cli::output::OK).into(),
+                    },
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::Del { key } => {
                 config.api().del_mcp_authorization(&key);
                 crate::config::write(&client, &config, cli_config).await?;
-                objectiveai_sdk::cli::output::Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (objectiveai_sdk::cli::output::OK).into() }).emit(handle).await;
+                objectiveai_sdk::cli::output::Output::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: (objectiveai_sdk::cli::output::OK).into(),
+                    },
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
         }

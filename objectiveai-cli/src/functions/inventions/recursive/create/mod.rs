@@ -1,6 +1,11 @@
 use clap::{Args, Subcommand};
 
-crate::define_inline_or_ref!(AgentArg, "agent", objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional, Remote);
+crate::define_inline_or_ref!(
+    AgentArg,
+    "agent",
+    objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
+    Remote
+);
 
 /// Shared params across all invention state types.
 #[derive(Args)]
@@ -108,9 +113,19 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         let (agent_ref, continuation_args, seed, state, detach) = match self {
-            Commands::AlphaScalar { params, agent, continuation, seed, detach } => {
+            Commands::AlphaScalar {
+                params,
+                agent,
+                continuation,
+                seed,
+                detach,
+            } => {
                 let p = params.into_params();
                 let state = objectiveai_sdk::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
                     objectiveai_sdk::functions::inventions::ParamsState::AlphaScalar(
@@ -119,7 +134,13 @@ impl Commands {
                 );
                 (agent, continuation, seed, state, detach)
             }
-            Commands::AlphaVector { params, agent, continuation, seed, detach } => {
+            Commands::AlphaVector {
+                params,
+                agent,
+                continuation,
+                seed,
+                detach,
+            } => {
                 let p = params.into_params();
                 let state = objectiveai_sdk::functions::inventions::ParamsStateOrRemoteCommitOptional::Inline(
                     objectiveai_sdk::functions::inventions::ParamsState::AlphaVector(
@@ -128,7 +149,14 @@ impl Commands {
                 );
                 (agent, continuation, seed, state, detach)
             }
-            Commands::Remote { state, state_inline, agent, continuation, seed, detach } => {
+            Commands::Remote {
+                state,
+                state_inline,
+                agent,
+                continuation,
+                seed,
+                detach,
+            } => {
                 let state = if let Some(inline) = state_inline {
                     let mut de = serde_json::Deserializer::from_str(&inline);
                     let parsed: objectiveai_sdk::functions::inventions::ParamsState =
@@ -147,10 +175,12 @@ impl Commands {
             crate::api::detach::detach(handle).await;
         }
 
-        let agent = agent_ref.resolve(|| async {
-            let (_, mut c) = crate::config::read(cli_config).await.unwrap();
-            c.agents().get_favorites().to_vec()
-        }).await?;
+        let agent = agent_ref
+            .resolve(|| async {
+                let (_, mut c) = crate::config::read(cli_config).await.unwrap();
+                c.agents().get_favorites().to_vec()
+            })
+            .await?;
         let continuation = continuation_args.resolve()?;
 
         // Read remote from config
@@ -189,7 +219,9 @@ impl Commands {
         // Build result: one item per invention that has state.
         // Per-invention errors already streamed as Output::Error;
         // `path: None` indicates failure (or no resolved path yet).
-        let results: Vec<InventionResultItem> = chunk.inventions.iter()
+        let results: Vec<InventionResultItem> = chunk
+            .inventions
+            .iter()
             .filter_map(|inv| {
                 let state = inv.inner.state.as_ref()?;
                 Some(InventionResultItem {
@@ -199,9 +231,16 @@ impl Commands {
             })
             .collect();
 
-        objectiveai_sdk::cli::output::Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (Inventions { inventions: results }).into(),
-         })
-        .emit(handle).await;
+        objectiveai_sdk::cli::output::Output::Notification(
+            objectiveai_sdk::cli::output::Notification {
+                value: (Inventions {
+                    inventions: results,
+                })
+                .into(),
+            },
+        )
+        .emit(handle)
+        .await;
         Ok(())
     }
 }

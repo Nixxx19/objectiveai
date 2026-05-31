@@ -72,7 +72,10 @@ pub struct Handle {
 
 impl From<HandleDestination> for Handle {
     fn from(destination: HandleDestination) -> Self {
-        Handle { destination, agent_id: None }
+        Handle {
+            destination,
+            agent_id: None,
+        }
     }
 }
 
@@ -94,20 +97,25 @@ impl Handle {
         // Single Value round-trip when we have an agent_id to stamp.
         // Both remaining variants (Notification + Error) are
         // object-shaped, so the insert always lands on a real object.
+        // For Notifications the cli-session id only stamps in if the
+        // payload didn't already supply its own agent_id — variants
+        // like `Spawned` carry the spawned-agent id at the same level
+        // and we mustn't overwrite them.
         let json = if let Some(id) = self.agent_id.as_deref() {
-            let mut v = serde_json::to_value(output)
-                .expect("Output serializes");
+            let mut v =
+                serde_json::to_value(output).expect("Output serializes");
             if let Some(obj) = v.as_object_mut() {
-                obj.insert(
-                    "agent_id".to_string(),
-                    serde_json::Value::String(id.to_string()),
-                );
+                if !obj.contains_key("agent_id") {
+                    obj.insert(
+                        "agent_id".to_string(),
+                        serde_json::Value::String(id.to_string()),
+                    );
+                }
             }
             serde_json::to_string(&v)
                 .expect("agent-id-stamped Output reserializes")
         } else {
-            serde_json::to_string(output)
-                .expect("Output serializes")
+            serde_json::to_string(output).expect("Output serializes")
         };
         match &self.destination {
             HandleDestination::Stdout => {
@@ -157,6 +165,12 @@ impl Handle {
     /// output didn't already carry one. Used by `Collect` and
     /// `Stream` so in-memory consumers see the same stamped shape
     /// the wire output carries.
+    ///
+    /// `Notification` has no struct-level agent_id since the flat
+    /// wire shape collides with inner payloads' agent_id. For
+    /// Collect/Stream consumers the inner payload's agent_id (if
+    /// any) is what they observe — the cli-session id stamp from
+    /// `emit` only shows up on the Stdout/Stdin JSON paths.
     fn stamped(&self, output: &Output) -> Output {
         match output {
             Output::Error(e) => {
@@ -166,13 +180,7 @@ impl Handle {
                 }
                 Output::Error(e)
             }
-            Output::Notification(n) => {
-                let mut n = n.clone();
-                if n.agent_id.is_none() {
-                    n.agent_id = self.agent_id.clone();
-                }
-                Output::Notification(n)
-            }
+            Output::Notification(n) => Output::Notification(n.clone()),
         }
     }
 }

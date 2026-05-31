@@ -34,18 +34,18 @@ pub mod agent;
 pub mod arbitrary_util;
 pub mod auth;
 pub mod data_url;
-pub mod swarm;
 pub mod error;
 pub mod functions;
-pub mod laboratories;
 mod json_schema;
+pub mod laboratories;
+pub mod swarm;
 pub use json_schema::*;
 pub mod prefixed_uuid;
 mod remote;
 pub(crate) mod serde_util;
+mod util;
 pub mod vector;
 mod weights;
-mod util;
 
 pub use remote::*;
 pub use weights::*;
@@ -82,4 +82,3 @@ pub mod cli;
 
 #[cfg(feature = "viewer")]
 pub mod viewer;
-

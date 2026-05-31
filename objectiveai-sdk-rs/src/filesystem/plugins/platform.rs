@@ -9,7 +9,9 @@ use serde::{Deserialize, Serialize};
 /// release-asset filename per platform. The underscore separator (vs
 /// the hyphen used by Rust target triples) keeps the names usable
 /// directly as identifiers in the cross-language SDK codegen.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
+#[derive(
+    Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema,
+)]
 #[schemars(rename = "filesystem.plugins.Platform")]
 pub enum Platform {
     #[serde(rename = "linux_x86_64")]

@@ -20,7 +20,10 @@ macro_rules! snapshot_test {
         #[test]
         fn $name() {
             if cli_test_util::test_api_address().is_none() {
-                eprintln!("OBJECTIVEAI_TEST_PORT not set — skipping {}", stringify!($name));
+                eprintln!(
+                    "OBJECTIVEAI_TEST_PORT not set — skipping {}",
+                    stringify!($name)
+                );
                 return;
             }
             let input = serde_json::to_string(&serde_json::json!($input)).unwrap();
@@ -29,11 +32,18 @@ macro_rules! snapshot_test {
             let function_str = format!("remote=mock,name={}", $function);
             let profile_str = format!("remote=mock,name={}", $profile);
             let cli_result = cli_test_util::run_cli(&[
-                "functions", "executions", "create", "standard",
-                "--function", &function_str,
-                "--profile", &profile_str,
-                "--input-inline", &input,
-                "--seed", &seed_str,
+                "functions",
+                "executions",
+                "create",
+                "standard",
+                "--function",
+                &function_str,
+                "--profile",
+                &profile_str,
+                "--input-inline",
+                &input,
+                "--seed",
+                &seed_str,
             ]);
 
             let snapshot = cli_test_util::load_snapshot(&snapshots_dir(), $snapshot);
@@ -41,18 +51,29 @@ macro_rules! snapshot_test {
             let has_errors = snapshot_has_errors(&snapshot);
 
             let actual_output = cli_test_util::rounded(&cli_result["output"]);
-            assert_eq!(actual_output, expected_output, "output mismatch for {}", $snapshot);
+            assert_eq!(
+                actual_output, expected_output,
+                "output mismatch for {}",
+                $snapshot
+            );
 
             if has_errors {
                 assert!(
-                    cli_result.get("errors").is_some_and(|e| e.as_array().is_some_and(|a| !a.is_empty())),
-                    "expected errors for {} but got none", $snapshot
+                    cli_result
+                        .get("errors")
+                        .is_some_and(|e| e.as_array().is_some_and(|a| !a.is_empty())),
+                    "expected errors for {} but got none",
+                    $snapshot
                 );
             } else {
                 assert!(
                     cli_result.get("errors").is_none()
-                        || cli_result["errors"].as_array().is_some_and(|a| a.is_empty()),
-                    "expected no errors for {} but got: {:?}", $snapshot, cli_result.get("errors")
+                        || cli_result["errors"]
+                            .as_array()
+                            .is_some_and(|a| a.is_empty()),
+                    "expected no errors for {} but got: {:?}",
+                    $snapshot,
+                    cli_result.get("errors")
                 );
             }
         }
@@ -111,12 +132,19 @@ fn split_tweet_scorer_10_tweets_seed_42() {
     }"#;
 
     let cli_result = cli_test_util::run_cli(&[
-        "functions", "executions", "create", "standard",
-        "--function", "remote=mock,name=tweet-scorer",
-        "--profile-inline", profile_inline,
-        "--input-inline", &input,
+        "functions",
+        "executions",
+        "create",
+        "standard",
+        "--function",
+        "remote=mock,name=tweet-scorer",
+        "--profile-inline",
+        profile_inline,
+        "--input-inline",
+        &input,
         "--split",
-        "--seed", "42",
+        "--seed",
+        "42",
     ]);
 
     let snapshot = cli_test_util::load_snapshot(&snapshots, "split_tweet_scorer_10_tweets_seed_42");
@@ -124,18 +152,26 @@ fn split_tweet_scorer_10_tweets_seed_42() {
     let has_errors = snapshot_has_errors(&snapshot);
 
     let actual_output = cli_test_util::rounded(&cli_result["output"]);
-    assert_eq!(actual_output, expected_output, "output mismatch for split_tweet_scorer_10_tweets_seed_42");
+    assert_eq!(
+        actual_output, expected_output,
+        "output mismatch for split_tweet_scorer_10_tweets_seed_42"
+    );
 
     if has_errors {
         assert!(
-            cli_result.get("errors").is_some_and(|e| e.as_array().is_some_and(|a| !a.is_empty())),
+            cli_result
+                .get("errors")
+                .is_some_and(|e| e.as_array().is_some_and(|a| !a.is_empty())),
             "expected errors but got none",
         );
     } else {
         assert!(
             cli_result.get("errors").is_none()
-                || cli_result["errors"].as_array().is_some_and(|a| a.is_empty()),
-            "expected no errors but got: {:?}", cli_result.get("errors"),
+                || cli_result["errors"]
+                    .as_array()
+                    .is_some_and(|a| a.is_empty()),
+            "expected no errors but got: {:?}",
+            cli_result.get("errors"),
         );
     }
 }

@@ -1,11 +1,20 @@
 //! Mock Agent types and validation logic.
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use twox_hash::XxHash3_128;
-use schemars::JsonSchema;
 
 /// The base configuration for a Mock Agent (without computed ID).
-#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Clone,
+    Debug,
+    Default,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[schemars(rename = "agent.mock.AgentBase")]
 pub struct AgentBase {
     /// The upstream provider marker.
@@ -69,7 +78,9 @@ impl AgentBase {
             self.mode = None;
         }
         self.mcp_servers = match self.mcp_servers.take() {
-            Some(mcp_servers) => super::super::mcp::mcp_servers::prepare(mcp_servers),
+            Some(mcp_servers) => {
+                super::super::mcp::mcp_servers::prepare(mcp_servers)
+            }
             None => None,
         };
         self.client_objectiveai_mcp = match self.client_objectiveai_mcp.take() {
@@ -101,10 +112,13 @@ impl AgentBase {
         }
         if let Some(p) = self.error_probability {
             if p > 100 {
-                return Err("`error_probability` must be at most 100".to_string());
+                return Err(
+                    "`error_probability` must be at most 100".to_string()
+                );
             }
             if self.error != Some(true) {
-                return Err("`error_probability` requires `error` to be true".to_string());
+                return Err("`error_probability` requires `error` to be true"
+                    .to_string());
             }
         }
         Ok(())

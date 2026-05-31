@@ -1,7 +1,17 @@
 use clap::{Args, Subcommand};
 
-crate::define_inline_or_ref!(FunctionArg, "function", objectiveai_sdk::functions::FullInlineFunctionOrRemoteCommitOptional, Remote);
-crate::define_inline_or_ref!(ProfileArg, "profile", objectiveai_sdk::functions::InlineProfileOrRemoteCommitOptional, Remote);
+crate::define_inline_or_ref!(
+    FunctionArg,
+    "function",
+    objectiveai_sdk::functions::FullInlineFunctionOrRemoteCommitOptional,
+    Remote
+);
+crate::define_inline_or_ref!(
+    ProfileArg,
+    "profile",
+    objectiveai_sdk::functions::InlineProfileOrRemoteCommitOptional,
+    Remote
+);
 
 /// How input is provided to the function execution.
 #[derive(Args)]
@@ -19,7 +29,9 @@ pub struct InputSource {
 }
 
 impl InputSource {
-    fn resolve(self) -> Result<objectiveai_sdk::functions::expression::InputValue, crate::error::Error> {
+    fn resolve(
+        self,
+    ) -> Result<objectiveai_sdk::functions::expression::InputValue, crate::error::Error> {
         if let Some(inline) = self.input_inline {
             let mut de = serde_json::Deserializer::from_str(&inline);
             return serde_path_to_error::deserialize(&mut de)
@@ -103,25 +115,90 @@ pub enum Commands {
     },
 }
 
-async fn fn_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
+async fn fn_favorites(
+    cli_config: &crate::Config,
+) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
     let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().get_favorites().to_vec()
 }
 
-async fn profile_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
+async fn profile_favorites(
+    cli_config: &crate::Config,
+) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
     let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().profiles().get_favorites().to_vec()
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
-        let (function_source, profile_source, input_source, continuation_args, retry_token, seed, split, invert, strategy, detach) = match self {
-            Commands::Standard { function, profile, input, continuation, retry_token, seed, split, invert, detach } => {
-                (function, profile, input, continuation, retry_token, seed, split, invert, objectiveai_sdk::functions::executions::request::Strategy::Default, detach)
-            }
-            Commands::SwissSystem { function, profile, input, continuation, retry_token, seed, split, invert, pool, rounds, detach } => {
-                let strategy = objectiveai_sdk::functions::executions::request::Strategy::SwissSystem { pool, rounds };
-                (function, profile, input, continuation, retry_token, seed, split, invert, strategy, detach)
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
+        let (
+            function_source,
+            profile_source,
+            input_source,
+            continuation_args,
+            retry_token,
+            seed,
+            split,
+            invert,
+            strategy,
+            detach,
+        ) = match self {
+            Commands::Standard {
+                function,
+                profile,
+                input,
+                continuation,
+                retry_token,
+                seed,
+                split,
+                invert,
+                detach,
+            } => (
+                function,
+                profile,
+                input,
+                continuation,
+                retry_token,
+                seed,
+                split,
+                invert,
+                objectiveai_sdk::functions::executions::request::Strategy::Default,
+                detach,
+            ),
+            Commands::SwissSystem {
+                function,
+                profile,
+                input,
+                continuation,
+                retry_token,
+                seed,
+                split,
+                invert,
+                pool,
+                rounds,
+                detach,
+            } => {
+                let strategy =
+                    objectiveai_sdk::functions::executions::request::Strategy::SwissSystem {
+                        pool,
+                        rounds,
+                    };
+                (
+                    function,
+                    profile,
+                    input,
+                    continuation,
+                    retry_token,
+                    seed,
+                    split,
+                    invert,
+                    strategy,
+                    detach,
+                )
             }
         };
 
@@ -130,25 +207,28 @@ impl Commands {
         }
 
         let function = function_source.resolve(|| fn_favorites(cli_config)).await?;
-        let profile = profile_source.resolve(|| profile_favorites(cli_config)).await?;
+        let profile = profile_source
+            .resolve(|| profile_favorites(cli_config))
+            .await?;
         let input_value = input_source.resolve()?;
         let continuation = continuation_args.resolve()?;
 
-        let params = objectiveai_sdk::functions::executions::request::FunctionExecutionCreateParams {
-            function,
-            profile,
-            retry_token,
-            from_cache: None,
-            reasoning: None,
-            strategy: Some(strategy),
-            input: input_value,
-            split: if split { Some(true) } else { None },
-            invert: if invert { Some(true) } else { None },
-            provider: None,
-            seed,
-            stream: Some(true),
-            continuation,
-        };
+        let params =
+            objectiveai_sdk::functions::executions::request::FunctionExecutionCreateParams {
+                function,
+                profile,
+                retry_token,
+                from_cache: None,
+                reasoning: None,
+                strategy: Some(strategy),
+                input: input_value,
+                split: if split { Some(true) } else { None },
+                invert: if invert { Some(true) } else { None },
+                provider: None,
+                seed,
+                stream: Some(true),
+                continuation,
+            };
 
         // Delegate to cli-stream. Inner errors per chunk are surfaced
         // by `stream_subprocess::run` as `Output::Error(Warn)` via the
@@ -160,9 +240,15 @@ impl Commands {
             &["functions", "executions", "create"],
             &params,
             handle,
-            |chunk| chunk.inner_errors().map(|e| serde_json::to_value(&e).unwrap()).collect(),
+            |chunk| {
+                chunk
+                    .inner_errors()
+                    .map(|e| serde_json::to_value(&e).unwrap())
+                    .collect()
+            },
             |agg, c| agg.push(c),
-        ).await?;
+        )
+        .await?;
         let mut chunk = aggregate.ok_or(crate::error::Error::EmptyStream)?;
 
         // Root-level execution failure -> propagate as Err so the
@@ -173,16 +259,20 @@ impl Commands {
         }
 
         // Extract output (default to Err { error: null } if missing)
-        let output = chunk.output
-            .map(|o| o.unwrap())
-            .unwrap_or(objectiveai_sdk::functions::expression::TaskOutputOwned::Err {
+        let output = chunk.output.map(|o| o.unwrap()).unwrap_or(
+            objectiveai_sdk::functions::expression::TaskOutputOwned::Err {
                 error: serde_json::Value::Null,
-            });
+            },
+        );
 
         let result = ExecutionResult { output };
-        objectiveai_sdk::cli::output::Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (Execution { execution: result }).into(),
-         })
-        .emit(handle).await;
+        objectiveai_sdk::cli::output::Output::Notification(
+            objectiveai_sdk::cli::output::Notification {
+                value: (Execution { execution: result }).into(),
+            },
+        )
+        .emit(handle)
+        .await;
         Ok(())
     }
 }

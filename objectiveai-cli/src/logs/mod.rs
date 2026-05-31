@@ -7,12 +7,21 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
-        let client = objectiveai_sdk::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
+        let client = objectiveai_sdk::filesystem::Client::new(
+            cli_config.config_base_dir.as_deref(),
+            None::<String>,
+            None::<String>,
+        );
         match self {
             Commands::Clear => {
                 let counts = futures::future::try_join_all(vec![
-                    Box::pin(client.clear_agent_completions()) as std::pin::Pin<Box<dyn std::future::Future<Output = _> + Send>>,
+                    Box::pin(client.clear_agent_completions())
+                        as std::pin::Pin<Box<dyn std::future::Future<Output = _> + Send>>,
                     Box::pin(client.clear_agent_completion_continuations()),
                     Box::pin(client.clear_agent_completion_messages()),
                     Box::pin(client.clear_agent_completion_message_logprobs()),
@@ -25,11 +34,12 @@ impl Commands {
                     Box::pin(client.clear_function_execution_retry_tokens()),
                     Box::pin(client.clear_function_inventions()),
                     Box::pin(client.clear_function_inventions_recursive()),
-                ]).await?;
+                ])
+                .await?;
                 {
-                crate::log_line::emit_log_clear_count(counts.into_iter().sum(), handle).await;
-                Ok(())
-            }
+                    crate::log_line::emit_log_clear_count(counts.into_iter().sum(), handle).await;
+                    Ok(())
+                }
             }
         }
     }

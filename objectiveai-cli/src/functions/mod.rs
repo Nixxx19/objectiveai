@@ -1,8 +1,8 @@
 pub mod config;
+pub mod executions;
 pub mod favorites;
 pub mod inventions;
 pub mod profiles;
-pub mod executions;
 
 use clap::Subcommand;
 
@@ -58,7 +58,9 @@ pub enum Commands {
     },
 }
 
-async fn get_favorites(cli_config: &crate::Config) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
+async fn get_favorites(
+    cli_config: &crate::Config,
+) -> Vec<objectiveai_sdk::filesystem::config::Favorite> {
     let (_, mut config) = crate::config::read(cli_config).await.unwrap();
     config.functions().get_favorites().to_vec()
 }
@@ -69,39 +71,79 @@ async fn list_source(
 ) -> Result<Vec<objectiveai_sdk::RemotePath>, crate::error::Error> {
     let response = objectiveai_sdk::functions::list_functions(
         &http_client,
-        objectiveai_sdk::functions::request::ListFunctionsRequest { source: Some(source) },
-    ).await?;
+        objectiveai_sdk::functions::request::ListFunctionsRequest {
+            source: Some(source),
+        },
+    )
+    .await?;
     Ok(response.data)
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         match self {
             Commands::Get { args } => {
                 let path = args.resolve(|| get_favorites(cli_config)).await?;
                 let handle = handle.clone();
                 crate::api::run(cli_config, |http_client| async move {
-                    let response = objectiveai_sdk::functions::get_function(&http_client, path).await?;
-                    objectiveai_sdk::cli::output::Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (objectiveai_sdk::cli::output::Function { function: response }).into(),
-                     })
-                    .emit(&handle).await;
+                    let response =
+                        objectiveai_sdk::functions::get_function(&http_client, path).await?;
+                    objectiveai_sdk::cli::output::Output::Notification(
+                        objectiveai_sdk::cli::output::Notification {
+                            value: (objectiveai_sdk::cli::output::Function { function: response })
+                                .into(),
+                        },
+                    )
+                    .emit(&handle)
+                    .await;
                     Ok(())
-                }).await
+                })
+                .await
             }
             Commands::List { source } => {
                 use objectiveai_sdk::functions::request::ListFunctionsSource;
                 match source {
-                    crate::list::Source::Favorites => crate::list::favorites(|| get_favorites(cli_config), handle).await,
-                    crate::list::Source::Filesystem => crate::list::single(cli_config, |c| Box::pin(list_source(c, ListFunctionsSource::Filesystem)), handle).await,
-                    crate::list::Source::Objectiveai => crate::list::single(cli_config, |c| Box::pin(list_source(c, ListFunctionsSource::Objectiveai)), handle).await,
-                    crate::list::Source::Mock => crate::list::single(cli_config, |c| Box::pin(list_source(c, ListFunctionsSource::Mock)), handle).await,
-                    crate::list::Source::All => crate::list::all(
-                        cli_config,
-                        || get_favorites(cli_config),
-                        |c| Box::pin(list_source(c, ListFunctionsSource::Filesystem)),
-                        |c| Box::pin(list_source(c, ListFunctionsSource::Objectiveai)),
-                        handle,
-                    ).await,
+                    crate::list::Source::Favorites => {
+                        crate::list::favorites(|| get_favorites(cli_config), handle).await
+                    }
+                    crate::list::Source::Filesystem => {
+                        crate::list::single(
+                            cli_config,
+                            |c| Box::pin(list_source(c, ListFunctionsSource::Filesystem)),
+                            handle,
+                        )
+                        .await
+                    }
+                    crate::list::Source::Objectiveai => {
+                        crate::list::single(
+                            cli_config,
+                            |c| Box::pin(list_source(c, ListFunctionsSource::Objectiveai)),
+                            handle,
+                        )
+                        .await
+                    }
+                    crate::list::Source::Mock => {
+                        crate::list::single(
+                            cli_config,
+                            |c| Box::pin(list_source(c, ListFunctionsSource::Mock)),
+                            handle,
+                        )
+                        .await
+                    }
+                    crate::list::Source::All => {
+                        crate::list::all(
+                            cli_config,
+                            || get_favorites(cli_config),
+                            |c| Box::pin(list_source(c, ListFunctionsSource::Filesystem)),
+                            |c| Box::pin(list_source(c, ListFunctionsSource::Objectiveai)),
+                            handle,
+                        )
+                        .await
+                    }
                 }
             }
             Commands::Executions { command } => command.handle(cli_config, handle).await,
@@ -109,7 +151,12 @@ impl Commands {
             Commands::Favorites { command } => command.handle(cli_config, handle).await,
             Commands::Inventions { command } => command.handle(cli_config, handle).await,
             Commands::Profiles { command } => command.handle(cli_config, handle).await,
-            Commands::Publish { repository, body, message, overwrite } => {
+            Commands::Publish {
+                repository,
+                body,
+                message,
+                overwrite,
+            } => {
                 let function: objectiveai_sdk::functions::FullRemoteFunction = body.resolve()?;
                 let msg = message.resolve()?;
                 let fs_client = objectiveai_sdk::filesystem::Client::new(
@@ -118,11 +165,20 @@ impl Commands {
                     cli_config.commit_author_email.as_deref(),
                 );
                 let sha = objectiveai_sdk::filesystem::publish::publish_function(
-                    &fs_client, &repository, &function, &msg, overwrite,
-                ).await?;
-                objectiveai_sdk::cli::output::Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (objectiveai_sdk::cli::output::Published { sha }).into(),
-                 })
-                .emit(handle).await;
+                    &fs_client,
+                    &repository,
+                    &function,
+                    &msg,
+                    overwrite,
+                )
+                .await?;
+                objectiveai_sdk::cli::output::Output::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: (objectiveai_sdk::cli::output::Published { sha }).into(),
+                    },
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
         }

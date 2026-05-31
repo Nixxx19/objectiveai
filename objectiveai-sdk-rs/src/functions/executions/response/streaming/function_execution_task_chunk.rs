@@ -1,9 +1,19 @@
 use crate::agent::completions::response::streaming::AgentCompletionIds;
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "functions.executions.response.streaming.FunctionExecutionTaskChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "functions.executions.response.streaming.FunctionExecutionTaskChunk"
+)]
 pub struct FunctionExecutionTaskChunk {
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub index: u64,
@@ -56,12 +66,13 @@ impl FunctionExecutionTaskChunk {
             Some((inner_ref, files)) => (inner_ref.path, files),
             None => (String::new(), Vec::new()),
         };
-        let mut reference = super::function_execution_task_log_reference::LogReference::new(
-            path,
-            self.index,
-            self.task_index,
-            self.task_path.clone(),
-        );
+        let mut reference =
+            super::function_execution_task_log_reference::LogReference::new(
+                path,
+                self.index,
+                self.task_index,
+                self.task_path.clone(),
+            );
         reference.swiss_pool_index = self.swiss_pool_index;
         reference.swiss_round = self.swiss_round;
         reference.split_index = self.split_index;
@@ -73,7 +84,11 @@ impl FunctionExecutionTaskChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> Box<dyn Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_> {
+    ) -> Box<
+        dyn Iterator<Item = crate::filesystem::db::schema::MessageRow>
+            + Send
+            + '_,
+    > {
         self.inner.produce_message_rows()
     }
 }

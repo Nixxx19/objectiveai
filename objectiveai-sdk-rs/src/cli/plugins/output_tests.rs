@@ -1,4 +1,5 @@
 use super::*;
+use crate::cli::output::ErrorType;
 use serde_json::json;
 
 fn roundtrip(out: &PluginOutput) -> serde_json::Value {
@@ -9,12 +10,13 @@ fn roundtrip(out: &PluginOutput) -> serde_json::Value {
 
 #[test]
 fn error_wire_shape() {
-    let out = PluginOutput::Error(Error {
+    let out = PluginOutput::Typed(TypedPluginOutput::Error(Error {
+        r#type: ErrorType::Error,
         level: Level::Error,
         fatal: true,
         message: "plugin blew up".into(),
         agent_id: None,
-    });
+    }));
     let v = roundtrip(&out);
     assert_eq!(v["type"], "error");
     assert_eq!(v["level"], "error");
@@ -26,17 +28,17 @@ fn error_wire_shape() {
 fn notification_wire_shape() {
     let out = PluginOutput::Notification(json!({"foo": "bar", "n": 42}));
     let v = roundtrip(&out);
-    assert_eq!(v["type"], "notification");
-    // Value's fields flatten alongside the `type` discriminator.
+    // Untagged catch-all: the value's keys are the wire shape, no
+    // `type:"notification"` envelope.
     assert_eq!(v["foo"], "bar");
     assert_eq!(v["n"], 42);
 }
 
 #[test]
 fn command_wire_shape() {
-    let out = PluginOutput::Command {
+    let out = PluginOutput::Typed(TypedPluginOutput::Command {
         command: "ping".to_string(),
-    };
+    });
     let v = roundtrip(&out);
     assert_eq!(v["type"], "command");
     assert_eq!(v["command"], "ping");
@@ -44,9 +46,9 @@ fn command_wire_shape() {
 
 #[test]
 fn mcp_wire_shape() {
-    let out = PluginOutput::Mcp(Mcp {
+    let out = PluginOutput::Typed(TypedPluginOutput::Mcp(Mcp {
         url: "https://example.com/mcp".into(),
-    });
+    }));
     let v = roundtrip(&out);
     assert_eq!(v["type"], "mcp");
     assert_eq!(v["url"], "https://example.com/mcp");

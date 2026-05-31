@@ -1,7 +1,10 @@
-use crate::tests::stream_push::stream_push_test;
 use super::*;
+use crate::tests::stream_push::stream_push_test;
 
-fn completion(index: u64, error: Option<crate::error::ResponseError>) -> AgentCompletionChunk {
+fn completion(
+    index: u64,
+    error: Option<crate::error::ResponseError>,
+) -> AgentCompletionChunk {
     AgentCompletionChunk {
         index,
         inner: crate::agent::completions::response::streaming::AgentCompletionChunk {
@@ -33,7 +36,10 @@ fn chunk_with(completions: Vec<AgentCompletionChunk>) -> VectorCompletionChunk {
 }
 
 fn err(code: u16, message: &str) -> crate::error::ResponseError {
-    crate::error::ResponseError { code, message: message.into() }
+    crate::error::ResponseError {
+        code,
+        message: message.into(),
+    }
 }
 
 #[test]
@@ -59,7 +65,10 @@ fn inner_errors_single_error_at_index_2() {
     assert_eq!(collected.len(), 1);
     assert_eq!(collected[0].agent_completion_index, 2);
     assert_eq!(collected[0].error.code, 429);
-    assert_eq!(collected[0].error.message, serde_json::Value::String("rate limited".into()));
+    assert_eq!(
+        collected[0].error.message,
+        serde_json::Value::String("rate limited".into())
+    );
 }
 
 #[test]
@@ -67,11 +76,17 @@ fn inner_error_serde_roundtrip() {
     let chunk = chunk_with(vec![completion(7, Some(err(503, "unavailable")))]);
     let item = chunk.inner_errors().next().expect("one inner error");
     let wire = serde_json::to_string(&item).unwrap();
-    assert_eq!(wire, r#"{"agent_completion_index":7,"error":{"code":503,"message":"unavailable"}}"#);
+    assert_eq!(
+        wire,
+        r#"{"agent_completion_index":7,"error":{"code":503,"message":"unavailable"}}"#
+    );
     let round: InnerError<'static> = serde_json::from_str(&wire).unwrap();
     assert_eq!(round.agent_completion_index, 7);
     assert_eq!(round.error.code, 503);
-    assert_eq!(round.error.message, serde_json::Value::String("unavailable".into()));
+    assert_eq!(
+        round.error.message,
+        serde_json::Value::String("unavailable".into())
+    );
 }
 
 #[test]

@@ -1,9 +1,11 @@
 use crate::{agent, functions};
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.inventions.request.FunctionInventionCreateParams")]
+#[schemars(
+    rename = "functions.inventions.request.FunctionInventionCreateParams"
+)]
 pub struct FunctionInventionCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
@@ -16,7 +18,8 @@ pub struct FunctionInventionCreateParams {
     #[schemars(extend("omitempty" = true))]
     pub provider: Option<agent::completions::request::Provider>,
     pub agent: agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
-    pub prompt: functions::inventions::prompts::InlinePromptOrRemoteCommitOptional,
+    pub prompt:
+        functions::inventions::prompts::InlinePromptOrRemoteCommitOptional,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub seed: Option<i64>,
@@ -45,7 +48,9 @@ pub struct FunctionInventionCreateParams {
 // per-leaf extraction (see `agent_completion_create_params.rs` for the
 // reference pattern).
 #[cfg(feature = "filesystem")]
-impl crate::filesystem::logs::ProducesRequestFiles for FunctionInventionCreateParams {
+impl crate::filesystem::logs::ProducesRequestFiles
+    for FunctionInventionCreateParams
+{
     fn produce_files(
         &self,
         id: &str,

@@ -34,7 +34,5 @@ pub enum PipeAck {
     /// `RichContent` JSON or the API-side notify dispatch returned
     /// an error. `message` is human-readable and not load-bearing.
     #[schemars(title = "Error")]
-    Error {
-        message: String,
-    },
+    Error { message: String },
 }

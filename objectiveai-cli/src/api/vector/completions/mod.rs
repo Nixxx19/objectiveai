@@ -1,6 +1,6 @@
+pub mod cache;
 pub mod post;
 pub mod votes;
-pub mod cache;
 
 use clap::Subcommand;
 
@@ -18,7 +18,11 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         match self {
             Commands::Post(args) => post::handle(args, cli_config, handle).await,
             Commands::Votes { command } => command.handle(cli_config, handle).await,

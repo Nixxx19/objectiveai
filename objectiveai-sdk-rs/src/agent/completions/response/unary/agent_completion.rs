@@ -1,11 +1,13 @@
 //! Agent completion response type.
 
 use crate::agent::completions::response;
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 /// A complete agent completion response.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[derive(
+    Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema,
+)]
 #[schemars(rename = "agent.completions.response.unary.AgentCompletion")]
 pub struct AgentCompletion {
     pub id: String,
@@ -31,7 +33,9 @@ pub struct AgentCompletion {
 impl AgentCompletion {
     /// Normalize non-deterministic fields for test snapshot comparison.
     pub fn normalize_for_tests(&mut self) {
-        use crate::agent::completions::message::{RichContent, RichContentPart};
+        use crate::agent::completions::message::{
+            RichContent, RichContentPart,
+        };
 
         self.id = String::new();
         self.created = 0;
@@ -74,7 +78,8 @@ impl AgentCompletion {
         // creation timestamp). Both vary run-to-run and would break
         // every snapshot otherwise. Decode, clear them, re-encode.
         if let Some(s) = &mut self.continuation {
-            if let Some(mut c) = crate::agent::Continuation::try_from_string(s) {
+            if let Some(mut c) = crate::agent::Continuation::try_from_string(s)
+            {
                 match &mut c {
                     crate::agent::Continuation::Openrouter(x) => {
                         x.mcp_sessions.clear();

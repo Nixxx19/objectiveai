@@ -1,10 +1,12 @@
 use crate::{agent, functions};
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 /// Parameters for creating a function execution.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.executions.request.FunctionExecutionCreateParams")]
+#[schemars(
+    rename = "functions.executions.request.FunctionExecutionCreateParams"
+)]
 pub struct FunctionExecutionCreateParams {
     /// The function to execute (inline definition or remote path).
     pub function: functions::FullInlineFunctionOrRemoteCommitOptional,
@@ -59,7 +61,9 @@ pub struct FunctionExecutionCreateParams {
 }
 
 #[cfg(feature = "filesystem")]
-impl crate::filesystem::logs::ProducesRequestFiles for FunctionExecutionCreateParams {
+impl crate::filesystem::logs::ProducesRequestFiles
+    for FunctionExecutionCreateParams
+{
     /// Break this request out into per-leaf log files:
     /// - `input` → recursive tree of files under `<route_base>/input/`
     ///   (per [`crate::functions::expression::InputValue::extract_to_files`]).

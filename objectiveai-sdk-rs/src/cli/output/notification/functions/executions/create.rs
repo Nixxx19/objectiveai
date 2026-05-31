@@ -16,7 +16,9 @@ pub struct Execution {
 
 /// Body of an execution result: the final task output.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
-#[schemars(rename = "cli.output.notification.functions.executions.ExecutionResult")]
+#[schemars(
+    rename = "cli.output.notification.functions.executions.ExecutionResult"
+)]
 pub struct ExecutionResult {
     pub output: crate::functions::expression::TaskOutputOwned,
 }

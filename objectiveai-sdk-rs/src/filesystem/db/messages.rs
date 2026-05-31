@@ -130,7 +130,8 @@ impl Queue {
     ) -> Result<bool, super::super::Error> {
         let entry = self.ensure_agent(agent_id).await?;
         let index = {
-            let mut state = entry.state.lock().expect("agent state mutex poisoned");
+            let mut state =
+                entry.state.lock().expect("agent state mutex poisoned");
             if state.request_inserted {
                 return Ok(false);
             }
@@ -198,7 +199,8 @@ impl Queue {
     ) -> Result<PendingNotification, super::super::Error> {
         let entry = self.ensure_agent(agent_id).await?;
         let index = {
-            let mut state = entry.state.lock().expect("agent state mutex poisoned");
+            let mut state =
+                entry.state.lock().expect("agent state mutex poisoned");
             let idx = state.next_index;
             state.next_index += 1;
             idx

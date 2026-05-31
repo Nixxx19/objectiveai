@@ -3,14 +3,23 @@ use super::{WhitelistEntry, check_plugin_whitelist, default_whitelist};
 #[test]
 fn default_whitelist_passes_objectiveai_owner() {
     let wl = default_whitelist();
-    let ok = check_plugin_whitelist("ObjectiveAI", "anything", "anysha", "0.1.0", &wl).unwrap();
+    let ok = check_plugin_whitelist(
+        "ObjectiveAI",
+        "anything",
+        "anysha",
+        "0.1.0",
+        &wl,
+    )
+    .unwrap();
     assert!(ok);
 }
 
 #[test]
 fn default_whitelist_rejects_other_owners() {
     let wl = default_whitelist();
-    let ok = check_plugin_whitelist("evil-org", "anything", "anysha", "0.1.0", &wl).unwrap();
+    let ok =
+        check_plugin_whitelist("evil-org", "anything", "anysha", "0.1.0", &wl)
+            .unwrap();
     assert!(!ok);
 }
 
@@ -18,7 +27,9 @@ fn default_whitelist_rejects_other_owners() {
 fn default_whitelist_is_case_insensitive() {
     let wl = default_whitelist();
     for owner in ["objectiveai", "OBJECTIVEAI", "ObJeCtIvEaI", "ObjectiveAI"] {
-        let ok = check_plugin_whitelist(owner, "anything", "anysha", "0.1.0", &wl).unwrap();
+        let ok =
+            check_plugin_whitelist(owner, "anything", "anysha", "0.1.0", &wl)
+                .unwrap();
         assert!(ok, "expected case-insensitive match for {owner:?}");
     }
 }
@@ -31,7 +42,8 @@ fn anchored_pattern_does_not_partial_match() {
         commit_sha: ".*".to_string(),
         version: ".*".to_string(),
     }];
-    let ok = check_plugin_whitelist("ObjectAttacker", "x", "x", "x", &wl).unwrap();
+    let ok =
+        check_plugin_whitelist("ObjectAttacker", "x", "x", "x", &wl).unwrap();
     assert!(!ok, "anchored `^Object$` must not match `ObjectAttacker`");
 }
 
@@ -43,7 +55,8 @@ fn anchored_pattern_does_not_match_prefix() {
         commit_sha: ".*".to_string(),
         version: ".*".to_string(),
     }];
-    let ok = check_plugin_whitelist("FakeOwnerExtra", "x", "x", "x", &wl).unwrap();
+    let ok =
+        check_plugin_whitelist("FakeOwnerExtra", "x", "x", "x", &wl).unwrap();
     assert!(!ok, "anchored `^.*Owner$` must not match `FakeOwnerExtra`");
 }
 
@@ -63,13 +76,21 @@ fn multiple_entries_or_semantics() {
             version: ".*".to_string(),
         },
     ];
-    let ok = check_plugin_whitelist("TrustedCorp", "any", "any", "any", &wl).unwrap();
+    let ok = check_plugin_whitelist("TrustedCorp", "any", "any", "any", &wl)
+        .unwrap();
     assert!(ok, "any matching entry should allow the install");
 }
 
 #[test]
 fn empty_whitelist_rejects_everything() {
-    let ok = check_plugin_whitelist("ObjectiveAI", "anything", "anysha", "0.1.0", &[]).unwrap();
+    let ok = check_plugin_whitelist(
+        "ObjectiveAI",
+        "anything",
+        "anysha",
+        "0.1.0",
+        &[],
+    )
+    .unwrap();
     assert!(!ok);
 }
 
@@ -95,11 +116,56 @@ fn all_four_fields_must_match() {
     }];
 
     // All match → ok
-    assert!(check_plugin_whitelist("ObjectiveAI", "approved-repo", "abc123", "1.0.0", &wl).unwrap());
+    assert!(
+        check_plugin_whitelist(
+            "ObjectiveAI",
+            "approved-repo",
+            "abc123",
+            "1.0.0",
+            &wl
+        )
+        .unwrap()
+    );
 
     // Single mismatch → reject
-    assert!(!check_plugin_whitelist("ObjectiveAI", "approved-repo", "abc123", "2.0.0", &wl).unwrap());
-    assert!(!check_plugin_whitelist("ObjectiveAI", "approved-repo", "deadbe", "1.0.0", &wl).unwrap());
-    assert!(!check_plugin_whitelist("ObjectiveAI", "other-repo", "abc123", "1.0.0", &wl).unwrap());
-    assert!(!check_plugin_whitelist("Other", "approved-repo", "abc123", "1.0.0", &wl).unwrap());
+    assert!(
+        !check_plugin_whitelist(
+            "ObjectiveAI",
+            "approved-repo",
+            "abc123",
+            "2.0.0",
+            &wl
+        )
+        .unwrap()
+    );
+    assert!(
+        !check_plugin_whitelist(
+            "ObjectiveAI",
+            "approved-repo",
+            "deadbe",
+            "1.0.0",
+            &wl
+        )
+        .unwrap()
+    );
+    assert!(
+        !check_plugin_whitelist(
+            "ObjectiveAI",
+            "other-repo",
+            "abc123",
+            "1.0.0",
+            &wl
+        )
+        .unwrap()
+    );
+    assert!(
+        !check_plugin_whitelist(
+            "Other",
+            "approved-repo",
+            "abc123",
+            "1.0.0",
+            &wl
+        )
+        .unwrap()
+    );
 }

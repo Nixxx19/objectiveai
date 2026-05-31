@@ -29,7 +29,9 @@ use crate::functions::executions::response;
 use super::{reasoning_summary_log_reference, task_log_reference};
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
-#[schemars(rename = "functions.executions.response.streaming.FunctionExecutionChunkLog")]
+#[schemars(
+    rename = "functions.executions.response.streaming.FunctionExecutionChunkLog"
+)]
 pub struct FunctionExecutionChunkLog {
     pub id: String,
     pub tasks: Vec<task_log_reference::LogReference>,

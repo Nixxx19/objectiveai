@@ -7,8 +7,8 @@
 //! ready-line.
 
 use objectiveai_sdk::cli::output::{
-    Cleared, Handle, Items, LogContent, LogStreamReady, Notification, NotificationValue,
-    Output,
+    Cleared, Handle, Items, LogContent, LogStreamReady, Notification, NotificationValue, Output,
+    TypedNotificationValue,
 };
 
 /// Returns the log id if `line` is a log-stream-ready notification.
@@ -17,7 +17,10 @@ pub fn parse_log_stream_ready(line: &str) -> Option<String> {
     let parsed: Output = serde_json::from_str(trimmed).ok()?;
     match parsed {
         Output::Notification(Notification {
-            value: NotificationValue::LogStreamReady(LogStreamReady { log_stream_ready }),
+            value:
+                NotificationValue::Typed(TypedNotificationValue::LogStreamReady(LogStreamReady {
+                    log_stream_ready,
+                })),
             ..
         }) => Some(log_stream_ready),
         _ => None,
@@ -28,7 +31,6 @@ pub fn parse_log_stream_ready(line: &str) -> Option<String> {
 /// envelope and emit it on the handle.
 pub async fn emit_log_content(content: LogContent, handle: &Handle) {
     Output::Notification(Notification {
-        agent_id: None,
         value: content.into(),
     })
     .emit(handle)
@@ -40,14 +42,18 @@ pub async fn emit_log_list(
     items: Vec<objectiveai_sdk::filesystem::logs::ListItem>,
     handle: &Handle,
 ) {
-    Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: objectiveai_sdk::cli::output::NotificationValue::other(&(Items { items })) })
-        .emit(handle)
-        .await;
+    Output::Notification(objectiveai_sdk::cli::output::Notification {
+        value: objectiveai_sdk::cli::output::NotificationValue::other(&(Items { items })),
+    })
+    .emit(handle)
+    .await;
 }
 
 /// Emit the count of cleared log files as `Cleared`.
 pub async fn emit_log_clear_count(count: u64, handle: &Handle) {
-    Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (Cleared { cleared: count }).into() })
-        .emit(handle)
-        .await;
+    Output::Notification(objectiveai_sdk::cli::output::Notification {
+        value: (Cleared { cleared: count }).into(),
+    })
+    .emit(handle)
+    .await;
 }

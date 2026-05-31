@@ -1,7 +1,7 @@
 pub mod config;
 pub mod logs;
-pub mod remote;
 pub mod recursive;
+pub mod remote;
 pub mod state;
 
 use clap::Subcommand;
@@ -36,7 +36,11 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         match self {
             Commands::Recursive { command } => command.handle(cli_config, handle).await,
             Commands::Config { command } => command.handle(cli_config, handle).await,

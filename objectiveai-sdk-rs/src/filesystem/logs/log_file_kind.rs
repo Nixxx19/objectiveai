@@ -251,9 +251,11 @@ impl LogFileKind {
             "agents/completions/response" => Some(Self::AgentCompletion {
                 id: stem.to_string(),
             }),
-            "agents/completions/request" => Some(Self::AgentCompletionRequest {
-                id: stem.to_string(),
-            }),
+            "agents/completions/request" => {
+                Some(Self::AgentCompletionRequest {
+                    id: stem.to_string(),
+                })
+            }
             "agents/completions/response/continuation" => {
                 Some(Self::AgentCompletionContinuation {
                     id: stem.to_string(),
@@ -262,15 +264,19 @@ impl LogFileKind {
             "vector/completions/response" => Some(Self::VectorCompletion {
                 id: stem.to_string(),
             }),
-            "vector/completions/request" => Some(Self::VectorCompletionRequest {
-                id: stem.to_string(),
-            }),
+            "vector/completions/request" => {
+                Some(Self::VectorCompletionRequest {
+                    id: stem.to_string(),
+                })
+            }
             "functions/executions/response" => Some(Self::FunctionExecution {
                 id: stem.to_string(),
             }),
-            "functions/executions/request" => Some(Self::FunctionExecutionRequest {
-                id: stem.to_string(),
-            }),
+            "functions/executions/request" => {
+                Some(Self::FunctionExecutionRequest {
+                    id: stem.to_string(),
+                })
+            }
             "functions/executions/response/retry_token" => {
                 Some(Self::FunctionExecutionRetryToken {
                     id: stem.to_string(),
@@ -279,9 +285,11 @@ impl LogFileKind {
             "functions/inventions/response" => Some(Self::FunctionInvention {
                 id: stem.to_string(),
             }),
-            "functions/inventions/request" => Some(Self::FunctionInventionRequest {
-                id: stem.to_string(),
-            }),
+            "functions/inventions/request" => {
+                Some(Self::FunctionInventionRequest {
+                    id: stem.to_string(),
+                })
+            }
             "functions/inventions/recursive/response" => {
                 Some(Self::FunctionInventionRecursive {
                     id: stem.to_string(),
@@ -304,7 +312,10 @@ impl LogFileKind {
             }
             "agents/completions/response/messages/reasoning" => {
                 let (id, message_index) = peel_u64(stem)?;
-                Some(Self::AgentCompletionMessageReasoning { id, message_index })
+                Some(Self::AgentCompletionMessageReasoning {
+                    id,
+                    message_index,
+                })
             }
             "agents/completions/response/messages/refusal" => {
                 let (id, message_index) = peel_u64(stem)?;
@@ -515,7 +526,10 @@ impl LogFileKind {
 /// `agents/completions/.../foo.json` → `("agents/completions/...", "foo")`.
 fn split_path(rel_path: &str) -> Option<(&str, &str)> {
     let (head, filename) = rel_path.rsplit_once('/')?;
-    let stem = filename.rsplit_once('.').map(|(s, _)| s).unwrap_or(filename);
+    let stem = filename
+        .rsplit_once('.')
+        .map(|(s, _)| s)
+        .unwrap_or(filename);
     Some((head, stem))
 }
 
@@ -552,13 +566,16 @@ mod tests {
 
     #[test]
     fn agent_completion_envelope() {
-        let k = LogFileKind::from_path("agents/completions/response/acc-1.json").unwrap();
+        let k =
+            LogFileKind::from_path("agents/completions/response/acc-1.json")
+                .unwrap();
         assert_eq!(k, LogFileKind::AgentCompletion { id: "acc-1".into() });
     }
 
     #[test]
     fn agent_completion_request_envelope() {
-        let k = LogFileKind::from_path("agents/completions/request/acc-1.json").unwrap();
+        let k = LogFileKind::from_path("agents/completions/request/acc-1.json")
+            .unwrap();
         assert_eq!(
             k,
             LogFileKind::AgentCompletionRequest { id: "acc-1".into() }
@@ -712,7 +729,9 @@ mod tests {
 
     #[test]
     fn function_execution_request() {
-        let k = LogFileKind::from_path("functions/executions/request/fer-9.json").unwrap();
+        let k =
+            LogFileKind::from_path("functions/executions/request/fer-9.json")
+                .unwrap();
         assert_eq!(
             k,
             LogFileKind::FunctionExecutionRequest { id: "fer-9".into() }

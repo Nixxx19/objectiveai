@@ -50,7 +50,9 @@ pub enum Error {
     ToolRead(std::io::Error),
     #[error("tool exited with non-zero status: {0}")]
     ToolExit(i32),
-    #[error("plugin {owner}/{repository} (commit {commit_sha}, version {version}) is not in the install whitelist; pass --allow-untrusted to install anyway")]
+    #[error(
+        "plugin {owner}/{repository} (commit {commit_sha}, version {version}) is not in the install whitelist; pass --allow-untrusted to install anyway"
+    )]
     PluginNotWhitelisted {
         owner: String,
         repository: String,
@@ -59,7 +61,9 @@ pub enum Error {
     },
     #[error("whitelist regex error: {0}")]
     WhitelistRegex(regex::Error),
-    #[error("viewer address is not configured; set VIEWER_ADDRESS in the env or run `objectiveai viewer address config set <addr>` (and optionally `objectiveai viewer port config set <port>`)")]
+    #[error(
+        "viewer address is not configured; set VIEWER_ADDRESS in the env or run `objectiveai viewer address config set <addr>` (and optionally `objectiveai viewer port config set <port>`)"
+    )]
     ViewerAddressNotConfigured,
     #[error("viewer path must start with `/`, got {0:?}")]
     ViewerPathMissingSlash(String),
@@ -79,10 +83,17 @@ pub enum Error {
     Spawn(String, std::io::Error),
     #[error("cli-stream subprocess exited with code {code}:\n{stderr_tail}")]
     CliStreamSubprocess { code: i32, stderr_tail: String },
-    #[error("no prior agent_completion_request for agent {agent_id:?}; spawn the agent first with `agents spawn`")]
+    #[error(
+        "no prior agent_completion_request for agent {agent_id:?}; spawn the agent first with `agents spawn`"
+    )]
     AgentNoPriorRequest { agent_id: String },
-    #[error("agent {agent_id:?} has no continuations available across {request_count} prior request(s); the most recent turn may still be streaming, or none have finished. Cannot fall back without a continuation.")]
-    AgentNoContinuation { agent_id: String, request_count: usize },
+    #[error(
+        "agent {agent_id:?} has no continuations available across {request_count} prior request(s); the most recent turn may still be streaming, or none have finished. Cannot fall back without a continuation."
+    )]
+    AgentNoContinuation {
+        agent_id: String,
+        request_count: usize,
+    },
 }
 
 impl Error {
@@ -92,6 +103,7 @@ impl Error {
         fatal: bool,
     ) -> objectiveai_sdk::cli::output::Error {
         objectiveai_sdk::cli::output::Error {
+            r#type: objectiveai_sdk::cli::output::ErrorType::Error,
             level,
             fatal,
             message: self.output_message(),

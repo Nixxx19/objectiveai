@@ -4,13 +4,21 @@ use crate::functions;
 use functions::expression::{
     ExpressionError, FromStarlarkValue, WithExpression,
 };
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::{UnpackValue, Value as StarlarkValue};
-use schemars::JsonSchema;
 
 /// Simple text content for system/developer messages.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[serde(untagged)]
 #[schemars(rename = "agent.completions.message.SimpleContent")]
 pub enum SimpleContent {
@@ -25,10 +33,16 @@ pub enum SimpleContent {
 impl SimpleContent {
     pub fn push(&mut self, other: &SimpleContent) {
         match (&mut *self, other) {
-            (SimpleContent::Text(self_text), SimpleContent::Text(other_text)) => {
+            (
+                SimpleContent::Text(self_text),
+                SimpleContent::Text(other_text),
+            ) => {
                 self_text.push_str(&other_text);
             }
-            (SimpleContent::Text(self_text), SimpleContent::Parts(other_parts)) => {
+            (
+                SimpleContent::Text(self_text),
+                SimpleContent::Parts(other_parts),
+            ) => {
                 let mut parts = Vec::with_capacity(1 + other_parts.len());
                 parts.push(SimpleContentPart::Text {
                     text: std::mem::take(self_text),
@@ -36,12 +50,18 @@ impl SimpleContent {
                 parts.extend(other_parts.iter().cloned());
                 *self = SimpleContent::Parts(parts);
             }
-            (SimpleContent::Parts(self_parts), SimpleContent::Text(other_text)) => {
+            (
+                SimpleContent::Parts(self_parts),
+                SimpleContent::Text(other_text),
+            ) => {
                 self_parts.push(SimpleContentPart::Text {
                     text: other_text.clone(),
                 });
             }
-            (SimpleContent::Parts(self_parts), SimpleContent::Parts(other_parts)) => {
+            (
+                SimpleContent::Parts(self_parts),
+                SimpleContent::Parts(other_parts),
+            ) => {
                 self_parts.extend(other_parts.iter().cloned());
             }
         }
@@ -67,9 +87,12 @@ impl SimpleContent {
         media_root: &str,
         id: &str,
         message_index: u64,
-    ) -> (super::SimpleContentLog, Vec<crate::filesystem::logs::LogFile>) {
-        use crate::filesystem::logs::{LogFile, LogReference};
+    ) -> (
+        super::SimpleContentLog,
+        Vec<crate::filesystem::logs::LogFile>,
+    ) {
         use super::SimpleContentLog;
+        use crate::filesystem::logs::{LogFile, LogReference};
 
         match self {
             SimpleContent::Text(text) => {
@@ -143,7 +166,15 @@ impl FromStarlarkValue for SimpleContent {
 }
 
 /// Expression variant of [`SimpleContent`] for dynamic content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[serde(untagged)]
 #[schemars(rename = "agent.completions.message.SimpleContentExpression")]
 pub enum SimpleContentExpression {
@@ -200,7 +231,15 @@ impl FromStarlarkValue for SimpleContentExpression {
 }
 
 /// A part of simple text content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "agent.completions.message.SimpleContentPart")]
 pub enum SimpleContentPart {
@@ -234,7 +273,15 @@ impl FromStarlarkValue for SimpleContentPart {
 }
 
 /// Expression variant of [`SimpleContentPart`] for dynamic content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "agent.completions.message.SimpleContentPartExpression")]
 pub enum SimpleContentPartExpression {

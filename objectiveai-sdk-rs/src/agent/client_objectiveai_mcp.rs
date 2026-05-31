@@ -11,15 +11,24 @@
 //! hash, so swapping in a different plugin reference produces a
 //! different agent id.
 
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 /// A single `owner` / `name` / `version` reference identifying one
 /// tool inside [`ClientObjectiveaiMcp::tools`]. Plugin references
 /// use the larger [`ClientObjectiveaiMcpPluginEntry`] — they carry
 /// extra `executable` / `mcp_servers` fields tools don't have.
 #[derive(
-    Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, JsonSchema, arbitrary::Arbitrary,
+    Debug,
+    Clone,
+    Serialize,
+    Deserialize,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    JsonSchema,
+    arbitrary::Arbitrary,
 )]
 #[schemars(rename = "agent.ClientObjectiveaiMcpEntry")]
 pub struct ClientObjectiveaiMcpEntry {
@@ -63,7 +72,16 @@ impl ClientObjectiveaiMcpEntry {
 ///   `filesystem::plugins::Manifest::mcp_servers` entries should be
 ///   exposed to the agent, by `name`. `None` ⇒ none of them.
 #[derive(
-    Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, JsonSchema, arbitrary::Arbitrary,
+    Debug,
+    Clone,
+    Serialize,
+    Deserialize,
+    PartialEq,
+    Eq,
+    PartialOrd,
+    Ord,
+    JsonSchema,
+    arbitrary::Arbitrary,
 )]
 #[schemars(rename = "agent.ClientObjectiveaiMcpPluginEntry")]
 pub struct ClientObjectiveaiMcpPluginEntry {
@@ -142,7 +160,15 @@ pub fn materialize_tool_name(owner: &str, name: &str, version: &str) -> String {
 ///   plus per-plugin `executable` + `mcp_servers`.
 /// - `tools`: specific tools (by `owner` / `name` / `version`).
 #[derive(
-    Debug, Clone, Serialize, Deserialize, PartialEq, Eq, JsonSchema, arbitrary::Arbitrary, Default,
+    Debug,
+    Clone,
+    Serialize,
+    Deserialize,
+    PartialEq,
+    Eq,
+    JsonSchema,
+    arbitrary::Arbitrary,
+    Default,
 )]
 #[schemars(rename = "agent.ClientObjectiveaiMcp")]
 pub struct ClientObjectiveaiMcp {
@@ -172,7 +198,8 @@ pub fn validate(this: &ClientObjectiveaiMcp) -> Result<(), String> {
     }
     for (i, a) in this.plugins.iter().enumerate() {
         for b in &this.plugins[i + 1..] {
-            if a.owner == b.owner && a.name == b.name && a.version == b.version {
+            if a.owner == b.owner && a.name == b.name && a.version == b.version
+            {
                 return Err(format!(
                     "`client_objectiveai_mcp.plugins` contains duplicate entry: \"{}/{}@{}\"",
                     a.owner, a.name, a.version,
@@ -200,7 +227,10 @@ pub fn validate(this: &ClientObjectiveaiMcp) -> Result<(), String> {
 pub fn prepare(mut this: ClientObjectiveaiMcp) -> Option<ClientObjectiveaiMcp> {
     this.plugins.sort();
     this.tools.sort();
-    if this.objectiveai.is_none() && this.plugins.is_empty() && this.tools.is_empty() {
+    if this.objectiveai.is_none()
+        && this.plugins.is_empty()
+        && this.tools.is_empty()
+    {
         None
     } else {
         Some(this)

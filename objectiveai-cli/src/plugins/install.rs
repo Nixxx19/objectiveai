@@ -83,11 +83,9 @@ impl Commands {
 }
 
 async fn emit_instructions(handle: &Handle) -> Result<(), crate::error::Error> {
-    let instructions = include_str!(
-        "../../assets/plugins/install/filesystem/INSTRUCTIONS.md"
-    )
-    .to_string();
-    Output::Notification(Notification { agent_id: None,
+    let instructions =
+        include_str!("../../assets/plugins/install/filesystem/INSTRUCTIONS.md").to_string();
+    Output::Notification(Notification {
         value: objectiveai_sdk::cli::output::Instructions { instructions }.into(),
     })
     .emit(handle)

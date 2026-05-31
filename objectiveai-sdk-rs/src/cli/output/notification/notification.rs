@@ -3,24 +3,27 @@ use serde::{Deserialize, Serialize};
 
 use super::NotificationValue;
 
-/// Wrapper that nests the notification payload one level deeper under a
-/// `value` field. Required because [`super::super::Output`] uses
-/// `#[serde(tag = "type")]` — keeping `NotificationValue` under `value`
-/// instead of flattening preserves the historical `.value.<field>`
-/// access path for downstream consumers.
+/// One emitted notification. The payload's keys flatten directly
+/// into the top-level JSON object via `#[serde(flatten)]` — there
+/// is no `value` wrapper or `type:"notification"` envelope.
 ///
-/// `agent_id` is stamped at emit time by [`super::super::Handle`] when
-/// its `agent_id` field is set; producers building a `Notification`
-/// inline almost always leave the field `None` and let the handle
-/// fill it. Serde-skipped when `None`.
+/// `Notification` has no struct-level `agent_id` field. Inner
+/// payloads that name an agent (e.g. `Spawned`, `MessageQueued`,
+/// `Inactive`, `Me`) carry agent_id themselves — flattening would
+/// otherwise collide on the wire. For payloads with no inherent
+/// agent_id (`Ok`, `LogContent`, `Mcp`, …), the cli session's
+/// agent_id is stamped at JSON-serialize time by
+/// [`super::super::Handle::emit`] iff the resulting JSON object
+/// doesn't already contain one.
 ///
-/// Wire (in combination with `Output::Notification`):
-/// `{"type":"notification","value":{"kind":"<variant>",…},"agent_id":"<id>"?}`.
+/// Wire:
+///   `{"type":"<typed-variant>",…fields…}` for typed variants.
+///   `{…object-keys…}` for `Other` payloads.
+///   Handle additionally injects `"agent_id":"<cli-session-id>"`
+///   at JSON level when no inner agent_id is present.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
 #[schemars(rename = "cli.output.notification.Notification")]
 pub struct Notification {
+    #[serde(flatten)]
     pub value: NotificationValue,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    #[schemars(extend("omitempty" = true))]
-    pub agent_id: Option<String>,
 }

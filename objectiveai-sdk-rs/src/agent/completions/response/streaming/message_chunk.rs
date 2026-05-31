@@ -1,7 +1,15 @@
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[serde(untagged)]
 #[schemars(rename = "agent.completions.response.streaming.MessageChunk")]
 pub enum MessageChunk {
@@ -42,9 +50,14 @@ impl MessageChunk {
         &self,
         id: &str,
         route_base: &str,
-    ) -> (crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>) {
+    ) -> (
+        crate::filesystem::logs::LogReference,
+        Vec<crate::filesystem::logs::LogFile>,
+    ) {
         match self {
-            MessageChunk::Assistant(chunk) => chunk.produce_files(id, route_base),
+            MessageChunk::Assistant(chunk) => {
+                chunk.produce_files(id, route_base)
+            }
             MessageChunk::Tool(chunk) => chunk.produce_files(id, route_base),
         }
     }

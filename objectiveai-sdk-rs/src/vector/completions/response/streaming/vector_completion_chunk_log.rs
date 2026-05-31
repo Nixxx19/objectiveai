@@ -14,7 +14,9 @@ use crate::filesystem::logs::indexed_reference;
 use crate::vector::completions::response;
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
-#[schemars(rename = "vector.completions.response.streaming.VectorCompletionChunkLog")]
+#[schemars(
+    rename = "vector.completions.response.streaming.VectorCompletionChunkLog"
+)]
 pub struct VectorCompletionChunkLog {
     pub id: String,
     pub completions: Vec<indexed_reference::LogReference>,

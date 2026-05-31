@@ -1,11 +1,22 @@
-use crate::{agent, functions};
 use crate::agent::completions::response::streaming::AgentCompletionIds;
-use serde::{Deserialize, Serialize};
+use crate::{agent, functions};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 /// Streaming chunk for a single evaluation agent completion within a laboratory execution.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "laboratories.executions.response.streaming.EvaluationChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    Default,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "laboratories.executions.response.streaming.EvaluationChunk"
+)]
 pub struct EvaluationChunk {
     /// Evaluation index (0-based).
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]

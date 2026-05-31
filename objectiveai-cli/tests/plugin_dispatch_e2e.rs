@@ -27,9 +27,11 @@ fn build_and_locate_hello_plugin() -> PathBuf {
     let target = std::env::var_os("CARGO_TARGET_DIR")
         .map(PathBuf::from)
         .unwrap_or_else(|| workspace_root.join("target"));
-    let bin = target
-        .join("debug")
-        .join(if cfg!(windows) { "hello-plugin.exe" } else { "hello-plugin" });
+    let bin = target.join("debug").join(if cfg!(windows) {
+        "hello-plugin.exe"
+    } else {
+        "hello-plugin"
+    });
     assert!(bin.exists(), "hello-plugin binary missing at {bin:?}");
     bin
 }
@@ -53,7 +55,11 @@ fn hello_plugin_dispatch_produces_expected_output() {
     let fixture = build_and_locate_hello_plugin();
     let plugin_subdir = plugins_dir.join("hello");
     std::fs::create_dir_all(&plugin_subdir).unwrap();
-    let target = plugin_subdir.join(if cfg!(windows) { "plugin.exe" } else { "plugin" });
+    let target = plugin_subdir.join(if cfg!(windows) {
+        "plugin.exe"
+    } else {
+        "plugin"
+    });
     std::fs::copy(&fixture, &target).expect("failed to copy fixture binary");
     #[cfg(unix)]
     {
@@ -82,7 +88,10 @@ fn hello_plugin_dispatch_produces_expected_output() {
     // `{"hello":"world"}` rides alongside `"kind":"other"`.
     let stdout = String::from_utf8(output.stdout).expect("cli stdout not utf-8");
     let lines: Vec<&str> = stdout.lines().collect();
-    assert!(!lines.is_empty(), "expected at least one notification, got: {lines:?}");
+    assert!(
+        !lines.is_empty(),
+        "expected at least one notification, got: {lines:?}"
+    );
 
     let hello_count = lines
         .iter()
@@ -91,14 +100,12 @@ fn hello_plugin_dispatch_produces_expected_output() {
                 return false;
             };
             // PluginNotification wraps the plugin's payload under
-            // an inner `value` field (kind = "plugin_notification"),
-            // so the path to the plugin's own key is two `value`
-            // hops deep.
-            v.get("type") == Some(&Value::String("notification".into()))
-                && v.pointer("/value/kind")
-                    == Some(&Value::String("plugin_notification".into()))
-                && v.pointer("/value/value/hello")
-                    == Some(&Value::String("world".into()))
+            // an inner `value` field (`type = "plugin_notification"`),
+            // flattened directly at the top level after the wire
+            // shape redesign — no more `value`/`type:"notification"`
+            // envelope.
+            v.get("type") == Some(&Value::String("plugin_notification".into()))
+                && v.pointer("/value/hello") == Some(&Value::String("world".into()))
         })
         .count();
     assert_eq!(

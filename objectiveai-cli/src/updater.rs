@@ -34,8 +34,7 @@ use objectiveai_sdk::cli::output::notification::{Notification, SkipReason, Updat
 use objectiveai_sdk::cli::output::{Handle, Output};
 use objectiveai_sdk::filesystem::Client;
 
-const RELEASES_API: &str =
-    "https://api.github.com/repos/ObjectiveAI/objectiveai/releases/latest";
+const RELEASES_API: &str = "https://api.github.com/repos/ObjectiveAI/objectiveai/releases/latest";
 const METADATA_TIMEOUT: Duration = Duration::from_secs(10);
 const DOWNLOAD_TIMEOUT: Duration = Duration::from_secs(120);
 
@@ -88,23 +87,27 @@ mod imp {
         browser_download_url: String,
     }
 
-    pub(super) async fn run(
-        cli_config: &crate::run::Config,
-        handle: &Handle,
-    ) -> Result<(), Error> {
+    pub(super) async fn run(cli_config: &crate::run::Config, handle: &Handle) -> Result<(), Error> {
         // Dev tree refuses to self-update — overwriting a `cargo run`
         // output would clobber an in-tree build.
         let current_exe = std::env::current_exe().map_err(Error::CurrentExe)?;
         if looks_like_dev_tree(&current_exe) {
-            emit_notification(handle, Updater::Skipped { reason: SkipReason::DevTree })
-                .await;
+            emit_notification(
+                handle,
+                Updater::Skipped {
+                    reason: SkipReason::DevTree,
+                },
+            )
+            .await;
             return Ok(());
         }
 
         let Some((os, arch, ext)) = platform_triple() else {
             emit_notification(
                 handle,
-                Updater::Skipped { reason: SkipReason::UnsupportedPlatform },
+                Updater::Skipped {
+                    reason: SkipReason::UnsupportedPlatform,
+                },
             )
             .await;
             return Ok(());
@@ -154,18 +157,12 @@ mod imp {
             if let Some(ref h) = auth {
                 req = req.header("Authorization", h);
             }
-            let resp = req
-                .send()
-                .await
-                .map_err(|e| Error::Http(e.to_string()))?;
+            let resp = req.send().await.map_err(|e| Error::Http(e.to_string()))?;
             let status = resp.status();
             if !status.is_success() {
                 return Err(Error::BadStatus(status));
             }
-            let body = resp
-                .bytes()
-                .await
-                .map_err(|e| Error::Http(e.to_string()))?;
+            let body = resp.bytes().await.map_err(|e| Error::Http(e.to_string()))?;
             serde_json::from_slice(&body).map_err(Error::BadMetadata)?
         };
 
@@ -180,7 +177,9 @@ mod imp {
             if !assets_map.contains_key(name.as_str()) {
                 emit_notification(
                     handle,
-                    Updater::Skipped { reason: SkipReason::IncompleteRelease },
+                    Updater::Skipped {
+                        reason: SkipReason::IncompleteRelease,
+                    },
                 )
                 .await;
                 return Ok(());
@@ -357,13 +356,10 @@ mod imp {
     }
 
     fn github_authorization(caller: Option<&str>) -> Option<String> {
-        caller
-            .map(str::trim)
-            .filter(|s| !s.is_empty())
-            .map(|s| {
-                let bare = s.strip_prefix("Bearer ").unwrap_or(s);
-                format!("Bearer {bare}")
-            })
+        caller.map(str::trim).filter(|s| !s.is_empty()).map(|s| {
+            let bare = s.strip_prefix("Bearer ").unwrap_or(s);
+            format!("Bearer {bare}")
+        })
     }
 
     async fn download_to(
@@ -383,16 +379,15 @@ mod imp {
         if let Some(h) = auth {
             req = req.header("Authorization", h);
         }
-        let resp = req
-            .send()
-            .await
-            .map_err(|e| Error::Http(e.to_string()))?;
+        let resp = req.send().await.map_err(|e| Error::Http(e.to_string()))?;
         let status = resp.status();
         if !status.is_success() {
             return Err(Error::BadStatus(status));
         }
 
-        let mut file = tokio::fs::File::create(dst).await.map_err(Error::Download)?;
+        let mut file = tokio::fs::File::create(dst)
+            .await
+            .map_err(Error::Download)?;
         let mut stream = resp.bytes_stream();
         while let Some(chunk) = stream.next().await {
             let chunk = chunk.map_err(|e| Error::Http(e.to_string()))?;
@@ -453,12 +448,15 @@ mod imp {
 }
 
 async fn emit_notification(handle: &Handle, value: Updater) {
-    let output = Output::Notification(Notification { value: value.into(), agent_id: None });
+    let output = Output::Notification(Notification {
+        value: value.into(),
+    });
     output.emit(handle).await;
 }
 
 async fn emit_warn(handle: &Handle, message: &str) {
     let err = objectiveai_sdk::cli::output::Error {
+        r#type: objectiveai_sdk::cli::output::ErrorType::Error,
         level: objectiveai_sdk::cli::output::Level::Warn,
         fatal: false,
         message: serde_json::Value::String(message.to_string()),

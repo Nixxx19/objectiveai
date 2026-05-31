@@ -1,10 +1,20 @@
-use crate::{agent, error, functions};
 use crate::agent::completions::response::streaming::AgentCompletionIds;
-use serde::{Deserialize, Serialize};
+use crate::{agent, error, functions};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "functions.inventions.response.streaming.FunctionInventionChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "functions.inventions.response.streaming.FunctionInventionChunk"
+)]
 pub struct FunctionInventionChunk {
     pub id: String,
     pub completions: Vec<super::AgentCompletionChunk>,
@@ -32,7 +42,9 @@ pub struct FunctionInventionChunk {
 
 impl AgentCompletionIds for FunctionInventionChunk {
     fn agent_completion_ids(&self) -> impl Iterator<Item = &str> {
-        self.completions.iter().flat_map(|c| c.agent_completion_ids())
+        self.completions
+            .iter()
+            .flat_map(|c| c.agent_completion_ids())
     }
 }
 
@@ -41,7 +53,8 @@ impl FunctionInventionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_ {
+    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_
+    {
         self.completions
             .iter()
             .flat_map(|c| c.produce_message_rows())
@@ -138,7 +151,10 @@ impl FunctionInventionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_files(
         &self,
-    ) -> Option<(crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>)> {
+    ) -> Option<(
+        crate::filesystem::logs::LogReference,
+        Vec<crate::filesystem::logs::LogFile>,
+    )> {
         use crate::filesystem::logs::{LogFile, LogReference};
         const ROUTE: &str = "functions/inventions/response";
 
@@ -148,8 +164,9 @@ impl FunctionInventionChunk {
         }
 
         let mut files: Vec<LogFile> = Vec::new();
-        let mut completion_refs:
-            Vec<crate::filesystem::logs::indexed_reference::LogReference> = Vec::new();
+        let mut completion_refs: Vec<
+            crate::filesystem::logs::indexed_reference::LogReference,
+        > = Vec::new();
 
         for completion in &self.completions {
             let (reference, completion_files) = completion.produce_files();

@@ -38,7 +38,10 @@ fn ensure_cli_stream_built() {
             ])
             .status()
             .expect("failed to spawn cargo build for objectiveai-cli-stream");
-        assert!(status.success(), "cargo build of objectiveai-cli-stream failed");
+        assert!(
+            status.success(),
+            "cargo build of objectiveai-cli-stream failed"
+        );
     });
 }
 
@@ -121,10 +124,10 @@ async fn spawn_then_message_propagates_response_continuation() {
     );
     let spawned = spawn_lines
         .iter()
-        .find(|l| l.pointer("/value/kind") == Some(&json!("spawned")))
+        .find(|l| l.pointer("/type") == Some(&json!("spawned")))
         .expect("agents spawn must emit a Spawned notification");
     let spawn_id = spawned
-        .pointer("/value/agent_id")
+        .pointer("/agent_id")
         .and_then(|v| v.as_str())
         .expect("Spawned.agent_id")
         .to_string();
@@ -139,10 +142,7 @@ async fn spawn_then_message_propagates_response_continuation() {
     let response_cont_path = base_dir
         .join("logs/agents/completions/response/continuation")
         .join(format!("{spawn_id}.json"));
-    let socket_path = base_dir
-        .join("pipes/cli")
-        .join(&spawn_id)
-        .join("socket");
+    let socket_path = base_dir.join("pipes/cli").join(&spawn_id).join("socket");
     poll_until(Duration::from_secs(30), || {
         response_cont_path.exists() && !socket_path.exists()
     })
@@ -170,16 +170,16 @@ async fn spawn_then_message_propagates_response_continuation() {
     );
     let queued = msg_lines
         .iter()
-        .find(|l| l.pointer("/value/kind") == Some(&json!("message_queued")))
+        .find(|l| l.pointer("/type") == Some(&json!("message_queued")))
         .expect("agents message must emit MessageQueued on the fallback path");
 
     let new_response_id = queued
-        .pointer("/value/response_id")
+        .pointer("/response_id")
         .and_then(|v| v.as_str())
         .expect("MessageQueued.response_id")
         .to_string();
     let echoed_agent_id = queued
-        .pointer("/value/agent_id")
+        .pointer("/agent_id")
         .and_then(|v| v.as_str())
         .expect("MessageQueued.agent_id");
     assert_eq!(
@@ -236,8 +236,7 @@ async fn spawn_then_message_propagates_response_continuation() {
                                         break;
                                     }
                                     Ok(_) => {
-                                        last_err =
-                                            Some("continuation leaf empty".to_string());
+                                        last_err = Some("continuation leaf empty".to_string());
                                     }
                                     Err(e) => {
                                         last_err = Some(format!(
@@ -248,8 +247,7 @@ async fn spawn_then_message_propagates_response_continuation() {
                                 }
                             }
                             None => {
-                                last_err =
-                                    Some("no .continuation.path field".to_string());
+                                last_err = Some("no .continuation.path field".to_string());
                             }
                         }
                     }

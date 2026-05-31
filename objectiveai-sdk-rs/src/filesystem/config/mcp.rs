@@ -1,6 +1,8 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(
+    Debug, Clone, Default, Serialize, Deserialize, schemars::JsonSchema,
+)]
 #[schemars(rename = "filesystem.config.McpConfig")]
 pub struct McpConfig {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -36,7 +38,10 @@ impl McpConfig {
         self.port = Some(value);
     }
 
-    pub fn jq(&self, filter: &str) -> Result<Vec<serde_json::Value>, super::super::Error> {
+    pub fn jq(
+        &self,
+        filter: &str,
+    ) -> Result<Vec<serde_json::Value>, super::super::Error> {
         super::super::run_jq(self, filter)
     }
 }

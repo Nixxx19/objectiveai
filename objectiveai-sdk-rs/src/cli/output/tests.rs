@@ -18,7 +18,7 @@ fn roundtrip(out: &Output) -> Output {
 }
 
 fn notif(value: NotificationValue) -> Output {
-    Output::Notification(Notification { value, agent_id: None })
+    Output::Notification(Notification { value })
 }
 
 fn assert_roundtrip_eq(out: Output) {
@@ -31,7 +31,9 @@ async fn emit_via_stdout_handle() {
     // Smoke test that the default Stdout-destination handle routes
     // emit() without panicking. We can't intercept stdout from a unit
     // test, so just confirm the call completes.
-    notif(NotificationValue::Ok(OK)).emit(&Handle::stdout()).await;
+    notif(NotificationValue::Typed(TypedNotificationValue::Ok(OK)))
+        .emit(&Handle::stdout())
+        .await;
 }
 
 #[tokio::test]
@@ -39,8 +41,11 @@ async fn emit_via_collect_handle_appends_to_vec() {
     let vec = Arc::new(Mutex::new(Vec::new()));
     let handle = Handle::from(HandleDestination::Collect(vec.clone()));
 
-    notif(NotificationValue::Ok(OK)).emit(&handle).await;
+    notif(NotificationValue::Typed(TypedNotificationValue::Ok(OK)))
+        .emit(&handle)
+        .await;
     Output::Error(Error {
+        r#type: ErrorType::Error,
         level: Level::Warn,
         fatal: false,
         message: "heads up".into(),
@@ -53,9 +58,8 @@ async fn emit_via_collect_handle_appends_to_vec() {
     assert_eq!(snapshot.len(), 2);
 
     let first = serde_json::to_value(&snapshot[0]).unwrap();
-    assert_eq!(first["type"], "notification");
-    assert_eq!(first["value"]["kind"], "ok");
-    assert_eq!(first["value"]["ok"], true);
+    assert_eq!(first["type"], "ok");
+    assert_eq!(first["ok"], true);
 
     let second = serde_json::to_value(&snapshot[1]).unwrap();
     assert_eq!(second["type"], "error");
@@ -67,6 +71,7 @@ async fn emit_via_collect_handle_appends_to_vec() {
 #[test]
 fn error_fatal_roundtrip() {
     let out = Output::Error(Error {
+        r#type: ErrorType::Error,
         level: Level::Error,
         fatal: true,
         message: "favorite not found: foo".into(),
@@ -78,6 +83,7 @@ fn error_fatal_roundtrip() {
 #[test]
 fn error_non_fatal_warn_roundtrip() {
     let out = Output::Error(Error {
+        r#type: ErrorType::Error,
         level: Level::Warn,
         fatal: false,
         message: json!({"code": "x", "detail": [1, 2, 3]}),
@@ -90,373 +96,455 @@ fn error_non_fatal_warn_roundtrip() {
 
 #[test]
 fn nv_active_agent_roundtrip() {
-    let out = notif(NotificationValue::ActiveAgent(ActiveAgent {
-        agent_id: "child-1".into(),
-        last_log: 1_700_000_000,
-    }));
-    assert_roundtrip_eq(out);
-}
-
-#[test]
-fn nv_agent_items_roundtrip() {
-    let out = notif(NotificationValue::AgentItems(AgentItems {
-        agent_id: "agent-1".into(),
-        items: vec![],
-    }));
-    assert_roundtrip_eq(out);
-}
-
-#[test]
-fn nv_inactive_roundtrip() {
-    let out = notif(NotificationValue::Inactive(
-        crate::cli::output::notification::agents::Inactive {
-            agent_id: "agent-1".into(),
-        },
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::ActiveAgent(ActiveAgent {
+            agent_id: "child-1".into(),
+            last_log: 1_700_000_000,
+        }),
     ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
+fn nv_agent_items_roundtrip() {
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::AgentItems(AgentItems {
+            agent_id: "agent-1".into(),
+            items: vec![],
+        }),
+    ));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_inactive_roundtrip() {
+    let out =
+        notif(NotificationValue::Typed(TypedNotificationValue::Inactive(
+            crate::cli::output::notification::agents::Inactive {
+                agent_id: "agent-1".into(),
+            },
+        )));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
 fn nv_spawned_roundtrip() {
-    let out = notif(NotificationValue::Spawned(Spawned {
-        agent_id: "spawn-xyz".into(),
-    }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Spawned(
+        Spawned {
+            agent_id: "spawn-xyz".into(),
+        },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_me_roundtrip() {
-    let out = notif(NotificationValue::Me(Me {
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Me(Me {
         agent_id: "agent-xyz".into(),
-    }));
+    })));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_mcp_roundtrip() {
-    let out = notif(NotificationValue::Mcp(Mcp {
-        url: "http://127.0.0.1:9876".into(),
-    }));
+    let out =
+        notif(NotificationValue::Typed(TypedNotificationValue::Mcp(Mcp {
+            url: "http://127.0.0.1:9876".into(),
+        })));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_message_delivered_roundtrip() {
-    let out = notif(NotificationValue::MessageDelivered(MessageDelivered {
-        agent_id: "cli/foo-123".into(),
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::MessageDelivered(MessageDelivered {
+            agent_id: "cli/foo-123".into(),
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_message_queued_roundtrip() {
-    let out = notif(NotificationValue::MessageQueued(MessageQueued {
-        agent_id: "cli/foo-123".into(),
-        response_id: "resp-abc".into(),
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::MessageQueued(MessageQueued {
+            agent_id: "cli/foo-123".into(),
+            response_id: "resp-abc".into(),
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_detached_roundtrip() {
-    let out = notif(NotificationValue::Detached(Detached { pid: 12345 }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::Detached(Detached { pid: 12345 }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_inventions_roundtrip() {
-    let out = notif(NotificationValue::Inventions(Inventions {
-        inventions: vec![InventionResultItem {
-            name: "alpha_scalar_leaf".into(),
-            path: None,
-        }],
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::Inventions(Inventions {
+            inventions: vec![InventionResultItem {
+                name: "alpha_scalar_leaf".into(),
+                path: None,
+            }],
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_cleared_roundtrip() {
-    let out = notif(NotificationValue::Cleared(Cleared { cleared: 7 }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Cleared(
+        Cleared { cleared: 7 },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_help_roundtrip() {
-    let out = notif(NotificationValue::Help(Help {
-        help: "Usage: objectiveai [OPTIONS]".into(),
-    }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Help(
+        Help {
+            help: "Usage: objectiveai [OPTIONS]".into(),
+        },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_installed_roundtrip() {
-    let out = notif(NotificationValue::Installed(Installed { installed: true }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::Installed(Installed { installed: true }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_instructions_roundtrip() {
-    let out = notif(NotificationValue::Instructions(Instructions {
-        instructions: "# Setup\n\n…".into(),
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::Instructions(Instructions {
+            instructions: "# Setup\n\n…".into(),
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_jq_results_roundtrip() {
-    let out = notif(NotificationValue::JqResults(JqResults {
-        jq: json!([{"a": 1}, {"b": 2}]),
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::JqResults(JqResults {
+            jq: json!([{"a": 1}, {"b": 2}]),
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_log_content_json_roundtrip() {
-    let out = notif(NotificationValue::LogContent(LogContent::Json {
-        content: json!({"completion": {"id": "abc"}}),
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::LogContent(LogContent::Json {
+            content: json!({"completion": {"id": "abc"}}),
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_log_content_text_roundtrip() {
-    let out = notif(NotificationValue::LogContent(LogContent::Text {
-        text: "plain string".into(),
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::LogContent(LogContent::Text {
+            text: "plain string".into(),
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_log_content_image_roundtrip() {
     use crate::agent::completions::message::ImageUrl;
-    let out = notif(NotificationValue::LogContent(LogContent::Image {
-        image_url: ImageUrl {
-            url: "data:image/png;base64,iVBORw0KGgo".into(),
-            detail: None,
-        },
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::LogContent(LogContent::Image {
+            image_url: ImageUrl {
+                url: "data:image/png;base64,iVBORw0KGgo".into(),
+                detail: None,
+            },
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_log_content_audio_roundtrip() {
     use crate::agent::completions::message::InputAudio;
-    let out = notif(NotificationValue::LogContent(LogContent::Audio {
-        input_audio: InputAudio {
-            data: "SUQzBAA".into(),
-            format: "audio/mpeg".into(),
-        },
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::LogContent(LogContent::Audio {
+            input_audio: InputAudio {
+                data: "SUQzBAA".into(),
+                format: "audio/mpeg".into(),
+            },
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_log_content_video_roundtrip() {
     use crate::agent::completions::message::VideoUrl;
-    let out = notif(NotificationValue::LogContent(LogContent::Video {
-        video_url: VideoUrl {
-            url: "data:video/mp4;base64,AAAA".into(),
-        },
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::LogContent(LogContent::Video {
+            video_url: VideoUrl {
+                url: "data:video/mp4;base64,AAAA".into(),
+            },
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_log_content_file_roundtrip() {
     use crate::agent::completions::message::File;
-    let out = notif(NotificationValue::LogContent(LogContent::File {
-        file: File {
-            file_data: Some("JVBERi0".into()),
-            filename: Some("report.pdf".into()),
-            file_id: None,
-            file_url: None,
-        },
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::LogContent(LogContent::File {
+            file: File {
+                file_data: Some("JVBERi0".into()),
+                filename: Some("report.pdf".into()),
+                file_id: None,
+                file_url: None,
+            },
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_log_stream_ready_roundtrip() {
-    let out = notif(NotificationValue::LogStreamReady(LogStreamReady {
-        log_stream_ready: "abc-123".into(),
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::LogStreamReady(LogStreamReady {
+            log_stream_ready: "abc-123".into(),
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_ok_roundtrip() {
-    let out = notif(NotificationValue::Ok(OK));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Ok(OK)));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_published_roundtrip() {
-    let out = notif(NotificationValue::Published(Published {
-        sha: "deadbeef".into(),
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::Published(Published {
+            sha: "deadbeef".into(),
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_schema_roundtrip() {
-    let out = notif(NotificationValue::Schema(Schema {
-        schema: json!({"$schema": "...", "type": "object"}),
-    }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Schema(
+        Schema {
+            schema: json!({"$schema": "...", "type": "object"}),
+        },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_schemas_roundtrip() {
-    let out = notif(NotificationValue::Schemas(Schemas {
-        schemas: vec!["Foo".into(), "Bar".into()],
-    }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Schemas(
+        Schemas {
+            schemas: vec!["Foo".into(), "Bar".into()],
+        },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_tool_line_stdout_roundtrip() {
-    let out = notif(NotificationValue::ToolLine(ToolLine {
-        line: "hello".into(),
-        stdout: Some(true),
-        stderr: None,
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::ToolLine(ToolLine {
+            line: "hello".into(),
+            stdout: Some(true),
+            stderr: None,
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_tool_line_stderr_roundtrip() {
-    let out = notif(NotificationValue::ToolLine(ToolLine {
-        line: "oops".into(),
-        stdout: None,
-        stderr: Some(true),
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::ToolLine(ToolLine {
+            line: "oops".into(),
+            stdout: None,
+            stderr: Some(true),
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_plugins_empty_roundtrip() {
-    let out = notif(NotificationValue::Plugins(Plugins { plugins: vec![] }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Plugins(
+        Plugins { plugins: vec![] },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_plugin_none_roundtrip() {
-    let out = notif(NotificationValue::Plugin(Plugin { plugin: None }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Plugin(
+        Plugin { plugin: None },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_plugin_notification_roundtrip_object() {
-    let out = notif(NotificationValue::PluginNotification {
-        value: serde_json::json!({"hello": "world", "count": 3}),
-    });
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::PluginNotification {
+            value: serde_json::json!({"hello": "world", "count": 3}),
+        },
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_plugin_notification_roundtrip_string() {
-    let out = notif(NotificationValue::PluginNotification {
-        value: serde_json::Value::String("plain text payload".into()),
-    });
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::PluginNotification {
+            value: serde_json::Value::String("plain text payload".into()),
+        },
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_plugin_notification_roundtrip_bool() {
-    let out = notif(NotificationValue::PluginNotification {
-        value: serde_json::Value::Bool(true),
-    });
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::PluginNotification {
+            value: serde_json::Value::Bool(true),
+        },
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_plugin_notification_roundtrip_number() {
-    let out = notif(NotificationValue::PluginNotification {
-        value: serde_json::json!(42),
-    });
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::PluginNotification {
+            value: serde_json::json!(42),
+        },
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_plugin_notification_roundtrip_array() {
-    let out = notif(NotificationValue::PluginNotification {
-        value: serde_json::json!([1, "two", false, null]),
-    });
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::PluginNotification {
+            value: serde_json::json!([1, "two", false, null]),
+        },
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_plugin_notification_roundtrip_null() {
-    let out = notif(NotificationValue::PluginNotification {
-        value: serde_json::Value::Null,
-    });
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::PluginNotification {
+            value: serde_json::Value::Null,
+        },
+    ));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_tools_empty_roundtrip() {
-    let out = notif(NotificationValue::Tools(Tools { tools: vec![] }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Tools(
+        Tools { tools: vec![] },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_tool_none_roundtrip() {
-    let out = notif(NotificationValue::Tool(Tool { tool: None }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Tool(
+        Tool { tool: None },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_updater_checking_roundtrip() {
-    let out = notif(NotificationValue::Updater(Updater::Checking {
-        asset_name: "objectiveai-x86_64-linux".into(),
-        current_version: "1.0.0".into(),
-    }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Updater(
+        Updater::Checking {
+            asset_name: "objectiveai-x86_64-linux".into(),
+            current_version: "1.0.0".into(),
+        },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_updater_skipped_roundtrip() {
-    let out = notif(NotificationValue::Updater(Updater::Skipped {
-        reason: SkipReason::DevTree,
-    }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Updater(
+        Updater::Skipped {
+            reason: SkipReason::DevTree,
+        },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_updater_up_to_date_roundtrip() {
-    let out = notif(NotificationValue::Updater(Updater::UpToDate {
-        current_version: "1.0.0".into(),
-        remote_version: "1.0.0".into(),
-    }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Updater(
+        Updater::UpToDate {
+            current_version: "1.0.0".into(),
+            remote_version: "1.0.0".into(),
+        },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_updater_found_roundtrip() {
-    let out = notif(NotificationValue::Updater(Updater::Found {
-        current_version: "1.0.0".into(),
-        remote_version: "1.1.0".into(),
-        asset_name: "asset.tar.gz".into(),
-        url: "https://example.com/asset.tar.gz".into(),
-    }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Updater(
+        Updater::Found {
+            current_version: "1.0.0".into(),
+            remote_version: "1.1.0".into(),
+            asset_name: "asset.tar.gz".into(),
+            url: "https://example.com/asset.tar.gz".into(),
+        },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_updater_installed_roundtrip() {
-    let out = notif(NotificationValue::Updater(Updater::Installed {
-        current_version: "1.0.0".into(),
-        remote_version: "1.1.0".into(),
-    }));
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Updater(
+        Updater::Installed {
+            current_version: "1.0.0".into(),
+            remote_version: "1.1.0".into(),
+        },
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_viewer_send_result_roundtrip() {
-    let out = notif(NotificationValue::ViewerSendResult(ViewerSendResult {
-        status: 200,
-        body: json!({"ok": true}),
-    }));
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::ViewerSendResult(ViewerSendResult {
+            status: 200,
+            body: json!({"ok": true}),
+        }),
+    ));
     assert_roundtrip_eq(out);
 }
 
@@ -466,12 +554,17 @@ fn nv_viewer_send_result_roundtrip() {
 // fixture typos. ===
 
 fn mock_remote_path() -> crate::RemotePath {
-    crate::RemotePath::Mock { name: "demo".to_string() }
+    crate::RemotePath::Mock {
+        name: "demo".to_string(),
+    }
 }
 
 fn mock_agent_with_fallbacks() -> crate::agent::RemoteAgentWithFallbacks {
     let base = crate::agent::mock::AgentBase::default();
-    let inner = crate::agent::InlineAgentBaseWithFallbacks { inner: crate::agent::InlineAgentBase::Mock(base), fallbacks: None };
+    let inner = crate::agent::InlineAgentBaseWithFallbacks {
+        inner: crate::agent::InlineAgentBase::Mock(base),
+        fallbacks: None,
+    };
     let remote_base = crate::agent::RemoteAgentBaseWithFallbacks {
         description: "demo agent".to_string(),
         inner,
@@ -485,24 +578,28 @@ fn nv_agent_roundtrip() {
         path: mock_remote_path(),
         inner: mock_agent_with_fallbacks(),
     };
-    let out = notif(NotificationValue::Agent(
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Agent(
         crate::cli::output::notification::Agent { agent: response },
-    ));
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_swarm_roundtrip() {
     // RemoteSwarmBase::convert with one mock agent slot.
-    let agent_slot = crate::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
-        count: 1,
-        inner: crate::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
-            crate::agent::InlineAgentBaseWithFallbacks {
-                inner: crate::agent::InlineAgentBase::Mock(crate::agent::mock::AgentBase::default()),
-                fallbacks: None,
-            },
-        ),
-    };
+    let agent_slot =
+        crate::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+            count: 1,
+            inner:
+                crate::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                    crate::agent::InlineAgentBaseWithFallbacks {
+                        inner: crate::agent::InlineAgentBase::Mock(
+                            crate::agent::mock::AgentBase::default(),
+                        ),
+                        fallbacks: None,
+                    },
+                ),
+        };
     let inline_base = crate::swarm::InlineSwarmBase {
         agents: vec![agent_slot],
         weights: None,
@@ -516,24 +613,26 @@ fn nv_swarm_roundtrip() {
         path: mock_remote_path(),
         inner: remote_swarm,
     };
-    let out = notif(NotificationValue::Swarm(
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Swarm(
         crate::cli::output::notification::Swarm { swarm: response },
-    ));
+    )));
     assert_roundtrip_eq(out);
 }
 
 #[test]
 fn nv_execution_roundtrip() {
     // TaskOutputOwned::Scalar is the simplest output variant.
-    let out = notif(NotificationValue::Execution(
-        crate::cli::output::notification::Execution {
-            execution: crate::cli::output::notification::ExecutionResult {
-                output: crate::functions::expression::TaskOutputOwned::Scalar(
-                    rust_decimal::Decimal::new(5, 1), // 0.5
-                ),
+    let out =
+        notif(NotificationValue::Typed(TypedNotificationValue::Execution(
+            crate::cli::output::notification::Execution {
+                execution: crate::cli::output::notification::ExecutionResult {
+                    output:
+                        crate::functions::expression::TaskOutputOwned::Scalar(
+                            rust_decimal::Decimal::new(5, 1), // 0.5
+                        ),
+                },
             },
-        },
-    ));
+        )));
     assert_roundtrip_eq(out);
 }
 
@@ -548,8 +647,12 @@ fn nv_laboratory_roundtrip() {
         ),
         score: Some(0.75),
     };
-    let out = notif(NotificationValue::Laboratory(
-        crate::cli::output::notification::Laboratory { laboratory: vec![item] },
+    let out = notif(NotificationValue::Typed(
+        TypedNotificationValue::Laboratory(
+            crate::cli::output::notification::Laboratory {
+                laboratory: vec![item],
+            },
+        ),
     ));
     assert_roundtrip_eq(out);
 }
@@ -571,7 +674,9 @@ fn minimal_remote_function() -> crate::functions::FullRemoteFunction {
         crate::functions::RemoteFunction::Scalar {
             description: "demo function".to_string(),
             input_schema: crate::functions::expression::InputSchema::AnyOf(
-                crate::functions::expression::AnyOfInputSchema { any_of: vec![] },
+                crate::functions::expression::AnyOfInputSchema {
+                    any_of: vec![],
+                },
             ),
             tasks: vec![],
         },
@@ -584,9 +689,10 @@ fn nv_function_roundtrip() {
         path: mock_remote_path(),
         inner: minimal_remote_function(),
     };
-    let out = notif(NotificationValue::Function(
-        crate::cli::output::notification::Function { function: response },
-    ));
+    let out =
+        notif(NotificationValue::Typed(TypedNotificationValue::Function(
+            crate::cli::output::notification::Function { function: response },
+        )));
     assert_roundtrip_eq(out);
 }
 
@@ -594,27 +700,34 @@ fn nv_function_roundtrip() {
 fn nv_profile_roundtrip() {
     // RemoteProfile::Auto wraps a RemoteSwarmBase — minimal swarm
     // base with one mock agent slot.
-    let agent_slot = crate::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
-        count: 1,
-        inner: crate::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
-            crate::agent::InlineAgentBaseWithFallbacks {
-                inner: crate::agent::InlineAgentBase::Mock(crate::agent::mock::AgentBase::default()),
-                fallbacks: None,
-            },
-        ),
-    };
+    let agent_slot =
+        crate::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+            count: 1,
+            inner:
+                crate::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                    crate::agent::InlineAgentBaseWithFallbacks {
+                        inner: crate::agent::InlineAgentBase::Mock(
+                            crate::agent::mock::AgentBase::default(),
+                        ),
+                        fallbacks: None,
+                    },
+                ),
+        };
     let swarm_base = crate::swarm::RemoteSwarmBase {
         description: "demo profile swarm".to_string(),
-        inner: crate::swarm::InlineSwarmBase { agents: vec![agent_slot], weights: None },
+        inner: crate::swarm::InlineSwarmBase {
+            agents: vec![agent_slot],
+            weights: None,
+        },
     };
     let inner = crate::functions::RemoteProfile::Auto(swarm_base);
     let response = crate::functions::profiles::response::GetProfileResponse {
         path: mock_remote_path(),
         inner,
     };
-    let out = notif(NotificationValue::Profile(
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Profile(
         crate::cli::output::notification::Profile { profile: response },
-    ));
+    )));
     assert_roundtrip_eq(out);
 }
 
@@ -624,27 +737,37 @@ fn nv_pair_roundtrip() {
         path: mock_remote_path(),
         inner: minimal_remote_function(),
     };
-    let agent_slot = crate::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
-        count: 1,
-        inner: crate::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
-            crate::agent::InlineAgentBaseWithFallbacks {
-                inner: crate::agent::InlineAgentBase::Mock(crate::agent::mock::AgentBase::default()),
-                fallbacks: None,
-            },
-        ),
-    };
+    let agent_slot =
+        crate::agent::InlineAgentBaseWithFallbacksOrRemoteWithCount {
+            count: 1,
+            inner:
+                crate::agent::InlineAgentBaseWithFallbacksOrRemote::AgentBase(
+                    crate::agent::InlineAgentBaseWithFallbacks {
+                        inner: crate::agent::InlineAgentBase::Mock(
+                            crate::agent::mock::AgentBase::default(),
+                        ),
+                        fallbacks: None,
+                    },
+                ),
+        };
     let swarm_base = crate::swarm::RemoteSwarmBase {
         description: "demo pair swarm".to_string(),
-        inner: crate::swarm::InlineSwarmBase { agents: vec![agent_slot], weights: None },
+        inner: crate::swarm::InlineSwarmBase {
+            agents: vec![agent_slot],
+            weights: None,
+        },
     };
     let profile = crate::functions::profiles::response::GetProfileResponse {
         path: mock_remote_path(),
         inner: crate::functions::RemoteProfile::Auto(swarm_base),
     };
-    let pair = crate::cli::output::notification::FunctionProfilePair { function, profile };
-    let out = notif(NotificationValue::Pair(
+    let pair = crate::cli::output::notification::FunctionProfilePair {
+        function,
+        profile,
+    };
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Pair(
         crate::cli::output::notification::Pair { pair },
-    ));
+    )));
     assert_roundtrip_eq(out);
 }
 
@@ -674,7 +797,8 @@ fn nv_state_roundtrip() {
         readme: None,
         checker_seed: None,
     };
-    let inner = crate::functions::inventions::state::ParamsState::AlphaScalarLeaf(leaf);
+    let inner =
+        crate::functions::inventions::state::ParamsState::AlphaScalarLeaf(leaf);
     let response = crate::functions::inventions::state::response::GetFunctionInventionStateResponse {
         path: crate::RemotePath::Github {
             owner: "demo".to_string(),
@@ -683,9 +807,9 @@ fn nv_state_roundtrip() {
         },
         inner,
     };
-    let out = notif(NotificationValue::State(
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::State(
         crate::cli::output::notification::State { state: response },
-    ));
+    )));
     assert_roundtrip_eq(out);
 }
 
@@ -711,7 +835,8 @@ fn nv_other_value_roundtrip() {
 
 #[test]
 fn nv_other_raw_object_roundtrip() {
-    let payload = json!({"arbitrary": {"nested": [1, 2, 3]}, "kind_hint": null});
+    let payload =
+        json!({"arbitrary": {"nested": [1, 2, 3]}, "kind_hint": null});
     let out = notif(NotificationValue::other(&payload));
     assert_roundtrip_eq(out);
 }
@@ -719,31 +844,37 @@ fn nv_other_raw_object_roundtrip() {
 #[test]
 fn full_envelope_with_agent_id_roundtrip() {
     let out = Output::Notification(Notification {
-        agent_id: Some("cli".to_string()),
-        value: NotificationValue::Spawned(Spawned {
-            agent_id: "x".into(),
-        }),
+        value: NotificationValue::Typed(TypedNotificationValue::Spawned(
+            Spawned {
+                agent_id: "x".into(),
+            },
+        )),
     });
     assert_roundtrip_eq(out);
 }
 
 #[test]
-fn other_keys_flatten_alongside_kind() {
-    // Sanity check: the catch-all variant's map keys land at the same
-    // level as `kind`, not nested under a wrapper field.
+fn other_keys_flatten_at_top_level() {
+    // Sanity check: the catch-all variant's map keys land directly
+    // at the Notification level — no `type`/`kind` envelope, no
+    // `value` wrapper. Other is the untagged half of NotificationValue.
     let out = notif(NotificationValue::other(&json!({"foo": 1, "bar": "baz"})));
     let v = serde_json::to_value(&out).unwrap();
-    assert_eq!(v["value"]["kind"], "other");
-    assert_eq!(v["value"]["foo"], 1);
-    assert_eq!(v["value"]["bar"], "baz");
+    assert!(v.get("type").is_none(), "Other has no `type` tag");
+    assert!(v.get("value").is_none(), "no `value` wrapper");
+    assert_eq!(v["foo"], 1);
+    assert_eq!(v["bar"], "baz");
 }
 
 #[test]
-fn typed_variant_carries_kind_discriminator() {
-    let out = notif(NotificationValue::Spawned(Spawned {
-        agent_id: "abc".into(),
-    }));
+fn typed_variant_carries_type_discriminator() {
+    let out = notif(NotificationValue::Typed(TypedNotificationValue::Spawned(
+        Spawned {
+            agent_id: "abc".into(),
+        },
+    )));
     let v = serde_json::to_value(&out).unwrap();
-    assert_eq!(v["value"]["kind"], "spawned");
-    assert_eq!(v["value"]["agent_id"], "abc");
+    assert_eq!(v["type"], "spawned");
+    assert_eq!(v["agent_id"], "abc");
+    assert!(v.get("value").is_none(), "no `value` wrapper");
 }

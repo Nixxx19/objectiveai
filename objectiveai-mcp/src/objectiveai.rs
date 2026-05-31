@@ -11,8 +11,7 @@ use rmcp::{
     handler::server::tool::{Extension, parse_json_object, schema_for_type},
     handler::server::wrapper::Parameters,
     model::{
-        CallToolResult, Implementation, ProtocolVersion, ServerCapabilities, ServerInfo,
-        Tool,
+        CallToolResult, Implementation, ProtocolVersion, ServerCapabilities, ServerInfo, Tool,
     },
     schemars, tool, tool_handler, tool_router,
 };
@@ -21,19 +20,25 @@ use crate::format::format_outputs;
 
 #[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
 pub struct ObjectiveAiRequest {
-    #[schemars(description = "The command arguments to pass to the ObjectiveAI CLI (e.g. [\"agents\", \"list\"] or [\"functions\", \"executions\", \"create\", \"--help\"])")]
+    #[schemars(
+        description = "The command arguments to pass to the ObjectiveAI CLI (e.g. [\"agents\", \"list\"] or [\"functions\", \"executions\", \"create\", \"--help\"])"
+    )]
     pub command: Vec<String>,
 }
 
 #[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
 pub struct PluginRequest {
-    #[schemars(description = "Args forwarded to the plugin's argv (prefixed automatically with `plugins <name>` when invoking the CLI).")]
+    #[schemars(
+        description = "Args forwarded to the plugin's argv (prefixed automatically with `plugins <name>` when invoking the CLI)."
+    )]
     pub args: Vec<String>,
 }
 
 #[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
 pub struct ToolRequest {
-    #[schemars(description = "Args forwarded to the tool's argv (prefixed automatically with `tools <name>` when invoking the CLI).")]
+    #[schemars(
+        description = "Args forwarded to the tool's argv (prefixed automatically with `tools <name>` when invoking the CLI)."
+    )]
     pub args: Vec<String>,
 }
 
@@ -85,11 +90,14 @@ impl ObjectiveAiMcpCli {
                         .get::<Parts>()
                         .cloned()
                         .unwrap_or_else(|| http::Request::new(()).into_parts().0);
-                    let args: Vec<String> =
-                        ["objectiveai".to_string(), "plugins".to_string(), plugin_name]
-                            .into_iter()
-                            .chain(req.args.into_iter())
-                            .collect();
+                    let args: Vec<String> = [
+                        "objectiveai".to_string(),
+                        "plugins".to_string(),
+                        plugin_name,
+                    ]
+                    .into_iter()
+                    .chain(req.args.into_iter())
+                    .collect();
                     let blocks = run_cli_and_collect(&cli_config, &parts, args).await;
                     Ok(CallToolResult::success(blocks))
                 }
@@ -119,11 +127,14 @@ impl ObjectiveAiMcpCli {
                         .get::<Parts>()
                         .cloned()
                         .unwrap_or_else(|| http::Request::new(()).into_parts().0);
-                    let args: Vec<String> =
-                        ["objectiveai".to_string(), "tools".to_string(), tool_name.clone()]
-                            .into_iter()
-                            .chain(req.args.into_iter())
-                            .collect();
+                    let args: Vec<String> = [
+                        "objectiveai".to_string(),
+                        "tools".to_string(),
+                        tool_name.clone(),
+                    ]
+                    .into_iter()
+                    .chain(req.args.into_iter())
+                    .collect();
                     let blocks = run_cli_and_collect(&cli_config, &parts, args).await;
                     Ok(CallToolResult::success(blocks))
                 }
@@ -136,10 +147,7 @@ impl ObjectiveAiMcpCli {
         }
     }
 
-    #[tool(
-        name = "ObjectiveAI",
-        description = "Run an ObjectiveAI command."
-    )]
+    #[tool(name = "ObjectiveAI", description = "Run an ObjectiveAI command.")]
     async fn objectiveai(
         &self,
         Parameters(req): Parameters<ObjectiveAiRequest>,

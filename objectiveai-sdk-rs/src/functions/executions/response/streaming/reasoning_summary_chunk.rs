@@ -1,10 +1,21 @@
-use crate::{agent, error};
 use crate::agent::completions::response::streaming::AgentCompletionIds;
-use serde::{Deserialize, Serialize};
+use crate::{agent, error};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "functions.executions.response.streaming.ReasoningSummaryChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    Default,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "functions.executions.response.streaming.ReasoningSummaryChunk"
+)]
 pub struct ReasoningSummaryChunk {
     #[serde(flatten)]
     pub inner: agent::completions::response::streaming::AgentCompletionChunk,
@@ -36,12 +47,16 @@ impl ReasoningSummaryChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_files(
         &self,
-    ) -> (super::reasoning_summary_log_reference::LogReference, Vec<crate::filesystem::logs::LogFile>) {
+    ) -> (
+        super::reasoning_summary_log_reference::LogReference,
+        Vec<crate::filesystem::logs::LogFile>,
+    ) {
         let (path, files) = match self.inner.produce_files() {
             Some((inner_ref, files)) => (inner_ref.path, files),
             None => (String::new(), Vec::new()),
         };
-        let mut reference = super::reasoning_summary_log_reference::LogReference::new(path);
+        let mut reference =
+            super::reasoning_summary_log_reference::LogReference::new(path);
         if let Some(error) = &self.error {
             reference.error = Some(serde_json::to_value(error).unwrap());
         }
@@ -52,7 +67,8 @@ impl ReasoningSummaryChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_ {
+    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_
+    {
         self.inner.produce_message_rows()
     }
 }

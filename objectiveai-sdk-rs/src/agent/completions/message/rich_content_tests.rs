@@ -34,11 +34,7 @@ fn text_resource(uri: &str, text: &str) -> ResourceContentsUnion {
     })
 }
 
-fn blob_resource(
-    uri: &str,
-    mime: &str,
-    blob: &str,
-) -> ResourceContentsUnion {
+fn blob_resource(uri: &str, mime: &str, blob: &str) -> ResourceContentsUnion {
     ResourceContentsUnion::Blob(BlobResourceContents {
         base: ResourceContents {
             uri: uri.to_string(),
@@ -183,12 +179,9 @@ fn resource_blob_video_becomes_input_video_part() {
 
 #[test]
 fn resource_blob_unknown_mime_becomes_file_with_uri_filename() {
-    let part: RichContentPart = blob_resource(
-        "file:///tmp/report.pdf",
-        "application/pdf",
-        "JVBERi0",
-    )
-    .into();
+    let part: RichContentPart =
+        blob_resource("file:///tmp/report.pdf", "application/pdf", "JVBERi0")
+            .into();
     match part {
         RichContentPart::File { file } => {
             assert_eq!(file.file_data.as_deref(), Some("JVBERi0"));

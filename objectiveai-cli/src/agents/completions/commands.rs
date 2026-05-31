@@ -1,6 +1,6 @@
 use clap::Subcommand;
 
-use super::{logs, continuations, messages};
+use super::{continuations, logs, messages};
 
 #[derive(Subcommand)]
 pub enum Commands {
@@ -22,7 +22,11 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         match self {
             Commands::Logs { command } => command.handle(cli_config, handle).await,
             Commands::Continuations { command } => command.handle(cli_config, handle).await,

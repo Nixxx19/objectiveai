@@ -4,8 +4,8 @@ use crate::functions;
 use functions::expression::{
     ExpressionError, FromStarlarkValue, ToStarlarkValue, WithExpression,
 };
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 use starlark::values::dict::{
     AllocDict as StarlarkAllocDict, DictRef as StarlarkDictRef,
 };
@@ -14,7 +14,15 @@ use starlark::values::{
 };
 
 /// Rich content for user/assistant messages (supports multimodal input).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[serde(untagged)]
 #[schemars(rename = "agent.completions.message.RichContent")]
 pub enum RichContent {
@@ -146,8 +154,8 @@ impl RichContent {
         id: &str,
         message_index: u64,
     ) -> (super::RichContentLog, Vec<crate::filesystem::logs::LogFile>) {
-        use crate::filesystem::logs::{LogFile, LogReference};
         use super::RichContentLog;
+        use crate::filesystem::logs::{LogFile, LogReference};
 
         match self {
             RichContent::Text(text) => {
@@ -222,10 +230,16 @@ impl RichContent {
 
         let (media_dir, bin_attempt) = match &part {
             RichContentPart::Text { .. } => unreachable!("handled above"),
-            RichContentPart::ImageUrl { image_url } => ("image", image_url.file_content()),
-            RichContentPart::InputAudio { input_audio } => ("audio", input_audio.file_content()),
+            RichContentPart::ImageUrl { image_url } => {
+                ("image", image_url.file_content())
+            }
+            RichContentPart::InputAudio { input_audio } => {
+                ("audio", input_audio.file_content())
+            }
             RichContentPart::InputVideo { video_url }
-            | RichContentPart::VideoUrl { video_url } => ("video", video_url.file_content()),
+            | RichContentPart::VideoUrl { video_url } => {
+                ("video", video_url.file_content())
+            }
             RichContentPart::File { file } => ("file", file.file_content()),
         };
 
@@ -397,9 +411,9 @@ impl From<crate::mcp::shared::ResourceContentsUnion> for RichContentPart {
     fn from(contents: crate::mcp::shared::ResourceContentsUnion) -> Self {
         use crate::mcp::shared::ResourceContentsUnion;
         match contents {
-            ResourceContentsUnion::Text(text) => RichContentPart::Text {
-                text: text.text,
-            },
+            ResourceContentsUnion::Text(text) => {
+                RichContentPart::Text { text: text.text }
+            }
             ResourceContentsUnion::Blob(blob) => {
                 let mime = blob
                     .base
@@ -551,7 +565,8 @@ impl From<crate::mcp::tool::ContentBlock> for RichContentPart {
                 if let Some(kind) = kind {
                     return match kind.as_str() {
                         KIND_IMAGE_URL_REMOTE => {
-                            let detail = meta_image_detail(&t._meta, META_IMAGE_DETAIL);
+                            let detail =
+                                meta_image_detail(&t._meta, META_IMAGE_DETAIL);
                             RichContentPart::ImageUrl {
                                 image_url: ImageUrl {
                                     url: t.text,
@@ -559,9 +574,11 @@ impl From<crate::mcp::tool::ContentBlock> for RichContentPart {
                                 },
                             }
                         }
-                        KIND_INPUT_VIDEO_REMOTE => RichContentPart::InputVideo {
-                            video_url: VideoUrl { url: t.text },
-                        },
+                        KIND_INPUT_VIDEO_REMOTE => {
+                            RichContentPart::InputVideo {
+                                video_url: VideoUrl { url: t.text },
+                            }
+                        }
                         KIND_VIDEO_URL => RichContentPart::VideoUrl {
                             video_url: VideoUrl { url: t.text },
                         },
@@ -601,7 +618,9 @@ impl From<crate::mcp::tool::ContentBlock> for RichContentPart {
             ContentBlock::Audio(a) => RichContentPart::InputAudio {
                 input_audio: a.into(),
             },
-            ContentBlock::EmbeddedResource(embedded) => embedded.resource.into(),
+            ContentBlock::EmbeddedResource(embedded) => {
+                embedded.resource.into()
+            }
             block @ ContentBlock::ResourceLink(_) => RichContentPart::Text {
                 text: serde_json::to_string(&block).unwrap_or_default(),
             },
@@ -624,7 +643,15 @@ impl From<Vec<crate::mcp::tool::ContentBlock>> for RichContent {
 }
 
 /// Expression variant of [`RichContent`] for dynamic content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[serde(untagged)]
 #[schemars(rename = "agent.completions.message.RichContentExpression")]
 pub enum RichContentExpression {
@@ -694,7 +721,17 @@ impl FromStarlarkValue for RichContentExpression {
 }
 
 /// A part of rich content.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    Hash,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "agent.completions.message.RichContentPart")]
 pub enum RichContentPart {
@@ -880,7 +917,15 @@ impl FromStarlarkValue for RichContentPart {
 }
 
 /// Expression variant of [`RichContentPart`] for dynamic content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "agent.completions.message.RichContentPartExpression")]
 pub enum RichContentPartExpression {
@@ -1019,7 +1064,17 @@ impl FromStarlarkValue for RichContentPartExpression {
 }
 
 /// An image URL for multimodal input.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    Hash,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[schemars(rename = "agent.completions.message.ImageUrl")]
 pub struct ImageUrl {
     /// The URL of the image (can be a data URL or HTTP URL).
@@ -1123,7 +1178,18 @@ impl FromStarlarkValue for ImageUrl {
 }
 
 /// Detail level for image processing.
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    Hash,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[schemars(rename = "agent.completions.message.ImageUrlDetail")]
 pub enum ImageUrlDetail {
     /// Let the model decide the detail level.
@@ -1179,7 +1245,17 @@ impl FromStarlarkValue for ImageUrlDetail {
 }
 
 /// Audio input for multimodal messages.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    Hash,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[schemars(rename = "agent.completions.message.InputAudio")]
 pub struct InputAudio {
     /// Base64-encoded audio data.
@@ -1204,7 +1280,11 @@ impl InputAudio {
         }
         Some(super::FileContent {
             content: &self.data,
-            extension: if self.format.is_empty() { "bin" } else { &self.format },
+            extension: if self.format.is_empty() {
+                "bin"
+            } else {
+                &self.format
+            },
         })
     }
 }
@@ -1270,7 +1350,17 @@ impl FromStarlarkValue for InputAudio {
 }
 
 /// A video URL for multimodal input.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    Hash,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[schemars(rename = "agent.completions.message.VideoUrl")]
 pub struct VideoUrl {
     /// The URL of the video.
@@ -1342,7 +1432,17 @@ impl FromStarlarkValue for VideoUrl {
 }
 
 /// A file attachment for multimodal input.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    Hash,
+    PartialEq,
+    Eq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[schemars(rename = "agent.completions.message.File")]
 pub struct File {
     /// Base64-encoded file data.
@@ -1396,7 +1496,9 @@ impl File {
         if data.is_empty() {
             return None;
         }
-        let ext = self.filename.as_deref()
+        let ext = self
+            .filename
+            .as_deref()
             .and_then(|name| name.rsplit_once('.'))
             .map(|(_, ext)| ext)
             .unwrap_or("bin");

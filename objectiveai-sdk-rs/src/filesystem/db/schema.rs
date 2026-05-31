@@ -42,9 +42,15 @@ impl MessageKind {
     pub fn as_str(&self) -> &'static str {
         match self {
             MessageKind::AgentCompletionRequest => "agent_completion_request",
-            MessageKind::FunctionExecutionRequest => "function_execution_request",
-            MessageKind::FunctionInventionRecursiveRequest => "function_invention_recursive_request",
-            MessageKind::AgentCompletionNotification => "agent_completion_notification",
+            MessageKind::FunctionExecutionRequest => {
+                "function_execution_request"
+            }
+            MessageKind::FunctionInventionRecursiveRequest => {
+                "function_invention_recursive_request"
+            }
+            MessageKind::AgentCompletionNotification => {
+                "agent_completion_notification"
+            }
             MessageKind::AssistantResponse => "assistant_response",
             MessageKind::ToolResponse => "tool_response",
         }
@@ -57,10 +63,18 @@ impl MessageKind {
     /// out-of-sync rows from a future schema.
     pub fn from_str(s: &str) -> Result<Self, super::super::Error> {
         match s {
-            "agent_completion_request" => Ok(MessageKind::AgentCompletionRequest),
-            "function_execution_request" => Ok(MessageKind::FunctionExecutionRequest),
-            "function_invention_recursive_request" => Ok(MessageKind::FunctionInventionRecursiveRequest),
-            "agent_completion_notification" => Ok(MessageKind::AgentCompletionNotification),
+            "agent_completion_request" => {
+                Ok(MessageKind::AgentCompletionRequest)
+            }
+            "function_execution_request" => {
+                Ok(MessageKind::FunctionExecutionRequest)
+            }
+            "function_invention_recursive_request" => {
+                Ok(MessageKind::FunctionInventionRecursiveRequest)
+            }
+            "agent_completion_notification" => {
+                Ok(MessageKind::AgentCompletionNotification)
+            }
             "assistant_response" => Ok(MessageKind::AssistantResponse),
             "tool_response" => Ok(MessageKind::ToolResponse),
             other => Err(super::super::Error::InvalidPath(format!(
@@ -112,7 +126,9 @@ impl MessageKind {
                 {
                     path.to_string()
                 } else {
-                    format!("functions/inventions/recursive/request/{path}.json")
+                    format!(
+                        "functions/inventions/recursive/request/{path}.json"
+                    )
                 }
             }
             MessageKind::AssistantResponse => {
@@ -224,7 +240,8 @@ pub fn path_for_file_id(
     id: i64,
 ) -> Result<Option<String>, super::super::Error> {
     use rusqlite::OptionalExtension as _;
-    let mut stmt = conn.prepare_cached("SELECT path FROM files WHERE id = ?1")?;
+    let mut stmt =
+        conn.prepare_cached("SELECT path FROM files WHERE id = ?1")?;
     Ok(stmt.query_row([id], |r| r.get::<_, String>(0)).optional()?)
 }
 
@@ -277,7 +294,10 @@ pub fn list_direct_active_children(
     )?;
     let rows = stmt
         .query_map(
-            rusqlite::params![parent_agent_id, MessageKind::AssistantResponse.as_str()],
+            rusqlite::params![
+                parent_agent_id,
+                MessageKind::AssistantResponse.as_str()
+            ],
             |r| Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?.max(0) as u64)),
         )?
         .collect::<rusqlite::Result<Vec<_>>>()?;
@@ -303,8 +323,9 @@ pub fn max_index(
     conn: &Connection,
     agent_id: &str,
 ) -> Result<Option<u64>, super::super::Error> {
-    let mut stmt = conn
-        .prepare_cached("SELECT MAX(\"index\") FROM messages WHERE agent_id = ?1")?;
+    let mut stmt = conn.prepare_cached(
+        "SELECT MAX(\"index\") FROM messages WHERE agent_id = ?1",
+    )?;
     use rusqlite::OptionalExtension as _;
     let row: Option<Option<i64>> = stmt
         .query_row([agent_id], |r| r.get::<_, Option<i64>>(0))
@@ -358,7 +379,15 @@ pub async fn insert_async(
 ) -> Result<(), super::super::Error> {
     tokio::task::spawn_blocking(move || {
         let conn = conn.lock().expect("filesystem db mutex poisoned");
-        insert(&conn, &agent_id, &response_id, kind, &path, timestamp, index)
+        insert(
+            &conn,
+            &agent_id,
+            &response_id,
+            kind,
+            &path,
+            timestamp,
+            index,
+        )
     })
     .await
     .map_err(spawn_blocking_join_err)?

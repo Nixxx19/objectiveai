@@ -26,7 +26,12 @@ fn api_routes() -> Vec<(String, String)> {
     .expect("regex compiles");
 
     re.captures_iter(&src)
-        .map(|cap| (cap.get(1).unwrap().as_str().to_string(), cap.get(2).unwrap().as_str().to_string()))
+        .map(|cap| {
+            (
+                cap.get(1).unwrap().as_str().to_string(),
+                cap.get(2).unwrap().as_str().to_string(),
+            )
+        })
         .collect()
 }
 
@@ -53,7 +58,12 @@ fn every_api_route_has_a_cli_leaf() {
         let rel = leaf_rel_path(&path, &method);
         let abs = cli_src_dir.join(&rel);
         if !abs.exists() {
-            missing.push(format!("{} {} -> src/{}", method.to_uppercase(), path, rel.display()));
+            missing.push(format!(
+                "{} {} -> src/{}",
+                method.to_uppercase(),
+                path,
+                rel.display()
+            ));
         }
     }
 
@@ -86,7 +96,12 @@ fn every_api_leaf_flattens_agent_id_arg() {
             continue;
         };
         if !src.contains(MARKER) {
-            missing.push(format!("{} {} -> src/{}", method.to_uppercase(), path, rel.display()));
+            missing.push(format!(
+                "{} {} -> src/{}",
+                method.to_uppercase(),
+                path,
+                rel.display()
+            ));
         }
     }
 

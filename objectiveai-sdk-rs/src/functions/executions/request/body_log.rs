@@ -20,7 +20,9 @@ use serde::Serialize;
 use crate::filesystem::logs::LogReference;
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
-#[schemars(rename = "functions.executions.request.FunctionExecutionCreateParamsLog")]
+#[schemars(
+    rename = "functions.executions.request.FunctionExecutionCreateParamsLog"
+)]
 pub struct FunctionExecutionCreateParamsLog {
     pub function: functions::FullInlineFunctionOrRemoteCommitOptional,
     pub profile: functions::InlineProfileOrRemoteCommitOptional,

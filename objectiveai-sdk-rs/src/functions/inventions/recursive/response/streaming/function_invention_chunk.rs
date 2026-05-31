@@ -1,10 +1,20 @@
-use crate::functions;
 use crate::agent::completions::response::streaming::AgentCompletionIds;
-use serde::{Deserialize, Serialize};
+use crate::functions;
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "functions.inventions.recursive.response.streaming.FunctionInventionChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "functions.inventions.recursive.response.streaming.FunctionInventionChunk"
+)]
 pub struct FunctionInventionChunk {
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub index: u64,
@@ -43,7 +53,9 @@ impl FunctionInventionChunk {
             None => (String::new(), Vec::new()),
         };
         (
-            crate::filesystem::logs::indexed_reference::LogReference::new(path, self.index),
+            crate::filesystem::logs::indexed_reference::LogReference::new(
+                path, self.index,
+            ),
             files,
         )
     }
@@ -52,7 +64,8 @@ impl FunctionInventionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_ {
+    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_
+    {
         self.inner.produce_message_rows()
     }
 }

@@ -50,42 +50,60 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["ApiKeyWithMetadata", "CreateApiKeyRequest", "CreateOpenRouterByokApiKeyRequest", "DisableApiKeyRequest", "GetCreditsResponse", "GetOpenRouterByokApiKeyResponse", "ListApiKeyItem", "ListApiKeyResponse"];
+                const NAMES: &[&str] = &[
+                    "ApiKeyWithMetadata",
+                    "CreateApiKeyRequest",
+                    "CreateOpenRouterByokApiKeyRequest",
+                    "DisableApiKeyRequest",
+                    "GetCreditsResponse",
+                    "GetOpenRouterByokApiKeyResponse",
+                    "ListApiKeyItem",
+                    "ListApiKeyResponse",
+                ];
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
-                        }.into(),
+                        }
+                        .into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::ApiKeyWithMetadata { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../objectiveai-json-schema/auth.ApiKeyWithMetadata.json"),
-                ).expect("embedded JSON Schema must parse");
+                let schema: serde_json::Value = serde_json::from_str(include_str!(
+                    "../../../../objectiveai-json-schema/auth.ApiKeyWithMetadata.json"
+                ))
+                .expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::CreateApiKeyRequest { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../objectiveai-json-schema/auth.CreateApiKeyRequest.json"),
-                ).expect("embedded JSON Schema must parse");
+                let schema: serde_json::Value = serde_json::from_str(include_str!(
+                    "../../../../objectiveai-json-schema/auth.CreateApiKeyRequest.json"
+                ))
+                .expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::CreateOpenRouterByokApiKeyRequest { .. } => {
@@ -94,70 +112,81 @@ impl Commands {
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::DisableApiKeyRequest { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../objectiveai-json-schema/auth.DisableApiKeyRequest.json"),
-                ).expect("embedded JSON Schema must parse");
+                let schema: serde_json::Value = serde_json::from_str(include_str!(
+                    "../../../../objectiveai-json-schema/auth.DisableApiKeyRequest.json"
+                ))
+                .expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::GetCreditsResponse { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../objectiveai-json-schema/auth.GetCreditsResponse.json"),
-                ).expect("embedded JSON Schema must parse");
+                let schema: serde_json::Value = serde_json::from_str(include_str!(
+                    "../../../../objectiveai-json-schema/auth.GetCreditsResponse.json"
+                ))
+                .expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::GetOpenRouterByokApiKeyResponse { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../objectiveai-json-schema/auth.GetOpenRouterByokApiKeyResponse.json"),
-                ).expect("embedded JSON Schema must parse");
+                let schema: serde_json::Value = serde_json::from_str(include_str!(
+                    "../../../../objectiveai-json-schema/auth.GetOpenRouterByokApiKeyResponse.json"
+                ))
+                .expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::ListApiKeyItem { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../objectiveai-json-schema/auth.ListApiKeyItem.json"),
-                ).expect("embedded JSON Schema must parse");
+                let schema: serde_json::Value = serde_json::from_str(include_str!(
+                    "../../../../objectiveai-json-schema/auth.ListApiKeyItem.json"
+                ))
+                .expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
             Commands::ListApiKeyResponse { .. } => {
-                let schema: serde_json::Value = serde_json::from_str(
-                    include_str!("../../../../objectiveai-json-schema/auth.ListApiKeyResponse.json"),
-                ).expect("embedded JSON Schema must parse");
+                let schema: serde_json::Value = serde_json::from_str(include_str!(
+                    "../../../../objectiveai-json-schema/auth.ListApiKeyResponse.json"
+                ))
+                .expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
-                ).emit(handle).await;
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
         }

@@ -1,18 +1,18 @@
 use clap::{Parser, Subcommand};
 use envconfig::Envconfig;
 
-use crate::api;
 use crate::agents;
-use crate::swarms;
+use crate::api;
+use crate::error;
 use crate::functions;
-use crate::viewer;
-use crate::mcp;
-use crate::schemas;
 use crate::logs;
+use crate::mcp;
 use crate::plugins;
+use crate::schemas;
+use crate::swarms;
 use crate::tools;
 use crate::vector;
-use crate::error;
+use crate::viewer;
 
 #[derive(Envconfig)]
 struct EnvConfigBuilder {
@@ -87,7 +87,9 @@ impl Envconfig for ConfigBuilder {
         EnvConfigBuilder::init_from_env().map(|e| e.build())
     }
 
-    fn init_from_hashmap(hashmap: &std::collections::HashMap<String, String>) -> Result<Self, envconfig::Error> {
+    fn init_from_hashmap(
+        hashmap: &std::collections::HashMap<String, String>,
+    ) -> Result<Self, envconfig::Error> {
         EnvConfigBuilder::init_from_hashmap(hashmap).map(|e| e.build())
     }
 }
@@ -225,7 +227,9 @@ impl Commands {
             Commands::Plugins { command } => command.handle(cli_config, handle).await,
             Commands::Tools { command } => command.handle(cli_config, handle).await,
             Commands::Update => crate::updater::run_update(cli_config, handle).await,
-            Commands::External(args) => crate::plugins::dispatch_external(args, cli_config, handle).await,
+            Commands::External(args) => {
+                crate::plugins::dispatch_external(args, cli_config, handle).await
+            }
         }
     }
 }
@@ -261,7 +265,9 @@ where
     I: IntoIterator<Item = T>,
     T: Into<std::ffi::OsString> + Clone,
 {
-    use objectiveai_sdk::cli::output::{Error as OutputError, Level, Notification, Output};
+    use objectiveai_sdk::cli::output::{
+        Error as OutputError, ErrorType, Level, Notification, Output,
+    };
 
     let code = match Cli::try_parse_from(args) {
         Ok(cli) => match cli.command.handle(cli_config, &handle).await {
@@ -286,8 +292,11 @@ where
             // stderr-mirror double-print (handle.rs emits fatal errors
             // to both stdout AND stderr so they survive stdout
             // capture), which is wrong for help output.
-            Output::Notification(Notification { agent_id: None,
-                value: objectiveai_sdk::cli::output::Help { help: e.to_string() }.into(),
+            Output::Notification(Notification {
+                value: objectiveai_sdk::cli::output::Help {
+                    help: e.to_string(),
+                }
+                .into(),
             })
             .emit(&handle)
             .await;
@@ -295,6 +304,7 @@ where
         }
         Err(e) => {
             let err = OutputError {
+                r#type: ErrorType::Error,
                 level: Level::Error,
                 fatal: true,
                 message: e.to_string().into(),

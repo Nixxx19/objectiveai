@@ -33,24 +33,36 @@ fn assert_invention_snapshot(snapshot_name: &str, cli_result: &serde_json::Value
     let expected_names = snapshot_invention_names(&snapshot);
     let has_errors = snapshot_has_errors(&snapshot);
 
-    let results = cli_result.as_array()
+    let results = cli_result
+        .as_array()
         .expect("CLI output should be an array");
 
     assert_eq!(
-        results.len(), expected_names.len(),
+        results.len(),
+        expected_names.len(),
         "invention count mismatch for {}: got {} expected {}",
-        snapshot_name, results.len(), expected_names.len()
+        snapshot_name,
+        results.len(),
+        expected_names.len()
     );
 
-    let actual_names: Vec<String> = results.iter()
+    let actual_names: Vec<String> = results
+        .iter()
         .map(|r| r["name"].as_str().unwrap().to_string())
         .collect();
-    assert_eq!(actual_names, expected_names, "invention names mismatch for {}", snapshot_name);
+    assert_eq!(
+        actual_names, expected_names,
+        "invention names mismatch for {}",
+        snapshot_name
+    );
 
     if has_errors {
         assert!(
-            results.iter().any(|r| r.get("error").is_some_and(|e| !e.is_null())),
-            "expected errors for {} but got none", snapshot_name
+            results
+                .iter()
+                .any(|r| r.get("error").is_some_and(|e| !e.is_null())),
+            "expected errors for {} but got none",
+            snapshot_name
         );
     }
 }
@@ -68,10 +80,17 @@ fn valid_schema_valid_tasks_scalar_leaf() {
         return;
     }
     let result = cli_test_util::run_cli(&[
-        "functions", "inventions", "recursive", "create", "remote",
-        "--state", "remote=mock,name=inv-good-sl",
-        "--agent", "remote=mock,name=invention",
-        "--seed", "5300",
+        "functions",
+        "inventions",
+        "recursive",
+        "create",
+        "remote",
+        "--state",
+        "remote=mock,name=inv-good-sl",
+        "--agent",
+        "remote=mock,name=invention",
+        "--seed",
+        "5300",
     ]);
     assert_invention_snapshot("valid_schema_valid_tasks_scalar_leaf", &result);
 }
@@ -85,10 +104,17 @@ fn valid_vector_schema_valid_tasks() {
         return;
     }
     let result = cli_test_util::run_cli(&[
-        "functions", "inventions", "recursive", "create", "remote",
-        "--state", "remote=mock,name=inv-good-vl",
-        "--agent", "remote=mock,name=invention",
-        "--seed", "5400",
+        "functions",
+        "inventions",
+        "recursive",
+        "create",
+        "remote",
+        "--state",
+        "remote=mock,name=inv-good-vl",
+        "--agent",
+        "remote=mock,name=invention",
+        "--seed",
+        "5400",
     ]);
     assert_invention_snapshot("valid_vector_schema_valid_tasks", &result);
 }
@@ -102,10 +128,17 @@ fn valid_schema_no_tasks_with_essay() {
         return;
     }
     let result = cli_test_util::run_cli(&[
-        "functions", "inventions", "recursive", "create", "remote",
-        "--state", "remote=mock,name=inv-schema-only",
-        "--agent", "remote=mock,name=invention",
-        "--seed", "5900",
+        "functions",
+        "inventions",
+        "recursive",
+        "create",
+        "remote",
+        "--state",
+        "remote=mock,name=inv-schema-only",
+        "--agent",
+        "remote=mock,name=invention",
+        "--seed",
+        "5900",
     ]);
     assert_invention_snapshot("valid_schema_no_tasks_with_essay", &result);
 }

@@ -43,10 +43,8 @@
 use dashmap::DashMap;
 use indexmap::IndexMap;
 use objectiveai_sdk::Notifier;
-use objectiveai_sdk::cli::plugins::PluginOutput;
-use objectiveai_sdk::client_objectiveai_mcp::client_request::{
-    McpListChanged, McpListChangedKind,
-};
+use objectiveai_sdk::cli::plugins::{PluginOutput, TypedPluginOutput};
+use objectiveai_sdk::client_objectiveai_mcp::client_request::{McpListChanged, McpListChangedKind};
 use objectiveai_sdk::client_objectiveai_mcp::{server_request, server_response};
 use objectiveai_sdk::http::McpHandler;
 use std::collections::HashSet;
@@ -216,7 +214,6 @@ impl ConduitMcpHandler {
         );
         Ok(Arc::new(ConduitState { connection }))
     }
-
 }
 
 /// Dial a plugin's MCP upstream: verify the plugin manifest declares
@@ -243,15 +240,10 @@ async fn dial_plugin_upstream(
     };
 
     let Some(base_dir) = inner.config_base_dir.clone() else {
-        return Err(fail(
-            "filesystem unavailable (no config_base_dir)".into(),
-        ));
+        return Err(fail("filesystem unavailable (no config_base_dir)".into()));
     };
-    let fs = objectiveai_sdk::filesystem::Client::new(
-        Some(base_dir),
-        None::<String>,
-        None::<String>,
-    );
+    let fs =
+        objectiveai_sdk::filesystem::Client::new(Some(base_dir), None::<String>, None::<String>);
 
     let Some(plugin) = fs.get_plugin(&plugin_name).await else {
         return Err(fail(format!("plugin {plugin_name:?} not installed")));
@@ -304,11 +296,12 @@ async fn dial_plugin_upstream(
                 Err(_) => continue,
             };
             match out {
-                PluginOutput::Mcp(mcp) => return Ok(mcp),
-                PluginOutput::Error(err) => {
+                PluginOutput::Typed(TypedPluginOutput::Mcp(mcp)) => return Ok(mcp),
+                PluginOutput::Typed(TypedPluginOutput::Error(err)) => {
                     return Err(format!("plugin emitted error: {}", err.message));
                 }
-                PluginOutput::Notification(_) | PluginOutput::Command { .. } => {}
+                PluginOutput::Notification(_)
+                | PluginOutput::Typed(TypedPluginOutput::Command { .. }) => {}
             }
         }
     })
@@ -409,15 +402,12 @@ impl McpHandler for ConduitMcpHandler {
         // `ConduitState`. Primary's `mcp_url` is only needed when
         // the aggregate names a primary that's no longer cached
         // (e.g. fresh WS after reconnect).
-        let aggregate_id = request.headers.iter().find_map(|(k, v)| {
-            k.eq_ignore_ascii_case("mcp-session-id").then(|| v.clone())
-        });
+        let aggregate_id = request
+            .headers
+            .iter()
+            .find_map(|(k, v)| k.eq_ignore_ascii_case("mcp-session-id").then(|| v.clone()));
         let Some(aggregate_id) = aggregate_id else {
-            return conduit_error(
-                id_for_err,
-                rpc_id_for_err,
-                "missing Mcp-Session-Id",
-            );
+            return conduit_error(id_for_err, rpc_id_for_err, "missing Mcp-Session-Id");
         };
         let Some(aggregate) = AggregateSession::decode(&aggregate_id) else {
             return conduit_error(
@@ -524,11 +514,7 @@ fn install_list_changed_pump(
 /// (no primary mcp_session_id recorded); the next `tools/list` for
 /// that session will refresh state anyway. Drops the whole fan-out
 /// if the WS notifier isn't installed yet.
-fn fan_list_changed(
-    inner: &Arc<Inner>,
-    state: &Arc<PluginMcpState>,
-    kind: McpListChangedKind,
-) {
+fn fan_list_changed(inner: &Arc<Inner>, state: &Arc<PluginMcpState>, kind: McpListChangedKind) {
     let Some(notifier) = inner.notifier.get().cloned() else {
         return;
     };
@@ -557,9 +543,7 @@ fn fan_list_changed(
 }
 
 /// Hop-by-hop and layer-internal headers don't propagate to MCP.
-fn sanitize_connect_headers(
-    headers: &IndexMap<String, String>,
-) -> IndexMap<String, String> {
+fn sanitize_connect_headers(headers: &IndexMap<String, String>) -> IndexMap<String, String> {
     let mut out = headers.clone();
     for k in [
         "Host",
@@ -645,8 +629,7 @@ async fn forward(
 
         // Primary future. Skipped when `needs_primary = false`; the
         // `expect` is unreachable in that branch.
-        let stored_primary_sid =
-            inbound_aggregate.as_ref().and_then(|a| a.primary.clone());
+        let stored_primary_sid = inbound_aggregate.as_ref().and_then(|a| a.primary.clone());
         let primary_headers = sanitize_connect_headers(&request.headers);
         let primary_fut = async {
             if !needs_primary {
@@ -662,11 +645,7 @@ async fn forward(
                 .connect(mcp_url, stored_primary_sid, Some(primary_headers))
                 .await
                 .map_err(|_| ConduitError::PrimaryDialFailed)?;
-            install_list_changed_pump(
-                &connection,
-                inner.clone(),
-                connection.session_id.clone(),
-            );
+            install_list_changed_pump(&connection, inner.clone(), connection.session_id.clone());
             let session_id = connection.session_id.clone();
             inner
                 .connections
@@ -693,8 +672,7 @@ async fn forward(
             .collect();
 
         let plugin_joined = futures::future::try_join_all(plugin_futs);
-        let (primary_sid_opt, plugin_results) =
-            tokio::try_join!(primary_fut, plugin_joined)?;
+        let (primary_sid_opt, plugin_results) = tokio::try_join!(primary_fut, plugin_joined)?;
 
         // Build the outbound aggregate from the dialed session ids.
         // Input ordering of `plugin_pairs` is preserved through
@@ -704,13 +682,13 @@ async fn forward(
             plugins: plugin_pairs
                 .into_iter()
                 .zip(plugin_results.into_iter())
-                .map(|((plugin_name, mcp_name), mcp_session_id)| {
-                    AggregatePluginEntry {
+                .map(
+                    |((plugin_name, mcp_name), mcp_session_id)| AggregatePluginEntry {
                         plugin_name,
                         mcp_name,
                         mcp_session_id,
-                    }
-                })
+                    },
+                )
                 .collect(),
         };
         let aggregate_encoded = aggregate.encode();
@@ -753,21 +731,11 @@ async fn forward(
             // through to primary forward below.
             if !cfg.mcp_servers.is_empty() || primary.is_some() {
                 let routed = if method == "tools/call" {
-                    try_route_tools_call(
-                        inner,
-                        primary.map(|s| &s.connection),
-                        &request,
-                        cfg,
-                    )
-                    .await?
+                    try_route_tools_call(inner, primary.map(|s| &s.connection), &request, cfg)
+                        .await?
                 } else {
-                    try_route_resources_read(
-                        inner,
-                        primary.map(|s| &s.connection),
-                        &request,
-                        cfg,
-                    )
-                    .await?
+                    try_route_resources_read(inner, primary.map(|s| &s.connection), &request, cfg)
+                        .await?
                 };
                 if let Some(resp) = routed {
                     return Ok(resp);
@@ -791,8 +759,7 @@ async fn forward(
     };
 
     // Raw POST through the primary Connection.
-    let mut response =
-        forward_through(&primary.connection, &request, envelope.as_ref()).await?;
+    let mut response = forward_through(&primary.connection, &request, envelope.as_ref()).await?;
 
     // `tools/list`: apply the API↔CLI control surface stamped on
     // the request via `X-OBJECTIVEAI-MCP-CONFIG`.
@@ -808,29 +775,17 @@ async fn forward(
         if let Some(body) = response.body.as_mut() {
             apply_tools_filter(inner, body, cfg).await;
             let ws_session_id = ws_session_id_from_headers(&request.headers);
-            aggregate_plugin_tools(
-                inner,
-                body,
-                &cfg.mcp_servers,
-                ws_session_id.as_deref(),
-            )
-            .await?;
+            aggregate_plugin_tools(inner, body, &cfg.mcp_servers, ws_session_id.as_deref()).await?;
         }
     } else if rpc_method.as_deref() == Some("resources/list") {
         // `resources/list`: same shape as tools/list aggregation,
         // operating on `result.resources[]` with `uri` as the
         // prefix-namespacing field. No primary name allow-list.
-        let cfg = config
-            .expect("X-OBJECTIVEAI-MCP-CONFIG header is required on resources/list");
+        let cfg = config.expect("X-OBJECTIVEAI-MCP-CONFIG header is required on resources/list");
         if let Some(body) = response.body.as_mut() {
             let ws_session_id = ws_session_id_from_headers(&request.headers);
-            aggregate_plugin_resources(
-                inner,
-                body,
-                &cfg.mcp_servers,
-                ws_session_id.as_deref(),
-            )
-            .await?;
+            aggregate_plugin_resources(inner, body, &cfg.mcp_servers, ws_session_id.as_deref())
+                .await?;
         }
     }
 
@@ -1203,16 +1158,15 @@ async fn try_route_tools_call(
     };
 
     let states = collect_plugin_states(inner, &config.mcp_servers);
-    let plugin_lists_fut = futures::future::try_join_all(states.into_iter().map(
-        |(pair, state)| async move {
+    let plugin_lists_fut =
+        futures::future::try_join_all(states.into_iter().map(|(pair, state)| async move {
             let tools = state
                 .connection
                 .list_tools()
                 .await
                 .map_err(|_| ConduitError::PluginListFailed)?;
             Ok::<_, ConduitError>((pair, state, tools))
-        },
-    ));
+        }));
     let primary_tools_opt = match primary {
         Some(p) => {
             let primary_tools_fut = async {
@@ -1220,8 +1174,7 @@ async fn try_route_tools_call(
                     .await
                     .map_err(|_| ConduitError::PluginListFailed)
             };
-            let (pt, plugin_lists) =
-                tokio::try_join!(primary_tools_fut, plugin_lists_fut)?;
+            let (pt, plugin_lists) = tokio::try_join!(primary_tools_fut, plugin_lists_fut)?;
             Some((pt, plugin_lists))
         }
         None => {
@@ -1238,11 +1191,19 @@ async fn try_route_tools_call(
         .iter()
         .flat_map(|((_p, mcp_name), _s, tools)| {
             let mcp_name = mcp_name.clone();
-            tools.iter().map(move |t| format!("{}_{}", mcp_name, t.name))
+            tools
+                .iter()
+                .map(move |t| format!("{}_{}", mcp_name, t.name))
         })
         .collect();
-    let primary_collides = primary_tools.iter().any(|t| plugin_prefixed.contains(&t.name));
-    let primary_prefix = if primary_collides { "objectiveai-mcp_" } else { "" };
+    let primary_collides = primary_tools
+        .iter()
+        .any(|t| plugin_prefixed.contains(&t.name));
+    let primary_prefix = if primary_collides {
+        "objectiveai-mcp_"
+    } else {
+        ""
+    };
 
     // Try primary first.
     if let Some(p) = primary {
@@ -1270,7 +1231,10 @@ async fn try_route_tools_call(
     // No match anywhere.
     Ok(Some(json_rpc_not_found(
         request.id.clone(),
-        envelope.get("id").cloned().unwrap_or(serde_json::Value::Null),
+        envelope
+            .get("id")
+            .cloned()
+            .unwrap_or(serde_json::Value::Null),
         &requested,
         "tool",
     )))
@@ -1296,16 +1260,15 @@ async fn try_route_resources_read(
     };
 
     let states = collect_plugin_states(inner, &config.mcp_servers);
-    let plugin_lists_fut = futures::future::try_join_all(states.into_iter().map(
-        |(pair, state)| async move {
+    let plugin_lists_fut =
+        futures::future::try_join_all(states.into_iter().map(|(pair, state)| async move {
             let resources = state
                 .connection
                 .list_resources()
                 .await
                 .map_err(|_| ConduitError::PluginListFailed)?;
             Ok::<_, ConduitError>((pair, state, resources))
-        },
-    ));
+        }));
     let (primary_resources, plugin_lists) = match primary {
         Some(p) => {
             let primary_resources_fut = async {
@@ -1330,7 +1293,11 @@ async fn try_route_resources_read(
     let primary_collides = primary_resources
         .iter()
         .any(|r| plugin_prefixed.contains(&r.uri));
-    let primary_prefix = if primary_collides { "objectiveai-mcp_" } else { "" };
+    let primary_prefix = if primary_collides {
+        "objectiveai-mcp_"
+    } else {
+        ""
+    };
 
     if let Some(p) = primary {
         if let Some(stripped) = requested.strip_prefix(primary_prefix) {
@@ -1355,7 +1322,10 @@ async fn try_route_resources_read(
 
     Ok(Some(json_rpc_not_found(
         request.id.clone(),
-        envelope.get("id").cloned().unwrap_or(serde_json::Value::Null),
+        envelope
+            .get("id")
+            .cloned()
+            .unwrap_or(serde_json::Value::Null),
         &requested,
         "resource",
     )))
@@ -1372,7 +1342,10 @@ fn rewrite_params_field(
 ) -> serde_json::Value {
     let mut clone = body.clone();
     if let Some(obj) = clone.get_mut("params").and_then(|p| p.as_object_mut()) {
-        obj.insert(field.to_string(), serde_json::Value::String(new_value.to_string()));
+        obj.insert(
+            field.to_string(),
+            serde_json::Value::String(new_value.to_string()),
+        );
     }
     clone
 }
@@ -1450,11 +1423,7 @@ fn read_mcp_config_header(headers: &IndexMap<String, String>) -> Option<McpConfi
 ///
 /// Drops everything else. No-op on bodies that don't carry a
 /// `result.tools` array.
-async fn apply_tools_filter(
-    inner: &Arc<Inner>,
-    body: &mut serde_json::Value,
-    allowed: &McpConfig,
-) {
+async fn apply_tools_filter(inner: &Arc<Inner>, body: &mut serde_json::Value, allowed: &McpConfig) {
     let Some(tools) = body
         .get_mut("result")
         .and_then(|r| r.get_mut("tools"))
@@ -1464,7 +1433,12 @@ async fn apply_tools_filter(
     };
 
     let installed: Option<&HashSet<String>> = if allowed.objectiveai_builtins {
-        Some(inner.installed_names.get_or_init(|| load_installed_names(inner)).await)
+        Some(
+            inner
+                .installed_names
+                .get_or_init(|| load_installed_names(inner))
+                .await,
+        )
     } else {
         None
     };
@@ -1473,9 +1447,11 @@ async fn apply_tools_filter(
         let Some(name) = tool.get("name").and_then(|n| n.as_str()) else {
             return false;
         };
-        if allowed.names.iter().any(|declared| {
-            name == declared || name.ends_with(&format!("_{declared}"))
-        }) {
+        if allowed
+            .names
+            .iter()
+            .any(|declared| name == declared || name.ends_with(&format!("_{declared}")))
+        {
             return true;
         }
         if let Some(installed) = installed {
@@ -1495,11 +1471,8 @@ async fn load_installed_names(inner: &Arc<Inner>) -> HashSet<String> {
     let Some(base_dir) = inner.config_base_dir.clone() else {
         return names;
     };
-    let fs = objectiveai_sdk::filesystem::Client::new(
-        Some(base_dir),
-        None::<String>,
-        None::<String>,
-    );
+    let fs =
+        objectiveai_sdk::filesystem::Client::new(Some(base_dir), None::<String>, None::<String>);
     for entry in fs.list_plugins(0, usize::MAX).await {
         names.insert(entry.name);
     }
@@ -1674,8 +1647,7 @@ fn base62_encode_bytes(bytes: &[u8]) -> String {
     if bytes.is_empty() {
         return String::new();
     }
-    const ALPHABET: &[u8; 62] =
-        b"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    const ALPHABET: &[u8; 62] = b"0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     let leading_zeros = bytes.iter().take_while(|b| **b == 0).count();
     let mut digits: Vec<u8> = Vec::with_capacity(bytes.len() * 2);
     let mut num: Vec<u32> = bytes[leading_zeros..].iter().map(|b| *b as u32).collect();
@@ -1787,13 +1759,7 @@ mod aggregate_tests {
 
     #[test]
     fn base62_round_trip_samples() {
-        let samples: Vec<&[u8]> = vec![
-            b"hello",
-            b"\x00\x00abc",
-            &[0u8; 8],
-            &[255u8; 16],
-            b"",
-        ];
+        let samples: Vec<&[u8]> = vec![b"hello", b"\x00\x00abc", &[0u8; 8], &[255u8; 16], b""];
         for s in samples {
             let encoded = base62_encode_bytes(s);
             let decoded = base62_decode_bytes(&encoded).expect("decode");

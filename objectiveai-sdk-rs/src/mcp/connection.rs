@@ -9,8 +9,8 @@
 //! zombie 401 retries against a now-dead proxy session.
 
 use std::ops::Deref;
-use std::sync::{Arc, RwLock as StdRwLock, Weak};
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::{Arc, RwLock as StdRwLock, Weak};
 use std::time::Duration;
 
 use indexmap::IndexMap;
@@ -80,7 +80,9 @@ pub struct Connection {
 
 impl Clone for Connection {
     fn clone(&self) -> Self {
-        Self { inner: Arc::clone(&self.inner) }
+        Self {
+            inner: Arc::clone(&self.inner),
+        }
     }
 }
 
@@ -130,14 +132,17 @@ impl Connection {
         Self { inner }
     }
 
-
     pub(super) fn new_mock(url: String) -> Self {
-        Self { inner: ConnectionInner::new_mock(url) }
+        Self {
+            inner: ConnectionInner::new_mock(url),
+        }
     }
 
     #[cfg(test)]
     pub(crate) fn new_for_test(name: String, url: String) -> Self {
-        Self { inner: ConnectionInner::new_for_test(name, url) }
+        Self {
+            inner: ConnectionInner::new_for_test(name, url),
+        }
     }
 
     /// Send a JSON-RPC notification to the upstream. Used by `Client`
@@ -180,10 +185,8 @@ impl Connection {
         &self,
         params: &super::tool::CallToolRequestParams,
         tool_call_id: String,
-    ) -> Result<
-        crate::agent::completions::message::ToolMessage,
-        super::Error,
-    > {
+    ) -> Result<crate::agent::completions::message::ToolMessage, super::Error>
+    {
         self.inner.call_tool_as_message(params, tool_call_id).await
     }
 
@@ -253,7 +256,9 @@ impl Connection {
     /// restart) is mapped to `Ok(false)` for the same reason as the
     /// drain path: callers do not need to distinguish "no
     /// notifications" from "lost session" at the use site.
-    pub async fn has_pending_notifications(&self) -> Result<bool, super::Error> {
+    pub async fn has_pending_notifications(
+        &self,
+    ) -> Result<bool, super::Error> {
         self.inner.has_pending_notifications().await
     }
 
@@ -358,11 +363,13 @@ pub struct ConnectionInner {
     /// stream ends so `list_tools` will re-paginate against the
     /// upstream rather than return stale state). `Some(_)` = last
     /// known result, `Ok` or `Err`.
-    tools: RwLock<Option<Result<Arc<Vec<super::tool::Tool>>, Arc<super::Error>>>>,
+    tools:
+        RwLock<Option<Result<Arc<Vec<super::tool::Tool>>, Arc<super::Error>>>>,
     /// All resources from the server, populated by background pagination.
     /// Same `None`/`Some` semantics as [`Self::tools`].
-    resources:
-        RwLock<Option<Result<Arc<Vec<super::resource::Resource>>, Arc<super::Error>>>>,
+    resources: RwLock<
+        Option<Result<Arc<Vec<super::resource::Resource>>, Arc<super::Error>>>,
+    >,
 
     /// Cancellation token for the long-lived `listen_for_list_changes`
     /// task. The listener selects this against every blocking await
@@ -470,16 +477,15 @@ impl ConnectionInner {
             call_timeout: Duration::from_secs(30),
             initialize_result: super::initialize_result::InitializeResult {
                 protocol_version: "2025-03-26".into(),
-                capabilities:
-                    super::initialize_result::ServerCapabilities {
-                        experimental: None,
-                        logging: None,
-                        completions: None,
-                        prompts: None,
-                        resources: None,
-                        tools: None,
-                        tasks: None,
-                    },
+                capabilities: super::initialize_result::ServerCapabilities {
+                    experimental: None,
+                    logging: None,
+                    completions: None,
+                    prompts: None,
+                    resources: None,
+                    tools: None,
+                    tasks: None,
+                },
                 server_info: super::initialize_result::Implementation {
                     name,
                     title: None,
@@ -695,12 +701,13 @@ impl ConnectionInner {
 
         let attempt_one = || async {
             let url = self.url.clone();
-            let response = self.post().json(&body).send().await.map_err(|source| {
-                backoff::Error::transient(super::Error::Request {
-                    url: url.clone(),
-                    source,
-                })
-            })?;
+            let response =
+                self.post().json(&body).send().await.map_err(|source| {
+                    backoff::Error::transient(super::Error::Request {
+                        url: url.clone(),
+                        source,
+                    })
+                })?;
 
             if response.status() == reqwest::StatusCode::NOT_FOUND {
                 return Err(backoff::Error::transient(
@@ -711,7 +718,11 @@ impl ConnectionInner {
                 let code = response.status();
                 let body = response.text().await.unwrap_or_default();
                 return Err(backoff::Error::transient(
-                    super::Error::BadStatus { url: url.clone(), code, body },
+                    super::Error::BadStatus {
+                        url: url.clone(),
+                        code,
+                        body,
+                    },
                 ));
             }
 
@@ -737,7 +748,8 @@ impl ConnectionInner {
             backoff::future::retry(self.backoff(), attempt_one).await
         } else {
             attempt_one().await.map_err(|e| match e {
-                backoff::Error::Permanent(err) | backoff::Error::Transient { err, .. } => err,
+                backoff::Error::Permanent(err)
+                | backoff::Error::Transient { err, .. } => err,
             })
         }
     }
@@ -751,7 +763,9 @@ impl ConnectionInner {
         method: &str,
         params: &P,
     ) -> Result<(), super::Error> {
-        if self.mock { return Ok(()); }
+        if self.mock {
+            return Ok(());
+        }
         let body = serde_json::json!({
             "jsonrpc": "2.0",
             "method": method,
@@ -760,12 +774,13 @@ impl ConnectionInner {
 
         backoff::future::retry(self.backoff(), || async {
             let url = self.url.clone();
-            let response = self.post().json(&body).send().await.map_err(|source| {
-                backoff::Error::transient(super::Error::Request {
-                    url: url.clone(),
-                    source,
-                })
-            })?;
+            let response =
+                self.post().json(&body).send().await.map_err(|source| {
+                    backoff::Error::transient(super::Error::Request {
+                        url: url.clone(),
+                        source,
+                    })
+                })?;
 
             if response.status() == reqwest::StatusCode::NOT_FOUND {
                 return Err(backoff::Error::transient(
@@ -776,7 +791,11 @@ impl ConnectionInner {
                 let code = response.status();
                 let body = response.text().await.unwrap_or_default();
                 return Err(backoff::Error::transient(
-                    super::Error::BadStatus { url: url.clone(), code, body },
+                    super::Error::BadStatus {
+                        url: url.clone(),
+                        code,
+                        body,
+                    },
                 ));
             }
 
@@ -817,10 +836,14 @@ impl ConnectionInner {
         // the invariant in `Self::post`.
         request = request.header("Mcp-Session-Id", &self.session_id);
 
-        let response = request.send().await.map_err(|source| super::Error::Request {
-            url: url.clone(),
-            source,
-        })?;
+        let response =
+            request
+                .send()
+                .await
+                .map_err(|source| super::Error::Request {
+                    url: url.clone(),
+                    source,
+                })?;
 
         if response.status() == reqwest::StatusCode::NOT_FOUND {
             return Ok(Vec::new());
@@ -867,10 +890,14 @@ impl ConnectionInner {
         // the invariant in `Self::drain_notifications`.
         request = request.header("Mcp-Session-Id", &self.session_id);
 
-        let response = request.send().await.map_err(|source| super::Error::Request {
-            url: url.clone(),
-            source,
-        })?;
+        let response =
+            request
+                .send()
+                .await
+                .map_err(|source| super::Error::Request {
+                    url: url.clone(),
+                    source,
+                })?;
 
         if response.status() == reqwest::StatusCode::NOT_FOUND {
             return Err(super::Error::SessionExpired { url });
@@ -908,10 +935,14 @@ impl ConnectionInner {
         // the invariant in `Self::drain_notifications`.
         request = request.header("Mcp-Session-Id", &self.session_id);
 
-        let response = request.send().await.map_err(|source| super::Error::Request {
-            url: url.clone(),
-            source,
-        })?;
+        let response =
+            request
+                .send()
+                .await
+                .map_err(|source| super::Error::Request {
+                    url: url.clone(),
+                    source,
+                })?;
 
         if response.status() == reqwest::StatusCode::NOT_FOUND {
             return Ok(false);
@@ -1001,11 +1032,13 @@ impl ConnectionInner {
     ) -> Result<super::tool::CallToolResult, super::Error> {
         if self.mock {
             return Ok(super::tool::CallToolResult {
-                content: vec![super::tool::ContentBlock::Text(super::tool::TextContent {
-                    text: "mock".to_string(),
-                    annotations: None,
-                    _meta: None,
-                })],
+                content: vec![super::tool::ContentBlock::Text(
+                    super::tool::TextContent {
+                        text: "mock".to_string(),
+                        annotations: None,
+                        _meta: None,
+                    },
+                )],
                 structured_content: None,
                 is_error: None,
                 _meta: None,
@@ -1085,21 +1118,16 @@ impl ConnectionInner {
         &self,
         params: &super::tool::CallToolRequestParams,
         tool_call_id: String,
-    ) -> Result<
-        crate::agent::completions::message::ToolMessage,
-        super::Error,
-    > {
+    ) -> Result<crate::agent::completions::message::ToolMessage, super::Error>
+    {
         use crate::agent::completions::message::{
             RichContentPart, ToolMessage, ToolResponseMetadata,
         };
 
         let result = self.call_tool(params).await?;
 
-        let parts: Vec<RichContentPart> = result
-            .content
-            .into_iter()
-            .map(Into::into)
-            .collect();
+        let parts: Vec<RichContentPart> =
+            result.content.into_iter().map(Into::into).collect();
 
         // Lossy-decode the MCP `_meta` extension bag into our typed
         // `ToolResponseMetadata`. Unknown keys (set by non-objectiveai
@@ -1256,10 +1284,8 @@ impl ConnectionInner {
         // guard, *after* `*guard = result`, so anyone awoken by them
         // queues on the read lock, waits for the guard to drop, and
         // observes the post-swap state.
-        let (mut guard, result) = tokio::join!(
-            self.tools.write(),
-            self.paginate_tools(),
-        );
+        let (mut guard, result) =
+            tokio::join!(self.tools.write(), self.paginate_tools(),);
         *guard = Some(result);
         self.tools_changed.notify_waiters();
         if let Some(cb) = on_change {
@@ -1335,10 +1361,8 @@ impl ConnectionInner {
         // Same paginate-while-acquiring-the-write-lock pattern as
         // `refresh_tools` — see that comment for the visibility +
         // performance rationale.
-        let (mut guard, result) = tokio::join!(
-            self.resources.write(),
-            self.paginate_resources(),
-        );
+        let (mut guard, result) =
+            tokio::join!(self.resources.write(), self.paginate_resources(),);
         *guard = Some(result);
         self.resources_changed.notify_waiters();
         if let Some(cb) = on_change {
@@ -1520,7 +1544,9 @@ impl ConnectionInner {
                 // recovery isn't sequential.
                 let _ = tokio::join!(
                     this.refresh_tools(this.on_tools_list_changed.get()),
-                    this.refresh_resources(this.on_resources_list_changed.get()),
+                    this.refresh_resources(
+                        this.on_resources_list_changed.get()
+                    ),
                 );
             }
             is_reconnect = true;
@@ -1648,9 +1674,7 @@ mod subscribe_tests {
         *conn.inner.tools.write().await = Some(Err(Arc::new(err)));
 
         let start = std::time::Instant::now();
-        let got = conn
-            .subscribe_tools(&[], Duration::from_secs(5))
-            .await;
+        let got = conn.subscribe_tools(&[], Duration::from_secs(5)).await;
         assert!(start.elapsed() < Duration::from_millis(100));
         assert!(got.is_err());
     }
@@ -1776,11 +1800,15 @@ mod drain_notifications_tests {
         let blocks = conn.drain_notifications().await.expect("drain ok");
         assert_eq!(blocks.len(), 2);
         match &blocks[0] {
-            ContentBlock::Text(TextContent { text, .. }) => assert_eq!(text, "first"),
+            ContentBlock::Text(TextContent { text, .. }) => {
+                assert_eq!(text, "first")
+            }
             other => panic!("expected text, got {other:?}"),
         }
         match &blocks[1] {
-            ContentBlock::Text(TextContent { text, .. }) => assert_eq!(text, "second"),
+            ContentBlock::Text(TextContent { text, .. }) => {
+                assert_eq!(text, "second")
+            }
             other => panic!("expected text, got {other:?}"),
         }
     }
@@ -1829,10 +1857,7 @@ mod drain_notifications_tests {
             .await;
 
         let conn = Connection::new_for_test("t".into(), server.uri());
-        let err = conn
-            .drain_notifications()
-            .await
-            .expect_err("5xx → err");
+        let err = conn.drain_notifications().await.expect_err("5xx → err");
         match err {
             super::super::Error::BadStatus { code, body, .. } => {
                 assert_eq!(code.as_u16(), 500);
@@ -1880,7 +1905,9 @@ mod has_pending_notifications_tests {
         let server = MockServer::start().await;
         Mock::given(method("GET"))
             .and(path("/notify/queued"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(json!(false)))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(json!(false)),
+            )
             .mount(&server)
             .await;
 

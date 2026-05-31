@@ -5,7 +5,9 @@ use serde::{Deserialize, Serialize};
 ///
 /// Wire: `{"type":"notification","inventions":[...InventionResultItem...]}`.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
-#[schemars(rename = "cli.output.notification.functions.inventions.recursive.Inventions")]
+#[schemars(
+    rename = "cli.output.notification.functions.inventions.recursive.Inventions"
+)]
 pub struct Inventions {
     pub inventions: Vec<InventionResultItem>,
 }
@@ -16,7 +18,9 @@ pub struct Inventions {
 /// (`None` if it failed). Per-invention failures surface live via
 /// `Output::Error` notifications during streaming, not on this struct.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
-#[schemars(rename = "cli.output.notification.functions.inventions.recursive.InventionResultItem")]
+#[schemars(
+    rename = "cli.output.notification.functions.inventions.recursive.InventionResultItem"
+)]
 pub struct InventionResultItem {
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]

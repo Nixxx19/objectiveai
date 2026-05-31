@@ -1,12 +1,21 @@
 //! Effort settings for Agent output.
 
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 /// The effort level for model output.
 ///
 /// This setting hints to the model how detailed its responses should be.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[schemars(rename = "agent.claude_agent_sdk.Effort")]
 pub enum Effort {
     /// Minimal output, concise responses.

@@ -9,7 +9,12 @@ use clap::Args;
 
 use objectiveai_sdk::agent::completions::message::{Message, RichContent, UserMessage};
 
-crate::define_inline_or_ref!(AgentArg, "agent", objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional, Remote);
+crate::define_inline_or_ref!(
+    AgentArg,
+    "agent",
+    objectiveai_sdk::agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
+    Remote
+);
 
 /// How the prompt is provided to the agent completion. Resolves to
 /// the wire-level `messages` array, but the CLI surface is named
@@ -89,11 +94,6 @@ pub async fn handle(
         continuation: None,
     };
 
-    crate::api::stream_subprocess::run_detached(
-        cli_config,
-        &["agents", "spawn"],
-        &params,
-        handle,
-    )
-    .await
+    crate::api::stream_subprocess::run_detached(cli_config, &["agents", "spawn"], &params, handle)
+        .await
 }

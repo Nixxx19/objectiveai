@@ -1,8 +1,8 @@
 //! Vector completion request parameters.
 
 use crate::agent;
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 /// Parameters for creating a vector completion.
 ///
@@ -55,7 +55,9 @@ pub struct VectorCompletionCreateParams {
 // per-leaf extraction (see `agent_completion_create_params.rs` for the
 // reference pattern).
 #[cfg(feature = "filesystem")]
-impl crate::filesystem::logs::ProducesRequestFiles for VectorCompletionCreateParams {
+impl crate::filesystem::logs::ProducesRequestFiles
+    for VectorCompletionCreateParams
+{
     fn produce_files(
         &self,
         id: &str,

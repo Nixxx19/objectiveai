@@ -33,8 +33,10 @@
 //! error and converts to exit code 1.
 
 use clap::Subcommand;
-use objectiveai_sdk::cli::output::{Handle, Installed, Notification, Output, Plugin, Plugins};
-use objectiveai_sdk::cli::plugins::PluginOutput;
+use objectiveai_sdk::cli::output::{
+    Handle, Installed, Notification, Output, Plugin, Plugins, TypedNotificationValue,
+};
+use objectiveai_sdk::cli::plugins::{PluginOutput, TypedPluginOutput};
 use tokio::io::AsyncBufReadExt;
 use tokio::task::JoinHandle;
 
@@ -154,13 +156,16 @@ pub(super) async fn install(
     // Step 3: install from the already-fetched manifest. The source
     // URL persisted alongside the binary is the raw GitHub URL the
     // manifest came from.
-    let source = objectiveai_sdk::filesystem::plugins::raw_manifest_url(owner, repository, commit_sha);
+    let source =
+        objectiveai_sdk::filesystem::plugins::raw_manifest_url(owner, repository, commit_sha);
     let installed = fs_client
         .install_plugin_from_manifest(owner, repository, &manifest, &source, None, upgrade)
         .await?;
-    Output::Notification(Notification { agent_id: None, value: (Installed { installed }).into() })
-        .emit(handle)
-        .await;
+    Output::Notification(Notification {
+        value: (Installed { installed }).into(),
+    })
+    .emit(handle)
+    .await;
     Ok(())
 }
 
@@ -171,12 +176,13 @@ async fn emit_untrusted_warning(
     commit_sha: &str,
     version: &str,
 ) {
-    use objectiveai_sdk::cli::output::{Error as OutputError, Level};
+    use objectiveai_sdk::cli::output::{Error as OutputError, ErrorType, Level};
     let message = format!(
         "installing untrusted plugin {owner}/{repository} (commit: {commit_sha}, version: {version}); \
          this plugin is not in the whitelist and is being installed because --allow-untrusted was passed"
     );
     Output::Error(OutputError {
+        r#type: ErrorType::Error,
         level: Level::Warn,
         fatal: false,
         message: message.into(),
@@ -197,9 +203,11 @@ async fn get(
         cli_config.commit_author_email.as_deref(),
     );
     let plugin = fs_client.get_plugin(name).await;
-    Output::Notification(Notification { agent_id: None, value: (Plugin { plugin }).into() })
-        .emit(handle)
-        .await;
+    Output::Notification(Notification {
+        value: (Plugin { plugin }).into(),
+    })
+    .emit(handle)
+    .await;
     Ok(())
 }
 
@@ -215,9 +223,11 @@ async fn list(
         cli_config.commit_author_email.as_deref(),
     );
     let plugins = fs_client.list_plugins(offset, limit).await;
-    Output::Notification(Notification { agent_id: None, value: (Plugins { plugins }).into() })
-        .emit(handle)
-        .await;
+    Output::Notification(Notification {
+        value: (Plugins { plugins }).into(),
+    })
+    .emit(handle)
+    .await;
     Ok(())
 }
 
@@ -254,9 +264,7 @@ pub async fn dispatch_external(
         cmd.env(objectiveai_sdk::mcp::OBJECTIVEAI_MCP_ENV, "true");
     }
 
-    let mut child = cmd
-        .spawn()
-        .map_err(crate::error::Error::PluginSpawn)?;
+    let mut child = cmd.spawn().map_err(crate::error::Error::PluginSpawn)?;
 
     let stdout = child.stdout.take().unwrap();
     let stderr = child.stderr.take().unwrap();
@@ -277,37 +285,36 @@ pub async fn dispatch_external(
         }
         let trimmed = line.trim_end_matches(['\r', '\n']);
         match serde_json::from_str::<PluginOutput>(trimmed) {
-            Ok(PluginOutput::Error(e)) => {
+            Ok(PluginOutput::Typed(TypedPluginOutput::Error(e))) => {
                 Output::Error(e).emit(handle).await;
             }
-            Ok(PluginOutput::Mcp(mcp)) => {
+            Ok(PluginOutput::Typed(TypedPluginOutput::Mcp(mcp))) => {
                 // Forward to the host's notification stream so
                 // subscribers see it on the standard channel — the
                 // wire variant is direct, but the host's emit
                 // surface keeps the `Mcp` value typed.
-                Output::Notification(Notification {
-                    value: mcp.into(),
-                    agent_id: None,
-                })
-                .emit(handle)
-                .await;
+                Output::Notification(Notification { value: mcp.into() })
+                    .emit(handle)
+                    .await;
             }
             Ok(PluginOutput::Notification(value)) => {
                 Output::Notification(Notification {
-                    value: objectiveai_sdk::cli::output::NotificationValue::PluginNotification { value },
-                    agent_id: None,
+                    value: objectiveai_sdk::cli::output::NotificationValue::Typed(
+                        TypedNotificationValue::PluginNotification { value },
+                    ),
                 })
                 .emit(handle)
                 .await;
             }
-            Ok(PluginOutput::Command { command }) => {
+            Ok(PluginOutput::Typed(TypedPluginOutput::Command { command })) => {
                 command_tasks.push(spawn_command(command, cli_config, handle));
             }
             Err(_) => {
                 let value = serde_json::Value::String(trimmed.to_string());
                 Output::Notification(Notification {
-                    value: objectiveai_sdk::cli::output::NotificationValue::PluginNotification { value },
-                    agent_id: None,
+                    value: objectiveai_sdk::cli::output::NotificationValue::Typed(
+                        TypedNotificationValue::PluginNotification { value },
+                    ),
                 })
                 .emit(handle)
                 .await;
@@ -335,11 +342,7 @@ pub async fn dispatch_external(
 /// Tokenize the plugin's `command` string and spawn `cli::run` on it.
 /// Uses whitespace splitting — quoted args aren't supported (upgrade
 /// to `shlex` if a real plugin needs them).
-fn spawn_command(
-    command: String,
-    cli_config: &crate::Config,
-    handle: &Handle,
-) -> JoinHandle<i32> {
+fn spawn_command(command: String, cli_config: &crate::Config, handle: &Handle) -> JoinHandle<i32> {
     let tokens: Vec<String> = command.split_whitespace().map(String::from).collect();
     // `run()` expects argv[0] to be the binary name (clap ignores its
     // content). Prepend a placeholder.

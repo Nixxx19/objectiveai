@@ -2,15 +2,26 @@
 
 use crate::agent;
 use crate::agent::completions::response::streaming::AgentCompletionIds;
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 /// A streaming agent completion chunk from a single agent within a vector completion.
 ///
 /// The `index` field is used to correlate chunks belonging to the same
 /// underlying completion when accumulating via [`push`](Self::push).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "vector.completions.response.streaming.AgentCompletionChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    Default,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "vector.completions.response.streaming.AgentCompletionChunk"
+)]
 pub struct AgentCompletionChunk {
     /// Index used to correlate chunks from the same completion.
     #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
@@ -51,7 +62,9 @@ impl AgentCompletionChunk {
             None => (String::new(), Vec::new()),
         };
         (
-            crate::filesystem::logs::indexed_reference::LogReference::new(path, self.index),
+            crate::filesystem::logs::indexed_reference::LogReference::new(
+                path, self.index,
+            ),
             files,
         )
     }
@@ -60,7 +73,8 @@ impl AgentCompletionChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_ {
+    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_
+    {
         self.inner.produce_message_rows()
     }
 }

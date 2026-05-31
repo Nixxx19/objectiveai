@@ -75,18 +75,27 @@ pub(super) async fn get_favorites(
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         match self {
             Commands::Get { args } => {
                 let path = args.resolve(|| get_favorites(cli_config)).await?;
                 let handle = handle.clone();
                 crate::api::run(cli_config, |http_client| async move {
                     let response = objectiveai_sdk::agent::get_agent(&http_client, path).await?;
-                    objectiveai_sdk::cli::output::Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (objectiveai_sdk::cli::output::Agent { agent: response }).into(),
-                     })
-                    .emit(&handle).await;
+                    objectiveai_sdk::cli::output::Output::Notification(
+                        objectiveai_sdk::cli::output::Notification {
+                            value: (objectiveai_sdk::cli::output::Agent { agent: response }).into(),
+                        },
+                    )
+                    .emit(&handle)
+                    .await;
                     Ok(())
-                }).await
+                })
+                .await
             }
             Commands::List { command } => command.handle(cli_config, handle).await,
             Commands::Completions { command } => command.handle(cli_config, handle).await,
@@ -98,7 +107,6 @@ impl Commands {
             Commands::Me => {
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
-                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Me {
                             agent_id: cli_config.agent_id.clone(),
                         }
@@ -109,7 +117,12 @@ impl Commands {
                 .await;
                 Ok(())
             }
-            Commands::Publish { repository, body, message, overwrite } => {
+            Commands::Publish {
+                repository,
+                body,
+                message,
+                overwrite,
+            } => {
                 let agent: objectiveai_sdk::agent::RemoteAgentBaseWithFallbacks = body.resolve()?;
                 let msg = message.resolve()?;
                 let fs_client = objectiveai_sdk::filesystem::Client::new(
@@ -118,11 +131,20 @@ impl Commands {
                     cli_config.commit_author_email.as_deref(),
                 );
                 let sha = objectiveai_sdk::filesystem::publish::publish_agent(
-                    &fs_client, &repository, &agent, &msg, overwrite,
-                ).await?;
-                objectiveai_sdk::cli::output::Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (objectiveai_sdk::cli::output::Published { sha }).into(),
-                 })
-                .emit(handle).await;
+                    &fs_client,
+                    &repository,
+                    &agent,
+                    &msg,
+                    overwrite,
+                )
+                .await?;
+                objectiveai_sdk::cli::output::Output::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        value: (objectiveai_sdk::cli::output::Published { sha }).into(),
+                    },
+                )
+                .emit(handle)
+                .await;
                 Ok(())
             }
         }

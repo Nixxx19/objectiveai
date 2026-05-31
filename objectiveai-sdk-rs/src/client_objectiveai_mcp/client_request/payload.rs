@@ -21,7 +21,9 @@ use serde::{Deserialize, Serialize};
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Payload {
     #[schemars(title = "AgentCompletionNotify")]
-    AgentCompletionNotify(crate::agent::completions::request::AgentCompletionNotifyParams),
+    AgentCompletionNotify(
+        crate::agent::completions::request::AgentCompletionNotifyParams,
+    ),
     /// The CLI's upstream `mcp::Connection` for `mcp_session_id`
     /// fired `notifications/<kind>/list_changed`. The API
     /// dispatches this onto its per-`(ws_session_id, mcp_session_id)`
@@ -43,7 +45,9 @@ pub struct McpListChanged {
 }
 
 /// Distinguishes `tools/list_changed` from `resources/list_changed`.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Hash)]
+#[derive(
+    Debug, Clone, Copy, Serialize, Deserialize, JsonSchema, PartialEq, Eq, Hash,
+)]
 #[schemars(rename = "client_objectiveai_mcp.client_request.McpListChangedKind")]
 #[serde(rename_all = "snake_case")]
 pub enum McpListChangedKind {
@@ -58,7 +62,9 @@ impl McpListChangedKind {
     pub fn method(&self) -> &'static str {
         match self {
             McpListChangedKind::Tools => "notifications/tools/list_changed",
-            McpListChangedKind::Resources => "notifications/resources/list_changed",
+            McpListChangedKind::Resources => {
+                "notifications/resources/list_changed"
+            }
         }
     }
 }

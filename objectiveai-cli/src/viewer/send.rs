@@ -27,7 +27,9 @@ pub async fn run(
     let mut config = fs_client.read_config().await?;
 
     if !path.starts_with('/') {
-        return Err(crate::error::Error::ViewerPathMissingSlash(path.to_string()));
+        return Err(crate::error::Error::ViewerPathMissingSlash(
+            path.to_string(),
+        ));
     }
     let parsed: serde_json::Value = serde_json::from_str(body)
         .map_err(|e| crate::error::Error::ViewerBodyJsonParse(e.to_string()))?;
@@ -78,7 +80,7 @@ async fn do_post(
         .unwrap_or_else(|_| serde_json::Value::String(response_text));
 
     if status.is_success() {
-        Output::Notification(Notification { agent_id: None,
+        Output::Notification(Notification {
             value: ViewerSendResult {
                 status: status.as_u16(),
                 body: response_body,

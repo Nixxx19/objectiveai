@@ -1,6 +1,6 @@
-use objectiveai_sdk::filesystem::config::Config;
-use objectiveai_sdk::filesystem::Client;
 use objectiveai_sdk::cli::output::{Handle, JqResults, Output, Value};
+use objectiveai_sdk::filesystem::Client;
+use objectiveai_sdk::filesystem::config::Config;
 
 pub fn filter(f: Option<String>) -> String {
     f.unwrap_or_else(|| ".".to_string())
@@ -16,7 +16,11 @@ pub async fn read(cli_config: &super::Config) -> Result<(Client, Config), crate:
     Ok((client, config))
 }
 
-pub async fn write(client: &Client, config: &Config, cli_config: &super::Config) -> Result<(), crate::error::Error> {
+pub async fn write(
+    client: &Client,
+    config: &Config,
+    cli_config: &super::Config,
+) -> Result<(), crate::error::Error> {
     if cli_config.config_set_forbidden {
         return Err(crate::error::Error::ConfigSetForbidden);
     }
@@ -35,15 +39,19 @@ pub async fn emit_jq(
         1 => results.into_iter().next().unwrap(),
         _ => serde_json::Value::Array(results),
     };
-    Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (JqResults { jq }).into() })
-        .emit(handle)
-        .await;
+    Output::Notification(objectiveai_sdk::cli::output::Notification {
+        value: (JqResults { jq }).into(),
+    })
+    .emit(handle)
+    .await;
     Ok(())
 }
 
 /// Emit a typed config value as `{"type":"notification","value":<v>}`.
 pub async fn emit_value<V: serde::Serialize>(v: V, handle: &Handle) {
-    Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: objectiveai_sdk::cli::output::NotificationValue::other(&(Value { value: v })) })
-        .emit(handle)
-        .await;
+    Output::Notification(objectiveai_sdk::cli::output::Notification {
+        value: objectiveai_sdk::cli::output::NotificationValue::other(&(Value { value: v })),
+    })
+    .emit(handle)
+    .await;
 }

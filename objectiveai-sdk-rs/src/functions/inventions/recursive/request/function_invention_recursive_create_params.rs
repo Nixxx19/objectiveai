@@ -1,9 +1,11 @@
 use crate::{agent, functions};
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams")]
+#[schemars(
+    rename = "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams"
+)]
 pub struct FunctionInventionRecursiveCreateParams {
     pub remote: crate::Remote,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -14,7 +16,8 @@ pub struct FunctionInventionRecursiveCreateParams {
     #[schemars(extend("omitempty" = true))]
     pub provider: Option<agent::completions::request::Provider>,
     pub agent: agent::InlineAgentBaseWithFallbacksOrRemoteCommitOptional,
-    pub prompt: functions::inventions::prompts::InlinePromptOrRemoteCommitOptional,
+    pub prompt:
+        functions::inventions::prompts::InlinePromptOrRemoteCommitOptional,
     #[serde(skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
     pub seed: Option<i64>,
@@ -36,7 +39,9 @@ pub struct FunctionInventionRecursiveCreateParams {
 }
 
 #[cfg(feature = "filesystem")]
-impl crate::filesystem::logs::ProducesRequestFiles for FunctionInventionRecursiveCreateParams {
+impl crate::filesystem::logs::ProducesRequestFiles
+    for FunctionInventionRecursiveCreateParams
+{
     /// Break this request out into per-leaf log files:
     /// - `state` → own JSON file under `<route_base>/state/`.
     /// - `continuation` (if Some) → own `.txt` file under

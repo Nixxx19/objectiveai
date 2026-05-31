@@ -1,18 +1,18 @@
+mod agents;
+mod api;
 mod client;
 mod config;
-mod api;
+mod favorite;
 mod functions;
-mod agents;
+mod mcp;
 mod swarms;
 mod viewer;
-mod mcp;
-mod favorite;
 
-pub use config::*;
-pub use api::*;
-pub use functions::*;
 pub use agents::*;
+pub use api::*;
+pub use config::*;
+pub use favorite::*;
+pub use functions::*;
+pub use mcp::*;
 pub use swarms::*;
 pub use viewer::*;
-pub use mcp::*;
-pub use favorite::*;

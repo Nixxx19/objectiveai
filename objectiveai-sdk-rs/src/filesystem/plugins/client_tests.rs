@@ -2,7 +2,8 @@ use super::super::Client;
 use super::{Binaries, Manifest};
 
 fn fresh_base_dir() -> std::path::PathBuf {
-    let d = std::env::temp_dir().join(format!("oai-list-plugins-{}", uuid::Uuid::new_v4()));
+    let d = std::env::temp_dir()
+        .join(format!("oai-list-plugins-{}", uuid::Uuid::new_v4()));
     std::fs::create_dir_all(&d).unwrap();
     d
 }
@@ -78,9 +79,11 @@ async fn list_plugins_skips_invalid_files() {
     let base = fresh_base_dir();
     let plugins_dir = base.join("plugins");
     std::fs::create_dir_all(&plugins_dir).unwrap();
-    std::fs::write(plugins_dir.join("a.json"), minimal_manifest_json()).unwrap();
+    std::fs::write(plugins_dir.join("a.json"), minimal_manifest_json())
+        .unwrap();
     std::fs::write(plugins_dir.join("b.json"), "\"not json\"").unwrap();
-    std::fs::write(plugins_dir.join("c.json"), r#"{"version":"1.0.0"}"#).unwrap();
+    std::fs::write(plugins_dir.join("c.json"), r#"{"version":"1.0.0"}"#)
+        .unwrap();
     std::fs::write(plugins_dir.join("noise.txt"), "ignore me").unwrap();
 
     let client = client_for(&base);
@@ -98,7 +101,11 @@ async fn list_plugins_handles_multiple_valid_manifests() {
     let plugins_dir = base.join("plugins");
     std::fs::create_dir_all(&plugins_dir).unwrap();
     for stem in ["a", "b", "c"] {
-        std::fs::write(plugins_dir.join(format!("{stem}.json")), minimal_manifest_json()).unwrap();
+        std::fs::write(
+            plugins_dir.join(format!("{stem}.json")),
+            minimal_manifest_json(),
+        )
+        .unwrap();
     }
 
     let client = client_for(&base);
@@ -144,7 +151,8 @@ async fn get_plugin_returns_none_when_file_missing() {
     let base = fresh_base_dir();
     let plugins_dir = base.join("plugins");
     std::fs::create_dir_all(&plugins_dir).unwrap();
-    std::fs::write(plugins_dir.join("other.json"), minimal_manifest_json()).unwrap();
+    std::fs::write(plugins_dir.join("other.json"), minimal_manifest_json())
+        .unwrap();
 
     let client = client_for(&base);
     assert!(client.get_plugin("missing").await.is_none());
@@ -167,12 +175,20 @@ async fn get_plugin_returns_none_when_malformed() {
 fn plugin_binary_path_layout() {
     let base = fresh_base_dir();
     let client = client_for(&base);
-    let expected = client
-        .plugins_dir()
-        .join("my-plugin")
-        .join(if cfg!(windows) { "plugin.exe" } else { "plugin" });
+    let expected =
+        client
+            .plugins_dir()
+            .join("my-plugin")
+            .join(if cfg!(windows) {
+                "plugin.exe"
+            } else {
+                "plugin"
+            });
     assert_eq!(client.plugin_binary_path("my-plugin"), expected);
-    assert_eq!(client.plugin_dir("my-plugin"), client.plugins_dir().join("my-plugin"));
+    assert_eq!(
+        client.plugin_dir("my-plugin"),
+        client.plugins_dir().join("my-plugin")
+    );
     cleanup(&base);
 }
 
@@ -190,7 +206,11 @@ async fn resolve_plugin_returns_canonical_nested_path_when_present() {
     let client = client_for(&base);
     let target = client.plugin_binary_path("hello");
     std::fs::create_dir_all(target.parent().unwrap()).unwrap();
-    std::fs::write(&target, b"\x7fELF or MZ; contents don't matter for is_file()").unwrap();
+    std::fs::write(
+        &target,
+        b"\x7fELF or MZ; contents don't matter for is_file()",
+    )
+    .unwrap();
 
     let resolved = client.resolve_plugin("hello").await;
     assert_eq!(resolved.as_deref(), Some(target.as_path()));
@@ -206,7 +226,11 @@ async fn resolve_plugin_falls_back_to_cross_platform_canonical() {
     let client = client_for(&base);
     let dir = client.plugin_dir("hello");
     std::fs::create_dir_all(&dir).unwrap();
-    let alt = dir.join(if cfg!(windows) { "plugin" } else { "plugin.exe" });
+    let alt = dir.join(if cfg!(windows) {
+        "plugin"
+    } else {
+        "plugin.exe"
+    });
     std::fs::write(&alt, b"x").unwrap();
 
     let resolved = client.resolve_plugin("hello").await;
@@ -238,7 +262,8 @@ async fn resolve_plugin_prefers_canonical_over_alternate_extension() {
     let canonical = client.plugin_binary_path("hello");
     std::fs::create_dir_all(canonical.parent().unwrap()).unwrap();
     std::fs::write(&canonical, b"canonical").unwrap();
-    std::fs::write(canonical.parent().unwrap().join("plugin.bat"), b"alt").unwrap();
+    std::fs::write(canonical.parent().unwrap().join("plugin.bat"), b"alt")
+        .unwrap();
 
     let resolved = client.resolve_plugin("hello").await;
     assert_eq!(resolved.as_deref(), Some(canonical.as_path()));
@@ -269,7 +294,8 @@ async fn resolve_plugin_ignores_flat_layout() {
     let base = fresh_base_dir();
     let plugins_dir = base.join("plugins");
     std::fs::create_dir_all(&plugins_dir).unwrap();
-    let flat = plugins_dir.join(if cfg!(windows) { "hello.exe" } else { "hello" });
+    let flat =
+        plugins_dir.join(if cfg!(windows) { "hello.exe" } else { "hello" });
     std::fs::write(&flat, b"x").unwrap();
 
     let client = client_for(&base);
@@ -283,16 +309,40 @@ async fn list_plugins_respects_offset_and_limit() {
     let plugins_dir = base.join("plugins");
     std::fs::create_dir_all(&plugins_dir).unwrap();
     for stem in ["a", "b", "c"] {
-        std::fs::write(plugins_dir.join(format!("{stem}.json")), minimal_manifest_json()).unwrap();
+        std::fs::write(
+            plugins_dir.join(format!("{stem}.json")),
+            minimal_manifest_json(),
+        )
+        .unwrap();
     }
 
     let client = client_for(&base);
 
-    assert_eq!(client.list_plugins(0, 100).await.len(), 3, "unbounded should return all 3");
-    assert_eq!(client.list_plugins(0, 1).await.len(), 1, "limit=1 should clip to 1");
-    assert_eq!(client.list_plugins(1, 1).await.len(), 1, "offset=1 limit=1 should return 1");
-    assert_eq!(client.list_plugins(2, 100).await.len(), 1, "offset=2 should leave 1 item");
-    assert_eq!(client.list_plugins(5, 100).await.len(), 0, "offset past end is empty");
+    assert_eq!(
+        client.list_plugins(0, 100).await.len(),
+        3,
+        "unbounded should return all 3"
+    );
+    assert_eq!(
+        client.list_plugins(0, 1).await.len(),
+        1,
+        "limit=1 should clip to 1"
+    );
+    assert_eq!(
+        client.list_plugins(1, 1).await.len(),
+        1,
+        "offset=1 limit=1 should return 1"
+    );
+    assert_eq!(
+        client.list_plugins(2, 100).await.len(),
+        1,
+        "offset=2 should leave 1 item"
+    );
+    assert_eq!(
+        client.list_plugins(5, 100).await.len(),
+        0,
+        "offset past end is empty"
+    );
     assert_eq!(client.list_plugins(0, 0).await.len(), 0, "limit=0 is empty");
 
     cleanup(&base);

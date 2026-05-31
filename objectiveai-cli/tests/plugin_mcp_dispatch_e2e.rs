@@ -72,8 +72,7 @@ fn test_mcp_plugin_binary() -> PathBuf {
 /// isolated — no contact with `~/.objectiveai` or the in-repo
 /// `objectiveai-cli/tests/.objectiveai`.
 fn temp_base() -> PathBuf {
-    let d = std::env::temp_dir()
-        .join(format!("oai-mcp-plugin-{}", uuid::Uuid::new_v4()));
+    let d = std::env::temp_dir().join(format!("oai-mcp-plugin-{}", uuid::Uuid::new_v4()));
     std::fs::create_dir_all(&d).unwrap();
     d
 }
@@ -115,11 +114,7 @@ fn stage_plugin(base: &Path) {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        std::fs::set_permissions(
-            &installed,
-            std::fs::Permissions::from_mode(0o755),
-        )
-        .unwrap();
+        std::fs::set_permissions(&installed, std::fs::Permissions::from_mode(0o755)).unwrap();
     }
 }
 
@@ -144,9 +139,7 @@ impl Drop for PluginGuard {
                 }
                 #[cfg(unix)]
                 {
-                    let _ = Command::new("kill")
-                        .args(["-9", &pid.to_string()])
-                        .status();
+                    let _ = Command::new("kill").args(["-9", &pid.to_string()]).status();
                 }
             }
         }
@@ -161,10 +154,7 @@ async fn wait_for_completion(base_dir: &Path, spawn_id: &str) {
     let response_cont_path = base_dir
         .join("logs/agents/completions/response/continuation")
         .join(format!("{spawn_id}.json"));
-    let socket_path = base_dir
-        .join("pipes/cli")
-        .join(spawn_id)
-        .join("socket");
+    let socket_path = base_dir.join("pipes/cli").join(spawn_id).join("socket");
     let deadline = Instant::now() + Duration::from_secs(180);
     while Instant::now() < deadline {
         if response_cont_path.exists() && !socket_path.exists() {
@@ -172,9 +162,7 @@ async fn wait_for_completion(base_dir: &Path, spawn_id: &str) {
         }
         tokio::time::sleep(Duration::from_millis(50)).await;
     }
-    panic!(
-        "cli-stream did not flush continuation + tear down socket for {spawn_id} in 180s",
-    );
+    panic!("cli-stream did not flush continuation + tear down socket for {spawn_id} in 180s",);
 }
 
 fn cli_command_with_base_dir(base_dir: &Path, args: &[&str]) -> Command {
@@ -194,11 +182,7 @@ fn project_for_snapshot(cont: &Value) -> Value {
     let mut tool_call_names: Vec<String> = Vec::new();
     let mut tool_result_texts: Vec<String> = Vec::new();
 
-    fn walk(
-        v: &Value,
-        tool_call_names: &mut Vec<String>,
-        tool_result_texts: &mut Vec<String>,
-    ) {
+    fn walk(v: &Value, tool_call_names: &mut Vec<String>, tool_result_texts: &mut Vec<String>) {
         match v {
             Value::Object(obj) => {
                 if let Some(name) = obj
@@ -214,9 +198,7 @@ fn project_for_snapshot(cont: &Value) -> Value {
                             tool_result_texts.push(s.to_string());
                         } else if let Some(arr) = content.as_array() {
                             for part in arr {
-                                if let Some(s) =
-                                    part.get("text").and_then(|t| t.as_str())
-                                {
+                                if let Some(s) = part.get("text").and_then(|t| t.as_str()) {
                                     tool_result_texts.push(s.to_string());
                                 }
                             }
@@ -300,10 +282,14 @@ async fn plugin_mcp_dispatch_round_trip() {
     let mut spawn_cmd = cli_command_with_base_dir(
         &base,
         &[
-            "agents", "spawn",
-            "--agent-inline", &agent,
-            "--simple", "use a tool",
-            "--seed", "1",
+            "agents",
+            "spawn",
+            "--agent-inline",
+            &agent,
+            "--simple",
+            "use a tool",
+            "--seed",
+            "1",
         ],
     );
     spawn_cmd.env("OAI_TEST_MCP_PID_FILE", &pid_file);
@@ -323,10 +309,10 @@ async fn plugin_mcp_dispatch_round_trip() {
         .collect();
     let spawned = lines
         .iter()
-        .find(|l| l.pointer("/value/kind") == Some(&json!("spawned")))
+        .find(|l| l.pointer("/type") == Some(&json!("spawned")))
         .expect("agents spawn must emit Spawned notification");
     let spawn_id = spawned
-        .pointer("/value/agent_id")
+        .pointer("/agent_id")
         .and_then(|v| v.as_str())
         .expect("Spawned.agent_id")
         .to_string();
@@ -336,8 +322,7 @@ async fn plugin_mcp_dispatch_round_trip() {
     let response_cont_path = base
         .join("logs/agents/completions/response/continuation")
         .join(format!("{spawn_id}.json"));
-    let raw = std::fs::read_to_string(&response_cont_path)
-        .expect("read response continuation");
+    let raw = std::fs::read_to_string(&response_cont_path).expect("read response continuation");
     let cont: Value = serde_json::from_str(&raw).expect("parse response continuation");
 
     let projection = project_for_snapshot(&cont);

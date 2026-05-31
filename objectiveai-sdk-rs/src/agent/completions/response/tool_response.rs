@@ -1,8 +1,16 @@
 use crate::agent;
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
 #[schemars(rename = "agent.completions.response.ToolResponse")]
 pub struct ToolResponse {
     pub role: ToolRole,
@@ -24,7 +32,10 @@ impl ToolResponse {
         &self,
         id: &str,
         route_base: &str,
-    ) -> (crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>) {
+    ) -> (
+        crate::filesystem::logs::LogReference,
+        Vec<crate::filesystem::logs::LogFile>,
+    ) {
         use crate::filesystem::logs::{LogFile, LogReference};
 
         let mut files = Vec::new();
@@ -69,7 +80,16 @@ impl ToolResponse {
 }
 
 #[derive(
-    Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, Eq, JsonSchema, arbitrary::Arbitrary,
+    Debug,
+    Clone,
+    Copy,
+    Serialize,
+    Deserialize,
+    Default,
+    PartialEq,
+    Eq,
+    JsonSchema,
+    arbitrary::Arbitrary,
 )]
 #[schemars(rename = "agent.completions.response.ToolRole")]
 pub enum ToolRole {

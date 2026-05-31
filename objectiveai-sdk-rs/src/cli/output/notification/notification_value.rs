@@ -1,37 +1,67 @@
-//! [`NotificationValue`] — discriminated enum of every
-//! notification payload the cli emits.
+//! [`NotificationValue`] — the discriminated body of one cli
+//! notification, structured as a two-layer enum:
 //!
-//! Lives one level inside [`super::Notification`]'s `value` field,
-//! so the wire shape is
-//! `{"type":"notification","value":{"kind":"<variant>",<fields>}}`.
-//! The `kind` discriminator was added so a downstream consumer can
-//! do a single `serde_json::from_str::<Output>(line)` and dispatch
-//! on the variant without already knowing which payload to expect.
+//! - [`NotificationValue::Typed`] holds a [`TypedNotificationValue`]
+//!   — an internally-tagged enum (`tag = "type"`) covering every
+//!   concrete payload the cli emits. Deserialization tries this
+//!   variant first.
+//! - [`NotificationValue::Other`] is the untagged catch-all map:
+//!   generic emits (`Items<T>`, `Value<V>`), api-call passthroughs
+//!   (`Resp`, `Chunk`), and raw `serde_json::Value` payloads. Its
+//!   keys flatten directly at the [`super::Notification`] level —
+//!   there is no `kind`/`type` envelope, no `value` wrapper.
 //!
-//! Every concrete struct the cli emits gets a typed variant.
-//! Generic and one-off payloads (`Items<T>`, `Value<V>`, raw
-//! `serde_json::Value`, api-call passthrough `Resp`/`Chunk`) route
-//! through the single [`NotificationValue::Other`] catch-all, which
-//! is a `serde_json::Map` that flattens directly alongside `kind`
-//! — no inner field wrapper.
+//! `NotificationValue` itself is `#[serde(untagged)]`. The whole
+//! thing then flattens through [`super::Notification`]'s `value`
+//! field, so a `Typed::Ok` lands on the wire as
+//! `{"type":"ok","ok":true}` and an `Other({"items":[…]})` lands
+//! as `{"items":[…]}`.
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    ActiveAgent, Agent, AgentItems, Cleared, Detached, Execution, Function, Help,
-    Inactive, Installed, Instructions, Inventions, JqResults, Laboratory, LogContent,
-    LogStreamReady, Mcp, Me, MessageDelivered, MessageQueued, Ok, Pair, Plugin,
-    Plugins, Profile, Published, Schema, Schemas, Spawned, State, Swarm, Tool,
-    ToolLine, Tools, Updater, ViewerSendResult,
+    ActiveAgent, Agent, AgentItems, Cleared, Detached, Execution, Function,
+    Help, Inactive, Installed, Instructions, Inventions, JqResults, Laboratory,
+    LogContent, LogStreamReady, Mcp, Me, MessageDelivered, MessageQueued, Ok,
+    Pair, Plugin, Plugins, Profile, Published, Schema, Schemas, Spawned, State,
+    Swarm, Tool, ToolLine, Tools, Updater, ViewerSendResult,
 };
 
-/// One emitted notification payload. The `kind` tag discriminates
-/// the variant. See module-level docs for the wire shape.
+/// One emitted notification payload. Untagged wrapper around
+/// [`TypedNotificationValue`] (preferred — has a `type` discriminator)
+/// and an `Other` catch-all map.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
-#[serde(tag = "kind", rename_all = "snake_case")]
+#[serde(untagged)]
 #[schemars(rename = "cli.output.notification.NotificationValue")]
 pub enum NotificationValue {
+    #[schemars(title = "Typed")]
+    Typed(TypedNotificationValue),
+    /// Single catch-all for anything that doesn't get a typed
+    /// variant: generic emits (`Items<T>`, `Value<V>`),
+    /// api/call.rs passthrough (`Resp`, `Chunk`), and raw
+    /// `serde_json::Value`. The map's keys flatten directly into
+    /// the surrounding [`super::Notification`] — there is no
+    /// `kind`/`type` envelope on the wire.
+    ///
+    /// Construct via [`NotificationValue::other`]. The payload
+    /// must serialize to a JSON object (so its entries can sit at
+    /// the [`super::Notification`] level via `#[serde(flatten)]`).
+    ///
+    /// Wire examples:
+    ///   `{"items":[…]}`   (Items<T>)
+    ///   `{"value":<V>}`   (Value<V>)
+    #[schemars(title = "Other")]
+    Other(serde_json::Map<String, serde_json::Value>),
+}
+
+/// The typed half of [`NotificationValue`]. Internally tagged with
+/// `#[serde(tag = "type")]` — variant discrimination happens on
+/// the `type` key.
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
+#[serde(tag = "type", rename_all = "snake_case")]
+#[schemars(rename = "cli.output.notification.TypedNotificationValue")]
+pub enum TypedNotificationValue {
     // Agents
     #[schemars(title = "ActiveAgent")]
     ActiveAgent(ActiveAgent),
@@ -100,12 +130,9 @@ pub enum NotificationValue {
     /// A notification emitted by a cli plugin and forwarded by the
     /// host. The plugin's payload is nested under `value` as an
     /// arbitrary `serde_json::Value` — objects, strings, numbers,
-    /// booleans, arrays, and null are all valid. Replaces the old
-    /// `NotificationValue::other` flatten-onto-`kind` shape (which
-    /// collided with payloads that had their own `"kind"` key and
-    /// panicked on non-object inputs).
+    /// booleans, arrays, and null are all valid.
     ///
-    /// Wire: `{"kind":"plugin_notification","value":<any-json>}`.
+    /// Wire: `{"type":"plugin_notification","value":<any-json>}`.
     #[schemars(title = "PluginNotification")]
     PluginNotification { value: serde_json::Value },
     #[schemars(title = "Plugins")]
@@ -126,29 +153,13 @@ pub enum NotificationValue {
     Updater(Updater),
     #[schemars(title = "ViewerSendResult")]
     ViewerSendResult(ViewerSendResult),
-
-    /// Single catch-all for anything that doesn't get a typed
-    /// variant: generic emits (`Items<T>`, `Value<V>`),
-    /// api/call.rs passthrough (`Resp`, `Chunk`), and raw
-    /// `serde_json::Value`. The map's keys flatten directly
-    /// alongside `kind` — there is no inner field wrapping.
-    ///
-    /// Construct via [`NotificationValue::other`]. The payload
-    /// must serialize to a JSON object (so its entries can sit at
-    /// the same level as `kind`), and its keys cannot include
-    /// `"kind"` (would collide with the discriminator).
-    ///
-    /// Wire examples:
-    ///   `{"kind":"other","items":[…]}`        (Items<T>)
-    ///   `{"kind":"other","value":<V>}`        (Value<V>)
-    #[schemars(title = "Other")]
-    Other(serde_json::Map<String, serde_json::Value>),
 }
 
 impl NotificationValue {
     /// Build an `Other` variant from an arbitrary serializable
     /// payload. Panics if the payload doesn't serialize to a JSON
-    /// object — `Other` flattens, so non-object payloads have
+    /// object — `Other` flattens via `#[serde(flatten)]` on
+    /// [`super::Notification::value`], so non-object payloads have
     /// nowhere to land.
     pub fn other<T: Serialize>(value: &T) -> Self {
         let v = serde_json::to_value(value)
@@ -162,11 +173,22 @@ impl NotificationValue {
     }
 }
 
+impl From<TypedNotificationValue> for NotificationValue {
+    fn from(t: TypedNotificationValue) -> Self {
+        Self::Typed(t)
+    }
+}
+
 macro_rules! from_variant {
     ($($v:ident),* $(,)?) => {
         $(
-            impl From<$v> for NotificationValue {
+            impl From<$v> for TypedNotificationValue {
                 fn from(v: $v) -> Self { Self::$v(v) }
+            }
+            impl From<$v> for NotificationValue {
+                fn from(v: $v) -> Self {
+                    Self::Typed(TypedNotificationValue::$v(v))
+                }
             }
         )*
     };

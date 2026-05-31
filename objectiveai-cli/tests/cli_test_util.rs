@@ -43,9 +43,14 @@ pub fn cli_binary() -> PathBuf {
     BUILD_ONCE.call_once(|| {
         let status = Command::new("cargo")
             .args([
-                "build", "-p", "objectiveai-cli",
-                "--no-default-features", "--features", "rustpython",
-                "--target-dir", target_dir.to_str().unwrap(),
+                "build",
+                "-p",
+                "objectiveai-cli",
+                "--no-default-features",
+                "--features",
+                "rustpython",
+                "--target-dir",
+                target_dir.to_str().unwrap(),
             ])
             .status()
             .expect("failed to run cargo build");
@@ -99,12 +104,13 @@ pub fn rounded(value: &serde_json::Value) -> serde_json::Value {
     }
 }
 
-/// Run a CLI command and return the last data-bearing JSONL
-/// notification's `value`. The CLI wraps output in
-/// `{begin}` / `{notification, value: {log_stream_ready: ...}}` /
-/// `{notification, value: <payload>}` / `{end}`; tests want the
-/// `<payload>` line, so we skip control markers and `log_stream_ready`
-/// stubs and return the last remaining notification's value.
+/// Run a CLI command and return the last data-bearing JSONL line.
+/// The cli emits one [`objectiveai_sdk::cli::output::Output`] JSON
+/// object per line; `Output` is untagged, so every notification's
+/// keys live at the top level (no more `type:"notification"`
+/// envelope or `value` wrapper). Tests want the actual payload
+/// line, so we skip `log_stream_ready` stubs and error lines
+/// (`type:"error"`) and return the last remaining line.
 pub fn run_cli(args: &[&str]) -> serde_json::Value {
     let output = cli_command(args)
         .output()
@@ -128,63 +134,43 @@ pub fn run_cli(args: &[&str]) -> serde_json::Value {
         let Ok(parsed) = serde_json::from_str::<serde_json::Value>(trimmed) else {
             continue;
         };
-        if parsed.get("type").and_then(|t| t.as_str()) != Some("notification") {
+        // Skip Error envelopes.
+        if parsed.get("type").and_then(|t| t.as_str()) == Some("error") {
             continue;
         }
-        let Some(value) = parsed.get("value") else {
-            continue;
-        };
-        // Skip the `log_stream_ready` stub notification; tests want
-        // the subsequent data-bearing notifications only. The new
-        // `kind`-tagged shape is `{"kind":"log_stream_ready",
-        // "log_stream_ready":"<id>"}` (two keys); the legacy
-        // pre-tag shape was just `{"log_stream_ready":"<id>"}`
-        // (one key). Match either.
-        let is_log_stream_ready = value
-            .as_object()
-            .map(|o| {
-                (o.len() == 1 && o.contains_key("log_stream_ready"))
-                    || (o.len() == 2
-                        && o.get("kind").and_then(|k| k.as_str())
-                            == Some("log_stream_ready"))
-            })
-            .unwrap_or(false);
+        // Skip `log_stream_ready` stub notifications.
+        let is_log_stream_ready =
+            parsed.get("type").and_then(|t| t.as_str()) == Some("log_stream_ready");
         if is_log_stream_ready {
             continue;
         }
-        data_values.push(value.clone());
+        data_values.push(parsed);
     }
     if data_values.is_empty() {
         panic!("no data notification in CLI output:\n{stdout}");
     }
     // Tests written against the pre-JSONL CLI expect either the direct
     // payload (single notification) or an array of payloads (streaming
-    // notifications). When there's exactly one notification with exactly
-    // one object-typed wrapper key, descend through it — the cli wraps
-    // command responses in keys like `execution`, `invention`, etc.
-    //
-    // After `NotificationValue` grew an internally-tagged `kind`
-    // discriminator, the wrapper map has two keys (`kind` +
-    // `<variant>`). Detect that shape (exactly one non-`kind` key
-    // whose value is an object/array) and descend through the data
-    // key so existing tests that read `cli_result["output"]` keep
-    // working without touching every snapshot.
+    // notifications). When there's exactly one notification, walk past
+    // the `type` discriminator and (for `Other`-flattened payloads
+    // like `Items<T>`) descend through a single non-`type` data key
+    // if it points at an object/array. This keeps snapshot tests that
+    // read `cli_result["output"]` working without touching every
+    // snapshot.
     if data_values.len() == 1 {
         let v = data_values.into_iter().next().unwrap();
         if let Some(obj) = v.as_object() {
-            if obj.len() == 1 {
-                let inner = obj.values().next().unwrap();
+            // Single non-`type`/non-`agent_id` key with an object/array
+            // value → descend through it (e.g. `{"items": [...]}`,
+            // `{"value": <V>}`).
+            let data_keys: Vec<(&String, &serde_json::Value)> = obj
+                .iter()
+                .filter(|(k, _)| k.as_str() != "type" && k.as_str() != "agent_id")
+                .collect();
+            if data_keys.len() == 1 {
+                let (_, inner) = data_keys[0];
                 if inner.is_object() || inner.is_array() {
                     return inner.clone();
-                }
-            }
-            if obj.len() == 2 && obj.contains_key("kind") {
-                if let Some((_, inner)) =
-                    obj.iter().find(|(k, _)| k.as_str() != "kind")
-                {
-                    if inner.is_object() || inner.is_array() {
-                        return inner.clone();
-                    }
                 }
             }
         }

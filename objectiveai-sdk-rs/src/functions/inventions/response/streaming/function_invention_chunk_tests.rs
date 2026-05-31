@@ -1,7 +1,10 @@
-use crate::tests::stream_push::stream_push_test;
 use super::*;
+use crate::tests::stream_push::stream_push_test;
 
-fn completion(index: u64, error: Option<crate::error::ResponseError>) -> AgentCompletionChunk {
+fn completion(
+    index: u64,
+    error: Option<crate::error::ResponseError>,
+) -> AgentCompletionChunk {
     AgentCompletionChunk {
         index,
         inner: crate::agent::completions::response::streaming::AgentCompletionChunk {
@@ -36,7 +39,10 @@ fn chunk_with(
 }
 
 fn err(code: u16, message: &str) -> crate::error::ResponseError {
-    crate::error::ResponseError { code, message: message.into() }
+    crate::error::ResponseError {
+        code,
+        message: message.into(),
+    }
 }
 
 #[test]
@@ -53,7 +59,8 @@ fn inner_errors_excludes_own_error() {
 
 #[test]
 fn inner_errors_no_completion_errors() {
-    let chunk = chunk_with(vec![completion(0, None), completion(1, None)], None);
+    let chunk =
+        chunk_with(vec![completion(0, None), completion(1, None)], None);
     assert!(chunk.inner_errors().next().is_none());
 }
 
@@ -71,7 +78,10 @@ fn inner_errors_mixed() {
     assert_eq!(collected.len(), 1);
     assert_eq!(collected[0].agent_completion_index, 1);
     assert_eq!(collected[0].error.code, 429);
-    assert_eq!(collected[0].error.message, serde_json::Value::String("rate limited".into()));
+    assert_eq!(
+        collected[0].error.message,
+        serde_json::Value::String("rate limited".into())
+    );
 }
 
 #[test]
@@ -96,14 +106,21 @@ fn inner_errors_all_completions_errored() {
 
 #[test]
 fn inner_error_serde_roundtrip() {
-    let chunk = chunk_with(vec![completion(9, Some(err(404, "missing")))], None);
+    let chunk =
+        chunk_with(vec![completion(9, Some(err(404, "missing")))], None);
     let item = chunk.inner_errors().next().unwrap();
     let wire = serde_json::to_string(&item).unwrap();
-    assert_eq!(wire, r#"{"agent_completion_index":9,"error":{"code":404,"message":"missing"}}"#);
+    assert_eq!(
+        wire,
+        r#"{"agent_completion_index":9,"error":{"code":404,"message":"missing"}}"#
+    );
     let round: InnerError<'static> = serde_json::from_str(&wire).unwrap();
     assert_eq!(round.agent_completion_index, 9);
     assert_eq!(round.error.code, 404);
-    assert_eq!(round.error.message, serde_json::Value::String("missing".into()));
+    assert_eq!(
+        round.error.message,
+        serde_json::Value::String("missing".into())
+    );
 }
 
 stream_push_test!(

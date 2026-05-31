@@ -20,7 +20,11 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(self, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
+    pub async fn handle(
+        self,
+        cli_config: &crate::Config,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), crate::error::Error> {
         let (client, mut config) = crate::config::read(cli_config).await?;
         match self {
             Commands::Get => {
@@ -62,18 +66,13 @@ async fn notify(
     name: String,
 ) {
     let client = crate::api::client::build_viewer_client(config);
-    client.send_agents_favorites_changed(
-        None,
-        None,
-        ChangedNotification { action, name },
-    );
+    client.send_agents_favorites_changed(None, None, ChangedNotification { action, name });
     client.flush().await;
 }
 
 async fn emit_ok(handle: &objectiveai_sdk::cli::output::Handle) {
     objectiveai_sdk::cli::output::Output::Notification(
         objectiveai_sdk::cli::output::Notification {
-            agent_id: None,
             value: (objectiveai_sdk::cli::output::OK).into(),
         },
     )

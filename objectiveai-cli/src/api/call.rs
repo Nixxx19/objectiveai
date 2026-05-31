@@ -18,10 +18,7 @@ use objectiveai_sdk::cli::output::{Handle, Notification, Output};
 /// rule: handle's agent_id (env-derived, mirrored on
 /// `http.agent_id`) takes precedence; the flag is the fallback
 /// header.
-fn apply_agent_id_arg(
-    http: &mut objectiveai_sdk::HttpClient,
-    agent_id_arg: Option<String>,
-) {
+fn apply_agent_id_arg(http: &mut objectiveai_sdk::HttpClient, agent_id_arg: Option<String>) {
     if http.agent_id.is_none() {
         if let Some(id) = agent_id_arg {
             http.agent_id = Some(Arc::new(id));
@@ -45,9 +42,11 @@ where
     let mut http = super::client::build_http_client(cli_config, &mut config);
     apply_agent_id_arg(&mut http, agent_id_arg);
     let response: Resp = http.send_unary(method, path, body).await?;
-    Output::Notification(Notification { agent_id: None, value: objectiveai_sdk::cli::output::NotificationValue::other(&(response)) })
-        .emit(handle)
-        .await;
+    Output::Notification(Notification {
+        value: objectiveai_sdk::cli::output::NotificationValue::other(&(response)),
+    })
+    .emit(handle)
+    .await;
     Ok(())
 }
 
@@ -70,7 +69,6 @@ where
     apply_agent_id_arg(&mut http, agent_id_arg);
     http.send_unary_no_response(method, path, body).await?;
     Output::Notification(Notification {
-        agent_id: None,
         value: objectiveai_sdk::cli::output::NotificationValue::other(&(serde_json::Value::Null)),
     })
     .emit(handle)
@@ -99,10 +97,11 @@ where
     let mut stream = std::pin::pin!(stream);
     while let Some(result) = stream.next().await {
         let chunk = result?;
-        Output::Notification(Notification { agent_id: None, value: objectiveai_sdk::cli::output::NotificationValue::other(&(chunk)) })
-            .emit(handle)
-            .await;
+        Output::Notification(Notification {
+            value: objectiveai_sdk::cli::output::NotificationValue::other(&(chunk)),
+        })
+        .emit(handle)
+        .await;
     }
     Ok(())
 }
-

@@ -5,7 +5,9 @@ use serde::{Deserialize, Serialize};
 
 use super::super::{Client, Error};
 use super::ListItem;
-use crate::agent::completions::message::{File, ImageUrl, InputAudio, VideoUrl};
+use crate::agent::completions::message::{
+    File, ImageUrl, InputAudio, VideoUrl,
+};
 
 /// Result of reading a log file. The variant is determined by **which
 /// typed `read_*` method the caller invoked** (or, for
@@ -14,20 +16,22 @@ use crate::agent::completions::message::{File, ImageUrl, InputAudio, VideoUrl};
 /// variant is picked at the call site that already knows the kind.
 ///
 /// Wire form (when wrapped in
-/// [`crate::cli::output::NotificationValue::LogContent`]): the outer
-/// `kind: "log_content"` envelope from `NotificationValue` plus this
-/// inner `type` discriminator:
+/// `TypedNotificationValue::LogContent`): the outer `type:
+/// "log_content"` envelope from `TypedNotificationValue` plus this
+/// inner `kind` discriminator (`type`/`kind` swap relative to the
+/// historical shape — needed to avoid a key collision when the
+/// outer enum flattens through `Notification`):
 ///
 /// ```text
-/// {"kind":"log_content","type":"json", "content":{...}}
-/// {"kind":"log_content","type":"text", "text":"..."}
-/// {"kind":"log_content","type":"image","image_url":{"url":"data:image/png;base64,..."}}
-/// {"kind":"log_content","type":"audio","input_audio":{"data":"<base64>","format":"audio/mpeg"}}
-/// {"kind":"log_content","type":"video","video_url":{"url":"data:video/mp4;base64,..."}}
-/// {"kind":"log_content","type":"file", "file":{"file_data":"<base64>","filename":"<name>"}}
+/// {"type":"log_content","kind":"json", "content":{...}}
+/// {"type":"log_content","kind":"text", "text":"..."}
+/// {"type":"log_content","kind":"image","image_url":{"url":"data:image/png;base64,..."}}
+/// {"type":"log_content","kind":"audio","input_audio":{"data":"<base64>","format":"audio/mpeg"}}
+/// {"type":"log_content","kind":"video","video_url":{"url":"data:video/mp4;base64,..."}}
+/// {"type":"log_content","kind":"file", "file":{"file_data":"<base64>","filename":"<name>"}}
 /// ```
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[serde(tag = "type", rename_all = "snake_case")]
+#[serde(tag = "kind", rename_all = "snake_case")]
 #[schemars(rename = "filesystem.logs.LogContent")]
 pub enum LogContent {
     /// A `.json` envelope parsed as a structured value.
@@ -127,7 +131,9 @@ impl Client {
     ) -> Result<Vec<ListItem>, Error> {
         let dir = self.endpoint_dir(endpoint);
         match tokio::fs::metadata(&dir).await {
-            Err(e) if e.kind() == std::io::ErrorKind::NotFound => return Ok(Vec::new()),
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
+                return Ok(Vec::new());
+            }
             Err(e) => return Err(Error::ReadDir(dir, e)),
             Ok(_) => {}
         }
@@ -169,20 +175,49 @@ impl Client {
 
     // -- List methods --------------------------------------------------------
 
-    pub async fn list_agent_completions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, Error> {
-        self.list_endpoint("agents/completions/response", offset, limit).await
+    pub async fn list_agent_completions(
+        &self,
+        offset: usize,
+        limit: usize,
+    ) -> Result<Vec<ListItem>, Error> {
+        self.list_endpoint("agents/completions/response", offset, limit)
+            .await
     }
-    pub async fn list_vector_completions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, Error> {
-        self.list_endpoint("vector/completions/response", offset, limit).await
+    pub async fn list_vector_completions(
+        &self,
+        offset: usize,
+        limit: usize,
+    ) -> Result<Vec<ListItem>, Error> {
+        self.list_endpoint("vector/completions/response", offset, limit)
+            .await
     }
-    pub async fn list_function_executions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, Error> {
-        self.list_endpoint("functions/executions/response", offset, limit).await
+    pub async fn list_function_executions(
+        &self,
+        offset: usize,
+        limit: usize,
+    ) -> Result<Vec<ListItem>, Error> {
+        self.list_endpoint("functions/executions/response", offset, limit)
+            .await
     }
-    pub async fn list_function_inventions(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, Error> {
-        self.list_endpoint("functions/inventions/response", offset, limit).await
+    pub async fn list_function_inventions(
+        &self,
+        offset: usize,
+        limit: usize,
+    ) -> Result<Vec<ListItem>, Error> {
+        self.list_endpoint("functions/inventions/response", offset, limit)
+            .await
     }
-    pub async fn list_function_inventions_recursive(&self, offset: usize, limit: usize) -> Result<Vec<ListItem>, Error> {
-        self.list_endpoint("functions/inventions/recursive/response", offset, limit).await
+    pub async fn list_function_inventions_recursive(
+        &self,
+        offset: usize,
+        limit: usize,
+    ) -> Result<Vec<ListItem>, Error> {
+        self.list_endpoint(
+            "functions/inventions/recursive/response",
+            offset,
+            limit,
+        )
+        .await
     }
 
     // -- Clear helpers + methods --------------------------------------------
@@ -218,35 +253,63 @@ impl Client {
     pub async fn clear_agent_completions(&self) -> Result<u64, Error> {
         self.clear_endpoint("agents/completions/response").await
     }
-    pub async fn clear_agent_completion_continuations(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agents/completions/response/continuation").await
+    pub async fn clear_agent_completion_continuations(
+        &self,
+    ) -> Result<u64, Error> {
+        self.clear_endpoint("agents/completions/response/continuation")
+            .await
     }
     pub async fn clear_agent_completion_messages(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agents/completions/response/messages").await
+        self.clear_endpoint("agents/completions/response/messages")
+            .await
     }
-    pub async fn clear_agent_completion_message_logprobs(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agents/completions/response/messages/logprobs").await
+    pub async fn clear_agent_completion_message_logprobs(
+        &self,
+    ) -> Result<u64, Error> {
+        self.clear_endpoint("agents/completions/response/messages/logprobs")
+            .await
     }
-    pub async fn clear_agent_completion_message_reasoning(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agents/completions/response/messages/reasoning").await
+    pub async fn clear_agent_completion_message_reasoning(
+        &self,
+    ) -> Result<u64, Error> {
+        self.clear_endpoint("agents/completions/response/messages/reasoning")
+            .await
     }
-    pub async fn clear_agent_completion_message_refusal(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agents/completions/response/messages/refusal").await
+    pub async fn clear_agent_completion_message_refusal(
+        &self,
+    ) -> Result<u64, Error> {
+        self.clear_endpoint("agents/completions/response/messages/refusal")
+            .await
     }
-    pub async fn clear_agent_completion_message_tool_calls(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agents/completions/response/messages/tool_calls").await
+    pub async fn clear_agent_completion_message_tool_calls(
+        &self,
+    ) -> Result<u64, Error> {
+        self.clear_endpoint("agents/completions/response/messages/tool_calls")
+            .await
     }
-    pub async fn clear_agent_completion_message_images(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agents/completions/response/messages/image").await
+    pub async fn clear_agent_completion_message_images(
+        &self,
+    ) -> Result<u64, Error> {
+        self.clear_endpoint("agents/completions/response/messages/image")
+            .await
     }
-    pub async fn clear_agent_completion_message_audio(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agents/completions/response/messages/audio").await
+    pub async fn clear_agent_completion_message_audio(
+        &self,
+    ) -> Result<u64, Error> {
+        self.clear_endpoint("agents/completions/response/messages/audio")
+            .await
     }
-    pub async fn clear_agent_completion_message_video(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agents/completions/response/messages/video").await
+    pub async fn clear_agent_completion_message_video(
+        &self,
+    ) -> Result<u64, Error> {
+        self.clear_endpoint("agents/completions/response/messages/video")
+            .await
     }
-    pub async fn clear_agent_completion_message_files(&self) -> Result<u64, Error> {
-        self.clear_endpoint("agents/completions/response/messages/file").await
+    pub async fn clear_agent_completion_message_files(
+        &self,
+    ) -> Result<u64, Error> {
+        self.clear_endpoint("agents/completions/response/messages/file")
+            .await
     }
     pub async fn clear_vector_completions(&self) -> Result<u64, Error> {
         self.clear_endpoint("vector/completions/response").await
@@ -254,14 +317,20 @@ impl Client {
     pub async fn clear_function_executions(&self) -> Result<u64, Error> {
         self.clear_endpoint("functions/executions/response").await
     }
-    pub async fn clear_function_execution_retry_tokens(&self) -> Result<u64, Error> {
-        self.clear_endpoint("functions/executions/response/retry_token").await
+    pub async fn clear_function_execution_retry_tokens(
+        &self,
+    ) -> Result<u64, Error> {
+        self.clear_endpoint("functions/executions/response/retry_token")
+            .await
     }
     pub async fn clear_function_inventions(&self) -> Result<u64, Error> {
         self.clear_endpoint("functions/inventions/response").await
     }
-    pub async fn clear_function_inventions_recursive(&self) -> Result<u64, Error> {
-        self.clear_endpoint("functions/inventions/recursive/response").await
+    pub async fn clear_function_inventions_recursive(
+        &self,
+    ) -> Result<u64, Error> {
+        self.clear_endpoint("functions/inventions/recursive/response")
+            .await
     }
 
     // -- Write methods (LogWriter constructors) -----------------------------
@@ -269,70 +338,95 @@ impl Client {
     pub fn write_agent_completion(
         &self,
         request: &crate::agent::completions::request::AgentCompletionCreateParams,
-    ) -> Result<super::LogWriter<crate::agent::completions::response::streaming::AgentCompletionChunk>, Error> {
+    ) -> Result<super::LogWriter<crate::agent::completions::response::streaming::AgentCompletionChunk>, Error>{
         use crate::agent::completions::response::streaming::AgentCompletionChunk;
         let conn = super::super::db::connection::connection(self)?;
-        let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        Ok(super::LogWriter::new(self.logs_dir(), |chunk: &AgentCompletionChunk| chunk.produce_files().map(|(_, files)| files))
-            .with_request("agents/completions/request", request)?
-            .with_queue(
-                queue,
-                Some(super::super::db::schema::MessageKind::AgentCompletionRequest),
-                |chunk: &AgentCompletionChunk| Box::new(chunk.produce_message_rows()),
-            ))
+        let queue =
+            super::super::db::messages::Queue::new(conn, self.logs_dir());
+        Ok(super::LogWriter::new(
+            self.logs_dir(),
+            |chunk: &AgentCompletionChunk| {
+                chunk.produce_files().map(|(_, files)| files)
+            },
+        )
+        .with_request("agents/completions/request", request)?
+        .with_queue(
+            queue,
+            Some(super::super::db::schema::MessageKind::AgentCompletionRequest),
+            |chunk: &AgentCompletionChunk| {
+                Box::new(chunk.produce_message_rows())
+            },
+        ))
     }
     pub fn write_vector_completion(
         &self,
         request: &crate::vector::completions::request::VectorCompletionCreateParams,
-    ) -> Result<super::LogWriter<crate::vector::completions::response::streaming::VectorCompletionChunk>, Error> {
+    ) -> Result<super::LogWriter<crate::vector::completions::response::streaming::VectorCompletionChunk>, Error>{
         use crate::vector::completions::response::streaming::VectorCompletionChunk;
         let conn = super::super::db::connection::connection(self)?;
-        let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        Ok(super::LogWriter::new(self.logs_dir(), |chunk: &VectorCompletionChunk| chunk.produce_files().map(|(_, files)| files))
-            .with_request("vector/completions/request", request)?
-            .with_queue(
-                queue,
-                None,
-                |chunk: &VectorCompletionChunk| Box::new(chunk.produce_message_rows()),
-            ))
+        let queue =
+            super::super::db::messages::Queue::new(conn, self.logs_dir());
+        Ok(super::LogWriter::new(
+            self.logs_dir(),
+            |chunk: &VectorCompletionChunk| {
+                chunk.produce_files().map(|(_, files)| files)
+            },
+        )
+        .with_request("vector/completions/request", request)?
+        .with_queue(queue, None, |chunk: &VectorCompletionChunk| {
+            Box::new(chunk.produce_message_rows())
+        }))
     }
     pub fn write_function_execution(
         &self,
         request: &crate::functions::executions::request::FunctionExecutionCreateParams,
-    ) -> Result<super::LogWriter<crate::functions::executions::response::streaming::FunctionExecutionChunk>, Error> {
+    ) -> Result<super::LogWriter<crate::functions::executions::response::streaming::FunctionExecutionChunk>, Error>{
         use crate::functions::executions::response::streaming::FunctionExecutionChunk;
         let conn = super::super::db::connection::connection(self)?;
-        let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        Ok(super::LogWriter::new(self.logs_dir(), |chunk: &FunctionExecutionChunk| chunk.produce_files().map(|(_, files)| files))
-            .with_request("functions/executions/request", request)?
-            .with_queue(
-                queue,
-                Some(super::super::db::schema::MessageKind::FunctionExecutionRequest),
-                |chunk: &FunctionExecutionChunk| chunk.produce_message_rows(),
-            ))
+        let queue =
+            super::super::db::messages::Queue::new(conn, self.logs_dir());
+        Ok(super::LogWriter::new(
+            self.logs_dir(),
+            |chunk: &FunctionExecutionChunk| {
+                chunk.produce_files().map(|(_, files)| files)
+            },
+        )
+        .with_request("functions/executions/request", request)?
+        .with_queue(
+            queue,
+            Some(
+                super::super::db::schema::MessageKind::FunctionExecutionRequest,
+            ),
+            |chunk: &FunctionExecutionChunk| chunk.produce_message_rows(),
+        ))
     }
     pub fn write_function_invention(
         &self,
         request: &crate::functions::inventions::request::FunctionInventionCreateParams,
-    ) -> Result<super::LogWriter<crate::functions::inventions::response::streaming::FunctionInventionChunk>, Error> {
+    ) -> Result<super::LogWriter<crate::functions::inventions::response::streaming::FunctionInventionChunk>, Error>{
         use crate::functions::inventions::response::streaming::FunctionInventionChunk;
         let conn = super::super::db::connection::connection(self)?;
-        let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        Ok(super::LogWriter::new(self.logs_dir(), |chunk: &FunctionInventionChunk| chunk.produce_files().map(|(_, files)| files))
-            .with_request("functions/inventions/request", request)?
-            .with_queue(
-                queue,
-                None,
-                |chunk: &FunctionInventionChunk| Box::new(chunk.produce_message_rows()),
-            ))
+        let queue =
+            super::super::db::messages::Queue::new(conn, self.logs_dir());
+        Ok(super::LogWriter::new(
+            self.logs_dir(),
+            |chunk: &FunctionInventionChunk| {
+                chunk.produce_files().map(|(_, files)| files)
+            },
+        )
+        .with_request("functions/inventions/request", request)?
+        .with_queue(queue, None, |chunk: &FunctionInventionChunk| {
+            Box::new(chunk.produce_message_rows())
+        }))
     }
     pub fn write_function_invention_recursive(
         &self,
         request: &crate::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams,
-    ) -> Result<super::LogWriter<crate::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk>, Error> {
+    ) -> Result<super::LogWriter<crate::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk>, Error>{
         use crate::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk;
         let conn = super::super::db::connection::connection(self)?;
-        let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
+        let queue =
+            super::super::db::messages::Queue::new(conn, self.logs_dir());
         Ok(super::LogWriter::new(self.logs_dir(), |chunk: &FunctionInventionRecursiveChunk| chunk.produce_files().map(|(_, files)| files))
             .with_request("functions/inventions/recursive/request", request)?
             .with_queue(
@@ -344,13 +438,18 @@ impl Client {
 
     // -- Read helpers + methods ---------------------------------------------
 
-    async fn read_json(&self, dir: &str, stem: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+    async fn read_json(
+        &self,
+        dir: &str,
+        stem: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
         let full = self.logs_dir().join(dir).join(format!("{stem}.json"));
         let bytes = tokio::fs::read(&full)
             .await
             .map_err(|e| Error::Read(full.clone(), e))?;
-        let value: serde_json::Value =
-            serde_json::from_slice(&bytes).map_err(|e| Error::Parse(full, e))?;
+        let value: serde_json::Value = serde_json::from_slice(&bytes)
+            .map_err(|e| Error::Parse(full, e))?;
         apply_jq(value, jq)
     }
 
@@ -396,7 +495,8 @@ impl Client {
                     let mime = mime_guess::from_path(&path)
                         .first_or_octet_stream()
                         .to_string();
-                    let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
+                    let b64 = base64::engine::general_purpose::STANDARD
+                        .encode(&bytes);
                     let filename = Some(name.to_string());
                     return Ok((mime, b64, filename));
                 }
@@ -404,7 +504,10 @@ impl Client {
         }
         Err(Error::Read(
             dir_path.join(&prefix),
-            std::io::Error::new(std::io::ErrorKind::NotFound, "no matching file"),
+            std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                "no matching file",
+            ),
         ))
     }
 
@@ -432,7 +535,10 @@ impl Client {
         stem: &str,
     ) -> Result<InputAudio, Error> {
         let (mime, b64, _) = self.read_media_parts_by_stem(dir, stem).await?;
-        Ok(InputAudio { data: b64, format: mime })
+        Ok(InputAudio {
+            data: b64,
+            format: mime,
+        })
     }
 
     /// Read the media file at `dir/<stem>.*` and assemble a
@@ -457,7 +563,8 @@ impl Client {
         dir: &str,
         stem: &str,
     ) -> Result<File, Error> {
-        let (_, b64, filename) = self.read_media_parts_by_stem(dir, stem).await?;
+        let (_, b64, filename) =
+            self.read_media_parts_by_stem(dir, stem).await?;
         Ok(File {
             file_data: Some(b64),
             filename,
@@ -466,68 +573,209 @@ impl Client {
         })
     }
 
-    pub async fn read_agent_completion(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+    pub async fn read_agent_completion(
+        &self,
+        id: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
         self.read_json("agents/completions/response", id, jq).await
     }
-    pub async fn read_agent_completion_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+    pub async fn read_agent_completion_request(
+        &self,
+        id: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
         self.read_json("agents/completions/request", id, jq).await
     }
-    pub async fn read_agent_completion_continuation(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions/response/continuation", id, jq).await
+    pub async fn read_agent_completion_continuation(
+        &self,
+        id: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
+        self.read_json("agents/completions/response/continuation", id, jq)
+            .await
     }
-    pub async fn read_agent_completion_message(&self, id: &str, message_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions/response/messages", &format!("{id}_{message_index}"), jq).await
+    pub async fn read_agent_completion_message(
+        &self,
+        id: &str,
+        message_index: u64,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
+        self.read_json(
+            "agents/completions/response/messages",
+            &format!("{id}_{message_index}"),
+            jq,
+        )
+        .await
     }
-    pub async fn read_agent_completion_message_logprobs(&self, id: &str, message_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions/response/messages/logprobs", &format!("{id}_{message_index}"), jq).await
+    pub async fn read_agent_completion_message_logprobs(
+        &self,
+        id: &str,
+        message_index: u64,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
+        self.read_json(
+            "agents/completions/response/messages/logprobs",
+            &format!("{id}_{message_index}"),
+            jq,
+        )
+        .await
     }
-    pub async fn read_agent_completion_message_reasoning(&self, id: &str, message_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions/response/messages/reasoning", &format!("{id}_{message_index}"), jq).await
+    pub async fn read_agent_completion_message_reasoning(
+        &self,
+        id: &str,
+        message_index: u64,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
+        self.read_json(
+            "agents/completions/response/messages/reasoning",
+            &format!("{id}_{message_index}"),
+            jq,
+        )
+        .await
     }
-    pub async fn read_agent_completion_message_refusal(&self, id: &str, message_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions/response/messages/refusal", &format!("{id}_{message_index}"), jq).await
+    pub async fn read_agent_completion_message_refusal(
+        &self,
+        id: &str,
+        message_index: u64,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
+        self.read_json(
+            "agents/completions/response/messages/refusal",
+            &format!("{id}_{message_index}"),
+            jq,
+        )
+        .await
     }
-    pub async fn read_agent_completion_message_tool_call(&self, id: &str, message_index: u64, tool_call_index: u64, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("agents/completions/response/messages/tool_calls", &format!("{id}_{message_index}_{tool_call_index}"), jq).await
+    pub async fn read_agent_completion_message_tool_call(
+        &self,
+        id: &str,
+        message_index: u64,
+        tool_call_index: u64,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
+        self.read_json(
+            "agents/completions/response/messages/tool_calls",
+            &format!("{id}_{message_index}_{tool_call_index}"),
+            jq,
+        )
+        .await
     }
-    pub async fn read_agent_completion_message_image(&self, id: &str, message_index: u64, media_index: u64) -> Result<ImageUrl, Error> {
-        self.read_image_by_stem("agents/completions/response/messages/image", &format!("{id}_{message_index}_{media_index}")).await
+    pub async fn read_agent_completion_message_image(
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
+    ) -> Result<ImageUrl, Error> {
+        self.read_image_by_stem(
+            "agents/completions/response/messages/image",
+            &format!("{id}_{message_index}_{media_index}"),
+        )
+        .await
     }
-    pub async fn read_agent_completion_message_audio(&self, id: &str, message_index: u64, media_index: u64) -> Result<InputAudio, Error> {
-        self.read_audio_by_stem("agents/completions/response/messages/audio", &format!("{id}_{message_index}_{media_index}")).await
+    pub async fn read_agent_completion_message_audio(
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
+    ) -> Result<InputAudio, Error> {
+        self.read_audio_by_stem(
+            "agents/completions/response/messages/audio",
+            &format!("{id}_{message_index}_{media_index}"),
+        )
+        .await
     }
-    pub async fn read_agent_completion_message_video(&self, id: &str, message_index: u64, media_index: u64) -> Result<VideoUrl, Error> {
-        self.read_video_by_stem("agents/completions/response/messages/video", &format!("{id}_{message_index}_{media_index}")).await
+    pub async fn read_agent_completion_message_video(
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
+    ) -> Result<VideoUrl, Error> {
+        self.read_video_by_stem(
+            "agents/completions/response/messages/video",
+            &format!("{id}_{message_index}_{media_index}"),
+        )
+        .await
     }
-    pub async fn read_agent_completion_message_file(&self, id: &str, message_index: u64, media_index: u64) -> Result<File, Error> {
-        self.read_file_by_stem("agents/completions/response/messages/file", &format!("{id}_{message_index}_{media_index}")).await
+    pub async fn read_agent_completion_message_file(
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
+    ) -> Result<File, Error> {
+        self.read_file_by_stem(
+            "agents/completions/response/messages/file",
+            &format!("{id}_{message_index}_{media_index}"),
+        )
+        .await
     }
-    pub async fn read_vector_completion(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+    pub async fn read_vector_completion(
+        &self,
+        id: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
         self.read_json("vector/completions/response", id, jq).await
     }
-    pub async fn read_vector_completion_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+    pub async fn read_vector_completion_request(
+        &self,
+        id: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
         self.read_json("vector/completions/request", id, jq).await
     }
-    pub async fn read_function_execution(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/executions/response", id, jq).await
+    pub async fn read_function_execution(
+        &self,
+        id: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
+        self.read_json("functions/executions/response", id, jq)
+            .await
     }
-    pub async fn read_function_execution_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+    pub async fn read_function_execution_request(
+        &self,
+        id: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
         self.read_json("functions/executions/request", id, jq).await
     }
-    pub async fn read_function_execution_retry_token(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/executions/response/retry_token", id, jq).await
+    pub async fn read_function_execution_retry_token(
+        &self,
+        id: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
+        self.read_json("functions/executions/response/retry_token", id, jq)
+            .await
     }
-    pub async fn read_function_invention(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/inventions/response", id, jq).await
+    pub async fn read_function_invention(
+        &self,
+        id: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
+        self.read_json("functions/inventions/response", id, jq)
+            .await
     }
-    pub async fn read_function_invention_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
+    pub async fn read_function_invention_request(
+        &self,
+        id: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
         self.read_json("functions/inventions/request", id, jq).await
     }
-    pub async fn read_function_invention_recursive(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/inventions/recursive/response", id, jq).await
+    pub async fn read_function_invention_recursive(
+        &self,
+        id: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
+        self.read_json("functions/inventions/recursive/response", id, jq)
+            .await
     }
-    pub async fn read_function_invention_recursive_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-        self.read_json("functions/inventions/recursive/request", id, jq).await
+    pub async fn read_function_invention_recursive_request(
+        &self,
+        id: &str,
+        jq: Option<&str>,
+    ) -> Result<serde_json::Value, Error> {
+        self.read_json("functions/inventions/recursive/request", id, jq)
+            .await
     }
 
     // -- Assistant message content (response side) -------------------------
@@ -538,133 +786,197 @@ impl Client {
     // `media_index: Option<u64>` to cover both cases.
 
     pub async fn read_agent_completion_message_text(
-        &self, id: &str, message_index: u64, media_index: Option<u64>,
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: Option<u64>,
     ) -> Result<String, Error> {
         let stem = text_stem(id, message_index, media_index);
-        self.read_text("agents/completions/response/messages/text", &stem).await
+        self.read_text("agents/completions/response/messages/text", &stem)
+            .await
     }
 
     // -- Tool response content (response side, under .../messages/tool/) ---
 
     pub async fn read_agent_completion_message_tool_text(
-        &self, id: &str, message_index: u64, media_index: Option<u64>,
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: Option<u64>,
     ) -> Result<String, Error> {
         let stem = text_stem(id, message_index, media_index);
-        self.read_text("agents/completions/response/messages/tool/text", &stem).await
+        self.read_text("agents/completions/response/messages/tool/text", &stem)
+            .await
     }
     pub async fn read_agent_completion_message_tool_image(
-        &self, id: &str, message_index: u64, media_index: u64,
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
     ) -> Result<ImageUrl, Error> {
         self.read_image_by_stem(
             "agents/completions/response/messages/tool/image",
             &format!("{id}_{message_index}_{media_index}"),
-        ).await
+        )
+        .await
     }
     pub async fn read_agent_completion_message_tool_audio(
-        &self, id: &str, message_index: u64, media_index: u64,
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
     ) -> Result<InputAudio, Error> {
         self.read_audio_by_stem(
             "agents/completions/response/messages/tool/audio",
             &format!("{id}_{message_index}_{media_index}"),
-        ).await
+        )
+        .await
     }
     pub async fn read_agent_completion_message_tool_video(
-        &self, id: &str, message_index: u64, media_index: u64,
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
     ) -> Result<VideoUrl, Error> {
         self.read_video_by_stem(
             "agents/completions/response/messages/tool/video",
             &format!("{id}_{message_index}_{media_index}"),
-        ).await
+        )
+        .await
     }
     pub async fn read_agent_completion_message_tool_file(
-        &self, id: &str, message_index: u64, media_index: u64,
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
     ) -> Result<File, Error> {
         self.read_file_by_stem(
             "agents/completions/response/messages/tool/file",
             &format!("{id}_{message_index}_{media_index}"),
-        ).await
+        )
+        .await
     }
 
     // -- Request-side message content --------------------------------------
 
     pub async fn read_agent_completion_request_message_text(
-        &self, id: &str, message_index: u64, media_index: Option<u64>,
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: Option<u64>,
     ) -> Result<String, Error> {
         let stem = text_stem(id, message_index, media_index);
-        self.read_text("agents/completions/request/messages/text", &stem).await
+        self.read_text("agents/completions/request/messages/text", &stem)
+            .await
     }
     pub async fn read_agent_completion_request_message_image(
-        &self, id: &str, message_index: u64, media_index: u64,
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
     ) -> Result<ImageUrl, Error> {
         self.read_image_by_stem(
             "agents/completions/request/messages/image",
             &format!("{id}_{message_index}_{media_index}"),
-        ).await
+        )
+        .await
     }
     pub async fn read_agent_completion_request_message_audio(
-        &self, id: &str, message_index: u64, media_index: u64,
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
     ) -> Result<InputAudio, Error> {
         self.read_audio_by_stem(
             "agents/completions/request/messages/audio",
             &format!("{id}_{message_index}_{media_index}"),
-        ).await
+        )
+        .await
     }
     pub async fn read_agent_completion_request_message_video(
-        &self, id: &str, message_index: u64, media_index: u64,
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
     ) -> Result<VideoUrl, Error> {
         self.read_video_by_stem(
             "agents/completions/request/messages/video",
             &format!("{id}_{message_index}_{media_index}"),
-        ).await
+        )
+        .await
     }
     pub async fn read_agent_completion_request_message_file(
-        &self, id: &str, message_index: u64, media_index: u64,
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
     ) -> Result<File, Error> {
         self.read_file_by_stem(
             "agents/completions/request/messages/file",
             &format!("{id}_{message_index}_{media_index}"),
-        ).await
+        )
+        .await
     }
 
     // -- Notification content ----------------------------------------------
 
     pub async fn read_agent_completion_notification_text(
-        &self, response_id: &str, index: u64, media_index: Option<u64>,
+        &self,
+        response_id: &str,
+        index: u64,
+        media_index: Option<u64>,
     ) -> Result<String, Error> {
         let stem = text_stem(response_id, index, media_index);
-        self.read_text("agents/completions/request/notifications/text", &stem).await
+        self.read_text("agents/completions/request/notifications/text", &stem)
+            .await
     }
     pub async fn read_agent_completion_notification_image(
-        &self, response_id: &str, index: u64, media_index: u64,
+        &self,
+        response_id: &str,
+        index: u64,
+        media_index: u64,
     ) -> Result<ImageUrl, Error> {
         self.read_image_by_stem(
             "agents/completions/request/notifications/image",
             &format!("{response_id}_{index}_{media_index}"),
-        ).await
+        )
+        .await
     }
     pub async fn read_agent_completion_notification_audio(
-        &self, response_id: &str, index: u64, media_index: u64,
+        &self,
+        response_id: &str,
+        index: u64,
+        media_index: u64,
     ) -> Result<InputAudio, Error> {
         self.read_audio_by_stem(
             "agents/completions/request/notifications/audio",
             &format!("{response_id}_{index}_{media_index}"),
-        ).await
+        )
+        .await
     }
     pub async fn read_agent_completion_notification_video(
-        &self, response_id: &str, index: u64, media_index: u64,
+        &self,
+        response_id: &str,
+        index: u64,
+        media_index: u64,
     ) -> Result<VideoUrl, Error> {
         self.read_video_by_stem(
             "agents/completions/request/notifications/video",
             &format!("{response_id}_{index}_{media_index}"),
-        ).await
+        )
+        .await
     }
     pub async fn read_agent_completion_notification_file(
-        &self, response_id: &str, index: u64, media_index: u64,
+        &self,
+        response_id: &str,
+        index: u64,
+        media_index: u64,
     ) -> Result<File, Error> {
         self.read_file_by_stem(
             "agents/completions/request/notifications/file",
             &format!("{response_id}_{index}_{media_index}"),
-        ).await
+        )
+        .await
     }
 
     // -- Subscribe helpers + methods ----------------------------------------
@@ -682,7 +994,10 @@ impl Client {
         jq: Option<&str>,
     ) -> Result<Option<serde_json::Value>, Error> {
         let full = self.logs_dir().join(dir).join(format!("{stem}.json"));
-        if poll_file(&full, timeout, require_modification).await.is_none() {
+        if poll_file(&full, timeout, require_modification)
+            .await
+            .is_none()
+        {
             return Ok(None);
         }
         let bytes = match tokio::fs::read(&full).await {
@@ -711,14 +1026,16 @@ impl Client {
         let dir_path = self.logs_dir().join(dir);
         let prefix = format!("{stem}.");
 
-        async fn read_parts(path: &std::path::Path) -> Option<(String, String, Option<String>)> {
+        async fn read_parts(
+            path: &std::path::Path,
+        ) -> Option<(String, String, Option<String>)> {
             let bytes = tokio::fs::read(path).await.ok()?;
-            let mime = mime_guess::from_path(path).first_or_octet_stream().to_string();
+            let mime = mime_guess::from_path(path)
+                .first_or_octet_stream()
+                .to_string();
             let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
-            let filename = path
-                .file_name()
-                .and_then(|n| n.to_str())
-                .map(String::from);
+            let filename =
+                path.file_name().and_then(|n| n.to_str()).map(String::from);
             Some((mime, b64, filename))
         }
 
@@ -737,7 +1054,8 @@ impl Client {
                 return None;
             }
 
-            let current_mtime = find_file_mtime_by_prefix(&dir_path, &prefix).await;
+            let current_mtime =
+                find_file_mtime_by_prefix(&dir_path, &prefix).await;
             match (&initial_mtime, &current_mtime) {
                 (None, Some((path, _))) => return read_parts(path).await,
                 (Some((_, old_t)), Some((path, new_t))) if new_t > old_t => {
@@ -750,10 +1068,19 @@ impl Client {
     }
 
     async fn subscribe_image_by_stem(
-        &self, dir: &str, stem: &str, timeout: std::time::Duration, require_modification: bool,
+        &self,
+        dir: &str,
+        stem: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
     ) -> Option<ImageUrl> {
         let (mime, b64, _) = self
-            .subscribe_media_parts_by_stem(dir, stem, timeout, require_modification)
+            .subscribe_media_parts_by_stem(
+                dir,
+                stem,
+                timeout,
+                require_modification,
+            )
             .await?;
         Some(ImageUrl {
             url: format!("data:{mime};base64,{b64}"),
@@ -762,19 +1089,40 @@ impl Client {
     }
 
     async fn subscribe_audio_by_stem(
-        &self, dir: &str, stem: &str, timeout: std::time::Duration, require_modification: bool,
+        &self,
+        dir: &str,
+        stem: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
     ) -> Option<InputAudio> {
         let (mime, b64, _) = self
-            .subscribe_media_parts_by_stem(dir, stem, timeout, require_modification)
+            .subscribe_media_parts_by_stem(
+                dir,
+                stem,
+                timeout,
+                require_modification,
+            )
             .await?;
-        Some(InputAudio { data: b64, format: mime })
+        Some(InputAudio {
+            data: b64,
+            format: mime,
+        })
     }
 
     async fn subscribe_video_by_stem(
-        &self, dir: &str, stem: &str, timeout: std::time::Duration, require_modification: bool,
+        &self,
+        dir: &str,
+        stem: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
     ) -> Option<VideoUrl> {
         let (mime, b64, _) = self
-            .subscribe_media_parts_by_stem(dir, stem, timeout, require_modification)
+            .subscribe_media_parts_by_stem(
+                dir,
+                stem,
+                timeout,
+                require_modification,
+            )
             .await?;
         Some(VideoUrl {
             url: format!("data:{mime};base64,{b64}"),
@@ -782,10 +1130,19 @@ impl Client {
     }
 
     async fn subscribe_file_by_stem(
-        &self, dir: &str, stem: &str, timeout: std::time::Duration, require_modification: bool,
+        &self,
+        dir: &str,
+        stem: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
     ) -> Option<File> {
         let (_, b64, filename) = self
-            .subscribe_media_parts_by_stem(dir, stem, timeout, require_modification)
+            .subscribe_media_parts_by_stem(
+                dir,
+                stem,
+                timeout,
+                require_modification,
+            )
             .await?;
         Some(File {
             file_data: Some(b64),
@@ -795,68 +1152,347 @@ impl Client {
         })
     }
 
-    pub async fn subscribe_agent_completion(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/response", id, timeout, require_modification, jq).await
+    pub async fn subscribe_agent_completion(
+        &self,
+        id: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "agents/completions/response",
+            id,
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_agent_completion_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/request", id, timeout, require_modification, jq).await
+    pub async fn subscribe_agent_completion_request(
+        &self,
+        id: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "agents/completions/request",
+            id,
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_agent_completion_continuation(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/response/continuation", id, timeout, require_modification, jq).await
+    pub async fn subscribe_agent_completion_continuation(
+        &self,
+        id: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "agents/completions/response/continuation",
+            id,
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_agent_completion_message(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/response/messages", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
+    pub async fn subscribe_agent_completion_message(
+        &self,
+        id: &str,
+        message_index: u64,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "agents/completions/response/messages",
+            &format!("{id}_{message_index}"),
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_agent_completion_message_logprobs(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/response/messages/logprobs", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
+    pub async fn subscribe_agent_completion_message_logprobs(
+        &self,
+        id: &str,
+        message_index: u64,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "agents/completions/response/messages/logprobs",
+            &format!("{id}_{message_index}"),
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_agent_completion_message_reasoning(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/response/messages/reasoning", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
+    pub async fn subscribe_agent_completion_message_reasoning(
+        &self,
+        id: &str,
+        message_index: u64,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "agents/completions/response/messages/reasoning",
+            &format!("{id}_{message_index}"),
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_agent_completion_message_refusal(&self, id: &str, message_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/response/messages/refusal", &format!("{id}_{message_index}"), timeout, require_modification, jq).await
+    pub async fn subscribe_agent_completion_message_refusal(
+        &self,
+        id: &str,
+        message_index: u64,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "agents/completions/response/messages/refusal",
+            &format!("{id}_{message_index}"),
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_agent_completion_message_tool_call(&self, id: &str, message_index: u64, tool_call_index: u64, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("agents/completions/response/messages/tool_calls", &format!("{id}_{message_index}_{tool_call_index}"), timeout, require_modification, jq).await
+    pub async fn subscribe_agent_completion_message_tool_call(
+        &self,
+        id: &str,
+        message_index: u64,
+        tool_call_index: u64,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "agents/completions/response/messages/tool_calls",
+            &format!("{id}_{message_index}_{tool_call_index}"),
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_agent_completion_message_image(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<ImageUrl> {
-        self.subscribe_image_by_stem("agents/completions/response/messages/image", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
+    pub async fn subscribe_agent_completion_message_image(
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
+        timeout: std::time::Duration,
+        require_modification: bool,
+    ) -> Option<ImageUrl> {
+        self.subscribe_image_by_stem(
+            "agents/completions/response/messages/image",
+            &format!("{id}_{message_index}_{media_index}"),
+            timeout,
+            require_modification,
+        )
+        .await
     }
-    pub async fn subscribe_agent_completion_message_audio(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<InputAudio> {
-        self.subscribe_audio_by_stem("agents/completions/response/messages/audio", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
+    pub async fn subscribe_agent_completion_message_audio(
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
+        timeout: std::time::Duration,
+        require_modification: bool,
+    ) -> Option<InputAudio> {
+        self.subscribe_audio_by_stem(
+            "agents/completions/response/messages/audio",
+            &format!("{id}_{message_index}_{media_index}"),
+            timeout,
+            require_modification,
+        )
+        .await
     }
-    pub async fn subscribe_agent_completion_message_video(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<VideoUrl> {
-        self.subscribe_video_by_stem("agents/completions/response/messages/video", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
+    pub async fn subscribe_agent_completion_message_video(
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
+        timeout: std::time::Duration,
+        require_modification: bool,
+    ) -> Option<VideoUrl> {
+        self.subscribe_video_by_stem(
+            "agents/completions/response/messages/video",
+            &format!("{id}_{message_index}_{media_index}"),
+            timeout,
+            require_modification,
+        )
+        .await
     }
-    pub async fn subscribe_agent_completion_message_file(&self, id: &str, message_index: u64, media_index: u64, timeout: std::time::Duration, require_modification: bool) -> Option<File> {
-        self.subscribe_file_by_stem("agents/completions/response/messages/file", &format!("{id}_{message_index}_{media_index}"), timeout, require_modification).await
+    pub async fn subscribe_agent_completion_message_file(
+        &self,
+        id: &str,
+        message_index: u64,
+        media_index: u64,
+        timeout: std::time::Duration,
+        require_modification: bool,
+    ) -> Option<File> {
+        self.subscribe_file_by_stem(
+            "agents/completions/response/messages/file",
+            &format!("{id}_{message_index}_{media_index}"),
+            timeout,
+            require_modification,
+        )
+        .await
     }
-    pub async fn subscribe_vector_completion(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("vector/completions/response", id, timeout, require_modification, jq).await
+    pub async fn subscribe_vector_completion(
+        &self,
+        id: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "vector/completions/response",
+            id,
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_vector_completion_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("vector/completions/request", id, timeout, require_modification, jq).await
+    pub async fn subscribe_vector_completion_request(
+        &self,
+        id: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "vector/completions/request",
+            id,
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_function_execution(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/executions/response", id, timeout, require_modification, jq).await
+    pub async fn subscribe_function_execution(
+        &self,
+        id: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "functions/executions/response",
+            id,
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_function_execution_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/executions/request", id, timeout, require_modification, jq).await
+    pub async fn subscribe_function_execution_request(
+        &self,
+        id: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "functions/executions/request",
+            id,
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_function_execution_retry_token(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/executions/response/retry_token", id, timeout, require_modification, jq).await
+    pub async fn subscribe_function_execution_retry_token(
+        &self,
+        id: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "functions/executions/response/retry_token",
+            id,
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_function_invention(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/inventions/response", id, timeout, require_modification, jq).await
+    pub async fn subscribe_function_invention(
+        &self,
+        id: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "functions/inventions/response",
+            id,
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_function_invention_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/inventions/request", id, timeout, require_modification, jq).await
+    pub async fn subscribe_function_invention_request(
+        &self,
+        id: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "functions/inventions/request",
+            id,
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_function_invention_recursive(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/inventions/recursive/response", id, timeout, require_modification, jq).await
+    pub async fn subscribe_function_invention_recursive(
+        &self,
+        id: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "functions/inventions/recursive/response",
+            id,
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
-    pub async fn subscribe_function_invention_recursive_request(&self, id: &str, timeout: std::time::Duration, require_modification: bool, jq: Option<&str>) -> Result<Option<serde_json::Value>, Error> {
-        self.subscribe_json("functions/inventions/recursive/request", id, timeout, require_modification, jq).await
+    pub async fn subscribe_function_invention_recursive_request(
+        &self,
+        id: &str,
+        timeout: std::time::Duration,
+        require_modification: bool,
+        jq: Option<&str>,
+    ) -> Result<Option<serde_json::Value>, Error> {
+        self.subscribe_json(
+            "functions/inventions/recursive/request",
+            id,
+            timeout,
+            require_modification,
+            jq,
+        )
+        .await
     }
 
     // -- Per-agent message queue ---------------------------------------------
@@ -879,8 +1515,11 @@ impl Client {
         spawned_agent_id: &str,
     ) -> Result<Vec<super::queue::QueueItem>, Error> {
         let conn = super::super::db::connection::connection(self)?;
-        let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        let rows = queue.read_new_messages(caller_agent_id, spawned_agent_id).await?;
+        let queue =
+            super::super::db::messages::Queue::new(conn, self.logs_dir());
+        let rows = queue
+            .read_new_messages(caller_agent_id, spawned_agent_id)
+            .await?;
         let mut items = Vec::with_capacity(rows.len());
         for row in rows {
             items.push(self.queue_item_from_row(row).await?);
@@ -901,8 +1540,11 @@ impl Client {
         spawned_agent_id: &str,
     ) -> Result<Vec<super::queue::QueueItem>, Error> {
         let conn = super::super::db::connection::connection(self)?;
-        let queue = super::super::db::messages::Queue::new(conn, self.logs_dir());
-        let rows = queue.read_all_messages(caller_agent_id, spawned_agent_id).await?;
+        let queue =
+            super::super::db::messages::Queue::new(conn, self.logs_dir());
+        let rows = queue
+            .read_all_messages(caller_agent_id, spawned_agent_id)
+            .await?;
         let mut items = Vec::with_capacity(rows.len());
         for row in rows {
             items.push(self.queue_item_from_row(row).await?);
@@ -918,8 +1560,8 @@ impl Client {
         &self,
         row: crate::filesystem::db::schema::MessageRow,
     ) -> Result<super::queue::QueueItem, Error> {
-        use crate::filesystem::db::schema::MessageKind;
         use super::queue::QueueItem;
+        use crate::filesystem::db::schema::MessageKind;
 
         let rel_path = row.kind.file_path(&row.response_id, &row.path);
 
@@ -941,7 +1583,9 @@ impl Client {
                 for msg_ref in envelope.messages {
                     let msg_log: crate::agent::completions::message::MessageLog =
                         self.read_log_file(&msg_ref.path).await?;
-                    messages.push(self.message_log_to_queue_message(msg_log).await?);
+                    messages.push(
+                        self.message_log_to_queue_message(msg_log).await?,
+                    );
                 }
                 Ok(QueueItem::AgentCompletionRequest { messages })
             }
@@ -979,8 +1623,8 @@ impl Client {
         &self,
         log: crate::agent::completions::message::MessageLog,
     ) -> Result<super::queue::QueueMessage, Error> {
-        use crate::agent::completions::message::MessageLog;
         use super::queue::QueueMessage;
+        use crate::agent::completions::message::MessageLog;
 
         Ok(match log {
             MessageLog::Developer(m) => QueueMessage::Developer {
@@ -1074,10 +1718,12 @@ impl Client {
         &self,
         log: crate::agent::completions::message::RichContentLog,
     ) -> Result<super::queue::Content, Error> {
-        use crate::agent::completions::message::RichContentLog;
         use super::queue::Content;
+        use crate::agent::completions::message::RichContentLog;
         Ok(match log {
-            RichContentLog::Reference(r) => Content::One(self.file_id(&r.path).await?),
+            RichContentLog::Reference(r) => {
+                Content::One(self.file_id(&r.path).await?)
+            }
             RichContentLog::Parts(rs) => Content::Many(self.id_list(rs).await?),
         })
     }
@@ -1088,11 +1734,15 @@ impl Client {
         &self,
         log: crate::agent::completions::message::SimpleContentLog,
     ) -> Result<super::queue::Content, Error> {
-        use crate::agent::completions::message::SimpleContentLog;
         use super::queue::Content;
+        use crate::agent::completions::message::SimpleContentLog;
         Ok(match log {
-            SimpleContentLog::Reference(r) => Content::One(self.file_id(&r.path).await?),
-            SimpleContentLog::Parts(rs) => Content::Many(self.id_list(rs).await?),
+            SimpleContentLog::Reference(r) => {
+                Content::One(self.file_id(&r.path).await?)
+            }
+            SimpleContentLog::Parts(rs) => {
+                Content::Many(self.id_list(rs).await?)
+            }
         })
     }
 
@@ -1143,9 +1793,12 @@ impl Client {
         // every existing typed reader already knows its own kind,
         // and `read_file_by_id` re-uses that knowledge instead of
         // re-deriving it from a path-extension sniff.
-        let kind = super::LogFileKind::from_path(&rel_path).ok_or_else(|| {
-            Error::NotFound(format!("unknown log-file kind for path {rel_path:?}"))
-        })?;
+        let kind =
+            super::LogFileKind::from_path(&rel_path).ok_or_else(|| {
+                Error::NotFound(format!(
+                    "unknown log-file kind for path {rel_path:?}"
+                ))
+            })?;
         use super::LogFileKind as K;
         match kind {
             // -- Top-level envelopes (JSON) ---------------------------------
@@ -1199,31 +1852,27 @@ impl Client {
                 .map(super::LogContent::json),
 
             // -- Per-message metadata (JSON) --------------------------------
-            K::AgentCompletionMessage {
-                id,
-                message_index,
-            } => self
+            K::AgentCompletionMessage { id, message_index } => self
                 .read_agent_completion_message(&id, message_index, None)
                 .await
                 .map(super::LogContent::json),
-            K::AgentCompletionMessageLogprobs {
-                id,
-                message_index,
-            } => self
-                .read_agent_completion_message_logprobs(&id, message_index, None)
+            K::AgentCompletionMessageLogprobs { id, message_index } => self
+                .read_agent_completion_message_logprobs(
+                    &id,
+                    message_index,
+                    None,
+                )
                 .await
                 .map(super::LogContent::json),
-            K::AgentCompletionMessageReasoning {
-                id,
-                message_index,
-            } => self
-                .read_agent_completion_message_reasoning(&id, message_index, None)
+            K::AgentCompletionMessageReasoning { id, message_index } => self
+                .read_agent_completion_message_reasoning(
+                    &id,
+                    message_index,
+                    None,
+                )
                 .await
                 .map(super::LogContent::json),
-            K::AgentCompletionMessageRefusal {
-                id,
-                message_index,
-            } => self
+            K::AgentCompletionMessageRefusal { id, message_index } => self
                 .read_agent_completion_message_refusal(&id, message_index, None)
                 .await
                 .map(super::LogContent::json),
@@ -1250,7 +1899,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_message_text(&id, message_index, media_index)
+                .read_agent_completion_message_text(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::text),
             K::AgentCompletionMessageImage {
@@ -1258,7 +1911,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_message_image(&id, message_index, media_index)
+                .read_agent_completion_message_image(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::image),
             K::AgentCompletionMessageAudio {
@@ -1266,7 +1923,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_message_audio(&id, message_index, media_index)
+                .read_agent_completion_message_audio(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::audio),
             K::AgentCompletionMessageVideo {
@@ -1274,7 +1935,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_message_video(&id, message_index, media_index)
+                .read_agent_completion_message_video(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::video),
             K::AgentCompletionMessageFile {
@@ -1282,7 +1947,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_message_file(&id, message_index, media_index)
+                .read_agent_completion_message_file(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::file),
 
@@ -1292,7 +1961,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_message_tool_text(&id, message_index, media_index)
+                .read_agent_completion_message_tool_text(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::text),
             K::AgentCompletionMessageToolImage {
@@ -1300,7 +1973,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_message_tool_image(&id, message_index, media_index)
+                .read_agent_completion_message_tool_image(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::image),
             K::AgentCompletionMessageToolAudio {
@@ -1308,7 +1985,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_message_tool_audio(&id, message_index, media_index)
+                .read_agent_completion_message_tool_audio(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::audio),
             K::AgentCompletionMessageToolVideo {
@@ -1316,7 +1997,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_message_tool_video(&id, message_index, media_index)
+                .read_agent_completion_message_tool_video(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::video),
             K::AgentCompletionMessageToolFile {
@@ -1324,7 +2009,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_message_tool_file(&id, message_index, media_index)
+                .read_agent_completion_message_tool_file(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::file),
 
@@ -1334,7 +2023,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_request_message_text(&id, message_index, media_index)
+                .read_agent_completion_request_message_text(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::text),
             K::AgentCompletionRequestMessageImage {
@@ -1342,7 +2035,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_request_message_image(&id, message_index, media_index)
+                .read_agent_completion_request_message_image(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::image),
             K::AgentCompletionRequestMessageAudio {
@@ -1350,7 +2047,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_request_message_audio(&id, message_index, media_index)
+                .read_agent_completion_request_message_audio(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::audio),
             K::AgentCompletionRequestMessageVideo {
@@ -1358,7 +2059,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_request_message_video(&id, message_index, media_index)
+                .read_agent_completion_request_message_video(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::video),
             K::AgentCompletionRequestMessageFile {
@@ -1366,7 +2071,11 @@ impl Client {
                 message_index,
                 media_index,
             } => self
-                .read_agent_completion_request_message_file(&id, message_index, media_index)
+                .read_agent_completion_request_message_file(
+                    &id,
+                    message_index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::file),
 
@@ -1376,7 +2085,11 @@ impl Client {
                 index,
                 media_index,
             } => self
-                .read_agent_completion_notification_text(&response_id, index, media_index)
+                .read_agent_completion_notification_text(
+                    &response_id,
+                    index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::text),
             K::AgentCompletionNotificationImage {
@@ -1384,7 +2097,11 @@ impl Client {
                 index,
                 media_index,
             } => self
-                .read_agent_completion_notification_image(&response_id, index, media_index)
+                .read_agent_completion_notification_image(
+                    &response_id,
+                    index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::image),
             K::AgentCompletionNotificationAudio {
@@ -1392,7 +2109,11 @@ impl Client {
                 index,
                 media_index,
             } => self
-                .read_agent_completion_notification_audio(&response_id, index, media_index)
+                .read_agent_completion_notification_audio(
+                    &response_id,
+                    index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::audio),
             K::AgentCompletionNotificationVideo {
@@ -1400,7 +2121,11 @@ impl Client {
                 index,
                 media_index,
             } => self
-                .read_agent_completion_notification_video(&response_id, index, media_index)
+                .read_agent_completion_notification_video(
+                    &response_id,
+                    index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::video),
             K::AgentCompletionNotificationFile {
@@ -1408,7 +2133,11 @@ impl Client {
                 index,
                 media_index,
             } => self
-                .read_agent_completion_notification_file(&response_id, index, media_index)
+                .read_agent_completion_notification_file(
+                    &response_id,
+                    index,
+                    media_index,
+                )
                 .await
                 .map(super::LogContent::file),
         }
@@ -1469,8 +2198,13 @@ fn text_stem(id: &str, message_index: u64, media_index: Option<u64>) -> String {
 /// the same way the CLI `config get` command does: a single result is
 /// unwrapped, an empty result becomes JSON null, and multiple results are
 /// wrapped as an array. When `jq` is `None`, the value is returned as-is.
-fn apply_jq(value: serde_json::Value, jq: Option<&str>) -> Result<serde_json::Value, Error> {
-    let Some(filter) = jq else { return Ok(value); };
+fn apply_jq(
+    value: serde_json::Value,
+    jq: Option<&str>,
+) -> Result<serde_json::Value, Error> {
+    let Some(filter) = jq else {
+        return Ok(value);
+    };
     let mut results = super::super::run_jq(&value, filter)?;
     Ok(match results.len() {
         0 => serde_json::Value::Null,
@@ -1523,7 +2257,8 @@ async fn find_file_mtime_by_prefix(
         let path = entry.path();
         if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
             if name.starts_with(prefix) {
-                let mtime = tokio::fs::metadata(&path).await.ok()?.modified().ok()?;
+                let mtime =
+                    tokio::fs::metadata(&path).await.ok()?.modified().ok()?;
                 return Some((path, mtime));
             }
         }

@@ -95,9 +95,7 @@ impl From<MessageKindArg> for MessageKind {
             MessageKindArg::FunctionInventionRecursiveRequest => {
                 MessageKind::FunctionInventionRecursiveRequest
             }
-            MessageKindArg::AgentCompletionNotification => {
-                MessageKind::AgentCompletionNotification
-            }
+            MessageKindArg::AgentCompletionNotification => MessageKind::AgentCompletionNotification,
             MessageKindArg::AssistantResponse => MessageKind::AssistantResponse,
             MessageKindArg::ToolResponse => MessageKind::ToolResponse,
         }
@@ -187,8 +185,7 @@ fn subscribe_recursive(
                     // Pipe closed without `StreamEnd` (writer error
                     // or abnormal exit). Final drain attempt, then
                     // return — no more events possible.
-                    let items =
-                        client.read_new_from_queue(&caller, &spawned).await?;
+                    let items = client.read_new_from_queue(&caller, &spawned).await?;
                     if !items.is_empty() {
                         emit_items(handle, &sub_id, items).await;
                     }
@@ -197,8 +194,7 @@ fn subscribe_recursive(
             };
             match event {
                 SubscribeEvent::Row { message_kind: _ } => {
-                    let items =
-                        client.read_new_from_queue(&caller, &spawned).await?;
+                    let items = client.read_new_from_queue(&caller, &spawned).await?;
                     if matches_filter(&items, kind_filter) {
                         matched = true;
                     }
@@ -210,8 +206,7 @@ fn subscribe_recursive(
                     }
                 }
                 SubscribeEvent::StreamEnd => {
-                    let items =
-                        client.read_new_from_queue(&caller, &spawned).await?;
+                    let items = client.read_new_from_queue(&caller, &spawned).await?;
                     if !items.is_empty() {
                         emit_items(handle, &sub_id, items).await;
                     }
@@ -253,7 +248,6 @@ fn queue_item_kind(item: &QueueItem) -> MessageKind {
 
 async fn emit_items(handle: &Handle, sub_id: &str, items: Vec<QueueItem>) {
     Output::Notification(Notification {
-        agent_id: None,
         value: (AgentItems {
             agent_id: sub_id.to_string(),
             items,
@@ -266,7 +260,6 @@ async fn emit_items(handle: &Handle, sub_id: &str, items: Vec<QueueItem>) {
 
 async fn emit_inactive(handle: &Handle, sub_id: &str) {
     Output::Notification(Notification {
-        agent_id: None,
         value: (Inactive {
             agent_id: sub_id.to_string(),
         })
@@ -310,10 +303,7 @@ impl EventStream {
 /// client. Returns `None` if the socket doesn't exist or the connect
 /// fails for any reason — the caller decides whether to recurse,
 /// emit `Inactive`, or proceed with the loop.
-async fn try_connect_events(
-    pipes_dir: &std::path::Path,
-    spawned: &str,
-) -> Option<EventStream> {
+async fn try_connect_events(pipes_dir: &std::path::Path, spawned: &str) -> Option<EventStream> {
     let socket_path = pipes_dir.join(spawned).join("events.sock");
     let name = socket_path
         .to_fs_name::<GenericFilePath>()

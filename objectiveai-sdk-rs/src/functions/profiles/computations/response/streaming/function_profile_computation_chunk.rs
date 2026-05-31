@@ -1,13 +1,23 @@
+use crate::agent::completions::response::streaming::AgentCompletionIds;
 use crate::{
     agent,
     functions::{self, profiles::computations::response},
 };
-use crate::agent::completions::response::streaming::AgentCompletionIds;
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk"
+)]
 pub struct FunctionProfileComputationChunk {
     pub id: String,
     pub executions: Vec<super::FunctionExecutionChunk>,
@@ -34,7 +44,9 @@ pub struct FunctionProfileComputationChunk {
 
 impl AgentCompletionIds for FunctionProfileComputationChunk {
     fn agent_completion_ids(&self) -> impl Iterator<Item = &str> {
-        self.executions.iter().flat_map(|e| e.agent_completion_ids())
+        self.executions
+            .iter()
+            .flat_map(|e| e.agent_completion_ids())
     }
 }
 

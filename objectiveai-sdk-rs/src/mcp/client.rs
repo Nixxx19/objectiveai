@@ -4,7 +4,6 @@ use std::time::Duration;
 
 use indexmap::IndexMap;
 
-
 /// Client for creating MCP connections.
 ///
 /// Holds shared configuration (HTTP client, headers, backoff parameters)
@@ -222,9 +221,11 @@ impl Client {
             request = request.header("Mcp-Session-Id", sid);
         }
 
-        let response = request.send().await.map_err(|source| super::Error::Connection {
-            url: url.to_string(),
-            source,
+        let response = request.send().await.map_err(|source| {
+            super::Error::Connection {
+                url: url.to_string(),
+                source,
+            }
         })?;
 
         if !response.status().is_success() {
@@ -355,7 +356,8 @@ impl Client {
         for (name, value) in headers {
             notify_request = notify_request.header(name, value);
         }
-        notify_request = notify_request.header("Mcp-Session-Id", &resolved_session_id);
+        notify_request =
+            notify_request.header("Mcp-Session-Id", &resolved_session_id);
         let notify_response = notify_request
             .json(&init_notification_body)
             .send()
@@ -394,7 +396,8 @@ impl Client {
             for (name, value) in headers {
                 get_request = get_request.header(name, value);
             }
-            get_request = get_request.header("Mcp-Session-Id", &resolved_session_id);
+            get_request =
+                get_request.header("Mcp-Session-Id", &resolved_session_id);
             let get_response = get_request.send().await.map_err(|source| {
                 super::Error::Connection {
                     url: url.to_string(),
@@ -440,4 +443,3 @@ impl Client {
         Ok(connection)
     }
 }
-

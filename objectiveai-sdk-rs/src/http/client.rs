@@ -2,7 +2,7 @@
 
 use crate::error;
 use eventsource_stream::Event as MessageEvent;
-use futures::{Stream, StreamExt, SinkExt};
+use futures::{SinkExt, Stream, StreamExt};
 use reqwest_eventsource::{Event, RequestBuilderExt};
 use std::sync::Arc;
 use tokio_tungstenite::tungstenite;
@@ -50,7 +50,8 @@ pub struct HttpClient {
     /// Value for the `X-OPENROUTER-AUTHORIZATION` header.
     pub x_openrouter_authorization: Option<Arc<String>>,
     /// Values for the `X-MCP-AUTHORIZATION` header (JSON-encoded).
-    pub x_mcp_authorization: Option<Arc<std::collections::HashMap<String, String>>>,
+    pub x_mcp_authorization:
+        Option<Arc<std::collections::HashMap<String, String>>>,
     /// Value for the `X-VIEWER-SIGNATURE` header.
     pub x_viewer_signature: Option<Arc<String>>,
     /// Value for the `X-VIEWER-ADDRESS` header.
@@ -112,37 +113,162 @@ impl HttpClient {
             address: match address {
                 Some(base) => base.into(),
                 #[cfg(feature = "env")]
-                None => env("OBJECTIVEAI_ADDRESS")
-                    .unwrap_or_else(|| "https://api.objectiveai.dev".to_string()),
+                None => env("OBJECTIVEAI_ADDRESS").unwrap_or_else(|| {
+                    "https://api.objectiveai.dev".to_string()
+                }),
                 #[cfg(not(feature = "env"))]
                 None => "https://api.objectiveai.dev".to_string(),
             },
-            authorization: authorization.map(|k| Arc::new(k.into()))
-                .or_else(|| { #[cfg(feature = "env")] { env("OBJECTIVEAI_AUTHORIZATION").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
-            user_agent: user_agent.map(Into::into)
-                .or_else(|| { #[cfg(feature = "env")] { env("USER_AGENT") } #[cfg(not(feature = "env"))] { None } }),
-            x_title: x_title.map(Into::into)
-                .or_else(|| { #[cfg(feature = "env")] { env("X_TITLE") } #[cfg(not(feature = "env"))] { None } }),
-            http_referer: http_referer.map(Into::into)
-                .or_else(|| { #[cfg(feature = "env")] { env("HTTP_REFERER") } #[cfg(not(feature = "env"))] { None } }),
-            x_github_authorization: x_github_authorization.map(|v| Arc::new(v.into()))
-                .or_else(|| { #[cfg(feature = "env")] { env("GITHUB_AUTHORIZATION").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
-            x_openrouter_authorization: x_openrouter_authorization.map(|v| Arc::new(v.into()))
-                .or_else(|| { #[cfg(feature = "env")] { env("OPENROUTER_AUTHORIZATION").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
-            x_mcp_authorization: x_mcp_authorization.map(Arc::new)
-                .or_else(|| { #[cfg(feature = "env")] { env("MCP_AUTHORIZATION").and_then(|v| serde_json::from_str(&v).ok()).map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
-            x_viewer_signature: x_viewer_signature.map(|v| Arc::new(v.into()))
-                .or_else(|| { #[cfg(feature = "env")] { env("VIEWER_SIGNATURE").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
-            x_viewer_address: x_viewer_address.map(|v| Arc::new(v.into()))
-                .or_else(|| { #[cfg(feature = "env")] { env("VIEWER_ADDRESS").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
-            x_commit_author_name: x_commit_author_name.map(|v| Arc::new(v.into()))
-                .or_else(|| { #[cfg(feature = "env")] { env("COMMIT_AUTHOR_NAME").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
-            x_commit_author_email: x_commit_author_email.map(|v| Arc::new(v.into()))
-                .or_else(|| { #[cfg(feature = "env")] { env("COMMIT_AUTHOR_EMAIL").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
-            agent_id: agent_id.map(|v| Arc::new(v.into()))
-                .or_else(|| { #[cfg(feature = "env")] { env("OBJECTIVEAI_AGENT_ID").map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
-            mcp_session_id: mcp_session_id.map(|v| Arc::new(v.into()))
-                .or_else(|| { #[cfg(feature = "env")] { env(crate::mcp::MCP_SESSION_ID_ENV).map(Arc::new) } #[cfg(not(feature = "env"))] { None } }),
+            authorization: authorization.map(|k| Arc::new(k.into())).or_else(
+                || {
+                    #[cfg(feature = "env")]
+                    {
+                        env("OBJECTIVEAI_AUTHORIZATION").map(Arc::new)
+                    }
+                    #[cfg(not(feature = "env"))]
+                    {
+                        None
+                    }
+                },
+            ),
+            user_agent: user_agent.map(Into::into).or_else(|| {
+                #[cfg(feature = "env")]
+                {
+                    env("USER_AGENT")
+                }
+                #[cfg(not(feature = "env"))]
+                {
+                    None
+                }
+            }),
+            x_title: x_title.map(Into::into).or_else(|| {
+                #[cfg(feature = "env")]
+                {
+                    env("X_TITLE")
+                }
+                #[cfg(not(feature = "env"))]
+                {
+                    None
+                }
+            }),
+            http_referer: http_referer.map(Into::into).or_else(|| {
+                #[cfg(feature = "env")]
+                {
+                    env("HTTP_REFERER")
+                }
+                #[cfg(not(feature = "env"))]
+                {
+                    None
+                }
+            }),
+            x_github_authorization: x_github_authorization
+                .map(|v| Arc::new(v.into()))
+                .or_else(|| {
+                    #[cfg(feature = "env")]
+                    {
+                        env("GITHUB_AUTHORIZATION").map(Arc::new)
+                    }
+                    #[cfg(not(feature = "env"))]
+                    {
+                        None
+                    }
+                }),
+            x_openrouter_authorization: x_openrouter_authorization
+                .map(|v| Arc::new(v.into()))
+                .or_else(|| {
+                    #[cfg(feature = "env")]
+                    {
+                        env("OPENROUTER_AUTHORIZATION").map(Arc::new)
+                    }
+                    #[cfg(not(feature = "env"))]
+                    {
+                        None
+                    }
+                }),
+            x_mcp_authorization: x_mcp_authorization.map(Arc::new).or_else(
+                || {
+                    #[cfg(feature = "env")]
+                    {
+                        env("MCP_AUTHORIZATION")
+                            .and_then(|v| serde_json::from_str(&v).ok())
+                            .map(Arc::new)
+                    }
+                    #[cfg(not(feature = "env"))]
+                    {
+                        None
+                    }
+                },
+            ),
+            x_viewer_signature: x_viewer_signature
+                .map(|v| Arc::new(v.into()))
+                .or_else(|| {
+                    #[cfg(feature = "env")]
+                    {
+                        env("VIEWER_SIGNATURE").map(Arc::new)
+                    }
+                    #[cfg(not(feature = "env"))]
+                    {
+                        None
+                    }
+                }),
+            x_viewer_address: x_viewer_address
+                .map(|v| Arc::new(v.into()))
+                .or_else(|| {
+                    #[cfg(feature = "env")]
+                    {
+                        env("VIEWER_ADDRESS").map(Arc::new)
+                    }
+                    #[cfg(not(feature = "env"))]
+                    {
+                        None
+                    }
+                }),
+            x_commit_author_name: x_commit_author_name
+                .map(|v| Arc::new(v.into()))
+                .or_else(|| {
+                    #[cfg(feature = "env")]
+                    {
+                        env("COMMIT_AUTHOR_NAME").map(Arc::new)
+                    }
+                    #[cfg(not(feature = "env"))]
+                    {
+                        None
+                    }
+                }),
+            x_commit_author_email: x_commit_author_email
+                .map(|v| Arc::new(v.into()))
+                .or_else(|| {
+                    #[cfg(feature = "env")]
+                    {
+                        env("COMMIT_AUTHOR_EMAIL").map(Arc::new)
+                    }
+                    #[cfg(not(feature = "env"))]
+                    {
+                        None
+                    }
+                }),
+            agent_id: agent_id.map(|v| Arc::new(v.into())).or_else(|| {
+                #[cfg(feature = "env")]
+                {
+                    env("OBJECTIVEAI_AGENT_ID").map(Arc::new)
+                }
+                #[cfg(not(feature = "env"))]
+                {
+                    None
+                }
+            }),
+            mcp_session_id: mcp_session_id.map(|v| Arc::new(v.into())).or_else(
+                || {
+                    #[cfg(feature = "env")]
+                    {
+                        env(crate::mcp::MCP_SESSION_ID_ENV).map(Arc::new)
+                    }
+                    #[cfg(not(feature = "env"))]
+                    {
+                        None
+                    }
+                },
+            ),
         }
     }
 
@@ -160,7 +286,9 @@ impl HttpClient {
         );
         let mut request = self.http_client.request(method, &url);
         if let Some(authorization) = &self.authorization {
-            let key = authorization.strip_prefix("Bearer ").unwrap_or(authorization);
+            let key = authorization
+                .strip_prefix("Bearer ")
+                .unwrap_or(authorization);
             request =
                 request.header("authorization", format!("Bearer {}", key));
         }
@@ -178,7 +306,8 @@ impl HttpClient {
             request = request.header("X-GITHUB-AUTHORIZATION", token.as_str());
         }
         if let Some(token) = &self.x_openrouter_authorization {
-            request = request.header("X-OPENROUTER-AUTHORIZATION", token.as_str());
+            request =
+                request.header("X-OPENROUTER-AUTHORIZATION", token.as_str());
         }
         if let Some(headers) = &self.x_mcp_authorization {
             if let Ok(json) = serde_json::to_string(headers.as_ref()) {
@@ -201,7 +330,8 @@ impl HttpClient {
             request = request.header("X-OBJECTIVEAI-AGENT-ID", id.as_str());
         }
         if let Some(s) = &self.mcp_session_id {
-            request = request.header(crate::mcp::MCP_SESSION_ID_HEADER, s.as_str());
+            request =
+                request.header(crate::mcp::MCP_SESSION_ID_HEADER, s.as_str());
         }
         if let Some(body) = body {
             request = request.json(&body);
@@ -431,10 +561,10 @@ impl HttpClient {
     ) -> Result<
         (
             impl Stream<Item = Result<Chunk, super::HttpError>>
-                + Send
-                + Unpin
-                + 'static
-                + use<Chunk, B, H, P>,
+            + Send
+            + Unpin
+            + 'static
+            + use<Chunk, B, H, P>,
             super::Notifier,
         ),
         super::HttpError,
@@ -474,7 +604,13 @@ impl HttpClient {
         let mut req = tungstenite::handshake::client::Request::builder()
             .method("GET")
             .uri(&ws_url)
-            .header("Host", reqwest::Url::parse(&url).ok().and_then(|u| u.host_str().map(str::to_owned)).unwrap_or_default())
+            .header(
+                "Host",
+                reqwest::Url::parse(&url)
+                    .ok()
+                    .and_then(|u| u.host_str().map(str::to_owned))
+                    .unwrap_or_default(),
+            )
             .header("Upgrade", "websocket")
             .header("Connection", "Upgrade")
             .header(
@@ -528,14 +664,14 @@ impl HttpClient {
         if let Some(s) = &self.mcp_session_id {
             req = req.header(crate::mcp::MCP_SESSION_ID_HEADER, s.as_str());
         }
-        let req = req
-            .body(())
-            .map_err(|e| super::HttpError::WsConnect(tungstenite::Error::Http(
+        let req = req.body(()).map_err(|e| {
+            super::HttpError::WsConnect(tungstenite::Error::Http(
                 tungstenite::http::Response::builder()
                     .status(400)
                     .body(Some(e.to_string().into_bytes()))
                     .unwrap(),
-            )))?;
+            ))
+        })?;
 
         let (ws_stream, _resp) = tokio_tungstenite::connect_async(req).await?;
         let (mut sink, rx_stream): (
@@ -551,15 +687,17 @@ impl HttpClient {
             .map_err(super::HttpError::NotifySend)?;
 
         // Build the per-connection state shared with Notifier + demux.
-        let sink: super::notifier::SharedSink = Arc::new(tokio::sync::Mutex::new(sink));
+        let sink: super::notifier::SharedSink =
+            Arc::new(tokio::sync::Mutex::new(sink));
         let pending: super::notifier::PendingNotifies =
             Arc::new(dashmap::DashMap::new());
 
         // mpsc the demux task pushes chunks (or terminal errors) into.
         // Use futures::channel::mpsc so the rx side is `impl Stream`
         // without pulling in tokio-stream.
-        let (chunk_tx, chunk_rx) =
-            futures::channel::mpsc::unbounded::<Result<Chunk, super::HttpError>>();
+        let (chunk_tx, chunk_rx) = futures::channel::mpsc::unbounded::<
+            Result<Chunk, super::HttpError>,
+        >();
 
         let demux_sink = sink.clone();
         let demux_pending = pending.clone();
@@ -581,7 +719,8 @@ impl HttpClient {
                         continue;
                     }
                     Ok(
-                        tungstenite::Message::Ping(_) | tungstenite::Message::Pong(_),
+                        tungstenite::Message::Ping(_)
+                        | tungstenite::Message::Pong(_),
                     ) => continue,
                     Ok(tungstenite::Message::Close(_)) => {
                         break;
@@ -596,14 +735,18 @@ impl HttpClient {
                 // server_request, then chunk. Order matters — chunks
                 // tend to have many fields; the envelopes have a
                 // distinctive `id` + tagged `type`.
-                if let Ok(response) = serde_json::from_str::<ClientResponse>(&text) {
+                if let Ok(response) =
+                    serde_json::from_str::<ClientResponse>(&text)
+                {
                     let id = response.id().to_string();
                     if let Some((_, tx)) = demux_pending.remove(&id) {
                         let _ = tx.send(response);
                     }
                     continue;
                 }
-                if let Ok(request) = serde_json::from_str::<ServerRequest>(&text) {
+                if let Ok(request) =
+                    serde_json::from_str::<ServerRequest>(&text)
+                {
                     let id = request.id.clone();
                     let method = request
                         .body
@@ -644,7 +787,10 @@ impl HttpClient {
                     Err(e) => {
                         // Try to parse as a ResponseError before
                         // surfacing the deserialization failure.
-                        let err = match serde_json::from_str::<error::ResponseError>(&text) {
+                        let err = match serde_json::from_str::<
+                            error::ResponseError,
+                        >(&text)
+                        {
                             Ok(api_err) => super::HttpError::ApiError(api_err),
                             Err(_) => super::HttpError::DeserializationError(e),
                         };

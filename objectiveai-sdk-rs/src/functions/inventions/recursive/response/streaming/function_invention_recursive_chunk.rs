@@ -1,10 +1,20 @@
 use crate::agent;
 use crate::agent::completions::response::streaming::AgentCompletionIds;
-use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
-#[schemars(rename = "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk")]
+#[derive(
+    Debug,
+    Clone,
+    PartialEq,
+    Serialize,
+    Deserialize,
+    JsonSchema,
+    arbitrary::Arbitrary,
+)]
+#[schemars(
+    rename = "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk"
+)]
 pub struct FunctionInventionRecursiveChunk {
     pub id: String,
     pub inventions: Vec<super::FunctionInventionChunk>,
@@ -21,7 +31,9 @@ pub struct FunctionInventionRecursiveChunk {
 
 impl AgentCompletionIds for FunctionInventionRecursiveChunk {
     fn agent_completion_ids(&self) -> impl Iterator<Item = &str> {
-        self.inventions.iter().flat_map(|i| i.agent_completion_ids())
+        self.inventions
+            .iter()
+            .flat_map(|i| i.agent_completion_ids())
     }
 }
 
@@ -30,7 +42,8 @@ impl FunctionInventionRecursiveChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_message_rows(
         &self,
-    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_ {
+    ) -> impl Iterator<Item = crate::filesystem::db::schema::MessageRow> + Send + '_
+    {
         self.inventions
             .iter()
             .flat_map(|i| i.produce_message_rows())
@@ -54,18 +67,23 @@ impl FunctionInventionRecursiveChunk {
     pub fn inner_errors(&self) -> impl Iterator<Item = super::InnerError<'_>> {
         self.inventions.iter().flat_map(|wrapper| {
             let function_invention_index = wrapper.index;
-            let own = wrapper.inner.error.as_ref().map(move |error| super::InnerError {
-                function_invention_index,
-                agent_completion_index: None,
-                error: std::borrow::Cow::Borrowed(error),
-            });
-            let nested = wrapper.inner.inner_errors().map(move |non_recursive| {
+            let own = wrapper.inner.error.as_ref().map(move |error| {
                 super::InnerError {
                     function_invention_index,
-                    agent_completion_index: Some(non_recursive.agent_completion_index),
-                    error: non_recursive.error,
+                    agent_completion_index: None,
+                    error: std::borrow::Cow::Borrowed(error),
                 }
             });
+            let nested =
+                wrapper.inner.inner_errors().map(move |non_recursive| {
+                    super::InnerError {
+                        function_invention_index,
+                        agent_completion_index: Some(
+                            non_recursive.agent_completion_index,
+                        ),
+                        error: non_recursive.error,
+                    }
+                });
             own.into_iter().chain(nested)
         })
     }
@@ -130,7 +148,10 @@ impl FunctionInventionRecursiveChunk {
     #[cfg(feature = "filesystem")]
     pub fn produce_files(
         &self,
-    ) -> Option<(crate::filesystem::logs::LogReference, Vec<crate::filesystem::logs::LogFile>)> {
+    ) -> Option<(
+        crate::filesystem::logs::LogReference,
+        Vec<crate::filesystem::logs::LogFile>,
+    )> {
         use crate::filesystem::logs::{LogFile, LogReference};
         const ROUTE: &str = "functions/inventions/recursive/response";
 
@@ -140,8 +161,9 @@ impl FunctionInventionRecursiveChunk {
         }
 
         let mut files: Vec<LogFile> = Vec::new();
-        let mut invention_refs:
-            Vec<crate::filesystem::logs::indexed_reference::LogReference> = Vec::new();
+        let mut invention_refs: Vec<
+            crate::filesystem::logs::indexed_reference::LogReference,
+        > = Vec::new();
 
         for invention in &self.inventions {
             let (reference, invention_files) = invention.produce_files();

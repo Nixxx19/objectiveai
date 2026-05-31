@@ -118,9 +118,7 @@ pub enum ContentBlock {
 impl From<crate::agent::completions::message::RichContentPart>
     for ContentBlock
 {
-    fn from(
-        part: crate::agent::completions::message::RichContentPart,
-    ) -> Self {
+    fn from(part: crate::agent::completions::message::RichContentPart) -> Self {
         use crate::agent::completions::message::{
             File as RcpFile, RichContentPart,
         };
@@ -235,10 +233,7 @@ fn file_to_block(
     } else if let Some(url) = file.file_url {
         let mut m = single_meta(META_KIND, KIND_FILE_URL.to_string());
         if let Some(n) = filename {
-            m.insert(
-                META_FILENAME.to_string(),
-                serde_json::Value::String(n),
-            );
+            m.insert(META_FILENAME.to_string(), serde_json::Value::String(n));
         }
         ContentBlock::Text(super::TextContent {
             text: url,
@@ -248,10 +243,7 @@ fn file_to_block(
     } else if let Some(id) = file.file_id {
         let mut m = single_meta(META_KIND, KIND_FILE_ID.to_string());
         if let Some(n) = filename {
-            m.insert(
-                META_FILENAME.to_string(),
-                serde_json::Value::String(n),
-            );
+            m.insert(META_FILENAME.to_string(), serde_json::Value::String(n));
         }
         ContentBlock::Text(super::TextContent {
             text: id,
@@ -288,9 +280,7 @@ fn single_meta(
 impl From<crate::agent::completions::message::RichContent>
     for Vec<ContentBlock>
 {
-    fn from(
-        content: crate::agent::completions::message::RichContent,
-    ) -> Self {
+    fn from(content: crate::agent::completions::message::RichContent) -> Self {
         use crate::agent::completions::message::RichContent;
         match content {
             RichContent::Text(text) => {

@@ -1,11 +1,15 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(
+    Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema,
+)]
 #[schemars(rename = "filesystem.config.Favorite")]
 pub struct Favorite {
     name: String,
     #[serde(flatten)]
-    #[schemars(schema_with = "crate::flatten_schema::<crate::RemotePathCommitOptional>")]
+    #[schemars(
+        schema_with = "crate::flatten_schema::<crate::RemotePathCommitOptional>"
+    )]
     pub path: crate::RemotePathCommitOptional,
     note: String,
 }
@@ -25,7 +29,10 @@ impl Favorite {
         &self.name
     }
 
-    pub fn set_name(&mut self, name: String) -> Result<(), super::super::Error> {
+    pub fn set_name(
+        &mut self,
+        name: String,
+    ) -> Result<(), super::super::Error> {
         validate_favorite_name(&name)?;
         self.name = name;
         Ok(())
@@ -35,7 +42,10 @@ impl Favorite {
         &self.note
     }
 
-    pub fn set_note(&mut self, note: String) -> Result<(), super::super::Error> {
+    pub fn set_note(
+        &mut self,
+        note: String,
+    ) -> Result<(), super::super::Error> {
         validate_favorite_note(&note)?;
         self.note = note;
         Ok(())
@@ -46,7 +56,9 @@ impl Favorite {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema)]
+#[derive(
+    Debug, Clone, PartialEq, Serialize, Deserialize, schemars::JsonSchema,
+)]
 #[schemars(rename = "filesystem.config.PairFavorite")]
 pub struct PairFavorite {
     name: String,
@@ -64,14 +76,22 @@ impl PairFavorite {
     ) -> Result<Self, super::super::Error> {
         validate_favorite_name(&name)?;
         validate_favorite_note(&note)?;
-        Ok(Self { name, function, profile, note })
+        Ok(Self {
+            name,
+            function,
+            profile,
+            note,
+        })
     }
 
     pub fn get_name(&self) -> &str {
         &self.name
     }
 
-    pub fn set_name(&mut self, name: String) -> Result<(), super::super::Error> {
+    pub fn set_name(
+        &mut self,
+        name: String,
+    ) -> Result<(), super::super::Error> {
         validate_favorite_name(&name)?;
         self.name = name;
         Ok(())
@@ -81,7 +101,10 @@ impl PairFavorite {
         &self.note
     }
 
-    pub fn set_note(&mut self, note: String) -> Result<(), super::super::Error> {
+    pub fn set_note(
+        &mut self,
+        note: String,
+    ) -> Result<(), super::super::Error> {
         validate_favorite_note(&note)?;
         self.note = note;
         Ok(())

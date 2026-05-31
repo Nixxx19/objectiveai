@@ -103,9 +103,7 @@ fn parse_remote(s: &str) -> Result<Remote, String> {
 impl PathRef {
     pub fn resolve(self) -> Result<objectiveai_sdk::RemotePathCommitOptional, crate::error::Error> {
         self.remote
-            .ok_or(crate::error::Error::MissingArgs(
-                "remote is required",
-            ))?
+            .ok_or(crate::error::Error::MissingArgs("remote is required"))?
             .into_path(self.owner, self.repository, self.name, self.commit)
             .ok_or(crate::error::Error::MissingArgs(
                 "owner and repository are required for github/filesystem, name for mock",

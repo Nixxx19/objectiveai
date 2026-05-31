@@ -18,11 +18,8 @@ where
     F: FnOnce(objectiveai_sdk::HttpClient) -> Fut + Send + 'static,
     Fut: Future<Output = Result<(), crate::error::Error>> + Send + 'static,
 {
-    let client = objectiveai_sdk::filesystem::Client::new(
-        None::<String>,
-        None::<String>,
-        None::<String>,
-    );
+    let client =
+        objectiveai_sdk::filesystem::Client::new(None::<String>, None::<String>, None::<String>);
     let mut config = client.read_config().await?;
     let http_client = crate::api::client::build_http_client(cli_config, &mut config);
     task(http_client).await

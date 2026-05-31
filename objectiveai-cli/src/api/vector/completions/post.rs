@@ -15,15 +15,25 @@ pub struct Args {
     pub agent_id: crate::api::agent_id_arg::AgentIdArg,
 }
 
-pub async fn handle(args: Args, cli_config: &crate::Config, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
-    let params: objectiveai_sdk::vector::completions::request::VectorCompletionCreateParams = args.body.resolve()?;
+pub async fn handle(
+    args: Args,
+    cli_config: &crate::Config,
+    handle: &objectiveai_sdk::cli::output::Handle,
+) -> Result<(), crate::error::Error> {
+    let params: objectiveai_sdk::vector::completions::request::VectorCompletionCreateParams =
+        args.body.resolve()?;
     if params.stream.unwrap_or(false) {
         return Err(crate::error::Error::MissingArgs(
             "streaming vector completions are not supported via `api vector completions post`; use objectiveai-cli-stream",
         ));
     }
     crate::api::call::call_unary::<_, serde_json::Value>(
-        cli_config, handle, reqwest::Method::POST, "vector/completions", Some(params),
+        cli_config,
+        handle,
+        reqwest::Method::POST,
+        "vector/completions",
+        Some(params),
         args.agent_id.agent_id,
-    ).await
+    )
+    .await
 }

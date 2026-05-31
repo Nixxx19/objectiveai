@@ -13,7 +13,9 @@ pub struct Pair {
 
 /// The composite body inside a `Pair` notification.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
-#[schemars(rename = "cli.output.notification.functions.profiles.FunctionProfilePair")]
+#[schemars(
+    rename = "cli.output.notification.functions.profiles.FunctionProfilePair"
+)]
 pub struct FunctionProfilePair {
     pub function: crate::functions::response::GetFunctionResponse,
     pub profile: crate::functions::profiles::response::GetProfileResponse,
