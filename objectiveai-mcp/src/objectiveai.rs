@@ -17,8 +17,7 @@ use rmcp::{
     schemars, tool, tool_handler, tool_router,
 };
 
-use crate::blocks::outputs_to_content_blocks;
-use crate::format::OutputMode;
+use crate::format::{OutputMode, format_outputs};
 
 #[derive(Debug, serde::Deserialize, schemars::JsonSchema)]
 pub struct ObjectiveAiRequest {
@@ -91,16 +90,14 @@ impl ObjectiveAiMcpCli {
                             .into_iter()
                             .chain(req.args.into_iter())
                             .collect();
-                    let outputs = collect_cli_outputs(
+                    let blocks = run_cli_and_collect(
                         &cli_config,
                         &parts,
                         args,
+                        OutputMode::Plugin,
                     )
                     .await;
-                    Ok(CallToolResult::success(outputs_to_content_blocks(
-                        OutputMode::Plugin,
-                        &outputs,
-                    )))
+                    Ok(CallToolResult::success(blocks))
                 }
                 .boxed()
             }));
@@ -133,16 +130,14 @@ impl ObjectiveAiMcpCli {
                             .into_iter()
                             .chain(req.args.into_iter())
                             .collect();
-                    let outputs = collect_cli_outputs(
+                    let blocks = run_cli_and_collect(
                         &cli_config,
                         &parts,
                         args,
+                        OutputMode::Tool,
                     )
                     .await;
-                    Ok(CallToolResult::success(outputs_to_content_blocks(
-                        OutputMode::Tool,
-                        &outputs,
-                    )))
+                    Ok(CallToolResult::success(blocks))
                 }
                 .boxed()
             }));
@@ -169,32 +164,36 @@ impl ObjectiveAiMcpCli {
         // Plugin mode preserves the most structure (full
         // NotificationValue rather than extracting ToolLine.line),
         // which is the safer default when the underlying command
-        // is unknown. `outputs_to_content_blocks` short-circuits to
-        // a native MCP block when the single collected notification
-        // is typed `LogContent` media — every `agents read id` /
-        // `logs get` of an image/audio/video/file arrives here.
-        let outputs = collect_cli_outputs(&self.cli_config, &parts, args).await;
-        Ok(CallToolResult::success(outputs_to_content_blocks(
+        // is unknown.
+        let blocks = run_cli_and_collect(
+            &self.cli_config,
+            &parts,
+            args,
             OutputMode::Plugin,
-            &outputs,
-        )))
+        )
+        .await;
+        Ok(CallToolResult::success(blocks))
     }
 }
 
-/// Run the ObjectiveAI CLI in-process with `args` and return every
-/// emitted [`objectiveai_sdk::cli::output::Output`] in order.
-/// Applies the per-request `X-OBJECTIVEAI-AGENT-ID` header override
-/// (clones the server-wide `cli_config` so concurrent requests stay
-/// independent).
+/// Run the ObjectiveAI CLI in-process with `args`, collecting every
+/// emitted `Output`, and format the result into the MCP tool
+/// response `Vec<Content>`. Applies the per-request
+/// `X-OBJECTIVEAI-AGENT-ID` header override (clones the server-wide
+/// `cli_config` so concurrent requests stay independent).
 ///
-/// Formatting into MCP `Content` blocks (typed media routing vs.
-/// fallback JSON-into-text) is the caller's job — see
-/// [`crate::blocks::outputs_to_content_blocks`].
-async fn collect_cli_outputs(
+/// `mode` selects plugin vs. tool rendering — see [`crate::format`]
+/// for the full dispatch table. The formatter always strips
+/// `agent_id` from the response body regardless of any env vars.
+/// Today the returned vector is always a single `Content::text`
+/// block; the shape leaves room for a future change to start
+/// emitting typed media blocks alongside.
+async fn run_cli_and_collect(
     cli_config: &Arc<objectiveai_cli::Config>,
     parts: &Parts,
     args: Vec<String>,
-) -> Vec<objectiveai_sdk::cli::output::Output> {
+    mode: OutputMode,
+) -> Vec<rmcp::model::Content> {
     // Per-request: stamp agent_id + mcp_session_id from headers so
     // every cli invocation (and every tool subprocess the cli spawns
     // transitively) sees the values relevant to *this* request.
@@ -244,7 +243,7 @@ async fn collect_cli_outputs(
     let _ = objectiveai_cli::run(args, &cli_config, handle).await;
 
     let outputs = collected.lock().await;
-    outputs.clone()
+    format_outputs(mode, &outputs)
 }
 
 #[tool_handler]
