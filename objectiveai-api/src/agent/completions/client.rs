@@ -611,6 +611,18 @@ where
         let request_mcp_auth_owned = request_mcp_auth.clone();
         let default_mcp_auth_owned = self.mcp_authorization.clone();
         let internal_conn_for_resume = internal_conn.clone();
+        // Client-side resume path: when the wire continuation carries
+        // a `mcp_sessions[proxy_url]`, use it to resume the proxy
+        // session so upstream MCP sessions (and therefore tool
+        // subprocess `MCP_SESSION_ID`s) stay stable across separate
+        // `agents message` / `agent completions create` invocations.
+        // Without this fallback, every continuation turn creates a
+        // fresh proxy session, which dials upstream MCPs fresh, and
+        // any per-session tool state (counters, caches keyed on
+        // `MCP_SESSION_ID`) resets per turn.
+        let wire_proxy_session_id: Option<String> = request_continuation
+            .as_ref()
+            .and_then(|rc| rc.mcp_sessions().get(&proxy_url).cloned());
 
         // 6.5. Compose the `X-OBJECTIVEAI-AGENT-ID` header we forward
         //      to the proxy for every attempt.
@@ -873,10 +885,16 @@ where
                 let mcp_client = self.mcp_client.clone();
                 let proxy_url = proxy_url.clone();
                 // Resume the proxy session if we're continuing — the
-                // upstream sessions already live behind it.
+                // upstream sessions already live behind it. Prefer the
+                // internal continuation (server-side retry; in-memory
+                // Connection still warm) over the wire continuation
+                // (client-side resume; only the encoded session id is
+                // available — proxy reconstructs upstreams via its
+                // AEAD payload).
                 let session_id = internal_conn_for_resume
                     .as_ref()
-                    .map(|c| c.session_id.clone());
+                    .map(|c| c.session_id.clone())
+                    .or_else(|| wire_proxy_session_id.clone());
                 // Only agents that declared `client_objectiveai_mcp`
                 // need a `list_tools` round-trip — they're the ones
                 // we have a declaration to validate against. Agents
