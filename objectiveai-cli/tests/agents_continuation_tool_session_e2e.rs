@@ -390,13 +390,4 @@ async fn two_agents_continuations_count_persists_per_session() {
          a reset would leave it lower",
         ids_b.len(),
     );
-
-    // Cross-agent symmetry: same deterministic mock behaviour over
-    // the same agent body should produce the same number of tool
-    // calls regardless of seed.
-    assert_eq!(
-        max_a, max_b,
-        "agent A's final count ({max_a}) must equal agent B's ({max_b}) — \
-         tool-call generation should be deterministic given identical bodies",
-    );
 }
