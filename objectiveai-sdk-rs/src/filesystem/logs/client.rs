@@ -255,6 +255,17 @@ impl Client {
         apply_jq(value, jq)
     }
 
+    /// Reads a `.txt` file at `<dir>/<stem>.txt` as a UTF-8 string.
+    /// Sibling to [`Self::read_json`] / [`Self::read_data_url_by_stem`]
+    /// for the text-content writers (`extract_media` → `<...>/text/<stem>.txt`).
+    async fn read_text(&self, dir: &str, stem: &str) -> Result<String, Error> {
+        let full = self.logs_dir().join(dir).join(format!("{stem}.txt"));
+        let bytes = tokio::fs::read(&full)
+            .await
+            .map_err(|e| Error::Read(full.clone(), e))?;
+        String::from_utf8(bytes).map_err(|e| Error::Utf8(full, e))
+    }
+
     /// Finds the first file in `dir` whose name starts with `stem.` (any extension)
     /// and returns it as a data URL.
     async fn read_data_url_by_stem(&self, dir: &str, stem: &str) -> Result<String, Error> {
@@ -351,6 +362,143 @@ impl Client {
     }
     pub async fn read_function_invention_recursive_request(&self, id: &str, jq: Option<&str>) -> Result<serde_json::Value, Error> {
         self.read_json("functions/inventions/recursive/request", id, jq).await
+    }
+
+    // -- Assistant message content (response side) -------------------------
+    //
+    // `RichContent::Text(_)` → `<id>_<message_index>.txt` (no media_index).
+    // `RichContent::Parts([... Text { text } ...])` → one file per part,
+    // `<id>_<message_index>_<part>.<ext>`. The text reader takes
+    // `media_index: Option<u64>` to cover both cases.
+
+    pub async fn read_agent_completion_message_text(
+        &self, id: &str, message_index: u64, media_index: Option<u64>,
+    ) -> Result<String, Error> {
+        let stem = text_stem(id, message_index, media_index);
+        self.read_text("agents/completions/response/messages/text", &stem).await
+    }
+
+    // -- Tool response content (response side, under .../messages/tool/) ---
+
+    pub async fn read_agent_completion_message_tool_text(
+        &self, id: &str, message_index: u64, media_index: Option<u64>,
+    ) -> Result<String, Error> {
+        let stem = text_stem(id, message_index, media_index);
+        self.read_text("agents/completions/response/messages/tool/text", &stem).await
+    }
+    pub async fn read_agent_completion_message_tool_image(
+        &self, id: &str, message_index: u64, media_index: u64,
+    ) -> Result<String, Error> {
+        self.read_data_url_by_stem(
+            "agents/completions/response/messages/tool/image",
+            &format!("{id}_{message_index}_{media_index}"),
+        ).await
+    }
+    pub async fn read_agent_completion_message_tool_audio(
+        &self, id: &str, message_index: u64, media_index: u64,
+    ) -> Result<String, Error> {
+        self.read_data_url_by_stem(
+            "agents/completions/response/messages/tool/audio",
+            &format!("{id}_{message_index}_{media_index}"),
+        ).await
+    }
+    pub async fn read_agent_completion_message_tool_video(
+        &self, id: &str, message_index: u64, media_index: u64,
+    ) -> Result<String, Error> {
+        self.read_data_url_by_stem(
+            "agents/completions/response/messages/tool/video",
+            &format!("{id}_{message_index}_{media_index}"),
+        ).await
+    }
+    pub async fn read_agent_completion_message_tool_file(
+        &self, id: &str, message_index: u64, media_index: u64,
+    ) -> Result<String, Error> {
+        self.read_data_url_by_stem(
+            "agents/completions/response/messages/tool/file",
+            &format!("{id}_{message_index}_{media_index}"),
+        ).await
+    }
+
+    // -- Request-side message content --------------------------------------
+
+    pub async fn read_agent_completion_request_message_text(
+        &self, id: &str, message_index: u64, media_index: Option<u64>,
+    ) -> Result<String, Error> {
+        let stem = text_stem(id, message_index, media_index);
+        self.read_text("agents/completions/request/messages/text", &stem).await
+    }
+    pub async fn read_agent_completion_request_message_image(
+        &self, id: &str, message_index: u64, media_index: u64,
+    ) -> Result<String, Error> {
+        self.read_data_url_by_stem(
+            "agents/completions/request/messages/image",
+            &format!("{id}_{message_index}_{media_index}"),
+        ).await
+    }
+    pub async fn read_agent_completion_request_message_audio(
+        &self, id: &str, message_index: u64, media_index: u64,
+    ) -> Result<String, Error> {
+        self.read_data_url_by_stem(
+            "agents/completions/request/messages/audio",
+            &format!("{id}_{message_index}_{media_index}"),
+        ).await
+    }
+    pub async fn read_agent_completion_request_message_video(
+        &self, id: &str, message_index: u64, media_index: u64,
+    ) -> Result<String, Error> {
+        self.read_data_url_by_stem(
+            "agents/completions/request/messages/video",
+            &format!("{id}_{message_index}_{media_index}"),
+        ).await
+    }
+    pub async fn read_agent_completion_request_message_file(
+        &self, id: &str, message_index: u64, media_index: u64,
+    ) -> Result<String, Error> {
+        self.read_data_url_by_stem(
+            "agents/completions/request/messages/file",
+            &format!("{id}_{message_index}_{media_index}"),
+        ).await
+    }
+
+    // -- Notification content ----------------------------------------------
+
+    pub async fn read_agent_completion_notification_text(
+        &self, response_id: &str, index: u64, media_index: Option<u64>,
+    ) -> Result<String, Error> {
+        let stem = text_stem(response_id, index, media_index);
+        self.read_text("agents/completions/request/notifications/text", &stem).await
+    }
+    pub async fn read_agent_completion_notification_image(
+        &self, response_id: &str, index: u64, media_index: u64,
+    ) -> Result<String, Error> {
+        self.read_data_url_by_stem(
+            "agents/completions/request/notifications/image",
+            &format!("{response_id}_{index}_{media_index}"),
+        ).await
+    }
+    pub async fn read_agent_completion_notification_audio(
+        &self, response_id: &str, index: u64, media_index: u64,
+    ) -> Result<String, Error> {
+        self.read_data_url_by_stem(
+            "agents/completions/request/notifications/audio",
+            &format!("{response_id}_{index}_{media_index}"),
+        ).await
+    }
+    pub async fn read_agent_completion_notification_video(
+        &self, response_id: &str, index: u64, media_index: u64,
+    ) -> Result<String, Error> {
+        self.read_data_url_by_stem(
+            "agents/completions/request/notifications/video",
+            &format!("{response_id}_{index}_{media_index}"),
+        ).await
+    }
+    pub async fn read_agent_completion_notification_file(
+        &self, response_id: &str, index: u64, media_index: u64,
+    ) -> Result<String, Error> {
+        self.read_data_url_by_stem(
+            "agents/completions/request/notifications/file",
+            &format!("{response_id}_{index}_{media_index}"),
+        ).await
     }
 
     // -- Subscribe helpers + methods ----------------------------------------
@@ -771,33 +919,286 @@ impl Client {
         &self,
         id: i64,
     ) -> Result<super::LogContent, Error> {
-        use base64::Engine;
-
         let rel_path = self
             .path_for_file_id(id)
             .await?
             .ok_or_else(|| Error::NotFound(format!("file id {id}")))?;
-        let full = self.logs_dir().join(&rel_path);
-        let bytes = tokio::fs::read(&full)
-            .await
-            .map_err(|e| Error::Read(full.clone(), e))?;
 
-        if std::path::Path::new(&rel_path)
-            .extension()
-            .and_then(|e| e.to_str())
-            == Some("json")
-        {
-            let value: serde_json::Value = serde_json::from_slice(&bytes)
-                .map_err(|e| Error::Parse(full, e))?;
-            Ok(super::LogContent::Json(value))
-        } else {
-            let mime = mime_guess::from_path(&full)
-                .first_or_octet_stream()
-                .to_string();
-            let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
-            Ok(super::LogContent::DataUrl(format!(
-                "data:{mime};base64,{b64}"
-            )))
+        // Classify the path via the catalog of writer-side patterns,
+        // then dispatch to the matching `read_*` method. The
+        // variant-to-method match is the single source of truth for
+        // "what `LogContent` shape this kind of file produces" —
+        // every existing typed reader already knows its own kind,
+        // and `read_file_by_id` re-uses that knowledge instead of
+        // re-deriving it from a path-extension sniff.
+        let kind = super::LogFileKind::from_path(&rel_path).ok_or_else(|| {
+            Error::NotFound(format!("unknown log-file kind for path {rel_path:?}"))
+        })?;
+        use super::LogFileKind as K;
+        match kind {
+            // -- Top-level envelopes (JSON) ---------------------------------
+            K::AgentCompletion { id } => self
+                .read_agent_completion(&id, None)
+                .await
+                .map(super::LogContent::Json),
+            K::AgentCompletionRequest { id } => self
+                .read_agent_completion_request(&id, None)
+                .await
+                .map(super::LogContent::Json),
+            K::AgentCompletionContinuation { id } => self
+                .read_agent_completion_continuation(&id, None)
+                .await
+                .map(super::LogContent::Json),
+            K::VectorCompletion { id } => self
+                .read_vector_completion(&id, None)
+                .await
+                .map(super::LogContent::Json),
+            K::VectorCompletionRequest { id } => self
+                .read_vector_completion_request(&id, None)
+                .await
+                .map(super::LogContent::Json),
+            K::FunctionExecution { id } => self
+                .read_function_execution(&id, None)
+                .await
+                .map(super::LogContent::Json),
+            K::FunctionExecutionRequest { id } => self
+                .read_function_execution_request(&id, None)
+                .await
+                .map(super::LogContent::Json),
+            K::FunctionExecutionRetryToken { id } => self
+                .read_function_execution_retry_token(&id, None)
+                .await
+                .map(super::LogContent::Json),
+            K::FunctionInvention { id } => self
+                .read_function_invention(&id, None)
+                .await
+                .map(super::LogContent::Json),
+            K::FunctionInventionRequest { id } => self
+                .read_function_invention_request(&id, None)
+                .await
+                .map(super::LogContent::Json),
+            K::FunctionInventionRecursive { id } => self
+                .read_function_invention_recursive(&id, None)
+                .await
+                .map(super::LogContent::Json),
+            K::FunctionInventionRecursiveRequest { id } => self
+                .read_function_invention_recursive_request(&id, None)
+                .await
+                .map(super::LogContent::Json),
+
+            // -- Per-message metadata (JSON) --------------------------------
+            K::AgentCompletionMessage {
+                id,
+                message_index,
+            } => self
+                .read_agent_completion_message(&id, message_index, None)
+                .await
+                .map(super::LogContent::Json),
+            K::AgentCompletionMessageLogprobs {
+                id,
+                message_index,
+            } => self
+                .read_agent_completion_message_logprobs(&id, message_index, None)
+                .await
+                .map(super::LogContent::Json),
+            K::AgentCompletionMessageReasoning {
+                id,
+                message_index,
+            } => self
+                .read_agent_completion_message_reasoning(&id, message_index, None)
+                .await
+                .map(super::LogContent::Json),
+            K::AgentCompletionMessageRefusal {
+                id,
+                message_index,
+            } => self
+                .read_agent_completion_message_refusal(&id, message_index, None)
+                .await
+                .map(super::LogContent::Json),
+            K::AgentCompletionMessageToolCall {
+                id,
+                message_index,
+                tool_call_index,
+            } => self
+                .read_agent_completion_message_tool_call(
+                    &id,
+                    message_index,
+                    tool_call_index,
+                    None,
+                )
+                .await
+                .map(super::LogContent::Json),
+
+            // -- Assistant content ------------------------------------------
+            // Text → `Json(Value::String(text))` so it lands under the
+            // same `value.content` shape as every other textual log
+            // (reasoning, refusal, etc.). Media → `DataUrl`.
+            K::AgentCompletionMessageText {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_message_text(&id, message_index, media_index)
+                .await
+                .map(|s| super::LogContent::Json(serde_json::Value::String(s))),
+            K::AgentCompletionMessageImage {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_message_image(&id, message_index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+            K::AgentCompletionMessageAudio {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_message_audio(&id, message_index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+            K::AgentCompletionMessageVideo {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_message_video(&id, message_index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+            K::AgentCompletionMessageFile {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_message_file(&id, message_index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+
+            // -- Tool response content (under .../messages/tool/) -----------
+            K::AgentCompletionMessageToolText {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_message_tool_text(&id, message_index, media_index)
+                .await
+                .map(|s| super::LogContent::Json(serde_json::Value::String(s))),
+            K::AgentCompletionMessageToolImage {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_message_tool_image(&id, message_index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+            K::AgentCompletionMessageToolAudio {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_message_tool_audio(&id, message_index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+            K::AgentCompletionMessageToolVideo {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_message_tool_video(&id, message_index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+            K::AgentCompletionMessageToolFile {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_message_tool_file(&id, message_index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+
+            // -- Request-side message content -------------------------------
+            K::AgentCompletionRequestMessageText {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_request_message_text(&id, message_index, media_index)
+                .await
+                .map(|s| super::LogContent::Json(serde_json::Value::String(s))),
+            K::AgentCompletionRequestMessageImage {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_request_message_image(&id, message_index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+            K::AgentCompletionRequestMessageAudio {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_request_message_audio(&id, message_index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+            K::AgentCompletionRequestMessageVideo {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_request_message_video(&id, message_index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+            K::AgentCompletionRequestMessageFile {
+                id,
+                message_index,
+                media_index,
+            } => self
+                .read_agent_completion_request_message_file(&id, message_index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+
+            // -- Notification content ---------------------------------------
+            K::AgentCompletionNotificationText {
+                response_id,
+                index,
+                media_index,
+            } => self
+                .read_agent_completion_notification_text(&response_id, index, media_index)
+                .await
+                .map(|s| super::LogContent::Json(serde_json::Value::String(s))),
+            K::AgentCompletionNotificationImage {
+                response_id,
+                index,
+                media_index,
+            } => self
+                .read_agent_completion_notification_image(&response_id, index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+            K::AgentCompletionNotificationAudio {
+                response_id,
+                index,
+                media_index,
+            } => self
+                .read_agent_completion_notification_audio(&response_id, index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+            K::AgentCompletionNotificationVideo {
+                response_id,
+                index,
+                media_index,
+            } => self
+                .read_agent_completion_notification_video(&response_id, index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
+            K::AgentCompletionNotificationFile {
+                response_id,
+                index,
+                media_index,
+            } => self
+                .read_agent_completion_notification_file(&response_id, index, media_index)
+                .await
+                .map(super::LogContent::DataUrl),
         }
     }
 
@@ -840,6 +1241,17 @@ impl Client {
 }
 
 // -- Pure helpers (no &Client) ---------------------------------------------
+
+/// Stem layout for text content (matches `RichContent::extract_media`):
+/// `RichContent::Text(_)` produces a single `<id>_<msg>.txt` file (no
+/// `media_index`); `RichContent::Parts([... Text { text } ...])` produces
+/// one `<id>_<msg>_<part>.txt` file per part.
+fn text_stem(id: &str, message_index: u64, media_index: Option<u64>) -> String {
+    match media_index {
+        None => format!("{id}_{message_index}"),
+        Some(mi) => format!("{id}_{message_index}_{mi}"),
+    }
+}
 
 /// Applies a jq filter to a JSON value, collapsing the multi-result vector
 /// the same way the CLI `config get` command does: a single result is
