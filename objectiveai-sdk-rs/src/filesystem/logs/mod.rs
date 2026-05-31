@@ -7,6 +7,7 @@ mod log_file_kind;
 mod produces_request_files;
 pub mod queue;
 mod reference;
+mod subscribe_event;
 mod writer;
 
 pub use client::LogContent;
@@ -17,4 +18,5 @@ pub use log_file_kind::*;
 pub use produces_request_files::*;
 pub use queue::*;
 pub use reference::*;
+pub use subscribe_event::*;
 pub use writer::*;

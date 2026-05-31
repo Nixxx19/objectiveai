@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict, RootModel
 from objectiveai_sdk.cli.output.notification.agents.active_agent import ActiveAgent
 from objectiveai_sdk.cli.output.notification.agents.agent import Agent
 from objectiveai_sdk.cli.output.notification.agents.agent_items import AgentItems
+from objectiveai_sdk.cli.output.notification.agents.inactive import Inactive
 from objectiveai_sdk.cli.output.notification.agents.message_delivered import MessageDelivered
 from objectiveai_sdk.cli.output.notification.agents.message_queued import MessageQueued
 from objectiveai_sdk.cli.output.notification.agents.spawned import Spawned
@@ -58,6 +59,12 @@ class NotificationValueAgentItems(AgentItems):
     model_config = ConfigDict(json_schema_extra={'_variant_title': 'AgentItems'})
 
     kind: Literal['agent_items']
+
+
+class NotificationValueInactive(Inactive):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Inactive'})
+
+    kind: Literal['inactive']
 
 
 class NotificationValueMessageDelivered(MessageDelivered):
@@ -323,5 +330,5 @@ class NotificationValue(RootModel):
 the variant. See module-level docs for the wire shape."""
     model_config = ConfigDict(title='cli.output.notification.NotificationValue')
 
-    root: Union[NotificationValueActiveAgent, NotificationValueAgent, NotificationValueAgentItems, NotificationValueMessageDelivered, NotificationValueMessageQueued, NotificationValueSpawned, NotificationValueDetached, NotificationValueExecution, NotificationValueFunction, NotificationValueInventions, NotificationValuePair, NotificationValueProfile, NotificationValueState, NotificationValueLaboratory, NotificationValueSwarm, NotificationValueCleared, NotificationValueHelp, NotificationValueInstalled, NotificationValueInstructions, NotificationValueJqResults, NotificationValueLogContent, NotificationValueLogStreamReady, NotificationValueMcp, NotificationValueMe, NotificationValueOk, NotificationValuePlugin, NotificationValuePlugins, NotificationValuePublished, NotificationValueSchema, NotificationValueSchemas, NotificationValueTool, NotificationValueToolLine, NotificationValueTools, NotificationValueUpdater, NotificationValueViewerSendResult, NotificationValueOther]
+    root: Union[NotificationValueActiveAgent, NotificationValueAgent, NotificationValueAgentItems, NotificationValueInactive, NotificationValueMessageDelivered, NotificationValueMessageQueued, NotificationValueSpawned, NotificationValueDetached, NotificationValueExecution, NotificationValueFunction, NotificationValueInventions, NotificationValuePair, NotificationValueProfile, NotificationValueState, NotificationValueLaboratory, NotificationValueSwarm, NotificationValueCleared, NotificationValueHelp, NotificationValueInstalled, NotificationValueInstructions, NotificationValueJqResults, NotificationValueLogContent, NotificationValueLogStreamReady, NotificationValueMcp, NotificationValueMe, NotificationValueOk, NotificationValuePlugin, NotificationValuePlugins, NotificationValuePublished, NotificationValueSchema, NotificationValueSchemas, NotificationValueTool, NotificationValueToolLine, NotificationValueTools, NotificationValueUpdater, NotificationValueViewerSendResult, NotificationValueOther]
 

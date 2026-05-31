@@ -235,32 +235,44 @@ impl<C> LogWriter<C> {
         &mut self,
         chunk: &C,
         pending: &mut Vec<PendingNotification>,
-    ) -> Result<(), super::super::Error>
+    ) -> Result<Vec<(String, MessageKind)>, super::super::Error>
     where
         C: AgentCompletionIds + Clone,
     {
         // Process the previously-buffered chunk (one chunk behind),
-        // then stash the current one to await its successor.
+        // then stash the current one to await its successor. The
+        // returned vec lists every (agent_id, kind) row that was
+        // newly inserted by this call — in dedup-survivor order —
+        // so the cli-stream writer task can broadcast one Row event
+        // per insert on the outbound subscribe pipe.
         let prev = self.pending_chunk.replace(chunk.clone());
-        if let Some(buffered) = prev {
-            self.process_chunk(&buffered, pending).await?;
+        match prev {
+            Some(buffered) => self.process_chunk(&buffered, pending).await,
+            None => Ok(Vec::new()),
         }
-        Ok(())
     }
 
     /// Verbatim body of the original `write`. Splits files +
-    /// DB rows + notification drain in one atomic op set.
+    /// DB rows + notification drain in one atomic op set. Returns
+    /// every (agent_id, kind) row that survived the dedup gate and
+    /// was scheduled for insert. The vec is populated in scheduling
+    /// order — request rows (one per agent in this chunk) first,
+    /// then message rows in iterator order, with any drained
+    /// notifications interleaved just before each `ToolResponse`
+    /// row. The actual DB inserts run concurrently via the same
+    /// FuturesUnordered as before; the caller only sees the vec if
+    /// every op succeeded.
     async fn process_chunk(
         &mut self,
         chunk: &C,
         pending: &mut Vec<PendingNotification>,
-    ) -> Result<(), super::super::Error>
+    ) -> Result<Vec<(String, MessageKind)>, super::super::Error>
     where
         C: AgentCompletionIds,
     {
         let mut files = match (self.produce)(chunk) {
             Some(files) => files,
-            None => return Ok(()),
+            None => return Ok(Vec::new()),
         };
 
         // First-chunk: capture primary_id, flush the pending request
@@ -300,12 +312,19 @@ impl<C> LogWriter<C> {
             .collect();
 
         // Build the concurrent op set: file writes + per-agent request
-        // rows + per-message rows + drained notification rows.
+        // rows + per-message rows + drained notification rows. Each
+        // op returns `Some((agent_id, kind))` for rows that ultimately
+        // landed in `messages` (so the cli-stream task can broadcast
+        // one Row event per insert on the outbound subscribe pipe);
+        // file-only writes and dedup-skipped request rows return
+        // `None`.
+        type Inserted = Option<(String, MessageKind)>;
         let mut ops: FuturesUnordered<
             std::pin::Pin<
                 Box<
-                    dyn std::future::Future<Output = Result<(), super::super::Error>>
-                        + Send,
+                    dyn std::future::Future<
+                            Output = Result<Inserted, super::super::Error>,
+                        > + Send,
                 >,
             >,
         > = FuturesUnordered::new();
@@ -322,7 +341,8 @@ impl<C> LogWriter<C> {
                 }
                 tokio::fs::write(&full_path, file.content)
                     .await
-                    .map_err(|e| super::super::Error::Write(full_path, e))
+                    .map_err(|e| super::super::Error::Write(full_path, e))?;
+                Ok(None)
             }));
         }
 
@@ -349,7 +369,7 @@ impl<C> LogWriter<C> {
                     let queue = queue.clone();
                     let req_path = req_path.clone();
                     ops.push(Box::pin(async move {
-                        queue
+                        let inserted = queue
                             .insert_request_once(
                                 &agent_id,
                                 &response_id,
@@ -357,8 +377,8 @@ impl<C> LogWriter<C> {
                                 req_path,
                                 now,
                             )
-                            .await
-                            .map(|_| ())
+                            .await?;
+                        Ok(if inserted { Some((agent_id, kind)) } else { None })
                     }));
                 }
             }
@@ -397,8 +417,13 @@ impl<C> LogWriter<C> {
                             {
                                 let notif = pending.remove(i);
                                 let queue = queue.clone();
+                                let notif_agent = notif.agent_id.clone();
                                 ops.push(Box::pin(async move {
-                                    queue.insert_notification(notif).await
+                                    queue.insert_notification(notif).await?;
+                                    Ok(Some((
+                                        notif_agent,
+                                        MessageKind::AgentCompletionNotification,
+                                    )))
                                 }));
                             } else {
                                 i += 1;
@@ -416,7 +441,8 @@ impl<C> LogWriter<C> {
                     ops.push(Box::pin(async move {
                         queue
                             .insert(&agent_id, &response_id, kind, path, ts, index)
-                            .await
+                            .await?;
+                        Ok(Some((agent_id, kind)))
                     }));
                 }
             }
@@ -424,10 +450,13 @@ impl<C> LogWriter<C> {
 
         // Drive everything to completion. First error short-circuits;
         // remaining futures are dropped as the FuturesUnordered drops.
+        let mut inserted: Vec<(String, MessageKind)> = Vec::new();
         while let Some(result) = ops.next().await {
-            result?;
+            if let Some(pair) = result? {
+                inserted.push(pair);
+            }
         }
-        Ok(())
+        Ok(inserted)
     }
 
     /// Flush the buffered last chunk (if any), then drain any
@@ -441,28 +470,31 @@ impl<C> LogWriter<C> {
     pub async fn finalize(
         &mut self,
         pending: &mut Vec<PendingNotification>,
-    ) -> Result<(), super::super::Error>
+    ) -> Result<Vec<(String, MessageKind)>, super::super::Error>
     where
         C: AgentCompletionIds,
     {
         // Flush the last buffered chunk before doing the
         // notification drain — its tool-response rows may want to
         // drain notifications too, and those should land first.
+        let mut inserted: Vec<(String, MessageKind)> = Vec::new();
         if let Some(buffered) = self.pending_chunk.take() {
-            self.process_chunk(&buffered, pending).await?;
+            inserted.extend(self.process_chunk(&buffered, pending).await?);
         }
         let queue = match self.queue.clone() {
             Some(q) => q,
             None => {
                 pending.clear();
-                return Ok(());
+                return Ok(inserted);
             }
         };
+        type Inserted = Option<(String, MessageKind)>;
         let mut ops: FuturesUnordered<
             std::pin::Pin<
                 Box<
-                    dyn std::future::Future<Output = Result<(), super::super::Error>>
-                        + Send,
+                    dyn std::future::Future<
+                            Output = Result<Inserted, super::super::Error>,
+                        > + Send,
                 >,
             >,
         > = FuturesUnordered::new();
@@ -471,14 +503,18 @@ impl<C> LogWriter<C> {
                 continue;
             }
             let queue = queue.clone();
+            let notif_agent = notif.agent_id.clone();
             ops.push(Box::pin(async move {
-                queue.insert_notification(notif).await
+                queue.insert_notification(notif).await?;
+                Ok(Some((notif_agent, MessageKind::AgentCompletionNotification)))
             }));
         }
         while let Some(result) = ops.next().await {
-            result?;
+            if let Some(pair) = result? {
+                inserted.push(pair);
+            }
         }
-        Ok(())
+        Ok(inserted)
     }
 }
 

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { CliOutputNotificationAgentsActiveAgentSchema } from "./agents/activeAgent";
 import { CliOutputNotificationAgentsAgentSchema } from "./agents/agent";
 import { CliOutputNotificationAgentsAgentItemsSchema } from "./agents/agentItems";
+import { CliOutputNotificationAgentsInactiveSchema } from "./agents/inactive";
 import { CliOutputNotificationAgentsMessageDeliveredSchema } from "./agents/messageDelivered";
 import { CliOutputNotificationAgentsMessageQueuedSchema } from "./agents/messageQueued";
 import { CliOutputNotificationAgentsSpawnedSchema } from "./agents/spawned";
@@ -43,7 +44,9 @@ export const CliOutputNotificationNotificationValueSchema = z.union([CliOutputNo
   kind: z.literal("agent"),
 })).meta({"variantTitle":"Agent"}), CliOutputNotificationAgentsAgentItemsSchema.and(z.object({
   kind: z.literal("agent_items"),
-})).meta({"variantTitle":"AgentItems"}), CliOutputNotificationAgentsMessageDeliveredSchema.and(z.object({
+})).meta({"variantTitle":"AgentItems"}), CliOutputNotificationAgentsInactiveSchema.and(z.object({
+  kind: z.literal("inactive"),
+})).meta({"variantTitle":"Inactive"}), CliOutputNotificationAgentsMessageDeliveredSchema.and(z.object({
   kind: z.literal("message_delivered"),
 })).meta({"variantTitle":"MessageDelivered"}), CliOutputNotificationAgentsMessageQueuedSchema.and(z.object({
   kind: z.literal("message_queued"),

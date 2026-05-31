@@ -4,3 +4,4 @@ from .latest_continuation import LatestContinuation  # noqa: F401
 from .list_item import ListItem  # noqa: F401
 from .log_reference import LogReference  # noqa: F401
 from .log_reference_tag import LogReferenceTag  # noqa: F401
+from .subscribe_event import SubscribeEvent, SubscribeEventRow, SubscribeEventStreamEnd  # noqa: F401

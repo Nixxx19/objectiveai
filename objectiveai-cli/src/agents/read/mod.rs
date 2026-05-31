@@ -1,6 +1,7 @@
 pub mod all;
 pub mod id;
 pub mod pending;
+pub mod subscribe;
 
 use clap::Subcommand;
 
@@ -17,6 +18,12 @@ pub enum Commands {
     /// Drain pending queue items (past the watermark) for the
     /// given spawned agent id(s).
     Pending(pending::CommandArgs),
+    /// Block on the spawned agent's next queue event. Emits any
+    /// pending unread items immediately, then waits (no polling)
+    /// for new rows or stream end. With `--kind`, only returns on
+    /// a matching item or stream end. Emits `Inactive` when no
+    /// active stream exists and nothing is unread.
+    Subscribe(subscribe::CommandArgs),
 }
 
 impl Commands {
@@ -25,6 +32,7 @@ impl Commands {
             Commands::All(args) => all::handle(args, cli_config, handle).await,
             Commands::Id(args) => id::handle(args, cli_config, handle).await,
             Commands::Pending(args) => pending::handle(args, cli_config, handle).await,
+            Commands::Subscribe(args) => subscribe::handle(args, cli_config, handle).await,
         }
     }
 }

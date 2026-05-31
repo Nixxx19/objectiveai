@@ -62,6 +62,13 @@ impl Client {
         self.base_dir.join("logs")
     }
 
+    /// Root for the per-agent named-pipe tree managed by cli-stream
+    /// (inbound `socket` + outbound `events.sock`). Each agent's
+    /// pipes live under `pipes_dir().join(agent_id)/`.
+    pub fn pipes_dir(&self) -> PathBuf {
+        self.base_dir.join("pipes")
+    }
+
     /// Internal accessor to the lazy-init slot. Used by
     /// `filesystem::db::connection` to open the connection on first use.
     pub(crate) fn db_conn_slot(&self) -> &Mutex<Option<Arc<Mutex<rusqlite::Connection>>>> {

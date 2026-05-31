@@ -3,6 +3,7 @@
 export * from "./activeAgent";
 export * from "./agent";
 export * from "./agentItems";
+export * from "./inactive";
 export * from "./messageDelivered";
 export * from "./messageQueued";
 export * from "./spawned";

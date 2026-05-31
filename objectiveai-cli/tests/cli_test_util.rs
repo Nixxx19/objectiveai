@@ -134,12 +134,22 @@ pub fn run_cli(args: &[&str]) -> serde_json::Value {
         let Some(value) = parsed.get("value") else {
             continue;
         };
-        // Skip the `log_stream_ready` stub notification; tests want the
-        // subsequent data-bearing notifications only.
-        if value.as_object()
-            .map(|o| o.len() == 1 && o.contains_key("log_stream_ready"))
-            .unwrap_or(false)
-        {
+        // Skip the `log_stream_ready` stub notification; tests want
+        // the subsequent data-bearing notifications only. The new
+        // `kind`-tagged shape is `{"kind":"log_stream_ready",
+        // "log_stream_ready":"<id>"}` (two keys); the legacy
+        // pre-tag shape was just `{"log_stream_ready":"<id>"}`
+        // (one key). Match either.
+        let is_log_stream_ready = value
+            .as_object()
+            .map(|o| {
+                (o.len() == 1 && o.contains_key("log_stream_ready"))
+                    || (o.len() == 2
+                        && o.get("kind").and_then(|k| k.as_str())
+                            == Some("log_stream_ready"))
+            })
+            .unwrap_or(false);
+        if is_log_stream_ready {
             continue;
         }
         data_values.push(value.clone());
@@ -152,6 +162,13 @@ pub fn run_cli(args: &[&str]) -> serde_json::Value {
     // notifications). When there's exactly one notification with exactly
     // one object-typed wrapper key, descend through it — the cli wraps
     // command responses in keys like `execution`, `invention`, etc.
+    //
+    // After `NotificationValue` grew an internally-tagged `kind`
+    // discriminator, the wrapper map has two keys (`kind` +
+    // `<variant>`). Detect that shape (exactly one non-`kind` key
+    // whose value is an object/array) and descend through the data
+    // key so existing tests that read `cli_result["output"]` keep
+    // working without touching every snapshot.
     if data_values.len() == 1 {
         let v = data_values.into_iter().next().unwrap();
         if let Some(obj) = v.as_object() {
@@ -159,6 +176,15 @@ pub fn run_cli(args: &[&str]) -> serde_json::Value {
                 let inner = obj.values().next().unwrap();
                 if inner.is_object() || inner.is_array() {
                     return inner.clone();
+                }
+            }
+            if obj.len() == 2 && obj.contains_key("kind") {
+                if let Some((_, inner)) =
+                    obj.iter().find(|(k, _)| k.as_str() != "kind")
+                {
+                    if inner.is_object() || inner.is_array() {
+                        return inner.clone();
+                    }
                 }
             }
         }

@@ -6,3 +6,4 @@ export * from "./latestContinuation";
 export * from "./listItem";
 export * from "./logReference";
 export * from "./logReferenceTag";
+export * from "./subscribeEvent";

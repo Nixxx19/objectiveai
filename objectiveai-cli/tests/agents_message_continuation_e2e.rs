@@ -209,7 +209,12 @@ async fn spawn_then_message_propagates_response_continuation() {
         .expect("second turn's request summary .json did not land in 30s");
 
     // Re-poll briefly until the file is non-empty / parseable in
-    // case we caught it mid-write.
+    // case we caught it mid-write. `.continuation` is a
+    // `LogReference { type, path }` pointing at a sibling `.txt` file
+    // that holds the raw continuation token — same on-disk format
+    // every other request-side referenced leaf uses. Follow the path
+    // and read that file's content (raw bytes, NOT JSON-quoted) so
+    // the comparison below is `token vs token`.
     let request_cont_raw = {
         let mut last_err = None;
         let mut value: Option<String> = None;
@@ -218,11 +223,35 @@ async fn spawn_then_message_propagates_response_continuation() {
             match std::fs::read_to_string(&request_summary_path) {
                 Ok(s) if !s.is_empty() => match serde_json::from_str::<Value>(&s) {
                     Ok(v) => {
-                        if let Some(c) = v.get("continuation").and_then(|c| c.as_str()) {
-                            value = Some(c.to_string());
-                            break;
+                        let path = v
+                            .get("continuation")
+                            .and_then(|c| c.get("path"))
+                            .and_then(|p| p.as_str());
+                        match path {
+                            Some(p) => {
+                                let leaf = base_dir.join("logs").join(p);
+                                match std::fs::read_to_string(&leaf) {
+                                    Ok(token) if !token.is_empty() => {
+                                        value = Some(token);
+                                        break;
+                                    }
+                                    Ok(_) => {
+                                        last_err =
+                                            Some("continuation leaf empty".to_string());
+                                    }
+                                    Err(e) => {
+                                        last_err = Some(format!(
+                                            "read continuation leaf {}: {e}",
+                                            leaf.display()
+                                        ));
+                                    }
+                                }
+                            }
+                            None => {
+                                last_err =
+                                    Some("no .continuation.path field".to_string());
+                            }
                         }
-                        last_err = Some("no .continuation field".to_string());
                     }
                     Err(e) => last_err = Some(format!("parse: {e}")),
                 },

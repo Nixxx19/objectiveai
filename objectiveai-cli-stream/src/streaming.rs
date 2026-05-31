@@ -45,7 +45,8 @@ use objectiveai_sdk::agent::completions::message::RichContent;
 use objectiveai_sdk::agent::completions::response::streaming::AgentCompletionIds;
 use objectiveai_sdk::cli::output::{Handle, LogStreamReady, Notification, Output};
 use objectiveai_sdk::filesystem::db::pending::PendingNotification;
-use objectiveai_sdk::filesystem::logs::LogWriter;
+use objectiveai_sdk::filesystem::db::schema::MessageKind;
+use objectiveai_sdk::filesystem::logs::{LogWriter, SubscribeEvent};
 use serde::Serialize;
 
 use crate::pipes::PipeRegistry;
@@ -98,8 +99,17 @@ where
     )>();
     let writer_push = push.clone();
     let writer_handle = handle.clone();
+    let writer_registry = registry.clone();
     let writer_task = tokio::spawn(async move {
-        writer_loop(rx, notif_rx, log_writer, writer_push, writer_handle).await
+        writer_loop(
+            rx,
+            notif_rx,
+            log_writer,
+            writer_push,
+            writer_handle,
+            writer_registry,
+        )
+        .await
     });
 
     let mut stream_err: Option<String> = None;
@@ -132,6 +142,17 @@ where
                             handle,
                         )
                         .await;
+                    // Sibling endpoint: outbound `events.sock`. Same
+                    // per-agent directory as the inbound socket. Must
+                    // exist BEFORE the first matching DB insert hits
+                    // the writer task so a subscribe that connects in
+                    // between sees the resulting Row event — the
+                    // exact invariant the subscribe algorithm relies
+                    // on (no row between "function started" and
+                    // "drain returned" can be missed).
+                    registry
+                        .ensure_outbound_pipe(&lineage_id, &pipes_root, handle)
+                        .await;
                 }
 
                 // 3. Hand a clone to the writer task. Best-effort —
@@ -158,11 +179,13 @@ where
     // batch and returns.
     drop(tx);
 
-    // Tear down every pipe. Reader tasks wake from their
-    // tokio::select! and unlink the FS entry. Once every listener
-    // drops its `notif_tx` clone, the writer task's notif_rx will
-    // start returning None and writer_loop can finalize.
-    registry.shutdown();
+    // Cancel the INBOUND pipe listeners (no more accepts). Already-
+    // accepted connection handlers keep running until their peer
+    // closes; they own `notif_tx` clones, so the writer's `notif_rx`
+    // won't close until they all drop. The OUTBOUND senders remain
+    // alive — the writer task needs them to broadcast `StreamEnd`
+    // from inside `finalize`.
+    registry.shutdown_inbound();
     drop(notif_tx);
 
     // Collect the writer task's outcome. A JoinError means the
@@ -171,8 +194,19 @@ where
         .await
         .map_err(|e| format!("log writer task panicked: {e}"))?;
     if let Err(e) = writer_outcome {
+        // Tear down outbound listeners before propagating. The
+        // writer didn't get to broadcast `StreamEnd` cleanly, so
+        // subscribers see `Closed` on their receivers instead — the
+        // per-connection task handles that as "stream done."
+        registry.shutdown_outbound();
         return Err(format!("log writer failed: {e}"));
     }
+
+    // Writer finalised and broadcast `StreamEnd`. Now tear down the
+    // outbound listeners — accepting new subscriber connections at
+    // this point is a no-op (they'd just see Closed immediately) and
+    // we want `events.sock` unlinked.
+    registry.shutdown_outbound();
 
     if let Some(e) = stream_err {
         return Err(e);
@@ -198,6 +232,14 @@ where
 /// written, the matching handles are passed back into `log_writer.write`
 /// for db insertion. Anything still queued when both channels close
 /// is flushed by `log_writer.finalize`.
+///
+/// After each successful `log_writer.write` / `finalize`, broadcasts
+/// one [`SubscribeEvent::Row`] per inserted (agent_id, kind) tuple to
+/// that agent's outbound `events.sock` fanout sender (looked up via
+/// `registry.outbound_sender`). After `finalize` completes,
+/// broadcasts [`SubscribeEvent::StreamEnd`] to every outbound sender
+/// — `registry.shutdown_outbound` (called by the main loop AFTER
+/// this task returns) is what closes the listeners.
 async fn writer_loop<Chunk, F>(
     mut rx: tokio::sync::mpsc::UnboundedReceiver<Chunk>,
     mut notif_rx: tokio::sync::mpsc::UnboundedReceiver<(
@@ -208,6 +250,7 @@ async fn writer_loop<Chunk, F>(
     mut log_writer: LogWriter<Chunk>,
     push: F,
     handle: Handle,
+    registry: PipeRegistry,
 ) -> Result<(), objectiveai_sdk::filesystem::Error>
 where
     F: Fn(&mut Chunk, &Chunk),
@@ -247,7 +290,8 @@ where
                             pending.push(p);
                         }
                         if let Some(a) = &agg {
-                            log_writer.write(a, &mut pending).await?;
+                            let inserted = log_writer.write(a, &mut pending).await?;
+                            broadcast_rows(&registry, &inserted);
                         }
                         if !logged_id {
                             if let Some(id) = log_writer.primary_id() {
@@ -277,9 +321,28 @@ where
         }
     }
 
-    // Both channels closed — flush any remaining queued notifications.
-    log_writer.finalize(&mut pending).await?;
+    // Both channels closed — flush any remaining queued notifications
+    // (these may produce DB inserts — broadcast Row for each), then
+    // signal `StreamEnd` to every active subscriber.
+    let inserted = log_writer.finalize(&mut pending).await?;
+    broadcast_rows(&registry, &inserted);
+    registry.broadcast_stream_end();
     Ok(())
+}
+
+/// Fan one `Row` event per `(agent_id, kind)` tuple out to the
+/// matching outbound broadcast sender. Missing senders are silently
+/// skipped — `register.ensure_outbound_pipe` is called from the main
+/// loop for every chunk-referenced agent id BEFORE the chunk lands
+/// in the writer, so a missing entry here only happens if pipe bind
+/// previously failed (in which case the degraded sender is in place
+/// but no listener ever consumes from it — the send is a no-op).
+fn broadcast_rows(registry: &PipeRegistry, inserted: &[(String, MessageKind)]) {
+    for (agent_id, kind) in inserted {
+        if let Some(tx) = registry.outbound_sender(agent_id) {
+            let _ = tx.send(SubscribeEvent::Row { message_kind: *kind });
+        }
+    }
 }
 
 async fn emit_log_stream_ready(id: &str, handle: &Handle) {

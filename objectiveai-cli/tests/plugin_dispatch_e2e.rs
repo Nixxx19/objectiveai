@@ -75,15 +75,14 @@ fn hello_plugin_dispatch_produces_expected_output() {
         String::from_utf8_lossy(&output.stderr)
     );
 
+    // `Output::Begin` / `Output::End` JSONL markers were dropped in
+    // f5f4cf52e; plugin dispatch now emits the notification line(s)
+    // directly. The notification's `value` is the
+    // `NotificationValue::Other` flattened map, so the plugin's raw
+    // `{"hello":"world"}` rides alongside `"kind":"other"`.
     let stdout = String::from_utf8(output.stdout).expect("cli stdout not utf-8");
     let lines: Vec<&str> = stdout.lines().collect();
-    assert!(lines.len() >= 3, "expected at least begin/notification/end, got: {lines:?}");
-
-    let first: Value =
-        serde_json::from_str(lines.first().unwrap()).expect("first line not JSON");
-    let last: Value = serde_json::from_str(lines.last().unwrap()).expect("last line not JSON");
-    assert_eq!(first.get("type"), Some(&Value::String("begin".into())));
-    assert_eq!(last.get("type"), Some(&Value::String("end".into())));
+    assert!(!lines.is_empty(), "expected at least one notification, got: {lines:?}");
 
     let hello_count = lines
         .iter()

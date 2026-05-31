@@ -1,10 +1,12 @@
 mod active;
 mod agent_items;
+mod inactive;
 mod messaged;
 mod spawned;
 
 pub use active::*;
 pub use agent_items::*;
+pub use inactive::*;
 pub use messaged::*;
 pub use spawned::*;
 

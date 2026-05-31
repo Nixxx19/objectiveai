@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{
     ActiveAgent, Agent, AgentItems, Cleared, Detached, Execution, Function, Help,
-    Installed, Instructions, Inventions, JqResults, Laboratory, LogContent,
+    Inactive, Installed, Instructions, Inventions, JqResults, Laboratory, LogContent,
     LogStreamReady, Mcp, Me, MessageDelivered, MessageQueued, Ok, Pair, Plugin,
     Plugins, Profile, Published, Schema, Schemas, Spawned, State, Swarm, Tool,
     ToolLine, Tools, Updater, ViewerSendResult,
@@ -39,6 +39,8 @@ pub enum NotificationValue {
     Agent(Agent),
     #[schemars(title = "AgentItems")]
     AgentItems(AgentItems),
+    #[schemars(title = "Inactive")]
+    Inactive(Inactive),
     #[schemars(title = "MessageDelivered")]
     MessageDelivered(MessageDelivered),
     #[schemars(title = "MessageQueued")]
@@ -160,7 +162,7 @@ macro_rules! from_variant {
 }
 
 from_variant! {
-    ActiveAgent, Agent, AgentItems, MessageDelivered, MessageQueued, Spawned,
+    ActiveAgent, Agent, AgentItems, Inactive, MessageDelivered, MessageQueued, Spawned,
     Detached,
     Execution, Function, Inventions, Pair, Profile, State,
     Laboratory,

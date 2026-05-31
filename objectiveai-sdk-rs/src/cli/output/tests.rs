@@ -107,6 +107,16 @@ fn nv_agent_items_roundtrip() {
 }
 
 #[test]
+fn nv_inactive_roundtrip() {
+    let out = notif(NotificationValue::Inactive(
+        crate::cli::output::notification::agents::Inactive {
+            agent_id: "agent-1".into(),
+        },
+    ));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
 fn nv_spawned_roundtrip() {
     let out = notif(NotificationValue::Spawned(Spawned {
         agent_id: "spawn-xyz".into(),

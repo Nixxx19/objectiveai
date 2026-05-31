@@ -106,6 +106,39 @@ func (v CliOutputNotificationNotificationValueAgentItems) MarshalJSON() ([]byte,
 }
 func (CliOutputNotificationNotificationValueAgentItems) SchemaVariantTitle() string { return "AgentItems" }
 
+type CliOutputNotificationNotificationValueInactive struct {
+	CliOutputNotificationAgentsInactive
+	Kind string `json:"kind" validate:"oneof=inactive"`
+}
+
+func (v *CliOutputNotificationNotificationValueInactive) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.CliOutputNotificationAgentsInactive); err != nil {
+		return err
+	}
+	var local struct {
+		Kind string `json:"kind"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Kind = local.Kind
+	return nil
+}
+
+func (v CliOutputNotificationNotificationValueInactive) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.CliOutputNotificationAgentsInactive)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Kind); err == nil {
+		merged["kind"] = raw
+	}
+	return json.Marshal(merged)
+}
+func (CliOutputNotificationNotificationValueInactive) SchemaVariantTitle() string { return "Inactive" }
+
 type CliOutputNotificationNotificationValueMessageDelivered struct {
 	CliOutputNotificationAgentsMessageDelivered
 	Kind string `json:"kind" validate:"oneof=message_delivered"`
@@ -1208,6 +1241,7 @@ type CliOutputNotificationNotificationValue struct {
 	ActiveAgent *CliOutputNotificationNotificationValueActiveAgent 
 	Agent *CliOutputNotificationNotificationValueAgent 
 	AgentItems *CliOutputNotificationNotificationValueAgentItems 
+	Inactive *CliOutputNotificationNotificationValueInactive 
 	MessageDelivered *CliOutputNotificationNotificationValueMessageDelivered 
 	MessageQueued *CliOutputNotificationNotificationValueMessageQueued 
 	Spawned *CliOutputNotificationNotificationValueSpawned 
@@ -1266,6 +1300,9 @@ func (v CliOutputNotificationNotificationValue) MarshalJSON() ([]byte, error) {
 	}
 	if v.AgentItems != nil {
 		return json.Marshal(v.AgentItems)
+	}
+	if v.Inactive != nil {
+		return json.Marshal(v.Inactive)
 	}
 	if v.MessageDelivered != nil {
 		return json.Marshal(v.MessageDelivered)
@@ -1397,6 +1434,17 @@ func (v *CliOutputNotificationNotificationValue) UnmarshalJSON(data []byte) erro
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := CliOutputNotificationNotificationValue{}
 			candidate.AgentItems = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try CliOutputNotificationNotificationValueInactive
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := CliOutputNotificationNotificationValue{}
+			candidate.Inactive = &try
 			if candidate.Validate() == nil {
 				*v = candidate
 				return nil
@@ -1774,6 +1822,7 @@ func (v CliOutputNotificationNotificationValue) Validate() error {
 	if v.ActiveAgent != nil { count++ }
 	if v.Agent != nil { count++ }
 	if v.AgentItems != nil { count++ }
+	if v.Inactive != nil { count++ }
 	if v.MessageDelivered != nil { count++ }
 	if v.MessageQueued != nil { count++ }
 	if v.Spawned != nil { count++ }

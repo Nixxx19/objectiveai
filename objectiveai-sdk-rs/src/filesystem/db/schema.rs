@@ -8,14 +8,31 @@ use std::sync::{Arc, Mutex};
 use rusqlite::Connection;
 
 /// Discriminant for the row's payload. Persisted as TEXT via the
-/// `as_str()` mapping so on-disk dumps stay readable.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+/// `as_str()` mapping so on-disk dumps stay readable. Serde maps to
+/// the same snake_case strings so wire shapes that carry the kind
+/// (e.g. the cli-stream → subscribe event pipe) round-trip cleanly
+/// with `as_str()` / `from_str()`.
+///
+/// `AgentCompletionNotification` is the kind for messages drained
+/// off the per-agent inbound socket and inserted into `messages`
+/// just before the next tool-response row (or at stream end).
+#[derive(
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+    serde::Serialize,
+    serde::Deserialize,
+    schemars::JsonSchema,
+)]
+#[serde(rename_all = "snake_case")]
+#[schemars(rename = "filesystem.db.MessageKind")]
 pub enum MessageKind {
     AgentCompletionRequest,
     FunctionExecutionRequest,
     FunctionInventionRecursiveRequest,
-    /// Notifications drained from the per-agent socket and prepended
-    /// to the next tool response (or written at stream end if none).
     AgentCompletionNotification,
     AssistantResponse,
     ToolResponse,
