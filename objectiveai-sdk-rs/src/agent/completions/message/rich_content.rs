@@ -486,26 +486,118 @@ fn blob_to_rich_content_part(
 /// [`crate::mcp::Connection::call_tool_as_message`] handles
 /// `ResourceLink` properly by fetching its contents and routing
 /// them through [`From<ResourceContentsUnion>`].
+/// `_meta` string-value lookup. Returns `None` when the key is
+/// absent or the value isn't a JSON string.
+#[cfg(feature = "mcp")]
+fn meta_string(
+    meta: &Option<indexmap::IndexMap<String, serde_json::Value>>,
+    key: &str,
+) -> Option<String> {
+    meta.as_ref()?
+        .get(key)
+        .and_then(|v| v.as_str().map(String::from))
+}
+
+/// Deserialize a `_meta` entry into [`ImageUrlDetail`]. Accepts a
+/// string value (`"auto"` / `"low"` / `"high"`) that serde_json
+/// reads back via the type's `Deserialize` impl.
+#[cfg(feature = "mcp")]
+fn meta_image_detail(
+    meta: &Option<indexmap::IndexMap<String, serde_json::Value>>,
+    key: &str,
+) -> Option<ImageUrlDetail> {
+    let v = meta.as_ref()?.get(key)?.clone();
+    serde_json::from_value::<ImageUrlDetail>(v).ok()
+}
+
+/// Decode a Text carrier in the absence of an `objectiveai/kind`
+/// marker. Runs the existing `parse_data_url` heuristic and applies
+/// the `objectiveai/filename` marker for `File` outcomes.
+#[cfg(feature = "mcp")]
+fn decode_text_no_marker(
+    text: String,
+    meta: &Option<indexmap::IndexMap<String, serde_json::Value>>,
+) -> RichContentPart {
+    if let Some((mime, payload)) = crate::data_url::parse_data_url(&text) {
+        let filename = meta_string(meta, "objectiveai/filename");
+        blob_to_rich_content_part(mime, payload.to_string(), filename)
+    } else {
+        RichContentPart::Text { text }
+    }
+}
+
 #[cfg(feature = "mcp")]
 impl From<crate::mcp::tool::ContentBlock> for RichContentPart {
     fn from(block: crate::mcp::tool::ContentBlock) -> Self {
         use crate::mcp::tool::ContentBlock;
+        // `_meta` marker keys produced by `From<RichContentPart>` —
+        // every Text/Image carrier here may consult them. See
+        // `mcp/tool/content_block.rs` for the catalogue.
+        const META_KIND: &str = "objectiveai/kind";
+        const META_IMAGE_DETAIL: &str = "objectiveai/image_detail";
+        const META_FILENAME: &str = "objectiveai/filename";
+        const KIND_IMAGE_URL_REMOTE: &str = "image_url_remote";
+        const KIND_INPUT_VIDEO_REMOTE: &str = "input_video_remote";
+        const KIND_VIDEO_URL: &str = "video_url";
+        const KIND_FILE_URL: &str = "file_url";
+        const KIND_FILE_ID: &str = "file_id";
+
         match block {
             ContentBlock::Text(t) => {
-                // Data-URL fast path: `data:<mime>;base64,<payload>`
-                // → media part. `parse_data_url` requires the
-                // `;base64,` marker, so non-data-URL text (and
-                // malformed `data:` prefixes) cleanly fall through
-                // to the plain text mapping.
-                if let Some((mime, payload)) = crate::data_url::parse_data_url(&t.text) {
-                    blob_to_rich_content_part(mime, payload.to_string(), None)
-                } else {
-                    RichContentPart::Text { text: t.text }
+                // 1) Marker-driven reconstruction. Read `kind` and
+                //    rebuild the corresponding RichContentPart
+                //    variant, pulling companion markers as needed.
+                let kind = meta_string(&t._meta, META_KIND);
+                if let Some(kind) = kind {
+                    return match kind.as_str() {
+                        KIND_IMAGE_URL_REMOTE => {
+                            let detail = meta_image_detail(&t._meta, META_IMAGE_DETAIL);
+                            RichContentPart::ImageUrl {
+                                image_url: ImageUrl {
+                                    url: t.text,
+                                    detail,
+                                },
+                            }
+                        }
+                        KIND_INPUT_VIDEO_REMOTE => RichContentPart::InputVideo {
+                            video_url: VideoUrl { url: t.text },
+                        },
+                        KIND_VIDEO_URL => RichContentPart::VideoUrl {
+                            video_url: VideoUrl { url: t.text },
+                        },
+                        KIND_FILE_URL => RichContentPart::File {
+                            file: File {
+                                file_data: None,
+                                filename: meta_string(&t._meta, META_FILENAME),
+                                file_id: None,
+                                file_url: Some(t.text),
+                            },
+                        },
+                        KIND_FILE_ID => RichContentPart::File {
+                            file: File {
+                                file_data: None,
+                                filename: meta_string(&t._meta, META_FILENAME),
+                                file_id: Some(t.text),
+                                file_url: None,
+                            },
+                        },
+                        // Unknown kind: fall through to the
+                        // marker-free decode below. Be lenient.
+                        _ => decode_text_no_marker(t.text, &t._meta),
+                    };
                 }
+                // 2) No `kind` marker: parse_data_url-driven
+                //    heuristic (image/audio/video/file by mime,
+                //    plain text otherwise). Filename meta may still
+                //    apply to the file_data case.
+                decode_text_no_marker(t.text, &t._meta)
             }
-            ContentBlock::Image(i) => RichContentPart::ImageUrl {
-                image_url: i.into(),
-            },
+            ContentBlock::Image(i) => {
+                let detail = meta_image_detail(&i._meta, META_IMAGE_DETAIL);
+                let mut image_url: ImageUrl = i.into();
+                image_url.detail = detail;
+                RichContentPart::ImageUrl { image_url }
+            }
             ContentBlock::Audio(a) => RichContentPart::InputAudio {
                 input_audio: a.into(),
             },

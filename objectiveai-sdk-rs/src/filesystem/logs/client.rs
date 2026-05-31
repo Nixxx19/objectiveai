@@ -79,6 +79,37 @@ impl LogContent {
     }
 }
 
+/// Lossless projection into the agent-side rich-content surface. The
+/// MCP formatter funnels every cli output through `RichContentPart`
+/// before handing off to `ContentBlock`; this `From` is the entry
+/// point for the `LogContent` family.
+///
+/// `LogContent::Json` projects to a `Text` part carrying the
+/// JSON-encoded body (closest `RichContentPart` representation —
+/// there's no structured-JSON variant). Every other LogContent
+/// variant maps to the matching typed `RichContentPart`.
+impl From<LogContent> for crate::agent::completions::message::RichContentPart {
+    fn from(log: LogContent) -> Self {
+        use crate::agent::completions::message::RichContentPart;
+        match log {
+            LogContent::Json { content } => RichContentPart::Text {
+                text: serde_json::to_string(&content).unwrap_or_default(),
+            },
+            LogContent::Text { text } => RichContentPart::Text { text },
+            LogContent::Image { image_url } => {
+                RichContentPart::ImageUrl { image_url }
+            }
+            LogContent::Audio { input_audio } => {
+                RichContentPart::InputAudio { input_audio }
+            }
+            LogContent::Video { video_url } => {
+                RichContentPart::InputVideo { video_url }
+            }
+            LogContent::File { file } => RichContentPart::File { file },
+        }
+    }
+}
+
 impl Client {
     fn endpoint_dir(&self, endpoint: &str) -> PathBuf {
         let mut dir = self.logs_dir();
