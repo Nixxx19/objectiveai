@@ -90,8 +90,15 @@ fn hello_plugin_dispatch_produces_expected_output() {
             let Ok(v) = serde_json::from_str::<Value>(line) else {
                 return false;
             };
+            // PluginNotification wraps the plugin's payload under
+            // an inner `value` field (kind = "plugin_notification"),
+            // so the path to the plugin's own key is two `value`
+            // hops deep.
             v.get("type") == Some(&Value::String("notification".into()))
-                && v.pointer("/value/hello") == Some(&Value::String("world".into()))
+                && v.pointer("/value/kind")
+                    == Some(&Value::String("plugin_notification".into()))
+                && v.pointer("/value/value/hello")
+                    == Some(&Value::String("world".into()))
         })
         .count();
     assert_eq!(

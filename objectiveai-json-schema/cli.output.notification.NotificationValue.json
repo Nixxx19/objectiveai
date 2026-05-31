@@ -354,6 +354,20 @@
       }
     },
     {
+      "title": "PluginNotification",
+      "description": "A notification emitted by a cli plugin and forwarded by the\nhost. The plugin's payload is nested under `value` as an\narbitrary `serde_json::Value` — objects, strings, numbers,\nbooleans, arrays, and null are all valid. Replaces the old\n`NotificationValue::other` flatten-onto-`kind` shape (which\ncollided with payloads that had their own `\"kind\"` key and\npanicked on non-object inputs).\n\nWire: `{\"kind\":\"plugin_notification\",\"value\":<any-json>}`.",
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "plugin_notification"
+          ]
+        },
+        "value": {}
+      }
+    },
+    {
       "title": "Plugins",
       "type": "object",
       "$ref": "cli.output.notification.Plugins",

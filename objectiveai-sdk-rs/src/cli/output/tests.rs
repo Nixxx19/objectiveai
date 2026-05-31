@@ -346,6 +346,54 @@ fn nv_plugin_none_roundtrip() {
 }
 
 #[test]
+fn nv_plugin_notification_roundtrip_object() {
+    let out = notif(NotificationValue::PluginNotification {
+        value: serde_json::json!({"hello": "world", "count": 3}),
+    });
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_plugin_notification_roundtrip_string() {
+    let out = notif(NotificationValue::PluginNotification {
+        value: serde_json::Value::String("plain text payload".into()),
+    });
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_plugin_notification_roundtrip_bool() {
+    let out = notif(NotificationValue::PluginNotification {
+        value: serde_json::Value::Bool(true),
+    });
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_plugin_notification_roundtrip_number() {
+    let out = notif(NotificationValue::PluginNotification {
+        value: serde_json::json!(42),
+    });
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_plugin_notification_roundtrip_array() {
+    let out = notif(NotificationValue::PluginNotification {
+        value: serde_json::json!([1, "two", false, null]),
+    });
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_plugin_notification_roundtrip_null() {
+    let out = notif(NotificationValue::PluginNotification {
+        value: serde_json::Value::Null,
+    });
+    assert_roundtrip_eq(out);
+}
+
+#[test]
 fn nv_tools_empty_roundtrip() {
     let out = notif(NotificationValue::Tools(Tools { tools: vec![] }));
     assert_roundtrip_eq(out);

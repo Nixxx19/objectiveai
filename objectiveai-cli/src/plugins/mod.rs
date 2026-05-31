@@ -293,18 +293,24 @@ pub async fn dispatch_external(
                 .await;
             }
             Ok(PluginOutput::Notification(value)) => {
-                Output::Notification(Notification { value: objectiveai_sdk::cli::output::NotificationValue::other(&value), agent_id: None })
-                    .emit(handle)
-                    .await;
+                Output::Notification(Notification {
+                    value: objectiveai_sdk::cli::output::NotificationValue::PluginNotification { value },
+                    agent_id: None,
+                })
+                .emit(handle)
+                .await;
             }
             Ok(PluginOutput::Command { command }) => {
                 command_tasks.push(spawn_command(command, cli_config, handle));
             }
             Err(_) => {
                 let value = serde_json::Value::String(trimmed.to_string());
-                Output::Notification(Notification { value: objectiveai_sdk::cli::output::NotificationValue::other(&value), agent_id: None })
-                    .emit(handle)
-                    .await;
+                Output::Notification(Notification {
+                    value: objectiveai_sdk::cli::output::NotificationValue::PluginNotification { value },
+                    agent_id: None,
+                })
+                .emit(handle)
+                .await;
             }
         }
     }

@@ -97,6 +97,17 @@ pub enum NotificationValue {
     Ok(Ok),
     #[schemars(title = "Plugin")]
     Plugin(Plugin),
+    /// A notification emitted by a cli plugin and forwarded by the
+    /// host. The plugin's payload is nested under `value` as an
+    /// arbitrary `serde_json::Value` — objects, strings, numbers,
+    /// booleans, arrays, and null are all valid. Replaces the old
+    /// `NotificationValue::other` flatten-onto-`kind` shape (which
+    /// collided with payloads that had their own `"kind"` key and
+    /// panicked on non-object inputs).
+    ///
+    /// Wire: `{"kind":"plugin_notification","value":<any-json>}`.
+    #[schemars(title = "PluginNotification")]
+    PluginNotification { value: serde_json::Value },
     #[schemars(title = "Plugins")]
     Plugins(Plugins),
     #[schemars(title = "Published")]
