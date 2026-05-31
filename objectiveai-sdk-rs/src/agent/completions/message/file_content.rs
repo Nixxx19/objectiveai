@@ -32,7 +32,7 @@ impl FileContent<'_> {
 ///
 /// Expects the format `data:{type}/{subtype};base64,{payload}`.
 /// Returns `None` if the URL is not a valid base64 data URL.
-pub(crate) fn parse_data_url(url: &str) -> Option<(&str, &str)> {
+pub fn parse_data_url(url: &str) -> Option<(&str, &str)> {
     let rest = url.strip_prefix("data:")?;
     let (mime, payload) = rest.split_once(";base64,")?;
     Some((mime, payload))

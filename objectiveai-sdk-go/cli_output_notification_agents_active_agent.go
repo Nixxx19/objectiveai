@@ -7,7 +7,7 @@ import (
 	"fmt"
 )
 
-// One direct-child agent of the parent `agents list-active` was
+// One direct-child agent of the parent `agents list active` was
 // called with, plus the unix-seconds timestamp of its most recent
 // `assistant_response` row in the `messages` table.
 //

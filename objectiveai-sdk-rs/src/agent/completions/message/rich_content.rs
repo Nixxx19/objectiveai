@@ -346,6 +346,33 @@ impl From<Vec<RichContentPart>> for RichContent {
     }
 }
 
+impl RichContentPart {
+    /// Build a part from a raw string. If `text` parses as a
+    /// `data:<mime>;base64,<payload>` URL, route it through the same
+    /// mime-prefix dispatch the inlined-resource path uses
+    /// (`image/*` → `ImageUrl`, `audio/*` → `InputAudio`, `video/*` →
+    /// `InputVideo`, else `File`). Otherwise return a plain
+    /// `RichContentPart::Text { text }`.
+    pub fn from_text_or_data_url(text: String) -> Self {
+        match super::parse_data_url(&text) {
+            Some((mime, payload)) => {
+                blob_to_rich_content_part(mime, payload.to_string(), None)
+            }
+            None => RichContentPart::Text { text },
+        }
+    }
+}
+
+impl RichContent {
+    /// Build a `RichContent` from a raw string. Wraps
+    /// [`RichContentPart::from_text_or_data_url`] and lets the
+    /// existing `From<Vec<RichContentPart>>` collapse demote a
+    /// single Text part back to `RichContent::Text` automatically.
+    pub fn from_text_or_data_url(text: String) -> Self {
+        Self::from(vec![RichContentPart::from_text_or_data_url(text)])
+    }
+}
+
 /// Convert an inlined MCP resource (`ResourceContentsUnion`) into a
 /// `RichContentPart`. Mapping rules:
 ///
@@ -408,7 +435,6 @@ impl From<crate::mcp::shared::ResourceContentsUnion> for RichContentPart {
 ///   `application/ogg` or `application/mp4` where the bytes would
 ///   be needed to disambiguate audio vs video — becomes a file part
 ///   with the raw base64 data and the caller-supplied filename.
-#[cfg(feature = "mcp")]
 fn blob_to_rich_content_part(
     mime: &str,
     blob: String,

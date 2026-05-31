@@ -219,9 +219,58 @@ fn nv_log_content_json_roundtrip() {
 }
 
 #[test]
-fn nv_log_content_data_url_roundtrip() {
-    let out = notif(NotificationValue::LogContent(LogContent::DataUrl {
-        content_data_url: "data:image/png;base64,abc".into(),
+fn nv_log_content_text_roundtrip() {
+    let out = notif(NotificationValue::LogContent(LogContent::Text {
+        text: "plain string".into(),
+    }));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_log_content_image_roundtrip() {
+    use crate::agent::completions::message::ImageUrl;
+    let out = notif(NotificationValue::LogContent(LogContent::Image {
+        image_url: ImageUrl {
+            url: "data:image/png;base64,iVBORw0KGgo".into(),
+            detail: None,
+        },
+    }));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_log_content_audio_roundtrip() {
+    use crate::agent::completions::message::InputAudio;
+    let out = notif(NotificationValue::LogContent(LogContent::Audio {
+        input_audio: InputAudio {
+            data: "SUQzBAA".into(),
+            format: "audio/mpeg".into(),
+        },
+    }));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_log_content_video_roundtrip() {
+    use crate::agent::completions::message::VideoUrl;
+    let out = notif(NotificationValue::LogContent(LogContent::Video {
+        video_url: VideoUrl {
+            url: "data:video/mp4;base64,AAAA".into(),
+        },
+    }));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
+fn nv_log_content_file_roundtrip() {
+    use crate::agent::completions::message::File;
+    let out = notif(NotificationValue::LogContent(LogContent::File {
+        file: File {
+            file_data: Some("JVBERi0".into()),
+            filename: Some("report.pdf".into()),
+            file_id: None,
+            file_url: None,
+        },
     }));
     assert_roundtrip_eq(out);
 }

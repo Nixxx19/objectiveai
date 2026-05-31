@@ -4,5 +4,5 @@ import { z } from "zod";
 
 export const CliOutputNotificationAgentsSpawnedSchema = z.object({
   agent_id: z.string(),
-}).describe("Result of `agents spawn`. Emitted once, immediately before the\nCLI exits and leaves `objectiveai-cli-stream` running detached\nto consume the actual completion stream.\n\n`agent_id` is the local lineage segment of the spawned agent's\ncomposite id — paste it directly into `agents read pending` or\nmatch against the output of `agents list-active`.\n\nWire: `{\"type\":\"notification\",\"agent_id\":\"<local-id>\"}`.").meta({ title: "cli.output.notification.agents.Spawned" });
+}).describe("Result of `agents spawn`. Emitted once, immediately before the\nCLI exits and leaves `objectiveai-cli-stream` running detached\nto consume the actual completion stream.\n\n`agent_id` is the local lineage segment of the spawned agent's\ncomposite id — paste it directly into `agents read pending` or\nmatch against the output of `agents list active`.\n\nWire: `{\"type\":\"notification\",\"agent_id\":\"<local-id>\"}`.").meta({ title: "cli.output.notification.agents.Spawned" });
 export type CliOutputNotificationAgentsSpawned = z.infer<typeof CliOutputNotificationAgentsSpawnedSchema>;

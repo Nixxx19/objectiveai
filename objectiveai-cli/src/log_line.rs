@@ -24,16 +24,15 @@ pub fn parse_log_stream_ready(line: &str) -> Option<String> {
     }
 }
 
-/// Translate the upstream `LogContent` (which has no serde derives)
-/// into the cli-lib wire shape and emit.
-pub async fn emit_log_content(content: objectiveai_sdk::filesystem::logs::LogContent, handle: &Handle) {
-    let wire = match content {
-        objectiveai_sdk::filesystem::logs::LogContent::Json(v) => LogContent::Json { content: v },
-        objectiveai_sdk::filesystem::logs::LogContent::DataUrl(s) => LogContent::DataUrl {
-            content_data_url: s,
-        },
-    };
-    Output::Notification(objectiveai_sdk::cli::output::Notification { agent_id: None, value: (wire).into() }).emit(handle).await;
+/// Wrap a [`LogContent`] in the `NotificationValue::LogContent`
+/// envelope and emit it on the handle.
+pub async fn emit_log_content(content: LogContent, handle: &Handle) {
+    Output::Notification(Notification {
+        agent_id: None,
+        value: content.into(),
+    })
+    .emit(handle)
+    .await;
 }
 
 /// Emit a list of log directory entries as `Items<LogListItem>`.

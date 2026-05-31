@@ -4,6 +4,7 @@ export * from "./indexed_reference/index";
 export * from "./queue/index";
 export * from "./latestContinuation";
 export * from "./listItem";
+export * from "./logContent";
 export * from "./logReference";
 export * from "./logReferenceTag";
 export * from "./subscribeEvent";

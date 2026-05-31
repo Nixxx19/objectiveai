@@ -21,7 +21,6 @@ import { CliOutputNotificationInstalledSchema } from "./installed";
 import { CliOutputNotificationInstructionsSchema } from "./instructions";
 import { CliOutputNotificationJqResultsSchema } from "./jqResults";
 import { CliOutputNotificationLaboratoriesExecutionsLaboratorySchema } from "./laboratories/executions/laboratory";
-import { CliOutputNotificationLogContentSchema } from "./logContent";
 import { CliOutputNotificationLogStreamReadySchema } from "./logStreamReady";
 import { CliOutputNotificationMcpSchema } from "./mcp";
 import { CliOutputNotificationMeSchema } from "./me";
@@ -37,6 +36,7 @@ import { CliOutputNotificationToolLineSchema } from "./toolLine";
 import { CliOutputNotificationToolsSchema } from "./tools";
 import { CliOutputNotificationUpdaterSchema } from "./updater";
 import { CliOutputNotificationViewerSendResultSchema } from "./viewerSendResult";
+import { FilesystemLogsLogContentSchema } from "../../../filesystem/logs/logContent";
 
 export const CliOutputNotificationNotificationValueSchema = z.union([CliOutputNotificationAgentsActiveAgentSchema.and(z.object({
   kind: z.literal("active_agent"),
@@ -80,7 +80,7 @@ export const CliOutputNotificationNotificationValueSchema = z.union([CliOutputNo
   kind: z.literal("instructions"),
 })).meta({"variantTitle":"Instructions"}), CliOutputNotificationJqResultsSchema.and(z.object({
   kind: z.literal("jq_results"),
-})).meta({"variantTitle":"JqResults"}), CliOutputNotificationLogContentSchema.and(z.object({
+})).meta({"variantTitle":"JqResults"}), FilesystemLogsLogContentSchema.and(z.object({
   kind: z.literal("log_content"),
 })).meta({"variantTitle":"LogContent"}), CliOutputNotificationLogStreamReadySchema.and(z.object({
   kind: z.literal("log_stream_ready"),

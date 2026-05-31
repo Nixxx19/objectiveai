@@ -11,7 +11,6 @@ export * from "./installed";
 export * from "./instructions";
 export * from "./jqResults";
 export * from "./listItem";
-export * from "./logContent";
 export * from "./logStreamReady";
 export * from "./mcp";
 export * from "./me";

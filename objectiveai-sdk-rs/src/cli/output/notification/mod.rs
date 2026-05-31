@@ -11,7 +11,8 @@ mod help;
 mod instructions;
 mod items;
 mod jq;
-mod log_content;
+// `LogContent` lives at `crate::filesystem::logs::LogContent` — the
+// notification module re-exports it via the `pub use` block below.
 mod log_stream_ready;
 mod me;
 mod plugins;
@@ -35,7 +36,7 @@ pub use help::*;
 pub use instructions::*;
 pub use items::*;
 pub use jq::*;
-pub use log_content::*;
+pub use crate::filesystem::logs::LogContent;
 pub use log_stream_ready::*;
 pub use me::*;
 pub use plugins::*;

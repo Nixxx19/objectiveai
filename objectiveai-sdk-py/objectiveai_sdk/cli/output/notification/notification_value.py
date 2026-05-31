@@ -3,7 +3,11 @@
 from __future__ import annotations
 from typing import Literal, Union
 from objectiveai_sdk.json_value import JsonValue
-from pydantic import BaseModel, ConfigDict, RootModel
+from pydantic import BaseModel, ConfigDict, Field, RootModel
+from objectiveai_sdk.agent.completions.message.file import File
+from objectiveai_sdk.agent.completions.message.image_url import ImageUrl
+from objectiveai_sdk.agent.completions.message.input_audio import InputAudio
+from objectiveai_sdk.agent.completions.message.video_url import VideoUrl
 from objectiveai_sdk.cli.output.notification.agents.active_agent import ActiveAgent
 from objectiveai_sdk.cli.output.notification.agents.agent import Agent
 from objectiveai_sdk.cli.output.notification.agents.agent_items import AgentItems
@@ -24,7 +28,6 @@ from objectiveai_sdk.cli.output.notification.installed import Installed
 from objectiveai_sdk.cli.output.notification.instructions import Instructions
 from objectiveai_sdk.cli.output.notification.jq_results import JqResults
 from objectiveai_sdk.cli.output.notification.laboratories.executions.laboratory import Laboratory
-from objectiveai_sdk.cli.output.notification.log_content import LogContent
 from objectiveai_sdk.cli.output.notification.log_stream_ready import LogStreamReady
 from objectiveai_sdk.cli.output.notification.mcp import Mcp
 from objectiveai_sdk.cli.output.notification.me import Me
@@ -41,6 +44,7 @@ from objectiveai_sdk.cli.output.notification.tool_line import ToolLine
 from objectiveai_sdk.cli.output.notification.tools import Tools
 from objectiveai_sdk.cli.output.notification.updater import Updater
 from objectiveai_sdk.cli.output.notification.viewer_send_result import ViewerSendResult
+from objectiveai_sdk.filesystem.logs.log_content import LogContent
 
 
 class NotificationValueActiveAgent(ActiveAgent):
@@ -171,18 +175,44 @@ class NotificationValueJqResults(JqResults):
 
 class NotificationValueLogContentJson(BaseModel):
     content: JsonValue
+    type_: Literal['json'] = Field(..., alias='type')
     kind: Literal['log_content']
 
 
-class NotificationValueLogContentDataUrl(BaseModel):
-    content_data_url: str
+class NotificationValueLogContentText(BaseModel):
+    text: str
+    type_: Literal['text'] = Field(..., alias='type')
+    kind: Literal['log_content']
+
+
+class NotificationValueLogContentImage(BaseModel):
+    image_url: ImageUrl
+    type_: Literal['image'] = Field(..., alias='type')
+    kind: Literal['log_content']
+
+
+class NotificationValueLogContentAudio(BaseModel):
+    input_audio: InputAudio
+    type_: Literal['audio'] = Field(..., alias='type')
+    kind: Literal['log_content']
+
+
+class NotificationValueLogContentVideo(BaseModel):
+    type_: Literal['video'] = Field(..., alias='type')
+    video_url: VideoUrl
+    kind: Literal['log_content']
+
+
+class NotificationValueLogContentFile(BaseModel):
+    file: File
+    type_: Literal['file'] = Field(..., alias='type')
     kind: Literal['log_content']
 
 
 class NotificationValueLogContent(RootModel):
-    model_config = ConfigDict(json_schema_extra={'_expanded_ref': 'cli.output.notification.LogContent', '_expanded_ref_props': ['kind'], '_variant_title': 'LogContent'})
+    model_config = ConfigDict(json_schema_extra={'_expanded_ref': 'filesystem.logs.LogContent', '_expanded_ref_props': ['kind'], '_variant_title': 'LogContent'})
 
-    root: Union[NotificationValueLogContentJson, NotificationValueLogContentDataUrl]
+    root: Union[NotificationValueLogContentJson, NotificationValueLogContentText, NotificationValueLogContentImage, NotificationValueLogContentAudio, NotificationValueLogContentVideo, NotificationValueLogContentFile]
 
 
 class NotificationValueLogStreamReady(LogStreamReady):

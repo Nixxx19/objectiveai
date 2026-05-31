@@ -522,7 +522,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::cli::output::notification::ViewerSendResult),
             schemars::schema_for!(crate::cli::output::notification::JqResults),
             schemars::schema_for!(crate::cli::output::notification::ListItem),
-            schemars::schema_for!(crate::cli::output::notification::LogContent),
+            schemars::schema_for!(crate::filesystem::logs::LogContent),
             schemars::schema_for!(crate::cli::output::notification::LogStreamReady),
             schemars::schema_for!(crate::cli::output::notification::PairListItem),
             schemars::schema_for!(crate::cli::output::notification::Plugin),

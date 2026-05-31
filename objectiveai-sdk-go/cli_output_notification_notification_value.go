@@ -701,12 +701,12 @@ func (v CliOutputNotificationNotificationValueJqResults) MarshalJSON() ([]byte, 
 func (CliOutputNotificationNotificationValueJqResults) SchemaVariantTitle() string { return "JqResults" }
 
 type CliOutputNotificationNotificationValueLogContent struct {
-	CliOutputNotificationLogContent
+	FilesystemLogsLogContent
 	Kind string `json:"kind" validate:"oneof=log_content"`
 }
 
 func (v *CliOutputNotificationNotificationValueLogContent) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.CliOutputNotificationLogContent); err != nil {
+	if err := json.Unmarshal(data, &v.FilesystemLogsLogContent); err != nil {
 		return err
 	}
 	var local struct {
@@ -720,7 +720,7 @@ func (v *CliOutputNotificationNotificationValueLogContent) UnmarshalJSON(data []
 }
 
 func (v CliOutputNotificationNotificationValueLogContent) MarshalJSON() ([]byte, error) {
-	base, err := json.Marshal(v.CliOutputNotificationLogContent)
+	base, err := json.Marshal(v.FilesystemLogsLogContent)
 	if err != nil {
 		return nil, err
 	}

@@ -21,7 +21,7 @@ impl Commands {
         let client = objectiveai_sdk::filesystem::Client::new(cli_config.config_base_dir.as_deref(), None::<String>, None::<String>);
         match self {
             Commands::Get { id, filter } => {
-                let content = client.read_agent_completion_continuation(&id, filter.as_deref()).await.map(objectiveai_sdk::filesystem::logs::LogContent::Json)?;
+                let content = client.read_agent_completion_continuation(&id, filter.as_deref()).await.map(objectiveai_sdk::filesystem::logs::LogContent::json)?;
                 {
                 crate::log_line::emit_log_content(content, handle).await;
                 Ok(())
@@ -30,7 +30,7 @@ impl Commands {
             Commands::Subscribe { id, timeout_ms, require_modification, filter } => {
                 let result = client.subscribe_agent_completion_continuation(&id, std::time::Duration::from_millis(timeout_ms), require_modification, filter.as_deref()).await?;
                 {
-                match result.map(objectiveai_sdk::filesystem::logs::LogContent::Json) {
+                match result.map(objectiveai_sdk::filesystem::logs::LogContent::json) {
                     Some(content) => {
                         crate::log_line::emit_log_content(content, handle).await;
                         Ok(())

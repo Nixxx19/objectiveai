@@ -3,5 +3,5 @@
 
 
 def test_log_content_json():
-    from objectiveai_sdk.cli.output.notification import LogContentJson
+    from objectiveai_sdk.filesystem.logs import LogContentJson
     schema = LogContentJson.model_json_schema()
