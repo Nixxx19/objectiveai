@@ -28,16 +28,6 @@ impl FileContent<'_> {
     }
 }
 
-/// Parses a data URL, returning `(full_mime, base64_payload)`.
-///
-/// Expects the format `data:{type}/{subtype};base64,{payload}`.
-/// Returns `None` if the URL is not a valid base64 data URL.
-pub fn parse_data_url(url: &str) -> Option<(&str, &str)> {
-    let rest = url.strip_prefix("data:")?;
-    let (mime, payload) = rest.split_once(";base64,")?;
-    Some((mime, payload))
-}
-
 /// Maps a full MIME type to a file extension using `mime2ext`.
 ///
 /// Falls back to `"bin"` if the MIME type is not recognized.

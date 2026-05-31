@@ -354,7 +354,7 @@ impl RichContentPart {
     /// `InputVideo`, else `File`). Otherwise return a plain
     /// `RichContentPart::Text { text }`.
     pub fn from_text_or_data_url(text: String) -> Self {
-        match super::parse_data_url(&text) {
+        match crate::data_url::parse_data_url(&text) {
             Some((mime, payload)) => {
                 blob_to_rich_content_part(mime, payload.to_string(), None)
             }
@@ -497,7 +497,7 @@ impl From<crate::mcp::tool::ContentBlock> for RichContentPart {
                 // `;base64,` marker, so non-data-URL text (and
                 // malformed `data:` prefixes) cleanly fall through
                 // to the plain text mapping.
-                if let Some((mime, payload)) = super::parse_data_url(&t.text) {
+                if let Some((mime, payload)) = crate::data_url::parse_data_url(&t.text) {
                     blob_to_rich_content_part(mime, payload.to_string(), None)
                 } else {
                     RichContentPart::Text { text: t.text }
@@ -955,7 +955,7 @@ impl ImageUrl {
     ///
     /// HTTP/HTTPS URLs return `None` (kept inline).
     pub fn file_content(&self) -> Option<super::FileContent<'_>> {
-        let (mime, payload) = super::file_content::parse_data_url(&self.url)?;
+        let (mime, payload) = crate::data_url::parse_data_url(&self.url)?;
         Some(super::FileContent {
             content: payload,
             extension: super::file_content::mime_to_ext(mime),
@@ -1195,7 +1195,7 @@ impl VideoUrl {
     ///
     /// HTTP/HTTPS URLs return `None` (kept inline).
     pub fn file_content(&self) -> Option<super::FileContent<'_>> {
-        let (mime, payload) = super::file_content::parse_data_url(&self.url)?;
+        let (mime, payload) = crate::data_url::parse_data_url(&self.url)?;
         Some(super::FileContent {
             content: payload,
             extension: super::file_content::mime_to_ext(mime),
