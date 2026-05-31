@@ -5,7 +5,7 @@
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use super::{Content, Id, QueueMessage};
+use super::{Content, QueueMessage};
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -15,16 +15,16 @@ pub enum QueueItem {
     AssistantResponse {
         #[serde(skip_serializing_if = "Option::is_none")]
         #[schemars(extend("omitempty" = true))]
-        reasoning: Option<Id>,
+        reasoning: Option<i64>,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[schemars(extend("omitempty" = true))]
-        tool_calls: Option<Vec<Id>>,
+        tool_calls: Option<Vec<i64>>,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[schemars(extend("omitempty" = true))]
         content: Option<Content>,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[schemars(extend("omitempty" = true))]
-        refusal: Option<Id>,
+        refusal: Option<i64>,
     },
     #[schemars(title = "ToolResponse")]
     ToolResponse {
@@ -36,7 +36,7 @@ pub enum QueueItem {
     #[schemars(title = "AgentCompletionRequest")]
     AgentCompletionRequest { messages: Vec<QueueMessage> },
     #[schemars(title = "FunctionExecutionRequest")]
-    FunctionExecutionRequest { id: Id },
+    FunctionExecutionRequest { id: i64 },
     #[schemars(title = "FunctionInventionRecursiveRequest")]
-    FunctionInventionRecursiveRequest { id: Id },
+    FunctionInventionRecursiveRequest { id: i64 },
 }

@@ -163,6 +163,10 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    ToolResponseMetadata {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     UserMessage {
         #[command(subcommand)]
         command: GetCommand,
@@ -185,7 +189,7 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["AssistantMessage", "AssistantMessageExpression", "AssistantMessageLog", "AssistantToolCall", "AssistantToolCallDelta", "AssistantToolCallExpression", "AssistantToolCallFunction", "AssistantToolCallFunctionDelta", "AssistantToolCallFunctionExpression", "AssistantToolCallType", "DeveloperMessage", "DeveloperMessageExpression", "DeveloperMessageLog", "File", "ImageUrl", "ImageUrlDetail", "InputAudio", "Message", "MessageExpression", "MessageLog", "PipeAck", "RichContent", "RichContentExpression", "RichContentLog", "RichContentPart", "RichContentPartExpression", "SimpleContent", "SimpleContentExpression", "SimpleContentLog", "SimpleContentPart", "SimpleContentPartExpression", "SystemMessage", "SystemMessageExpression", "SystemMessageLog", "ToolMessage", "ToolMessageExpression", "ToolMessageLog", "UserMessage", "UserMessageExpression", "UserMessageLog", "VideoUrl"];
+                const NAMES: &[&str] = &["AssistantMessage", "AssistantMessageExpression", "AssistantMessageLog", "AssistantToolCall", "AssistantToolCallDelta", "AssistantToolCallExpression", "AssistantToolCallFunction", "AssistantToolCallFunctionDelta", "AssistantToolCallFunctionExpression", "AssistantToolCallType", "DeveloperMessage", "DeveloperMessageExpression", "DeveloperMessageLog", "File", "ImageUrl", "ImageUrlDetail", "InputAudio", "Message", "MessageExpression", "MessageLog", "PipeAck", "RichContent", "RichContentExpression", "RichContentLog", "RichContentPart", "RichContentPartExpression", "SimpleContent", "SimpleContentExpression", "SimpleContentLog", "SimpleContentPart", "SimpleContentPartExpression", "SystemMessage", "SystemMessageExpression", "SystemMessageLog", "ToolMessage", "ToolMessageExpression", "ToolMessageLog", "ToolResponseMetadata", "UserMessage", "UserMessageExpression", "UserMessageLog", "VideoUrl"];
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         agent_id: None,
@@ -631,6 +635,18 @@ impl Commands {
             Commands::ToolMessageLog { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/agent.completions.message.ToolMessageLog.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
+                        value: objectiveai_sdk::cli::output::Schema { schema }.into(),
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::ToolResponseMetadata { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../../../objectiveai-json-schema/agent.completions.message.ToolResponseMetadata.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {

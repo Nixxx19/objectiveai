@@ -4,6 +4,20 @@ from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 from objectiveai_sdk.cli.output.error import Error
+from objectiveai_sdk.cli.output.notification.mcp import Mcp
+
+
+class PluginOutputCommand(BaseModel):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Command'})
+
+    command: str
+    type_: Literal['command'] = Field(..., alias='type')
+
+
+class PluginOutputMcp(Mcp):
+    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Mcp'})
+
+    type_: Literal['mcp'] = Field(..., alias='type')
 
 
 class PluginOutputError(Error):
@@ -18,13 +32,6 @@ class PluginOutputNotification(BaseModel):
     type_: Literal['notification'] = Field(..., alias='type')
 
 
-class PluginOutputCommand(BaseModel):
-    model_config = ConfigDict(json_schema_extra={'_variant_title': 'Command'})
-
-    command: str
-    type_: Literal['command'] = Field(..., alias='type')
-
-
 class PluginOutput(RootModel):
     """One line of plugin output.
 
@@ -36,8 +43,12 @@ Identical in shape to [`crate::cli::output::Output`] except:
   which would collide with the discriminator.
 - No `Begin`/`End` markers — plugins don't bracket their stream.
 - Adds [`PluginOutput::Command`] — a request the host should act
-  on, identified by a `command` string."""
+  on, identified by a `command` string.
+- Adds [`PluginOutput::Mcp`] — a first-class wire variant for a
+  plugin announcing the URL of an MCP server it just started.
+  The host's `PLUGIN_MCP_BEGIN` capture loop matches it directly,
+  avoiding the double-wrap through `Notification(Value)`."""
     model_config = ConfigDict(title='cli.plugins.PluginOutput')
 
-    root: Union[PluginOutputError, PluginOutputNotification, PluginOutputCommand]
+    root: Union[PluginOutputCommand, PluginOutputMcp, PluginOutputError, PluginOutputNotification]
 

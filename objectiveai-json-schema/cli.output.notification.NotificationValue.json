@@ -3,6 +3,7 @@
   "description": "One emitted notification payload. The `kind` tag discriminates\nthe variant. See module-level docs for the wire shape.",
   "anyOf": [
     {
+      "title": "ActiveAgent",
       "type": "object",
       "$ref": "cli.output.notification.agents.ActiveAgent",
       "properties": {
@@ -15,6 +16,7 @@
       }
     },
     {
+      "title": "Agent",
       "type": "object",
       "$ref": "cli.output.notification.agents.Agent",
       "properties": {
@@ -27,6 +29,7 @@
       }
     },
     {
+      "title": "AgentItems",
       "type": "object",
       "$ref": "cli.output.notification.agents.AgentItems",
       "properties": {
@@ -39,6 +42,7 @@
       }
     },
     {
+      "title": "MessageDelivered",
       "type": "object",
       "$ref": "cli.output.notification.agents.MessageDelivered",
       "properties": {
@@ -51,6 +55,7 @@
       }
     },
     {
+      "title": "MessageQueued",
       "type": "object",
       "$ref": "cli.output.notification.agents.MessageQueued",
       "properties": {
@@ -63,6 +68,7 @@
       }
     },
     {
+      "title": "Spawned",
       "type": "object",
       "$ref": "cli.output.notification.agents.Spawned",
       "properties": {
@@ -75,6 +81,7 @@
       }
     },
     {
+      "title": "Detached",
       "type": "object",
       "$ref": "cli.output.notification.api.Detached",
       "properties": {
@@ -87,6 +94,7 @@
       }
     },
     {
+      "title": "Execution",
       "type": "object",
       "$ref": "cli.output.notification.functions.executions.Execution",
       "properties": {
@@ -99,6 +107,7 @@
       }
     },
     {
+      "title": "Function",
       "type": "object",
       "$ref": "cli.output.notification.functions.Function",
       "properties": {
@@ -111,6 +120,7 @@
       }
     },
     {
+      "title": "Inventions",
       "type": "object",
       "$ref": "cli.output.notification.functions.inventions.recursive.Inventions",
       "properties": {
@@ -123,6 +133,7 @@
       }
     },
     {
+      "title": "Pair",
       "type": "object",
       "$ref": "cli.output.notification.functions.profiles.Pair",
       "properties": {
@@ -135,6 +146,7 @@
       }
     },
     {
+      "title": "Profile",
       "type": "object",
       "$ref": "cli.output.notification.functions.profiles.Profile",
       "properties": {
@@ -147,6 +159,7 @@
       }
     },
     {
+      "title": "State",
       "type": "object",
       "$ref": "cli.output.notification.functions.inventions.State",
       "properties": {
@@ -159,6 +172,7 @@
       }
     },
     {
+      "title": "Laboratory",
       "type": "object",
       "$ref": "cli.output.notification.laboratories.executions.Laboratory",
       "properties": {
@@ -171,6 +185,7 @@
       }
     },
     {
+      "title": "Swarm",
       "type": "object",
       "$ref": "cli.output.notification.swarms.Swarm",
       "properties": {
@@ -183,6 +198,7 @@
       }
     },
     {
+      "title": "Cleared",
       "type": "object",
       "$ref": "cli.output.notification.Cleared",
       "properties": {
@@ -195,6 +211,7 @@
       }
     },
     {
+      "title": "Help",
       "type": "object",
       "$ref": "cli.output.notification.Help",
       "properties": {
@@ -207,6 +224,7 @@
       }
     },
     {
+      "title": "Installed",
       "type": "object",
       "$ref": "cli.output.notification.Installed",
       "properties": {
@@ -219,6 +237,7 @@
       }
     },
     {
+      "title": "Instructions",
       "type": "object",
       "$ref": "cli.output.notification.Instructions",
       "properties": {
@@ -231,6 +250,7 @@
       }
     },
     {
+      "title": "JqResults",
       "type": "object",
       "$ref": "cli.output.notification.JqResults",
       "properties": {
@@ -243,6 +263,7 @@
       }
     },
     {
+      "title": "LogContent",
       "type": "object",
       "$ref": "cli.output.notification.LogContent",
       "properties": {
@@ -255,6 +276,7 @@
       }
     },
     {
+      "title": "LogStreamReady",
       "type": "object",
       "$ref": "cli.output.notification.LogStreamReady",
       "properties": {
@@ -267,6 +289,33 @@
       }
     },
     {
+      "title": "Mcp",
+      "type": "object",
+      "$ref": "cli.output.notification.Mcp",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "mcp"
+          ]
+        }
+      }
+    },
+    {
+      "title": "Me",
+      "type": "object",
+      "$ref": "cli.output.notification.Me",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "me"
+          ]
+        }
+      }
+    },
+    {
+      "title": "Ok",
       "type": "object",
       "$ref": "cli.output.notification.Ok",
       "properties": {
@@ -279,6 +328,7 @@
       }
     },
     {
+      "title": "Plugin",
       "type": "object",
       "$ref": "cli.output.notification.Plugin",
       "properties": {
@@ -291,6 +341,7 @@
       }
     },
     {
+      "title": "Plugins",
       "type": "object",
       "$ref": "cli.output.notification.Plugins",
       "properties": {
@@ -303,6 +354,7 @@
       }
     },
     {
+      "title": "Published",
       "type": "object",
       "$ref": "cli.output.notification.Published",
       "properties": {
@@ -315,6 +367,7 @@
       }
     },
     {
+      "title": "Schema",
       "type": "object",
       "$ref": "cli.output.notification.Schema",
       "properties": {
@@ -327,6 +380,7 @@
       }
     },
     {
+      "title": "Schemas",
       "type": "object",
       "$ref": "cli.output.notification.Schemas",
       "properties": {
@@ -339,6 +393,7 @@
       }
     },
     {
+      "title": "Tool",
       "type": "object",
       "$ref": "cli.output.notification.Tool",
       "properties": {
@@ -351,6 +406,7 @@
       }
     },
     {
+      "title": "ToolLine",
       "type": "object",
       "$ref": "cli.output.notification.ToolLine",
       "properties": {
@@ -363,6 +419,7 @@
       }
     },
     {
+      "title": "Tools",
       "type": "object",
       "$ref": "cli.output.notification.Tools",
       "properties": {
@@ -375,6 +432,7 @@
       }
     },
     {
+      "title": "Updater",
       "type": "object",
       "$ref": "cli.output.notification.Updater",
       "properties": {
@@ -387,6 +445,7 @@
       }
     },
     {
+      "title": "ViewerSendResult",
       "type": "object",
       "$ref": "cli.output.notification.ViewerSendResult",
       "properties": {
@@ -399,6 +458,7 @@
       }
     },
     {
+      "title": "Other",
       "description": "Single catch-all for anything that doesn't get a typed\nvariant: generic emits (`Items<T>`, `Value<V>`),\napi/call.rs passthrough (`Resp`, `Chunk`), and raw\n`serde_json::Value`. The map's keys flatten directly\nalongside `kind` — there is no inner field wrapping.\n\nConstruct via [`NotificationValue::other`]. The payload\nmust serialize to a JSON object (so its entries can sit at\nthe same level as `kind`), and its keys cannot include\n`\"kind\"` (would collide with the discriminator).\n\nWire examples:\n  `{\"kind\":\"other\",\"items\":[…]}`        (Items<T>)\n  `{\"kind\":\"other\",\"value\":<V>}`        (Value<V>)",
       "type": "object",
       "properties": {

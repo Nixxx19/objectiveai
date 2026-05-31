@@ -3,6 +3,7 @@
   "description": "A single line of CLI output.",
   "anyOf": [
     {
+      "title": "Error",
       "type": "object",
       "$ref": "cli.output.Error",
       "properties": {
@@ -15,6 +16,7 @@
       }
     },
     {
+      "title": "Notification",
       "description": "Wraps [`NotificationValue`] in [`Notification`] so its fields\nend up under a nested `value` key.",
       "type": "object",
       "$ref": "cli.output.notification.Notification",

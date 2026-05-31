@@ -12,6 +12,7 @@ export * from "./agentWithFallbacks";
 export * from "./agentWithFallbacksWithCount";
 export * from "./clientObjectiveaiMcp";
 export * from "./clientObjectiveaiMcpEntry";
+export * from "./clientObjectiveaiMcpPluginEntry";
 export * from "./continuation";
 export * from "./getAgentResponse";
 export * from "./inlineAgent";

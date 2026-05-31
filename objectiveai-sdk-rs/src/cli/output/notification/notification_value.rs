@@ -33,50 +33,85 @@ use super::{
 #[schemars(rename = "cli.output.notification.NotificationValue")]
 pub enum NotificationValue {
     // Agents
+    #[schemars(title = "ActiveAgent")]
     ActiveAgent(ActiveAgent),
+    #[schemars(title = "Agent")]
     Agent(Agent),
+    #[schemars(title = "AgentItems")]
     AgentItems(AgentItems),
+    #[schemars(title = "MessageDelivered")]
     MessageDelivered(MessageDelivered),
+    #[schemars(title = "MessageQueued")]
     MessageQueued(MessageQueued),
+    #[schemars(title = "Spawned")]
     Spawned(Spawned),
 
     // API
+    #[schemars(title = "Detached")]
     Detached(Detached),
 
     // Functions
+    #[schemars(title = "Execution")]
     Execution(Execution),
+    #[schemars(title = "Function")]
     Function(Function),
+    #[schemars(title = "Inventions")]
     Inventions(Inventions),
+    #[schemars(title = "Pair")]
     Pair(Pair),
+    #[schemars(title = "Profile")]
     Profile(Profile),
+    #[schemars(title = "State")]
     State(State),
 
     // Laboratories
+    #[schemars(title = "Laboratory")]
     Laboratory(Laboratory),
 
     // Swarms
+    #[schemars(title = "Swarm")]
     Swarm(Swarm),
 
     // Shared / multi-command
+    #[schemars(title = "Cleared")]
     Cleared(Cleared),
+    #[schemars(title = "Help")]
     Help(Help),
+    #[schemars(title = "Installed")]
     Installed(Installed),
+    #[schemars(title = "Instructions")]
     Instructions(Instructions),
+    #[schemars(title = "JqResults")]
     JqResults(JqResults),
+    #[schemars(title = "LogContent")]
     LogContent(LogContent),
+    #[schemars(title = "LogStreamReady")]
     LogStreamReady(LogStreamReady),
+    #[schemars(title = "Mcp")]
     Mcp(Mcp),
+    #[schemars(title = "Me")]
     Me(Me),
+    #[schemars(title = "Ok")]
     Ok(Ok),
+    #[schemars(title = "Plugin")]
     Plugin(Plugin),
+    #[schemars(title = "Plugins")]
     Plugins(Plugins),
+    #[schemars(title = "Published")]
     Published(Published),
+    #[schemars(title = "Schema")]
     Schema(Schema),
+    #[schemars(title = "Schemas")]
     Schemas(Schemas),
+    #[schemars(title = "Tool")]
     Tool(Tool),
+    #[schemars(title = "ToolLine")]
     ToolLine(ToolLine),
+    #[schemars(title = "Tools")]
     Tools(Tools),
+    #[schemars(title = "Updater")]
     Updater(Updater),
+    #[schemars(title = "ViewerSendResult")]
     ViewerSendResult(ViewerSendResult),
 
     /// Single catch-all for anything that doesn't get a typed
@@ -93,6 +128,7 @@ pub enum NotificationValue {
     /// Wire examples:
     ///   `{"kind":"other","items":[…]}`        (Items<T>)
     ///   `{"kind":"other","value":<V>}`        (Value<V>)
+    #[schemars(title = "Other")]
     Other(serde_json::Map<String, serde_json::Value>),
 }
 

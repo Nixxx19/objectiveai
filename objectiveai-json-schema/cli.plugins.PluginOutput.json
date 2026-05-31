@@ -1,7 +1,35 @@
 {
   "title": "cli.plugins.PluginOutput",
-  "description": "One line of plugin output.\n\nIdentical in shape to [`crate::cli::output::Output`] except:\n\n- [`PluginOutput::Notification`] is a plain `serde_json::Value`\n  (no generic `T`, no nesting wrapper). The plugin is responsible\n  for not including `\"type\"` as a top-level key in the value,\n  which would collide with the discriminator.\n- No `Begin`/`End` markers — plugins don't bracket their stream.\n- Adds [`PluginOutput::Command`] — a request the host should act\n  on, identified by a `command` string.",
+  "description": "One line of plugin output.\n\nIdentical in shape to [`crate::cli::output::Output`] except:\n\n- [`PluginOutput::Notification`] is a plain `serde_json::Value`\n  (no generic `T`, no nesting wrapper). The plugin is responsible\n  for not including `\"type\"` as a top-level key in the value,\n  which would collide with the discriminator.\n- No `Begin`/`End` markers — plugins don't bracket their stream.\n- Adds [`PluginOutput::Command`] — a request the host should act\n  on, identified by a `command` string.\n- Adds [`PluginOutput::Mcp`] — a first-class wire variant for a\n  plugin announcing the URL of an MCP server it just started.\n  The host's `PLUGIN_MCP_BEGIN` capture loop matches it directly,\n  avoiding the double-wrap through `Notification(Value)`.",
   "anyOf": [
+    {
+      "title": "Command",
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "command"
+          ]
+        }
+      }
+    },
+    {
+      "title": "Mcp",
+      "type": "object",
+      "$ref": "cli.output.notification.Mcp",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "mcp"
+          ]
+        }
+      }
+    },
     {
       "title": "Error",
       "type": "object",
@@ -23,21 +51,6 @@
           "type": "string",
           "enum": [
             "notification"
-          ]
-        }
-      }
-    },
-    {
-      "title": "Command",
-      "type": "object",
-      "properties": {
-        "command": {
-          "type": "string"
-        },
-        "type": {
-          "type": "string",
-          "enum": [
-            "command"
           ]
         }
       }

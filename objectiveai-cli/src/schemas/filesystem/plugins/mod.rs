@@ -31,6 +31,10 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    McpServer {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     Platform {
         #[command(subcommand)]
         command: GetCommand,
@@ -49,7 +53,7 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["Binaries", "HttpMethod", "Manifest", "ManifestWithNameAndSource", "Platform", "ViewerRoute", "WhitelistEntry"];
+                const NAMES: &[&str] = &["Binaries", "HttpMethod", "Manifest", "ManifestWithNameAndSource", "McpServer", "Platform", "ViewerRoute", "WhitelistEntry"];
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         agent_id: None,
@@ -99,6 +103,18 @@ impl Commands {
             Commands::ManifestWithNameAndSource { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../objectiveai-json-schema/filesystem.plugins.ManifestWithNameAndSource.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
+                        value: objectiveai_sdk::cli::output::Schema { schema }.into(),
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::McpServer { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../../objectiveai-json-schema/filesystem.plugins.McpServer.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {

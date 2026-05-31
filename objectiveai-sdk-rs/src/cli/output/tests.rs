@@ -123,6 +123,14 @@ fn nv_me_roundtrip() {
 }
 
 #[test]
+fn nv_mcp_roundtrip() {
+    let out = notif(NotificationValue::Mcp(Mcp {
+        url: "http://127.0.0.1:9876".into(),
+    }));
+    assert_roundtrip_eq(out);
+}
+
+#[test]
 fn nv_message_delivered_roundtrip() {
     let out = notif(NotificationValue::MessageDelivered(MessageDelivered {
         agent_id: "cli/foo-123".into(),

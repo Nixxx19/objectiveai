@@ -78,6 +78,14 @@ pub enum Commands {
         #[command(subcommand)]
         command: GetCommand,
     },
+    Mcp {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
+    Me {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     Notification {
         #[command(subcommand)]
         command: GetCommand,
@@ -144,7 +152,7 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["agents", "api", "functions", "laboratories", "swarms", "Cleared", "Help", "Installed", "Instructions", "JqResults", "ListItem", "LogContent", "LogStreamReady", "Notification", "NotificationValue", "Ok", "PairListItem", "Plugin", "Plugins", "Published", "Schema", "Schemas", "SkipReason", "Tool", "ToolLine", "Tools", "Updater", "ViewerSendResult"];
+                const NAMES: &[&str] = &["agents", "api", "functions", "laboratories", "swarms", "Cleared", "Help", "Installed", "Instructions", "JqResults", "ListItem", "LogContent", "LogStreamReady", "Mcp", "Me", "Notification", "NotificationValue", "Ok", "PairListItem", "Plugin", "Plugins", "Published", "Schema", "Schemas", "SkipReason", "Tool", "ToolLine", "Tools", "Updater", "ViewerSendResult"];
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         agent_id: None,
@@ -247,6 +255,30 @@ impl Commands {
             Commands::LogStreamReady { .. } => {
                 let schema: serde_json::Value = serde_json::from_str(
                     include_str!("../../../../../../objectiveai-json-schema/cli.output.notification.LogStreamReady.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
+                        value: objectiveai_sdk::cli::output::Schema { schema }.into(),
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::Mcp { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../../../objectiveai-json-schema/cli.output.notification.Mcp.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
+                        value: objectiveai_sdk::cli::output::Schema { schema }.into(),
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::Me { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../../../objectiveai-json-schema/cli.output.notification.Me.json"),
                 ).expect("embedded JSON Schema must parse");
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {

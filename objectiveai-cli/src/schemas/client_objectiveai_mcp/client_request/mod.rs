@@ -15,6 +15,14 @@ pub enum GetCommand {
 pub enum Commands {
     #[command(name = "list")]
     List,
+    McpListChanged {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
+    McpListChangedKind {
+        #[command(subcommand)]
+        command: GetCommand,
+    },
     Payload {
         #[command(subcommand)]
         command: GetCommand,
@@ -29,13 +37,37 @@ impl Commands {
     pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
-                const NAMES: &[&str] = &["Payload", "Request"];
+                const NAMES: &[&str] = &["McpListChanged", "McpListChangedKind", "Payload", "Request"];
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
                         }.into(),
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::McpListChanged { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../../objectiveai-json-schema/client_objectiveai_mcp.client_request.McpListChanged.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
+                        value: objectiveai_sdk::cli::output::Schema { schema }.into(),
+                    },
+                ).emit(handle).await;
+                Ok(())
+            }
+            Commands::McpListChangedKind { .. } => {
+                let schema: serde_json::Value = serde_json::from_str(
+                    include_str!("../../../../../objectiveai-json-schema/client_objectiveai_mcp.client_request.McpListChangedKind.json"),
+                ).expect("embedded JSON Schema must parse");
+                objectiveai_sdk::cli::output::Output::Notification(
+                    objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
+                        value: objectiveai_sdk::cli::output::Schema { schema }.into(),
                     },
                 ).emit(handle).await;
                 Ok(())

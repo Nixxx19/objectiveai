@@ -9,10 +9,7 @@ pub struct Continuation {
     /// belongs to (e.g. `A/B/agtcpl-<uuid>-<created>`). Minted on the
     /// agent's first spawn and preserved verbatim across every
     /// continuation round so the agent's identity stays stable
-    /// regardless of who resumes the conversation. `#[serde(default)]`
-    /// so pre-field tokens deserialize as empty and get re-minted on
-    /// resume.
-    #[serde(default)]
+    /// regardless of who resumes the conversation.
     pub agent_id: String,
     pub messages: Vec<super::super::completions::message::Message>,
     pub mcp_sessions: indexmap::IndexMap<String, String>,

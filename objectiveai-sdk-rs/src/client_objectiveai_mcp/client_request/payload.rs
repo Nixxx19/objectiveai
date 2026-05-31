@@ -20,12 +20,14 @@ use serde::{Deserialize, Serialize};
 #[schemars(rename = "client_objectiveai_mcp.client_request.Payload")]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Payload {
+    #[schemars(title = "AgentCompletionNotify")]
     AgentCompletionNotify(crate::agent::completions::request::AgentCompletionNotifyParams),
     /// The CLI's upstream `mcp::Connection` for `mcp_session_id`
     /// fired `notifications/<kind>/list_changed`. The API
     /// dispatches this onto its per-`(ws_session_id, mcp_session_id)`
     /// broadcast so every matching MCP GET-SSE listener sees a
     /// standard MCP notification frame.
+    #[schemars(title = "McpListChanged")]
     McpListChanged(McpListChanged),
 }
 

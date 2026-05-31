@@ -553,8 +553,7 @@ impl Client {
     /// Translate one [`crate::filesystem::db::schema::MessageRow`]
     /// into a typed [`super::queue::QueueItem`] by reading the row's
     /// log file(s) from disk and converting each `LogReference` to
-    /// a [`super::queue::Id`] (SQL row id in the `files` table —
-    /// inserted on miss).
+    /// a `files`-table SQL row id (inserted on miss).
     async fn queue_item_from_row(
         &self,
         row: crate::filesystem::db::schema::MessageRow,
@@ -666,32 +665,31 @@ impl Client {
     /// Resolve a logs-relative path to its (stable) SQL row id in the
     /// `files` table. Inserts on miss; the `UNIQUE(path)` constraint
     /// keeps one id per path forever.
-    async fn file_id(&self, rel_path: &str) -> Result<super::queue::Id, Error> {
+    async fn file_id(&self, rel_path: &str) -> Result<i64, Error> {
         let conn = super::super::db::connection::connection(self)?;
-        let id = super::super::db::schema::file_id_for_path_async(
+        super::super::db::schema::file_id_for_path_async(
             conn,
             rel_path.to_string(),
         )
-        .await?;
-        Ok(super::queue::Id(id))
+        .await
     }
 
-    /// Resolve an `Option<LogReference>` to `Option<Id>`.
+    /// Resolve an `Option<LogReference>` to an optional file-id.
     async fn maybe_id(
         &self,
         r: Option<crate::filesystem::logs::LogReference>,
-    ) -> Result<Option<super::queue::Id>, Error> {
+    ) -> Result<Option<i64>, Error> {
         match r {
             Some(r) => Ok(Some(self.file_id(&r.path).await?)),
             None => Ok(None),
         }
     }
 
-    /// Resolve a `Vec<LogReference>` to `Vec<Id>`.
+    /// Resolve a `Vec<LogReference>` to a Vec of file-ids.
     async fn id_list(
         &self,
         rs: Vec<crate::filesystem::logs::LogReference>,
-    ) -> Result<Vec<super::queue::Id>, Error> {
+    ) -> Result<Vec<i64>, Error> {
         let mut out = Vec::with_capacity(rs.len());
         for r in rs {
             out.push(self.file_id(&r.path).await?);
@@ -699,11 +697,11 @@ impl Client {
         Ok(out)
     }
 
-    /// Resolve an `Option<Vec<LogReference>>` to `Option<Vec<Id>>`.
+    /// Resolve an `Option<Vec<LogReference>>` to an optional Vec of file-ids.
     async fn maybe_id_list(
         &self,
         rs: Option<Vec<crate::filesystem::logs::LogReference>>,
-    ) -> Result<Option<Vec<super::queue::Id>>, Error> {
+    ) -> Result<Option<Vec<i64>>, Error> {
         match rs {
             Some(rs) => Ok(Some(self.id_list(rs).await?)),
             None => Ok(None),
@@ -711,7 +709,7 @@ impl Client {
     }
 
     /// Translate a [`crate::agent::completions::message::RichContentLog`]
-    /// to [`super::queue::Content`], looking up an `Id` for every ref.
+    /// to [`super::queue::Content`], looking up a file-id for every ref.
     async fn rich_content_to_content(
         &self,
         log: crate::agent::completions::message::RichContentLog,
@@ -725,7 +723,7 @@ impl Client {
     }
 
     /// Translate a [`crate::agent::completions::message::SimpleContentLog`]
-    /// to [`super::queue::Content`], looking up an `Id` for every ref.
+    /// to [`super::queue::Content`], looking up a file-id for every ref.
     async fn simple_content_to_content(
         &self,
         log: crate::agent::completions::message::SimpleContentLog,
@@ -749,9 +747,9 @@ impl Client {
         }
     }
 
-    /// Resolve a queue [`super::queue::Id`] back to its logs-relative
-    /// path. Returns `None` if no row matches (e.g. the id was never
-    /// produced by this Client, or the `files` table was wiped).
+    /// Resolve a queue file-id back to its logs-relative path. Returns
+    /// `None` if no row matches (e.g. the id was never produced by this
+    /// Client, or the `files` table was wiped).
     pub async fn path_for_file_id(
         &self,
         id: i64,
@@ -760,10 +758,9 @@ impl Client {
         super::super::db::schema::path_for_file_id_async(conn, id).await
     }
 
-    /// Resolve a queue [`super::queue::Id`] to its file content.
-    /// `.json` files are parsed into [`LogContent::Json`]; every
-    /// other extension is encoded as a `data:` URL via
-    /// [`LogContent::DataUrl`].
+    /// Resolve a queue file-id to its file content. `.json` files are
+    /// parsed into [`LogContent::Json`]; every other extension is
+    /// encoded as a `data:` URL via [`LogContent::DataUrl`].
     ///
     /// Errors:
     /// - [`Error::NotFound`] if no `files` row matches `id`.

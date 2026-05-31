@@ -7,6 +7,64 @@ import (
 	"fmt"
 )
 
+type CliPluginsPluginOutputCommand struct {
+	Command string `json:"command"`
+	Type string `json:"type" validate:"oneof=command"`
+}
+
+func (v *CliPluginsPluginOutputCommand) UnmarshalJSON(data []byte) error {
+	var raw map[string]json.RawMessage
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+	for _, key := range []string{"command", "type"} {
+		if _, ok := raw[key]; !ok {
+			return fmt.Errorf("CliPluginsPluginOutputCommand: missing required field %q", key)
+		}
+	}
+	type Alias CliPluginsPluginOutputCommand
+	var alias Alias
+	if err := json.Unmarshal(data, &alias); err != nil {
+		return err
+	}
+	*v = CliPluginsPluginOutputCommand(alias)
+	return nil
+}
+func (CliPluginsPluginOutputCommand) SchemaVariantTitle() string { return "Command" }
+
+type CliPluginsPluginOutputMCP struct {
+	CliOutputNotificationMcp
+	Type string `json:"type" validate:"oneof=mcp"`
+}
+
+func (v *CliPluginsPluginOutputMCP) UnmarshalJSON(data []byte) error {
+	if err := json.Unmarshal(data, &v.CliOutputNotificationMcp); err != nil {
+		return err
+	}
+	var local struct {
+		Type string `json:"type"`
+	}
+	if err := json.Unmarshal(data, &local); err != nil {
+		return err
+	}
+	v.Type = local.Type
+	return nil
+}
+
+func (v CliPluginsPluginOutputMCP) MarshalJSON() ([]byte, error) {
+	base, err := json.Marshal(v.CliOutputNotificationMcp)
+	if err != nil {
+		return nil, err
+	}
+	var merged map[string]json.RawMessage
+	json.Unmarshal(base, &merged)
+	if raw, err := json.Marshal(v.Type); err == nil {
+		merged["type"] = raw
+	}
+	return json.Marshal(merged)
+}
+func (CliPluginsPluginOutputMCP) SchemaVariantTitle() string { return "Mcp" }
+
 type CliPluginsPluginOutputError struct {
 	CliOutputError
 	Type string `json:"type" validate:"oneof=error"`
@@ -64,31 +122,6 @@ func (v *CliPluginsPluginOutputNotification) UnmarshalJSON(data []byte) error {
 }
 func (CliPluginsPluginOutputNotification) SchemaVariantTitle() string { return "Notification" }
 
-type CliPluginsPluginOutputCommand struct {
-	Command string `json:"command"`
-	Type string `json:"type" validate:"oneof=command"`
-}
-
-func (v *CliPluginsPluginOutputCommand) UnmarshalJSON(data []byte) error {
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-	for _, key := range []string{"command", "type"} {
-		if _, ok := raw[key]; !ok {
-			return fmt.Errorf("CliPluginsPluginOutputCommand: missing required field %q", key)
-		}
-	}
-	type Alias CliPluginsPluginOutputCommand
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
-		return err
-	}
-	*v = CliPluginsPluginOutputCommand(alias)
-	return nil
-}
-func (CliPluginsPluginOutputCommand) SchemaVariantTitle() string { return "Command" }
-
 // One line of plugin output.
 //
 // Identical in shape to [`crate::cli::output::Output`] except:
@@ -100,26 +133,56 @@ func (CliPluginsPluginOutputCommand) SchemaVariantTitle() string { return "Comma
 // - No `Begin`/`End` markers — plugins don't bracket their stream.
 // - Adds [`PluginOutput::Command`] — a request the host should act
 //   on, identified by a `command` string.
+// - Adds [`PluginOutput::Mcp`] — a first-class wire variant for a
+//   plugin announcing the URL of an MCP server it just started.
+//   The host's `PLUGIN_MCP_BEGIN` capture loop matches it directly,
+//   avoiding the double-wrap through `Notification(Value)`.
 type CliPluginsPluginOutput struct {
+	Command *CliPluginsPluginOutputCommand 
+	MCP *CliPluginsPluginOutputMCP 
 	Error *CliPluginsPluginOutputError 
 	Notification *CliPluginsPluginOutputNotification 
-	Command *CliPluginsPluginOutputCommand 
 }
 
 func (v CliPluginsPluginOutput) MarshalJSON() ([]byte, error) {
+	if v.Command != nil {
+		return json.Marshal(v.Command)
+	}
+	if v.MCP != nil {
+		return json.Marshal(v.MCP)
+	}
 	if v.Error != nil {
 		return json.Marshal(v.Error)
 	}
 	if v.Notification != nil {
 		return json.Marshal(v.Notification)
 	}
-	if v.Command != nil {
-		return json.Marshal(v.Command)
-	}
 	return []byte("null"), nil
 }
 
 func (v *CliPluginsPluginOutput) UnmarshalJSON(data []byte) error {
+	{
+		var try CliPluginsPluginOutputCommand
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := CliPluginsPluginOutput{}
+			candidate.Command = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
+	{
+		var try CliPluginsPluginOutputMCP
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := CliPluginsPluginOutput{}
+			candidate.MCP = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
+	}
 	{
 		var try CliPluginsPluginOutputError
 		if err := json.Unmarshal(data, &try); err == nil {
@@ -142,25 +205,15 @@ func (v *CliPluginsPluginOutput) UnmarshalJSON(data []byte) error {
 			}
 		}
 	}
-	{
-		var try CliPluginsPluginOutputCommand
-		if err := json.Unmarshal(data, &try); err == nil {
-			candidate := CliPluginsPluginOutput{}
-			candidate.Command = &try
-			if candidate.Validate() == nil {
-				*v = candidate
-				return nil
-			}
-		}
-	}
 	return fmt.Errorf("data did not match any variant of CliPluginsPluginOutput")
 }
 
 func (v CliPluginsPluginOutput) Validate() error {
 	count := 0
+	if v.Command != nil { count++ }
+	if v.MCP != nil { count++ }
 	if v.Error != nil { count++ }
 	if v.Notification != nil { count++ }
-	if v.Command != nil { count++ }
 	if count != 1 {
 		return fmt.Errorf("CliPluginsPluginOutput: exactly one variant must be set, got %d", count)
 	}

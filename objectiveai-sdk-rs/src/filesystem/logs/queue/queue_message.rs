@@ -1,12 +1,12 @@
 //! `QueueMessage` — per-role message shape inside a
 //! [`super::QueueItem::UserRequest`]'s `messages` list. Mirrors the
 //! per-role `*MessageLog` types with content/refusal/reasoning/tool_calls
-//! flattened to bare [`Id`] paths.
+//! flattened to bare integer file-id refs.
 
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
-use super::{Content, Id};
+use super::Content;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
@@ -43,13 +43,13 @@ pub enum QueueMessage {
         name: Option<String>,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[schemars(extend("omitempty" = true))]
-        reasoning: Option<Id>,
+        reasoning: Option<i64>,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[schemars(extend("omitempty" = true))]
-        tool_calls: Option<Vec<Id>>,
+        tool_calls: Option<Vec<i64>>,
         #[serde(skip_serializing_if = "Option::is_none")]
         #[schemars(extend("omitempty" = true))]
-        refusal: Option<Id>,
+        refusal: Option<i64>,
     },
     #[schemars(title = "Tool")]
     Tool {
