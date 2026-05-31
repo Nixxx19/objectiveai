@@ -57,6 +57,8 @@ pub use user_message_log::*;
 
 #[cfg(test)]
 mod assistant_message_tests;
+#[cfg(all(test, feature = "mcp"))]
+mod rich_content_tests;
 
 use crate::functions;
 use functions::expression::{ExpressionError, FromStarlarkValue};

@@ -379,62 +379,80 @@ impl From<crate::mcp::shared::ResourceContentsUnion> for RichContentPart {
                     .mime_type
                     .as_deref()
                     .unwrap_or("application/octet-stream");
-                if mime.starts_with("image/") {
-                    RichContentPart::ImageUrl {
-                        image_url: ImageUrl {
-                            url: format!("data:{};base64,{}", mime, blob.blob),
-                            detail: None,
-                        },
-                    }
-                } else if mime.starts_with("audio/") {
-                    // InputAudio stores raw base64 + format separately
-                    // (no data-URL wrapping). `format` carries the
-                    // mime verbatim — same convention as
-                    // `From<AudioContent> for InputAudio`.
-                    RichContentPart::InputAudio {
-                        input_audio: InputAudio {
-                            data: blob.blob,
-                            format: mime.to_string(),
-                        },
-                    }
-                } else if mime.starts_with("video/") {
-                    // VideoUrl is URL-shaped; a `data:` URL is the
-                    // canonical inline form (`VideoUrl::file_content`
-                    // round-trips it).
-                    RichContentPart::InputVideo {
-                        video_url: VideoUrl {
-                            url: format!("data:{};base64,{}", mime, blob.blob),
-                        },
-                    }
-                } else {
-                    // Ambiguous container types (`application/ogg`,
-                    // `application/mp4`, manifests, etc.) and every
-                    // other blob fall through to a File part with a
-                    // filename lifted from the resource URI's last
-                    // path segment.
-                    let filename = blob
-                        .base
-                        .uri
-                        .rsplit('/')
-                        .next()
-                        .filter(|s| !s.is_empty())
-                        .map(String::from);
-                    RichContentPart::File {
-                        file: File {
-                            file_data: Some(blob.blob),
-                            filename,
-                            file_id: None,
-                            file_url: None,
-                        },
-                    }
-                }
+                let filename = blob
+                    .base
+                    .uri
+                    .rsplit('/')
+                    .next()
+                    .filter(|s| !s.is_empty())
+                    .map(String::from);
+                blob_to_rich_content_part(mime, blob.blob, filename)
             }
         }
     }
 }
 
+/// Shared mime-prefix dispatch for inline-media payloads (raw base64
+/// payload + explicit mime). Consumed by `From<ResourceContentsUnion>`
+/// for blob resources, and by `From<ContentBlock>`'s text arm when
+/// it spots a `data:<mime>;base64,<payload>` URL.
+///
+/// Routing rules:
+///
+/// - `image/*` → `ImageUrl` part (base64 data URL).
+/// - `audio/*` → `InputAudio` part (raw base64 + format string,
+///   matching the `From<AudioContent>` convention).
+/// - `video/*` → `InputVideo` part (base64 data URL in the `VideoUrl`
+///   shape).
+/// - Anything else — including ambiguous container types like
+///   `application/ogg` or `application/mp4` where the bytes would
+///   be needed to disambiguate audio vs video — becomes a file part
+///   with the raw base64 data and the caller-supplied filename.
+#[cfg(feature = "mcp")]
+fn blob_to_rich_content_part(
+    mime: &str,
+    blob: String,
+    filename: Option<String>,
+) -> RichContentPart {
+    if mime.starts_with("image/") {
+        RichContentPart::ImageUrl {
+            image_url: ImageUrl {
+                url: format!("data:{};base64,{}", mime, blob),
+                detail: None,
+            },
+        }
+    } else if mime.starts_with("audio/") {
+        RichContentPart::InputAudio {
+            input_audio: InputAudio {
+                data: blob,
+                format: mime.to_string(),
+            },
+        }
+    } else if mime.starts_with("video/") {
+        RichContentPart::InputVideo {
+            video_url: VideoUrl {
+                url: format!("data:{};base64,{}", mime, blob),
+            },
+        }
+    } else {
+        RichContentPart::File {
+            file: File {
+                file_data: Some(blob),
+                filename,
+                file_id: None,
+                file_url: None,
+            },
+        }
+    }
+}
+
 /// Convert an MCP `ContentBlock` into a `RichContentPart`. Lossless
-/// for text / image / audio / embedded_resource. `ResourceLink` is
+/// for image / audio / embedded_resource. The `Text` arm also peeks
+/// at the text body: if it parses as a `data:<mime>;base64,<payload>`
+/// URL it's routed through the same mime-prefix dispatch the blob
+/// path uses (so servers that pack media into a text block — common
+/// for sloppy upstreams — still land in the right `RichContentPart`
+/// variant). Plain text passes through unchanged. `ResourceLink` is
 /// the only stateful variant — resolving its URI requires a live
 /// `Connection` to call `read_resource`, which this `From` impl
 /// cannot do — so it falls back to a JSON-serialized text part. The
@@ -447,7 +465,18 @@ impl From<crate::mcp::tool::ContentBlock> for RichContentPart {
     fn from(block: crate::mcp::tool::ContentBlock) -> Self {
         use crate::mcp::tool::ContentBlock;
         match block {
-            ContentBlock::Text(t) => RichContentPart::Text { text: t.text },
+            ContentBlock::Text(t) => {
+                // Data-URL fast path: `data:<mime>;base64,<payload>`
+                // → media part. `parse_data_url` requires the
+                // `;base64,` marker, so non-data-URL text (and
+                // malformed `data:` prefixes) cleanly fall through
+                // to the plain text mapping.
+                if let Some((mime, payload)) = super::parse_data_url(&t.text) {
+                    blob_to_rich_content_part(mime, payload.to_string(), None)
+                } else {
+                    RichContentPart::Text { text: t.text }
+                }
+            }
             ContentBlock::Image(i) => RichContentPart::ImageUrl {
                 image_url: i.into(),
             },
