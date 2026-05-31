@@ -1007,12 +1007,20 @@ impl ConnectionInner {
     /// - `text` → text part
     /// - `image` → image_url part (data URL)
     /// - `audio` → input_audio part
-    /// - `resource` (embedded text) → text part
-    /// - `resource` (embedded blob, image mime) → image_url part (data URL)
-    /// - `resource` (embedded blob, other mime) → file part
+    /// - `embedded_resource` (text) → text part
+    /// - `embedded_resource` (blob, image mime) → image_url part (data URL)
+    /// - `embedded_resource` (blob, other mime) → file part
     /// - `resource_link` → if the URI appears in `list_resources`, fetches
     ///   via `read_resource` and inlines the content using the same
     ///   text/blob rules; otherwise serializes the link as JSON text
+    ///
+    /// Every variant other than `ResourceLink` goes through the
+    /// shared stateless `From<ContentBlock> for RichContentPart`
+    /// (which now properly handles `EmbeddedResource` via the
+    /// `From<ResourceContentsUnion>` impl). `ResourceLink` is the
+    /// only case that needs the live connection — it can't be a
+    /// stateless `From` impl because resolving the URI requires
+    /// `read_resource`.
     ///
     /// If `is_error` is set on the result, the content is prefixed with
     /// an error indicator.
@@ -1025,9 +1033,8 @@ impl ConnectionInner {
         super::Error,
     > {
         use crate::agent::completions::message::{
-            File, ImageUrl, RichContentPart, ToolMessage, ToolResponseMetadata,
+            RichContentPart, ToolMessage, ToolResponseMetadata,
         };
-        use super::shared::ResourceContentsUnion;
         use super::tool::ContentBlock;
 
         let result = self.call_tool(params).await?;
@@ -1041,92 +1048,24 @@ impl ConnectionInner {
                 Err(_) => std::collections::HashSet::new(),
             };
 
-        /// Converts a `ResourceContentsUnion` into one or more rich content
-        /// parts. Text resources become text parts. Blob resources with an
-        /// image MIME type become image_url parts (data URL); all other blobs
-        /// become file parts. This conversion is connection-local (the
-        /// `ResourceContentsUnion` shape doesn't exist outside the proxy
-        /// fetch path), so it doesn't go through a generic `From` impl.
-        fn resource_contents_to_part(
-            contents: ResourceContentsUnion,
-        ) -> RichContentPart {
-            match contents {
-                ResourceContentsUnion::Text(text) => RichContentPart::Text {
-                    text: text.text,
-                },
-                ResourceContentsUnion::Blob(blob) => {
-                    let mime = blob
-                        .base
-                        .mime_type
-                        .as_deref()
-                        .unwrap_or("application/octet-stream");
-
-                    if mime.starts_with("image/") {
-                        RichContentPart::ImageUrl {
-                            image_url: ImageUrl {
-                                url: format!(
-                                    "data:{};base64,{}",
-                                    mime, blob.blob
-                                ),
-                                detail: None,
-                            },
-                        }
-                    } else {
-                        // Extract a filename from the URI path, if any.
-                        let filename = blob
-                            .base
-                            .uri
-                            .rsplit('/')
-                            .next()
-                            .filter(|s| !s.is_empty())
-                            .map(String::from);
-
-                        RichContentPart::File {
-                            file: File {
-                                file_data: Some(blob.blob),
-                                filename,
-                                file_id: None,
-                                file_url: None,
-                            },
-                        }
-                    }
-                }
-            }
-        }
-
         let mut parts: Vec<RichContentPart> = Vec::new();
 
         for block in result.content {
             match block {
-                // Text / Image / Audio go through the shared
-                // `From<ContentBlock> for RichContentPart` impl so
-                // every call site converges on one mapping.
-                ContentBlock::Text(_)
-                | ContentBlock::Image(_)
-                | ContentBlock::Audio(_) => {
-                    parts.push(block.into());
-                }
-                // EmbeddedResource needs connection-local resolution
-                // into its inlined content shape — can't go through
-                // the stateless `From` impl (which would JSON-text-
-                // fallback instead of inlining).
-                ContentBlock::EmbeddedResource(embedded) => {
-                    parts.push(resource_contents_to_part(embedded.resource));
-                }
-                // ResourceLink: when the URI is known, fetch + inline;
-                // otherwise delegate to `From<ContentBlock>` which
-                // text-falls-back to the JSON-serialized link.
-                ContentBlock::ResourceLink(link) => {
-                    if known_resource_uris.contains(&link.uri) {
-                        let read_result =
-                            self.read_resource(&link.uri).await?;
-                        for contents in read_result.contents {
-                            parts.push(resource_contents_to_part(contents));
-                        }
-                    } else {
-                        parts.push(ContentBlock::ResourceLink(link).into());
+                // ResourceLink is the only stateful case: when the
+                // URI is known, fetch + inline each returned
+                // `ResourceContentsUnion`. Unknown URIs (and every
+                // other variant) fall through to the shared
+                // stateless `From<ContentBlock>` impl.
+                ContentBlock::ResourceLink(link)
+                    if known_resource_uris.contains(&link.uri) =>
+                {
+                    let read_result = self.read_resource(&link.uri).await?;
+                    for contents in read_result.contents {
+                        parts.push(contents.into());
                     }
                 }
+                other => parts.push(other.into()),
             }
         }
 

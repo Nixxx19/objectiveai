@@ -346,15 +346,102 @@ impl From<Vec<RichContentPart>> for RichContent {
     }
 }
 
+/// Convert an inlined MCP resource (`ResourceContentsUnion`) into a
+/// `RichContentPart`. Mapping rules:
+///
+/// - `Text` → text part.
+/// - `Blob` with `image/*` mime → `image_url` part (base64 data URL).
+/// - `Blob` with `audio/*` mime → `input_audio` part (raw base64 +
+///   format string, matching the `From<AudioContent>` convention).
+/// - `Blob` with `video/*` mime → `input_video` part (base64 data URL
+///   in the `VideoUrl` shape).
+/// - Any other blob — including ambiguous container types like
+///   `application/ogg` or `application/mp4` where the bytes would be
+///   needed to disambiguate audio vs video — becomes a file part
+///   with the raw base64 data and a filename lifted from the
+///   resource URI's trailing path segment.
+///
+/// Used by [`From<ContentBlock>`]'s `EmbeddedResource` arm and by
+/// [`crate::mcp::Connection::call_tool_as_message`]'s `ResourceLink`
+/// fetch path — both produce a `ResourceContentsUnion`, both want
+/// the same mapping.
+#[cfg(feature = "mcp")]
+impl From<crate::mcp::shared::ResourceContentsUnion> for RichContentPart {
+    fn from(contents: crate::mcp::shared::ResourceContentsUnion) -> Self {
+        use crate::mcp::shared::ResourceContentsUnion;
+        match contents {
+            ResourceContentsUnion::Text(text) => RichContentPart::Text {
+                text: text.text,
+            },
+            ResourceContentsUnion::Blob(blob) => {
+                let mime = blob
+                    .base
+                    .mime_type
+                    .as_deref()
+                    .unwrap_or("application/octet-stream");
+                if mime.starts_with("image/") {
+                    RichContentPart::ImageUrl {
+                        image_url: ImageUrl {
+                            url: format!("data:{};base64,{}", mime, blob.blob),
+                            detail: None,
+                        },
+                    }
+                } else if mime.starts_with("audio/") {
+                    // InputAudio stores raw base64 + format separately
+                    // (no data-URL wrapping). `format` carries the
+                    // mime verbatim — same convention as
+                    // `From<AudioContent> for InputAudio`.
+                    RichContentPart::InputAudio {
+                        input_audio: InputAudio {
+                            data: blob.blob,
+                            format: mime.to_string(),
+                        },
+                    }
+                } else if mime.starts_with("video/") {
+                    // VideoUrl is URL-shaped; a `data:` URL is the
+                    // canonical inline form (`VideoUrl::file_content`
+                    // round-trips it).
+                    RichContentPart::InputVideo {
+                        video_url: VideoUrl {
+                            url: format!("data:{};base64,{}", mime, blob.blob),
+                        },
+                    }
+                } else {
+                    // Ambiguous container types (`application/ogg`,
+                    // `application/mp4`, manifests, etc.) and every
+                    // other blob fall through to a File part with a
+                    // filename lifted from the resource URI's last
+                    // path segment.
+                    let filename = blob
+                        .base
+                        .uri
+                        .rsplit('/')
+                        .next()
+                        .filter(|s| !s.is_empty())
+                        .map(String::from);
+                    RichContentPart::File {
+                        file: File {
+                            file_data: Some(blob.blob),
+                            filename,
+                            file_id: None,
+                            file_url: None,
+                        },
+                    }
+                }
+            }
+        }
+    }
+}
+
 /// Convert an MCP `ContentBlock` into a `RichContentPart`. Lossless
-/// for text / image / audio; `ResourceLink` and `EmbeddedResource`
-/// fall back to a JSON-serialized text part so the content survives
-/// even when there's no rich representation. Mirrors the resource-
-/// resolution-free path of [`crate::mcp::Connection::call_tool_as_message`]
-/// (the connection-bound method does extra work to fetch resource
-/// contents, which this stateless `From` impl cannot do — callers
-/// that want resource resolution must do it before invoking this
-/// conversion).
+/// for text / image / audio / embedded_resource. `ResourceLink` is
+/// the only stateful variant — resolving its URI requires a live
+/// `Connection` to call `read_resource`, which this `From` impl
+/// cannot do — so it falls back to a JSON-serialized text part. The
+/// connection-bound path in
+/// [`crate::mcp::Connection::call_tool_as_message`] handles
+/// `ResourceLink` properly by fetching its contents and routing
+/// them through [`From<ResourceContentsUnion>`].
 #[cfg(feature = "mcp")]
 impl From<crate::mcp::tool::ContentBlock> for RichContentPart {
     fn from(block: crate::mcp::tool::ContentBlock) -> Self {
@@ -367,8 +454,8 @@ impl From<crate::mcp::tool::ContentBlock> for RichContentPart {
             ContentBlock::Audio(a) => RichContentPart::InputAudio {
                 input_audio: a.into(),
             },
-            block @ (ContentBlock::ResourceLink(_)
-            | ContentBlock::EmbeddedResource(_)) => RichContentPart::Text {
+            ContentBlock::EmbeddedResource(embedded) => embedded.resource.into(),
+            block @ ContentBlock::ResourceLink(_) => RichContentPart::Text {
                 text: serde_json::to_string(&block).unwrap_or_default(),
             },
         }
