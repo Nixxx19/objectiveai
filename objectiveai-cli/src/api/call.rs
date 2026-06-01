@@ -12,16 +12,16 @@ use std::sync::Arc;
 use futures::StreamExt;
 use objectiveai_sdk::cli::output::{Handle, Notification, Output};
 
-/// Apply the per-endpoint `--agent-id` flag to the SDK HttpClient
+/// Apply the per-endpoint `--agent-instance-hierarchy` flag to the SDK HttpClient
 /// only when `build_http_client` didn't already populate
-/// `http.agent_id` from `OBJECTIVEAI_AGENT_ID`. Matches the user's
-/// rule: handle's agent_id (env-derived, mirrored on
-/// `http.agent_id`) takes precedence; the flag is the fallback
+/// `http.agent_instance_hierarchy` from `OBJECTIVEAI_AGENT_INSTANCE_HIERARCHY`. Matches the user's
+/// rule: handle's agent_instance_hierarchy (env-derived, mirrored on
+/// `http.agent_instance_hierarchy`) takes precedence; the flag is the fallback
 /// header.
-fn apply_agent_id_arg(http: &mut objectiveai_sdk::HttpClient, agent_id_arg: Option<String>) {
-    if http.agent_id.is_none() {
-        if let Some(id) = agent_id_arg {
-            http.agent_id = Some(Arc::new(id));
+fn apply_agent_instance_hierarchy_arg(http: &mut objectiveai_sdk::HttpClient, agent_instance_hierarchy_arg: Option<String>) {
+    if http.agent_instance_hierarchy.is_none() {
+        if let Some(id) = agent_instance_hierarchy_arg {
+            http.agent_instance_hierarchy = Some(Arc::new(id));
         }
     }
 }
@@ -32,7 +32,7 @@ pub async fn call_unary<Req, Resp>(
     method: reqwest::Method,
     path: &str,
     body: Option<Req>,
-    agent_id_arg: Option<String>,
+    agent_instance_hierarchy_arg: Option<String>,
 ) -> Result<(), crate::error::Error>
 where
     Req: serde::Serialize + Send,
@@ -40,7 +40,7 @@ where
 {
     let (_client, mut config) = crate::config::read(cli_config).await?;
     let mut http = super::client::build_http_client(cli_config, &mut config);
-    apply_agent_id_arg(&mut http, agent_id_arg);
+    apply_agent_instance_hierarchy_arg(&mut http, agent_instance_hierarchy_arg);
     let response: Resp = http.send_unary(method, path, body).await?;
     Output::Notification(Notification {
         value: objectiveai_sdk::cli::output::NotificationValue::other(&(response)),
@@ -59,14 +59,14 @@ pub async fn call_unary_no_response<Req>(
     method: reqwest::Method,
     path: &str,
     body: Option<Req>,
-    agent_id_arg: Option<String>,
+    agent_instance_hierarchy_arg: Option<String>,
 ) -> Result<(), crate::error::Error>
 where
     Req: serde::Serialize + Send,
 {
     let (_client, mut config) = crate::config::read(cli_config).await?;
     let mut http = super::client::build_http_client(cli_config, &mut config);
-    apply_agent_id_arg(&mut http, agent_id_arg);
+    apply_agent_instance_hierarchy_arg(&mut http, agent_instance_hierarchy_arg);
     http.send_unary_no_response(method, path, body).await?;
     Output::Notification(Notification {
         value: objectiveai_sdk::cli::output::NotificationValue::other(&(serde_json::Value::Null)),
@@ -82,7 +82,7 @@ pub async fn call_streaming<Req, Chunk>(
     method: reqwest::Method,
     path: &str,
     body: Option<Req>,
-    agent_id_arg: Option<String>,
+    agent_instance_hierarchy_arg: Option<String>,
 ) -> Result<(), crate::error::Error>
 where
     Req: serde::Serialize + Send,
@@ -90,7 +90,7 @@ where
 {
     let (_client, mut config) = crate::config::read(cli_config).await?;
     let mut http = super::client::build_http_client(cli_config, &mut config);
-    apply_agent_id_arg(&mut http, agent_id_arg);
+    apply_agent_instance_hierarchy_arg(&mut http, agent_instance_hierarchy_arg);
     let stream = http
         .send_streaming::<Chunk, _, _>(method, path.to_string(), body)
         .await?;

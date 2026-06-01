@@ -143,7 +143,7 @@ fn install_count_tool_over_echo_arglen() {
 /// spawns with the same body produce the SAME agent definition but
 /// two DIFFERENT per-turn `chunk.id`s. Each lineage `cli/<chunk.id>`
 /// becomes its own MCP session id via the objectiveai-mcp fallback
-/// chain to `X-OBJECTIVEAI-AGENT-ID`.
+/// chain to `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY`.
 fn agent_json() -> String {
     let tools: Vec<Value> = (0..10)
         .map(|i| {
@@ -162,7 +162,7 @@ fn agent_json() -> String {
     .to_string()
 }
 
-/// Spawn an agent and return its sub-id (the `Spawned.agent_id`).
+/// Spawn an agent and return its sub-id (the `Spawned.agent_instance_hierarchy`).
 fn spawn_agent(base_dir: &Path, agent_json: &str, seed: i64) -> String {
     let seed_str = seed.to_string();
     let lines = run_cli_with_base_dir(
@@ -183,9 +183,9 @@ fn spawn_agent(base_dir: &Path, agent_json: &str, seed: i64) -> String {
         .find(|l| l.pointer("/type") == Some(&json!("spawned")))
         .expect("agents spawn must emit Spawned");
     spawned
-        .pointer("/agent_id")
+        .pointer("/agent_instance_hierarchy")
         .and_then(|v| v.as_str())
-        .expect("Spawned.agent_id")
+        .expect("Spawned.agent_instance_hierarchy")
         .to_string()
 }
 

@@ -15,7 +15,7 @@ fn error_wire_shape() {
         level: Level::Error,
         fatal: true,
         message: "plugin blew up".into(),
-        agent_id: None,
+        agent_instance_hierarchy: None,
     }));
     let v = roundtrip(&out);
     assert_eq!(v["type"], "error");

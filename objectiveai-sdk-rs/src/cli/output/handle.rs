@@ -18,8 +18,8 @@
 //!   want each [`Output`] line as a typed value (e.g. the viewer
 //!   bridging cli output into Tauri events).
 //!
-//! `Handle` is a thin pair of (`destination`, `agent_id`). The cli's
-//! top-level `run()` stamps `agent_id` once at startup; from then on
+//! `Handle` is a thin pair of (`destination`, `agent_instance_hierarchy`). The cli's
+//! top-level `run()` stamps `agent_instance_hierarchy` once at startup; from then on
 //! every emit picks up the same value without any per-call site
 //! threading.
 
@@ -74,13 +74,13 @@ impl Default for HandleDestination {
     }
 }
 
-/// Output handle: a destination plus an optional `agent_id` that gets
+/// Output handle: a destination plus an optional `agent_instance_hierarchy` that gets
 /// stamped on every emitted `Notification` and `Error` line.
 ///
-/// The `agent_id` field is set once by the cli's `run()` from
-/// `Config.agent_id` (env `OBJECTIVEAI_AGENT_ID`). All emit sites
+/// The `agent_instance_hierarchy` field is set once by the cli's `run()` from
+/// `Config.agent_instance_hierarchy` (env `OBJECTIVEAI_AGENT_INSTANCE_HIERARCHY`). All emit sites
 /// stay verbatim — `Notification` and `Error` payloads carry their
-/// own `agent_id: Option<String>` field that defaults to `None`, and
+/// own `agent_instance_hierarchy: Option<String>` field that defaults to `None`, and
 /// `emit` overwrites it with the handle's value before writing.
 ///
 /// Plugin↔CLI correlation lives on the *destination*, not on the
@@ -90,14 +90,14 @@ impl Default for HandleDestination {
 #[derive(Clone, Default)]
 pub struct Handle {
     pub destination: HandleDestination,
-    pub agent_id: Option<String>,
+    pub agent_instance_hierarchy: Option<String>,
 }
 
 impl From<HandleDestination> for Handle {
     fn from(destination: HandleDestination) -> Self {
         Handle {
             destination,
-            agent_id: None,
+            agent_instance_hierarchy: None,
         }
     }
 }
@@ -117,20 +117,20 @@ impl Handle {
     /// behaviour. Non-broken-pipe write errors fall through to a
     /// panic so genuine bugs still surface.
     pub async fn emit(&self, output: &Output) {
-        // Single Value round-trip when we have an agent_id to stamp.
+        // Single Value round-trip when we have an agent_instance_hierarchy to stamp.
         // Both remaining variants (Notification + Error) are
         // object-shaped, so the insert always lands on a real object.
         // For Notifications the cli-session id only stamps in if the
-        // payload didn't already supply its own agent_id — variants
+        // payload didn't already supply its own agent_instance_hierarchy — variants
         // like `Spawned` carry the spawned-agent id at the same level
         // and we mustn't overwrite them.
-        let json = if let Some(id) = self.agent_id.as_deref() {
+        let json = if let Some(id) = self.agent_instance_hierarchy.as_deref() {
             let mut v =
                 serde_json::to_value(output).expect("Output serializes");
             if let Some(obj) = v.as_object_mut() {
-                if !obj.contains_key("agent_id") {
+                if !obj.contains_key("agent_instance_hierarchy") {
                     obj.insert(
-                        "agent_id".to_string(),
+                        "agent_instance_hierarchy".to_string(),
                         serde_json::Value::String(id.to_string()),
                     );
                 }
@@ -178,9 +178,9 @@ impl Handle {
                 // envelope. We don't reuse the `json` precomputed
                 // above because the wire root is
                 // `PluginCommandResponse`, not `Output` — the
-                // top-level `agent_id` patch wouldn't apply at the
+                // top-level `agent_instance_hierarchy` patch wouldn't apply at the
                 // envelope's root (and any payload variant that
-                // wants `agent_id` carries it on its own field
+                // wants `agent_instance_hierarchy` carries it on its own field
                 // anyway, which the stamping above already touched
                 // via the Output's Value reserialization through
                 // serde would only matter if we wrapped that; here
@@ -213,22 +213,22 @@ impl Handle {
         }
     }
 
-    /// Clone `output` with the handle's `agent_id` stamped in if the
+    /// Clone `output` with the handle's `agent_instance_hierarchy` stamped in if the
     /// output didn't already carry one. Used by `Collect` and
     /// `Stream` so in-memory consumers see the same stamped shape
     /// the wire output carries.
     ///
-    /// `Notification` has no struct-level agent_id since the flat
-    /// wire shape collides with inner payloads' agent_id. For
-    /// Collect/Stream consumers the inner payload's agent_id (if
+    /// `Notification` has no struct-level agent_instance_hierarchy since the flat
+    /// wire shape collides with inner payloads' agent_instance_hierarchy. For
+    /// Collect/Stream consumers the inner payload's agent_instance_hierarchy (if
     /// any) is what they observe — the cli-session id stamp from
     /// `emit` only shows up on the Stdout/Stdin JSON paths.
     fn stamped(&self, output: &Output) -> Output {
         match output {
             Output::Error(e) => {
                 let mut e = e.clone();
-                if e.agent_id.is_none() {
-                    e.agent_id = self.agent_id.clone();
+                if e.agent_instance_hierarchy.is_none() {
+                    e.agent_instance_hierarchy = self.agent_instance_hierarchy.clone();
                 }
                 Output::Error(e)
             }
@@ -237,26 +237,26 @@ impl Handle {
     }
 }
 
-/// Reverse of [`Handle::emit`]'s `agent_id` stamping: walks each
+/// Reverse of [`Handle::emit`]'s `agent_instance_hierarchy` stamping: walks each
 /// newline-delimited line in `text`, tries to parse it as a JSON
-/// object, and removes the top-level `"agent_id"` key. Lines that
+/// object, and removes the top-level `"agent_instance_hierarchy"` key. Lines that
 /// aren't valid JSON pass through unchanged. Preserves the trailing
 /// newline if the original had one (the emit envelope always ends
 /// with `\n`, so matching that keeps re-stripped bodies stable).
 ///
 /// Used by test-mode response collectors (e.g. the MCP server's
 /// `TEST_MODE` strip) and snapshot normalizers to keep the racy
-/// `agent_id` counter out of test artefacts. **Never use this on
-/// production wire output** — callers depend on the agent_id stamp
+/// `agent_instance_hierarchy` counter out of test artefacts. **Never use this on
+/// production wire output** — callers depend on the agent_instance_hierarchy stamp
 /// for cross-process correlation.
-pub fn strip_agent_id_lines(text: &str) -> String {
+pub fn strip_agent_instance_hierarchy_lines(text: &str) -> String {
     let mut out: String = text
         .lines()
         .map(|line| {
             // Only rewrite lines that parse as a JSON *object* AND
-            // actually contain an `agent_id` top-level key. Other
+            // actually contain an `agent_instance_hierarchy` top-level key. Other
             // JSON-valid lines (strings, numbers, arrays, or
-            // objects without agent_id) pass through verbatim —
+            // objects without agent_instance_hierarchy) pass through verbatim —
             // otherwise we'd re-serialize an indented JSON-string
             // line like `    "object"` (a schema's enum value) as
             // `"object"`, destroying the surrounding pretty-printed
@@ -266,7 +266,7 @@ pub fn strip_agent_id_lines(text: &str) -> String {
             else {
                 return line.to_string();
             };
-            if obj.remove("agent_id").is_none() {
+            if obj.remove("agent_instance_hierarchy").is_none() {
                 return line.to_string();
             }
             serde_json::to_string(&serde_json::Value::Object(obj))

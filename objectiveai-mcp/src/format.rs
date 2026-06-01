@@ -42,10 +42,10 @@
 //! before reaching `from_text_or_data_url`. The `type` field is an
 //! internal-cli wire convenience — MCP consumers don't need it.
 //!
-//! # `agent_id` stripping
+//! # `agent_instance_hierarchy` stripping
 //!
 //! Notifications are serialized via `n.value` (the inner
-//! `NotificationValue`), which has no `agent_id` field. `ToolLine`
+//! `NotificationValue`), which has no `agent_instance_hierarchy` field. `ToolLine`
 //! has none. `Output::Error` is explicitly cleared on a clone
 //! before serialization.
 
@@ -104,7 +104,7 @@ fn emit_one(output: &Output, blocks: &mut Vec<Content>) {
 fn output_to_rich_content_part(output: &Output) -> RichContentPart {
     match output {
         Output::Error(e) => {
-            let stripped = Output::Error(strip_error_agent_id(e));
+            let stripped = Output::Error(strip_error_agent_instance_hierarchy(e));
             let body = serde_json::to_string(&stripped)
                 .unwrap_or_else(|_| String::from("<serialize error>"));
             RichContentPart::from_text_or_data_url(body)
@@ -204,9 +204,9 @@ fn is_stderr(tl: &ToolLine) -> bool {
     tl.stderr == Some(true)
 }
 
-fn strip_error_agent_id(e: &Error) -> Error {
+fn strip_error_agent_instance_hierarchy(e: &Error) -> Error {
     let mut stripped = e.clone();
-    stripped.agent_id = None;
+    stripped.agent_instance_hierarchy = None;
     stripped
 }
 
@@ -225,7 +225,7 @@ mod tests {
         Output::Notification(Notification { value })
     }
 
-    fn notif_with_agent(value: NotificationValue, agent_id: &str) -> Output {
+    fn notif_with_agent(value: NotificationValue, agent_instance_hierarchy: &str) -> Output {
         Output::Notification(Notification { value })
     }
 
@@ -235,17 +235,17 @@ mod tests {
             level: Level::Error,
             fatal: false,
             message: Value::String(message.to_string()),
-            agent_id: None,
+            agent_instance_hierarchy: None,
         })
     }
 
-    fn err_with_agent(message: &str, agent_id: &str) -> Output {
+    fn err_with_agent(message: &str, agent_instance_hierarchy: &str) -> Output {
         Output::Error(Error {
             r#type: objectiveai_sdk::cli::output::ErrorType::Error,
             level: Level::Error,
             fatal: false,
             message: Value::String(message.to_string()),
-            agent_id: Some(agent_id.to_string()),
+            agent_instance_hierarchy: Some(agent_instance_hierarchy.to_string()),
         })
     }
 
@@ -735,18 +735,18 @@ mod tests {
     }
 
     #[test]
-    fn agent_id_stripped_from_errors() {
+    fn agent_instance_hierarchy_stripped_from_errors() {
         let outputs = vec![err_with_agent("nope", "agent-x")];
         let blocks = format_outputs(&outputs);
         let body = collect_body_strip_media(&blocks);
         assert!(!body.contains("agent-x"), "agent value leaked: {body}");
         let arr = parse_array_of_strings(&body);
         let inner: Value = serde_json::from_str(&arr[0]).expect("inner is JSON");
-        assert_eq!(inner.get("agent_id"), None);
+        assert_eq!(inner.get("agent_instance_hierarchy"), None);
     }
 
     #[test]
-    fn agent_id_stripped_from_notifications() {
+    fn agent_instance_hierarchy_stripped_from_notifications() {
         let outputs = vec![notif_with_agent(
             NotificationValue::Typed(TypedNotificationValue::Ok(NotifOk { ok: true })),
             "agent-y",

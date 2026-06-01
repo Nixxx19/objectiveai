@@ -6,9 +6,9 @@ use std::future::Future;
 /// `objectiveai api …` subcommands (or the matching env vars
 /// listed in `api/client.rs`).
 ///
-/// `cli_config` is threaded into `build_http_client` so the agent_id
+/// `cli_config` is threaded into `build_http_client` so the agent_instance_hierarchy
 /// (env or per-request override from an embedder) reaches outbound
-/// `X-OBJECTIVEAI-AGENT-ID`.
+/// `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY`.
 ///
 /// Streaming subcommands no longer call this — they spawn
 /// `objectiveai-cli-stream` via [`super::stream_subprocess::run`]

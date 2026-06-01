@@ -5,7 +5,7 @@
 //!   `objectiveai-cli/src/api/...`. Convention: `<METHOD> /<a>/<b>/<c>` maps
 //!   to `<a>/<b>/<c>/<method>.rs`, lowercased verb (`post`, `get`, `delete`).
 //!
-//! - `every_api_leaf_flattens_agent_id_arg`: every cli leaf that calls
+//! - `every_api_leaf_flattens_agent_instance_hierarchy_arg`: every cli leaf that calls
 //!   `call_unary` / `call_streaming` must flatten the shared `AgentIdArg`
 //!   struct so the `--agent-id` flag is uniformly available on every
 //!   endpoint.
@@ -76,15 +76,15 @@ fn every_api_route_has_a_cli_leaf() {
 
 /// Every CLI leaf under `src/api/<...>/<method>.rs` that corresponds to a
 /// real API route must flatten the shared `AgentIdArg` struct on its
-/// `Args` — i.e. contain `pub agent_id: crate::api::agent_id_arg::AgentIdArg`.
+/// `Args` — i.e. contain `pub agent_instance_hierarchy: crate::api::agent_instance_hierarchy_arg::AgentIdArg`.
 ///
 /// This is structural (line-level) rather than full-syn-AST because the
 /// existing sibling test is already line-level; both rely on the
 /// codebase's consistent formatting.
 #[test]
-fn every_api_leaf_flattens_agent_id_arg() {
+fn every_api_leaf_flattens_agent_instance_hierarchy_arg() {
     let cli_src_dir = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("src");
-    const MARKER: &str = "pub agent_id: crate::api::agent_id_arg::AgentIdArg";
+    const MARKER: &str = "pub agent_instance_hierarchy: crate::api::agent_instance_hierarchy_arg::AgentIdArg";
 
     let mut missing: Vec<String> = Vec::new();
 

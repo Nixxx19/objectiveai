@@ -88,14 +88,14 @@ pub enum Error {
     )]
     CliStreamSlotTaken { stderr_tail: String },
     #[error(
-        "no prior agent_completion_request for agent {agent_id:?}; spawn the agent first with `agents spawn`"
+        "no prior agent_completion_request for agent {agent_instance_hierarchy:?}; spawn the agent first with `agents spawn`"
     )]
-    AgentNoPriorRequest { agent_id: String },
+    AgentNoPriorRequest { agent_instance_hierarchy: String },
     #[error(
-        "agent {agent_id:?} has no continuations available across {request_count} prior request(s); the most recent turn may still be streaming, or none have finished. Cannot fall back without a continuation."
+        "agent {agent_instance_hierarchy:?} has no continuations available across {request_count} prior request(s); the most recent turn may still be streaming, or none have finished. Cannot fall back without a continuation."
     )]
     AgentNoContinuation {
-        agent_id: String,
+        agent_instance_hierarchy: String,
         request_count: usize,
     },
 }
@@ -111,7 +111,7 @@ impl Error {
             level,
             fatal,
             message: self.output_message(),
-            agent_id: None,
+            agent_instance_hierarchy: None,
         }
     }
 

@@ -206,7 +206,7 @@ async fn emit_untrusted_warning(
         level: Level::Warn,
         fatal: false,
         message: message.into(),
-        agent_id: None,
+        agent_instance_hierarchy: None,
     })
     .emit(handle)
     .await;

@@ -108,7 +108,7 @@ impl Commands {
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
                         value: objectiveai_sdk::cli::output::Me {
-                            agent_id: cli_config.agent_id.clone(),
+                            agent_instance_hierarchy: cli_config.agent_instance_hierarchy.clone(),
                         }
                         .into(),
                     },

@@ -184,7 +184,7 @@ fn build_mcp_servers(
 ///
 /// Only `None` or `Text` formats are supported.
 fn validate_response_format(
-    agent_id: &str,
+    agent_instance_hierarchy: &str,
     response_format: &Option<objectiveai_sdk::agent::completions::request::ResponseFormatParam>,
 ) -> Result<(), super::Error> {
     use objectiveai_sdk::agent::completions::request::{
@@ -194,7 +194,7 @@ fn validate_response_format(
     match response_format {
         None => Ok(()),
         Some(ResponseFormatParam::Single(ResponseFormat::Text)) => Ok(()),
-        Some(ResponseFormatParam::PerAgent(map)) => match map.get(agent_id) {
+        Some(ResponseFormatParam::PerAgent(map)) => match map.get(agent_instance_hierarchy) {
             None => Ok(()),
             Some(ResponseFormat::Text) => Ok(()),
             Some(_) => Err(super::Error::UnsupportedResponseFormat),
@@ -247,7 +247,7 @@ impl
         _invention_step: Option<usize>,
         _invention_tasks_min: Option<u64>,
         _invention_input_schema: Option<String>,
-        agent_id_header: Option<&str>,
+        agent_instance_hierarchy_header: Option<&str>,
     ) -> impl Future<Output = Result<Self::Stream, Self::Error>> + Send + 'static
     {
         let enabled = self.enabled;
@@ -259,7 +259,7 @@ impl
         let continuation = continuation.map(|c| c.to_vec());
         let request_continuation = request_continuation.cloned();
         let client = self.clone();
-        let agent_id_header = agent_id_header.map(|s| s.to_string());
+        let agent_instance_hierarchy_header = agent_instance_hierarchy_header.map(|s| s.to_string());
 
         async move {
             if !enabled {
@@ -327,7 +327,7 @@ impl
                 web_search_enabled: agent.base.web_search_enabled,
                 resume: resume_arg,
                 mcp_servers: &mcp_servers,
-                agent_id: agent_id_header.as_deref(),
+                agent_instance_hierarchy: agent_instance_hierarchy_header.as_deref(),
             };
 
             // Each agent-completions request gets its own caller-side
@@ -342,7 +342,7 @@ impl
                 .map_err(|e| super::Error::Spawn(e.to_string()))?;
 
             let id_for_chunks = id.clone();
-            let agent_id = agent.id.clone();
+            let agent_instance_hierarchy = agent.id.clone();
             let model = agent.base.model.clone();
             let initial_thread_id = prompt.thread_id.clone();
 
@@ -390,7 +390,7 @@ impl
                                 event,
                                 id_for_chunks.clone(),
                                 created,
-                                agent_id.clone(),
+                                agent_instance_hierarchy.clone(),
                                 model.clone(),
                                 msg_index,
                                 is_byok,
@@ -511,7 +511,7 @@ impl
             upstream: objectiveai_sdk::agent::codex_sdk::Upstream::default(),
             // Stamped by the agent-completions client immediately
             // after this method returns; empty here is fine.
-            agent_id: String::new(),
+            agent_instance_hierarchy: String::new(),
             thread_id,
             mcp_sessions,
             ws_session_id: None,

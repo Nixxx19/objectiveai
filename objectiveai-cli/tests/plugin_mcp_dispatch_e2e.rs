@@ -312,9 +312,9 @@ async fn plugin_mcp_dispatch_round_trip() {
         .find(|l| l.pointer("/type") == Some(&json!("spawned")))
         .expect("agents spawn must emit Spawned notification");
     let spawn_id = spawned
-        .pointer("/agent_id")
+        .pointer("/agent_instance_hierarchy")
         .and_then(|v| v.as_str())
-        .expect("Spawned.agent_id")
+        .expect("Spawned.agent_instance_hierarchy")
         .to_string();
 
     wait_for_completion(&base, &spawn_id).await;

@@ -6,7 +6,7 @@
 //! Companion to `read pending` (the watermark-respecting drain).
 //! Emits one [`AgentItems`] notification per positional arg, in
 //! order — same envelope as `read pending`. The caller id is taken
-//! from `cli_config.agent_id` (env-supplied `OBJECTIVEAI_AGENT_ID`,
+//! from `cli_config.agent_instance_hierarchy` (env-supplied `OBJECTIVEAI_AGENT_INSTANCE_HIERARCHY`,
 //! defaulting to `"cli"` in `main.rs`).
 //!
 //! Positional args are **sub-ids**, not full composite ids — the
@@ -24,7 +24,7 @@ pub struct CommandArgs {
     /// emits one `AgentItems` notification per arg, e.g.
     /// `agents read all foo-123 bar-456` emits two notifications.
     #[arg(required = true)]
-    pub agent_ids: Vec<String>,
+    pub agent_instance_hierarchys: Vec<String>,
 }
 
 pub async fn handle(
@@ -37,9 +37,9 @@ pub async fn handle(
         None::<String>,
         None::<String>,
     );
-    let caller = &cli_config.agent_id;
+    let caller = &cli_config.agent_instance_hierarchy;
 
-    for sub in &args.agent_ids {
+    for sub in &args.agent_instance_hierarchys {
         let spawned = format!("{caller}/{sub}");
         let items = client.read_all_from_queue(caller, &spawned).await?;
 

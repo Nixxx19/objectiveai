@@ -19,7 +19,7 @@ pub mod user_agent;
 pub mod x_title;
 
 // Shared infrastructure for per-endpoint subcommands.
-pub mod agent_id_arg;
+pub mod agent_instance_hierarchy_arg;
 pub mod body;
 pub mod call;
 pub mod client;

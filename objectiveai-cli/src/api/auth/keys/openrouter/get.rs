@@ -4,7 +4,7 @@ use clap::Args as ClapArgs;
 #[derive(ClapArgs)]
 pub struct Args {
     #[command(flatten)]
-    pub agent_id: crate::api::agent_id_arg::AgentIdArg,
+    pub agent_instance_hierarchy: crate::api::agent_instance_hierarchy_arg::AgentIdArg,
 }
 
 pub async fn handle(
@@ -18,7 +18,7 @@ pub async fn handle(
         reqwest::Method::GET,
         "auth/keys/openrouter",
         None,
-        args.agent_id.agent_id,
+        args.agent_instance_hierarchy.agent_instance_hierarchy,
     )
     .await
 }

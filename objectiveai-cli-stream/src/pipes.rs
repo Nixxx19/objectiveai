@@ -1,7 +1,7 @@
 //! Per-agent named-pipe notify bridge.
 //!
 //! When the WS stream surfaces a new agent completion `response_id`,
-//! we bind a socket for it at `${config_base_dir}/pipes/<agent_id>/socket`.
+//! we bind a socket for it at `${config_base_dir}/pipes/<agent_instance_hierarchy>/socket`.
 //! External processes that want to push a notification at that agent
 //! connect to the socket and write NDJSON lines, one [`RichContent`]
 //! per line. The reader task wraps each into an
@@ -12,7 +12,7 @@
 //!
 //! Same layout on every platform: a filesystem path under
 //! `${config_base_dir}/pipes/`. Each agent gets a folder at
-//! `<agent_id>/` (slashes in the agent id become real subdirectories)
+//! `<agent_instance_hierarchy>/` (slashes in the agent id become real subdirectories)
 //! containing both the socket (fixed name `socket`) and a sibling
 //! SQLite `db.sqlite` written by the log writer. On POSIX the socket
 //! is a Unix domain socket; on Windows it's `AF_UNIX` (supported
@@ -149,7 +149,7 @@ async fn bind_or_busy(address: &PipeAddress) -> BindOutcome {
     BindOutcome::SlotTaken
 }
 
-/// Compute the pipe address for `agent_id` under `pipes_root`.
+/// Compute the pipe address for `agent_instance_hierarchy` under `pipes_root`.
 ///
 /// Same layout on every platform: a filesystem path. `pipes_root` is
 /// `${config_base_dir}/pipes`; the returned [`PipeAddress`] carries
@@ -161,12 +161,12 @@ pub struct PipeAddress {
     pub fs_path: PathBuf,
 }
 
-pub fn pipe_address_for_agent(pipes_root: &Path, agent_id: &str) -> Result<PipeAddress, String> {
-    let fs_path = pipes_root.join(agent_id).join("socket");
+pub fn pipe_address_for_agent(pipes_root: &Path, agent_instance_hierarchy: &str) -> Result<PipeAddress, String> {
+    let fs_path = pipes_root.join(agent_instance_hierarchy).join("socket");
     let name = fs_path
         .clone()
         .to_fs_name::<GenericFilePath>()
-        .map_err(|e| format!("invalid pipe path for agent {agent_id:?}: {e}"))?
+        .map_err(|e| format!("invalid pipe path for agent {agent_instance_hierarchy:?}: {e}"))?
         .into_owned();
     Ok(PipeAddress { name, fs_path })
 }
@@ -176,12 +176,12 @@ pub fn pipe_address_for_agent(pipes_root: &Path, agent_id: &str) -> Result<PipeA
 /// NDJSON lines to. Same per-agent directory, different leaf name —
 /// so the existing cleanup-on-Drop / shutdown story covers both
 /// without extra plumbing.
-pub fn events_address_for_agent(pipes_root: &Path, agent_id: &str) -> Result<PipeAddress, String> {
-    let fs_path = pipes_root.join(agent_id).join("events.sock");
+pub fn events_address_for_agent(pipes_root: &Path, agent_instance_hierarchy: &str) -> Result<PipeAddress, String> {
+    let fs_path = pipes_root.join(agent_instance_hierarchy).join("events.sock");
     let name = fs_path
         .clone()
         .to_fs_name::<GenericFilePath>()
-        .map_err(|e| format!("invalid events pipe path for agent {agent_id:?}: {e}"))?
+        .map_err(|e| format!("invalid events pipe path for agent {agent_instance_hierarchy:?}: {e}"))?
         .into_owned();
     Ok(PipeAddress { name, fs_path })
 }
@@ -226,7 +226,7 @@ impl PipeRegistry {
     }
 
     /// Eager admission probe — atomically bind the inbound socket
-    /// for `agent_id` and stash the resulting [`Listener`] in
+    /// for `agent_instance_hierarchy` and stash the resulting [`Listener`] in
     /// `pending_listeners`. The matching [`Self::ensure_pipe`] call
     /// (which fires per-chunk from `run_chunk_loop` once `notifier` /
     /// `notif_tx` are ready) consumes the stashed listener and spawns
@@ -239,20 +239,20 @@ impl PipeRegistry {
     /// id are `Ok(())` no-ops.
     pub async fn try_acquire_pipe(
         &self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
         pipes_root: &Path,
         handle: &Handle,
     ) -> Result<(), BindStatus> {
-        if self.inner.cancellers.contains_key(agent_id)
-            || self.inner.pending_listeners.contains_key(agent_id)
+        if self.inner.cancellers.contains_key(agent_instance_hierarchy)
+            || self.inner.pending_listeners.contains_key(agent_instance_hierarchy)
         {
             return Ok(());
         }
 
-        let address = match pipe_address_for_agent(pipes_root, agent_id) {
+        let address = match pipe_address_for_agent(pipes_root, agent_instance_hierarchy) {
             Ok(a) => a,
             Err(e) => {
-                emit_error(handle, format!("pipe addr for {agent_id:?}: {e}")).await;
+                emit_error(handle, format!("pipe addr for {agent_instance_hierarchy:?}: {e}")).await;
                 return Err(BindStatus::Io);
             }
         };
@@ -272,7 +272,7 @@ impl PipeRegistry {
             BindOutcome::Bound(l) => {
                 self.inner
                     .pending_listeners
-                    .insert(agent_id.to_string(), l);
+                    .insert(agent_instance_hierarchy.to_string(), l);
                 Ok(())
             }
             BindOutcome::SlotTaken => Err(BindStatus::Live),
@@ -280,7 +280,7 @@ impl PipeRegistry {
                 emit_error(
                     handle,
                     format!(
-                        "bind pipe for {agent_id:?} at {}: {e}",
+                        "bind pipe for {agent_instance_hierarchy:?} at {}: {e}",
                         address.fs_path.display()
                     ),
                 )
@@ -290,7 +290,7 @@ impl PipeRegistry {
         }
     }
 
-    /// Bind a pipe for `agent_id` and spawn its reader task. No-op
+    /// Bind a pipe for `agent_instance_hierarchy` and spawn its reader task. No-op
     /// if a pipe for this id is already tracked. Returns
     /// `Err(BindStatus::Live)` when the slot is owned by another
     /// live listener — the run_chunk_loop caller propagates that to
@@ -307,26 +307,26 @@ impl PipeRegistry {
     /// the matching DB row.
     pub async fn ensure_pipe(
         &self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
         response_id: &str,
         pipes_root: &Path,
         notifier: Notifier,
         notif_tx: tokio::sync::mpsc::UnboundedSender<(String, String, RichContent)>,
         handle: &Handle,
     ) -> Result<(), BindStatus> {
-        if self.inner.cancellers.contains_key(agent_id) {
+        if self.inner.cancellers.contains_key(agent_instance_hierarchy) {
             return Ok(());
         }
 
         // Take the pre-bound listener if `try_acquire_pipe` already
         // claimed this slot. Otherwise bind fresh.
-        let listener = if let Some((_, l)) = self.inner.pending_listeners.remove(agent_id) {
+        let listener = if let Some((_, l)) = self.inner.pending_listeners.remove(agent_instance_hierarchy) {
             l
         } else {
-            let address = match pipe_address_for_agent(pipes_root, agent_id) {
+            let address = match pipe_address_for_agent(pipes_root, agent_instance_hierarchy) {
                 Ok(a) => a,
                 Err(e) => {
-                    emit_error(handle, format!("pipe addr for {agent_id:?}: {e}")).await;
+                    emit_error(handle, format!("pipe addr for {agent_instance_hierarchy:?}: {e}")).await;
                     return Err(BindStatus::Io);
                 }
             };
@@ -349,7 +349,7 @@ impl PipeRegistry {
                     emit_error(
                         handle,
                         format!(
-                            "bind pipe for {agent_id:?} at {}: {e}",
+                            "bind pipe for {agent_instance_hierarchy:?} at {}: {e}",
                             address.fs_path.display()
                         ),
                     )
@@ -363,10 +363,10 @@ impl PipeRegistry {
         let inserted = self
             .inner
             .cancellers
-            .insert(agent_id.to_string(), cancel_tx);
+            .insert(agent_instance_hierarchy.to_string(), cancel_tx);
         debug_assert!(inserted.is_none(), "ensure_pipe race: id already present");
 
-        let task_agent_id = agent_id.to_string();
+        let task_agent_instance_hierarchy = agent_instance_hierarchy.to_string();
         let task_response_id = response_id.to_string();
         let task_notifier = notifier;
         let task_notif_tx = notif_tx;
@@ -374,7 +374,7 @@ impl PipeRegistry {
         tokio::spawn(async move {
             run_listener(
                 listener,
-                task_agent_id,
+                task_agent_instance_hierarchy,
                 task_response_id,
                 task_notifier,
                 task_notif_tx,
@@ -386,7 +386,7 @@ impl PipeRegistry {
         Ok(())
     }
 
-    /// Bind the outbound `events.sock` for `agent_id` and spawn its
+    /// Bind the outbound `events.sock` for `agent_instance_hierarchy` and spawn its
     /// fanout listener task. Idempotent: returns a clone of the
     /// existing `broadcast::Sender` if one is already tracked.
     ///
@@ -397,21 +397,21 @@ impl PipeRegistry {
     /// without panicking; subscribers just won't see the events.
     pub async fn ensure_outbound_pipe(
         &self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
         pipes_root: &Path,
         handle: &Handle,
     ) -> broadcast::Sender<SubscribeEvent> {
         // Fast path — already wired.
-        if let Some(existing) = self.inner.outbound_senders.get(agent_id) {
+        if let Some(existing) = self.inner.outbound_senders.get(agent_instance_hierarchy) {
             return existing.clone();
         }
 
-        let address = match events_address_for_agent(pipes_root, agent_id) {
+        let address = match events_address_for_agent(pipes_root, agent_instance_hierarchy) {
             Ok(a) => a,
             Err(e) => {
-                emit_error(handle, format!("outbound pipe addr for {agent_id:?}: {e}")).await;
+                emit_error(handle, format!("outbound pipe addr for {agent_instance_hierarchy:?}: {e}")).await;
                 let (tx, _) = broadcast::channel(OUTBOUND_BROADCAST_CAPACITY);
-                return self.install_outbound_sender(agent_id, tx);
+                return self.install_outbound_sender(agent_instance_hierarchy, tx);
             }
         };
 
@@ -426,7 +426,7 @@ impl PipeRegistry {
                 )
                 .await;
                 let (tx, _) = broadcast::channel(OUTBOUND_BROADCAST_CAPACITY);
-                return self.install_outbound_sender(agent_id, tx);
+                return self.install_outbound_sender(agent_instance_hierarchy, tx);
             }
         }
         // Atomic claim with stale-recovery — see [`bind_or_busy`].
@@ -442,46 +442,46 @@ impl PipeRegistry {
                 emit_error(
                     handle,
                     format!(
-                        "outbound pipe slot already taken for {agent_id:?} at {}",
+                        "outbound pipe slot already taken for {agent_instance_hierarchy:?} at {}",
                         address.fs_path.display()
                     ),
                 )
                 .await;
                 let (tx, _) = broadcast::channel(OUTBOUND_BROADCAST_CAPACITY);
-                return self.install_outbound_sender(agent_id, tx);
+                return self.install_outbound_sender(agent_instance_hierarchy, tx);
             }
             BindOutcome::Io(e) => {
                 emit_error(
                     handle,
                     format!(
-                        "bind outbound pipe for {agent_id:?} at {}: {e}",
+                        "bind outbound pipe for {agent_instance_hierarchy:?} at {}: {e}",
                         address.fs_path.display()
                     ),
                 )
                 .await;
                 let (tx, _) = broadcast::channel(OUTBOUND_BROADCAST_CAPACITY);
-                return self.install_outbound_sender(agent_id, tx);
+                return self.install_outbound_sender(agent_instance_hierarchy, tx);
             }
         };
 
         let (tx, _) = broadcast::channel::<SubscribeEvent>(OUTBOUND_BROADCAST_CAPACITY);
-        let installed = self.install_outbound_sender(agent_id, tx.clone());
+        let installed = self.install_outbound_sender(agent_instance_hierarchy, tx.clone());
 
         let (cancel_tx, cancel_rx) = oneshot::channel();
         let prev = self
             .inner
             .outbound_cancellers
-            .insert(agent_id.to_string(), cancel_tx);
+            .insert(agent_instance_hierarchy.to_string(), cancel_tx);
         debug_assert!(
             prev.is_none(),
             "ensure_outbound_pipe race: id already present"
         );
 
-        let task_agent_id = agent_id.to_string();
+        let task_agent_instance_hierarchy = agent_instance_hierarchy.to_string();
         let task_tx = tx;
         let task_handle = handle.clone();
         tokio::spawn(async move {
-            run_outbound_listener(listener, task_agent_id, task_tx, task_handle, cancel_rx).await;
+            run_outbound_listener(listener, task_agent_instance_hierarchy, task_tx, task_handle, cancel_rx).await;
         });
 
         installed
@@ -489,23 +489,23 @@ impl PipeRegistry {
 
     fn install_outbound_sender(
         &self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
         tx: broadcast::Sender<SubscribeEvent>,
     ) -> broadcast::Sender<SubscribeEvent> {
         let entry = self
             .inner
             .outbound_senders
-            .entry(agent_id.to_string())
+            .entry(agent_instance_hierarchy.to_string())
             .or_insert(tx);
         entry.clone()
     }
 
-    /// Look up the outbound broadcast sender for `agent_id` if one
+    /// Look up the outbound broadcast sender for `agent_instance_hierarchy` if one
     /// has been ensured. Returns `None` for unknown ids.
-    pub fn outbound_sender(&self, agent_id: &str) -> Option<broadcast::Sender<SubscribeEvent>> {
+    pub fn outbound_sender(&self, agent_instance_hierarchy: &str) -> Option<broadcast::Sender<SubscribeEvent>> {
         self.inner
             .outbound_senders
-            .get(agent_id)
+            .get(agent_instance_hierarchy)
             .map(|entry| entry.clone())
     }
 
@@ -578,7 +578,7 @@ impl PipeRegistry {
 
 async fn run_listener(
     listener: Listener,
-    agent_id: String,
+    agent_instance_hierarchy: String,
     response_id: String,
     notifier: Notifier,
     notif_tx: tokio::sync::mpsc::UnboundedSender<(String, String, RichContent)>,
@@ -593,17 +593,17 @@ async fn run_listener(
                     Ok(conn) => {
                         let notifier = notifier.clone();
                         let notif_tx = notif_tx.clone();
-                        let agent_id = agent_id.clone();
+                        let agent_instance_hierarchy = agent_instance_hierarchy.clone();
                         let response_id = response_id.clone();
                         let handle = handle.clone();
                         tokio::spawn(handle_connection(
-                            conn, agent_id, response_id, notifier, notif_tx, handle,
+                            conn, agent_instance_hierarchy, response_id, notifier, notif_tx, handle,
                         ));
                     }
                     Err(e) => {
                         emit_error(
                             &handle,
-                            format!("pipe accept for {agent_id:?}: {e}"),
+                            format!("pipe accept for {agent_instance_hierarchy:?}: {e}"),
                         )
                         .await;
                         // Brief backoff so a hard-broken listener
@@ -618,7 +618,7 @@ async fn run_listener(
 
 async fn handle_connection(
     conn: interprocess::local_socket::tokio::Stream,
-    agent_id: String,
+    agent_instance_hierarchy: String,
     response_id: String,
     notifier: Notifier,
     notif_tx: tokio::sync::mpsc::UnboundedSender<(String, String, RichContent)>,
@@ -632,7 +632,7 @@ async fn handle_connection(
             Ok(Some(l)) => l,
             Ok(None) => return,
             Err(e) => {
-                emit_error(&handle, format!("pipe read for {agent_id:?}: {e}")).await;
+                emit_error(&handle, format!("pipe read for {agent_instance_hierarchy:?}: {e}")).await;
                 return;
             }
         };
@@ -644,7 +644,7 @@ async fn handle_connection(
             Ok(c) => c,
             Err(e) => {
                 let parse_msg = format!(
-                    "pipe line for {agent_id:?} is not a valid RichContent JSON: {e}; line: {}",
+                    "pipe line for {agent_instance_hierarchy:?} is not a valid RichContent JSON: {e}; line: {}",
                     truncate(trimmed, 200)
                 );
                 emit_error(&handle, parse_msg.clone()).await;
@@ -659,7 +659,7 @@ async fn handle_connection(
         // if the writer task is gone, drop silently. `response_id` is
         // the target agent-completion's id, threaded down from the
         // pipe binding — same value the wire request body carries.
-        let _ = notif_tx.send((agent_id.clone(), response_id.clone(), content.clone()));
+        let _ = notif_tx.send((agent_instance_hierarchy.clone(), response_id.clone(), content.clone()));
         let params = AgentCompletionNotifyParams {
             response_id: response_id.clone(),
             content,
@@ -667,7 +667,7 @@ async fn handle_connection(
         let ack = match notifier.notify(params).await {
             Ok(()) => PipeAck::Ok,
             Err(e) => {
-                let msg = format!("notify dispatch for {agent_id:?}: {e}");
+                let msg = format!("notify dispatch for {agent_instance_hierarchy:?}: {e}");
                 emit_error(&handle, msg.clone()).await;
                 PipeAck::Error { message: msg }
             }
@@ -702,7 +702,7 @@ where
 /// guarantee the subscribe algorithm relies on for invariant 1.
 async fn run_outbound_listener(
     listener: Listener,
-    agent_id: String,
+    agent_instance_hierarchy: String,
     sender: broadcast::Sender<SubscribeEvent>,
     handle: Handle,
     mut cancel: oneshot::Receiver<()>,
@@ -714,14 +714,14 @@ async fn run_outbound_listener(
                 match accept {
                     Ok(conn) => {
                         let rx = sender.subscribe();
-                        let agent_id = agent_id.clone();
+                        let agent_instance_hierarchy = agent_instance_hierarchy.clone();
                         let handle = handle.clone();
-                        tokio::spawn(handle_outbound_connection(conn, agent_id, rx, handle));
+                        tokio::spawn(handle_outbound_connection(conn, agent_instance_hierarchy, rx, handle));
                     }
                     Err(e) => {
                         emit_error(
                             &handle,
-                            format!("outbound pipe accept for {agent_id:?}: {e}"),
+                            format!("outbound pipe accept for {agent_instance_hierarchy:?}: {e}"),
                         )
                         .await;
                         tokio::time::sleep(std::time::Duration::from_millis(100)).await;
@@ -743,7 +743,7 @@ async fn run_outbound_listener(
 ///   4. The write fails (broken pipe — client disconnected).
 async fn handle_outbound_connection(
     conn: interprocess::local_socket::tokio::Stream,
-    agent_id: String,
+    agent_instance_hierarchy: String,
     mut rx: broadcast::Receiver<SubscribeEvent>,
     handle: Handle,
 ) {
@@ -766,7 +766,7 @@ async fn handle_outbound_connection(
             Err(e) => {
                 emit_error(
                     &handle,
-                    format!("serialize outbound event for {agent_id:?}: {e}"),
+                    format!("serialize outbound event for {agent_instance_hierarchy:?}: {e}"),
                 )
                 .await;
                 continue;
@@ -793,7 +793,7 @@ async fn emit_error(handle: &Handle, message: String) {
         level: Level::Warn,
         fatal: false,
         message: serde_json::Value::String(message),
-        agent_id: None,
+        agent_instance_hierarchy: None,
     });
     out.emit(handle).await;
 }

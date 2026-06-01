@@ -1,5 +1,5 @@
 //! `agents spawn` — fire a child agent in the background. Always
-//! detaches; emits exactly one `Spawned { agent_id }` notification
+//! detaches; emits exactly one `Spawned { agent_instance_hierarchy }` notification
 //! (the spawned agent's local lineage segment) and exits. The
 //! actual completion stream is consumed by an orphaned
 //! `objectiveai-cli-stream` child, which writes coalesced log

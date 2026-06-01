@@ -6,7 +6,7 @@ use crate::api::{BodySource, HttpArgs, PipeArgs};
 #[derive(Subcommand, Debug)]
 pub enum Commands {
     /// Stream `/functions/inventions/recursive`. Per-chunk NDJSON on
-    /// stdout, per-agent pipes under `${config_base_dir}/pipes/<agent_id>`,
+    /// stdout, per-agent pipes under `${config_base_dir}/pipes/<agent_instance_hierarchy>`,
     /// coalesced log files under
     /// `${config_base_dir}/logs/functions/inventions/recursive/<id>/`,
     /// and a one-shot `LogStreamReady` notification once the root

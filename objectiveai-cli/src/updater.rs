@@ -460,7 +460,7 @@ async fn emit_warn(handle: &Handle, message: &str) {
         level: objectiveai_sdk::cli::output::Level::Warn,
         fatal: false,
         message: serde_json::Value::String(message.to_string()),
-        agent_id: None,
+        agent_instance_hierarchy: None,
     };
     let output = Output::Error(err);
     output.emit(handle).await;

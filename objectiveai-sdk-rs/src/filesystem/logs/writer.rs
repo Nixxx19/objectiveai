@@ -79,12 +79,12 @@ pub struct LogWriter<C> {
     request_file_path: Option<String>,
     /// Optional caller lineage prefix prepended to every
     /// `chunk.agent_completion_ids()` value before it lands in the
-    /// `messages.agent_id` column. `None` keeps the bare form (the
+    /// `messages.agent_instance_hierarchy` column. `None` keeps the bare form (the
     /// original behaviour) for callers that don't go through a cli
     /// boundary; `Some("cli")`, `Some("cli/parent-X")`, etc. for
     /// stamped runs. Disambiguates two agents that happen to share
     /// the same `chunk.id` under different callers.
-    caller_agent_id: Option<String>,
+    caller_agent_instance_hierarchy: Option<String>,
     /// The most recently-received chunk, buffered awaiting a
     /// successor. Processed on the NEXT `write` call or by
     /// `finalize`. `None` before the first `write` and again once
@@ -110,26 +110,26 @@ impl<C> LogWriter<C> {
             request_kind: None,
             produce_rows: None,
             request_file_path: None,
-            caller_agent_id: None,
+            caller_agent_instance_hierarchy: None,
             pending_chunk: None,
         }
     }
 
-    /// Stamp the caller's lineage onto every `messages.agent_id` this
+    /// Stamp the caller's lineage onto every `messages.agent_instance_hierarchy` this
     /// writer inserts. `Some("cli")` prepends `"cli/"`; `None` keeps
     /// the bare chunk-emitted id. Passed verbatim — slashes inside
     /// `caller` (e.g. nested-spawn case `"cli/parent-X"`) become
     /// real subdir segments when the pipe path is derived from the
     /// same lineage string elsewhere in cli-stream.
-    pub fn with_caller_agent_id(mut self, caller: Option<String>) -> Self {
-        self.caller_agent_id = caller;
+    pub fn with_caller_agent_instance_hierarchy(mut self, caller: Option<String>) -> Self {
+        self.caller_agent_instance_hierarchy = caller;
         self
     }
 
-    /// Apply [`Self::with_caller_agent_id`]'s lineage transform to
-    /// a single chunk-derived `agent_id`. `None` caller passes through.
-    fn lineage_agent_id(&self, raw: &str) -> String {
-        match self.caller_agent_id.as_deref() {
+    /// Apply [`Self::with_caller_agent_instance_hierarchy`]'s lineage transform to
+    /// a single chunk-derived `agent_instance_hierarchy`. `None` caller passes through.
+    fn lineage_agent_instance_hierarchy(&self, raw: &str) -> String {
+        match self.caller_agent_instance_hierarchy.as_deref() {
             Some(c) => format!("{c}/{raw}"),
             None => raw.to_string(),
         }
@@ -202,16 +202,16 @@ impl<C> LogWriter<C> {
     /// the wire); the caller threads it down from the pipe binding.
     pub async fn write_notification(
         &mut self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
         response_id: &str,
         content: &RichContent,
     ) -> Result<PendingNotification, super::super::Error> {
         match &self.queue {
             Some(q) => {
-                q.write_notification(agent_id, response_id, content).await
+                q.write_notification(agent_instance_hierarchy, response_id, content).await
             }
             None => Ok(PendingNotification {
-                agent_id: agent_id.to_string(),
+                agent_instance_hierarchy: agent_instance_hierarchy.to_string(),
                 response_id: response_id.to_string(),
                 index: 0,
                 path: String::new(),
@@ -228,7 +228,7 @@ impl<C> LogWriter<C> {
     ///
     /// `pending` is the caller's local notification queue. For each
     /// tool-response row encountered, every queued notification with
-    /// the matching `agent_id` is removed from `pending` and its
+    /// the matching `agent_instance_hierarchy` is removed from `pending` and its
     /// `INSERT` is pushed into the same concurrent op set (at its
     /// already-reserved index — so the notification's index precedes
     /// the tool response's reserved index). Notifications for agents
@@ -243,7 +243,7 @@ impl<C> LogWriter<C> {
     {
         // Process the previously-buffered chunk (one chunk behind),
         // then stash the current one to await its successor. The
-        // returned vec lists every (agent_id, kind) row that was
+        // returned vec lists every (agent_instance_hierarchy, kind) row that was
         // newly inserted by this call — in dedup-survivor order —
         // so the cli-stream writer task can broadcast one Row event
         // per insert on the outbound subscribe pipe.
@@ -256,7 +256,7 @@ impl<C> LogWriter<C> {
 
     /// Verbatim body of the original `write`. Splits files +
     /// DB rows + notification drain in one atomic op set. Returns
-    /// every (agent_id, kind) row that survived the dedup gate and
+    /// every (agent_instance_hierarchy, kind) row that survived the dedup gate and
     /// was scheduled for insert. The vec is populated in scheduling
     /// order — request rows (one per agent in this chunk) first,
     /// then message rows in iterator order, with any drained
@@ -315,7 +315,7 @@ impl<C> LogWriter<C> {
 
         // Build the concurrent op set: file writes + per-agent request
         // rows + per-message rows + drained notification rows. Each
-        // op returns `Some((agent_id, kind))` for rows that ultimately
+        // op returns `Some((agent_instance_hierarchy, kind))` for rows that ultimately
         // landed in `messages` (so the cli-stream task can broadcast
         // one Row event per insert on the outbound subscribe pipe);
         // file-only writes and dedup-skipped request rows return
@@ -358,22 +358,22 @@ impl<C> LogWriter<C> {
                 // Lineage-stamp every chunk-emitted id with the
                 // caller prefix so two agents that happen to share
                 // `chunk.id` under different callers can't collide
-                // in `messages.agent_id`.
-                // (agent_id, response_id) pairs — `raw` is the bare
+                // in `messages.agent_instance_hierarchy`.
+                // (agent_instance_hierarchy, response_id) pairs — `raw` is the bare
                 // response id straight from the chunk; lineage-stamping
                 // produces the column value. We thread both so the
                 // reader doesn't have to reverse the stamp.
                 let id_pairs: Vec<(String, String)> = chunk
                     .agent_completion_ids()
-                    .map(|raw| (self.lineage_agent_id(raw), raw.to_string()))
+                    .map(|raw| (self.lineage_agent_instance_hierarchy(raw), raw.to_string()))
                     .collect();
-                for (agent_id, response_id) in id_pairs {
+                for (agent_instance_hierarchy, response_id) in id_pairs {
                     let queue = queue.clone();
                     let req_path = req_path.clone();
                     ops.push(Box::pin(async move {
                         let inserted = queue
                             .insert_request_once(
-                                &agent_id,
+                                &agent_instance_hierarchy,
                                 &response_id,
                                 kind,
                                 req_path,
@@ -381,7 +381,7 @@ impl<C> LogWriter<C> {
                             )
                             .await?;
                         Ok(if inserted {
-                            Some((agent_id, kind))
+                            Some((agent_instance_hierarchy, kind))
                         } else {
                             None
                         })
@@ -393,7 +393,7 @@ impl<C> LogWriter<C> {
             if let Some(rows_fn) = self.produce_rows {
                 let rows: Vec<MessageRow> = rows_fn(chunk)
                     .map(|mut row| {
-                        row.agent_id = self.lineage_agent_id(&row.agent_id);
+                        row.agent_instance_hierarchy = self.lineage_agent_instance_hierarchy(&row.agent_instance_hierarchy);
                         row
                     })
                     .collect();
@@ -403,7 +403,7 @@ impl<C> LogWriter<C> {
                     // share the same `path` (the bare index) but
                     // dispatch to different parsers on read.
                     let inserted = queue
-                        .register_path(&row.agent_id, row.kind, &row.path)
+                        .register_path(&row.agent_instance_hierarchy, row.kind, &row.path)
                         .await?;
                     if !inserted {
                         continue;
@@ -415,15 +415,15 @@ impl<C> LogWriter<C> {
                     // response then reserves and inserts at its own
                     // (later) index.
                     if matches!(row.kind, MessageKind::ToolResponse) {
-                        let agent = row.agent_id.clone();
+                        let agent = row.agent_instance_hierarchy.clone();
                         let mut i = 0;
                         while i < pending.len() {
-                            if pending[i].agent_id == agent
+                            if pending[i].agent_instance_hierarchy == agent
                                 && !pending[i].path.is_empty()
                             {
                                 let notif = pending.remove(i);
                                 let queue = queue.clone();
-                                let notif_agent = notif.agent_id.clone();
+                                let notif_agent = notif.agent_instance_hierarchy.clone();
                                 ops.push(Box::pin(async move {
                                     queue.insert_notification(notif).await?;
                                     Ok(Some((
@@ -437,17 +437,17 @@ impl<C> LogWriter<C> {
                         }
                     }
 
-                    let index = queue.reserve_index(&row.agent_id).await?;
+                    let index = queue.reserve_index(&row.agent_instance_hierarchy).await?;
                     let queue = queue.clone();
                     let path = row.path;
                     let kind = row.kind;
                     let ts = row.timestamp;
-                    let agent_id = row.agent_id;
+                    let agent_instance_hierarchy = row.agent_instance_hierarchy;
                     let response_id = row.response_id;
                     ops.push(Box::pin(async move {
                         queue
                             .insert(
-                                &agent_id,
+                                &agent_instance_hierarchy,
                                 &response_id,
                                 kind,
                                 path,
@@ -455,7 +455,7 @@ impl<C> LogWriter<C> {
                                 index,
                             )
                             .await?;
-                        Ok(Some((agent_id, kind)))
+                        Ok(Some((agent_instance_hierarchy, kind)))
                     }));
                 }
             }
@@ -516,7 +516,7 @@ impl<C> LogWriter<C> {
                 continue;
             }
             let queue = queue.clone();
-            let notif_agent = notif.agent_id.clone();
+            let notif_agent = notif.agent_instance_hierarchy.clone();
             ops.push(Box::pin(async move {
                 queue.insert_notification(notif).await?;
                 Ok(Some((

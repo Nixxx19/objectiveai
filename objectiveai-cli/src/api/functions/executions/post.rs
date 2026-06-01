@@ -6,7 +6,7 @@ pub struct Args {
     #[command(flatten)]
     pub body: crate::api::body::BodySource,
     #[command(flatten)]
-    pub agent_id: crate::api::agent_id_arg::AgentIdArg,
+    pub agent_instance_hierarchy: crate::api::agent_instance_hierarchy_arg::AgentIdArg,
 }
 
 pub async fn handle(
@@ -26,7 +26,7 @@ pub async fn handle(
             reqwest::Method::POST,
             "functions/executions",
             Some(params),
-            args.agent_id.agent_id,
+            args.agent_instance_hierarchy.agent_instance_hierarchy,
         )
         .await
     } else {
@@ -36,7 +36,7 @@ pub async fn handle(
             reqwest::Method::POST,
             "functions/executions",
             Some(params),
-            args.agent_id.agent_id,
+            args.agent_instance_hierarchy.agent_instance_hierarchy,
         )
         .await
     }

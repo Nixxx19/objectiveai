@@ -68,9 +68,9 @@ pub struct HttpArgs {
     #[arg(long, global = true)]
     pub commit_author_email: Option<String>,
 
-    /// `X-OBJECTIVEAI-AGENT-ID` header. Maps to `OBJECTIVEAI_AGENT_ID`.
+    /// `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY` header. Maps to `OBJECTIVEAI_AGENT_INSTANCE_HIERARCHY`.
     #[arg(long, global = true)]
-    pub objectiveai_agent_id: Option<String>,
+    pub objectiveai_agent_instance_hierarchy: Option<String>,
 
     /// `Mcp-Session-Id` header. Forwarded into cli-stream by the
     /// cli's `push_forwarded_args` so that downstream tool
@@ -122,7 +122,7 @@ impl HttpArgs {
             self.viewer_address.clone(),
             self.commit_author_name.clone(),
             self.commit_author_email.clone(),
-            self.objectiveai_agent_id.clone(),
+            self.objectiveai_agent_instance_hierarchy.clone(),
             self.mcp_session_id.clone(),
         ))
     }
@@ -133,7 +133,7 @@ impl HttpArgs {
 pub struct PipeArgs {
     /// Root directory under which per-agent pipes are bound and per-
     /// run log files are written. Each agent gets a folder at
-    /// `${config_base_dir}/pipes/<agent_id>/` (slashes in the agent
+    /// `${config_base_dir}/pipes/<agent_instance_hierarchy>/` (slashes in the agent
     /// id become subdirectories — same filesystem path on every
     /// platform, since cli-stream uses AF_UNIX everywhere) containing
     /// both the socket (fixed name `socket`) and a sibling SQLite
@@ -155,7 +155,7 @@ pub struct PipeArgs {
     /// Full lineage-stamped agent id (e.g. `caller/sub-id`) the
     /// endpoint should claim eagerly — *before* opening the API
     /// stream — by binding the per-agent inbound listener at
-    /// `${config_base_dir}/pipes/<bind_agent_id>/socket`. On bind
+    /// `${config_base_dir}/pipes/<bind_agent_instance_hierarchy>/socket`. On bind
     /// conflict (path already owned by a live listener) cli-stream
     /// exits with [`SLOT_TAKEN_EXIT_CODE`](crate::api::SLOT_TAKEN_EXIT_CODE);
     /// the wrapper `objectiveai-cli` then recursively retries the
@@ -165,7 +165,7 @@ pub struct PipeArgs {
     /// the response_id is minted randomly server-side and admission
     /// races cannot occur by construction.
     #[arg(long, global = true)]
-    pub bind_agent_id: Option<String>,
+    pub bind_agent_instance_hierarchy: Option<String>,
 }
 
 impl PipeArgs {
@@ -198,7 +198,7 @@ impl PipeArgs {
     }
 
     /// Run the eager admission probe against `registry` when
-    /// `--bind-agent-id` is set. On [`crate::pipes::BindStatus::Live`]
+    /// `--bind-agent-instance-hierarchy` is set. On [`crate::pipes::BindStatus::Live`]
     /// the process exits with [`super::SLOT_TAKEN_EXIT_CODE`] —
     /// **does not return**. On success the listener is stashed in
     /// `registry.pending_listeners` and the matching per-chunk
@@ -210,12 +210,12 @@ impl PipeArgs {
         registry: &crate::pipes::PipeRegistry,
         handle: &objectiveai_sdk::cli::output::Handle,
     ) -> Result<(), String> {
-        let Some(bind_agent_id) = self.bind_agent_id.as_deref() else {
+        let Some(bind_agent_instance_hierarchy) = self.bind_agent_instance_hierarchy.as_deref() else {
             return Ok(());
         };
         let pipes_root = self.pipes_root()?;
         match registry
-            .try_acquire_pipe(bind_agent_id, &pipes_root, handle)
+            .try_acquire_pipe(bind_agent_instance_hierarchy, &pipes_root, handle)
             .await
         {
             Ok(()) => Ok(()),

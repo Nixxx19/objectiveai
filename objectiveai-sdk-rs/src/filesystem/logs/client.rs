@@ -1497,8 +1497,8 @@ impl Client {
 
     // -- Per-agent message queue ---------------------------------------------
 
-    /// Drain every unread row for `spawned_agent_id` from
-    /// `caller_agent_id`'s perspective and atomically advance the
+    /// Drain every unread row for `spawned_agent_instance_hierarchy` from
+    /// `caller_agent_instance_hierarchy`'s perspective and atomically advance the
     /// pair's watermark in `messages_queue`. Each row is hydrated
     /// from its on-disk log file(s) and translated into a typed
     /// [`super::queue::QueueItem`] following the `WORK.md` schema.
@@ -1511,14 +1511,14 @@ impl Client {
     /// returned.
     pub async fn read_new_from_queue(
         &self,
-        caller_agent_id: &str,
-        spawned_agent_id: &str,
+        caller_agent_instance_hierarchy: &str,
+        spawned_agent_instance_hierarchy: &str,
     ) -> Result<Vec<super::queue::QueueItem>, Error> {
         let conn = super::super::db::connection::connection(self)?;
         let queue =
             super::super::db::messages::Queue::new(conn, self.logs_dir());
         let rows = queue
-            .read_new_messages(caller_agent_id, spawned_agent_id)
+            .read_new_messages(caller_agent_instance_hierarchy, spawned_agent_instance_hierarchy)
             .await?;
         let mut items = Vec::with_capacity(rows.len());
         for row in rows {
@@ -1527,8 +1527,8 @@ impl Client {
         Ok(items)
     }
 
-    /// Read every queue row for `spawned_agent_id` (no watermark
-    /// filter), advancing `caller_agent_id`'s watermark to the
+    /// Read every queue row for `spawned_agent_instance_hierarchy` (no watermark
+    /// filter), advancing `caller_agent_instance_hierarchy`'s watermark to the
     /// returned max. Companion to [`Self::read_new_from_queue`]:
     /// `read_all` returns everything; `read_new` returns only past
     /// the watermark. Both advance the watermark identically — a
@@ -1536,14 +1536,14 @@ impl Client {
     /// until new rows land.
     pub async fn read_all_from_queue(
         &self,
-        caller_agent_id: &str,
-        spawned_agent_id: &str,
+        caller_agent_instance_hierarchy: &str,
+        spawned_agent_instance_hierarchy: &str,
     ) -> Result<Vec<super::queue::QueueItem>, Error> {
         let conn = super::super::db::connection::connection(self)?;
         let queue =
             super::super::db::messages::Queue::new(conn, self.logs_dir());
         let rows = queue
-            .read_all_messages(caller_agent_id, spawned_agent_id)
+            .read_all_messages(caller_agent_instance_hierarchy, spawned_agent_instance_hierarchy)
             .await?;
         let mut items = Vec::with_capacity(rows.len());
         for row in rows {
@@ -2143,15 +2143,15 @@ impl Client {
         }
     }
 
-    /// List every direct-child agent of `parent_agent_id` (one
+    /// List every direct-child agent of `parent_agent_instance_hierarchy` (one
     /// composite-id segment deeper, no grandchildren) along with
     /// the unix-seconds timestamp of its most recent
     /// `assistant_response` row in the `messages` table.
     /// Newest-first.
     ///
-    /// The `agent_id` in each returned [`ActiveAgent`] is the
+    /// The `agent_instance_hierarchy` in each returned [`ActiveAgent`] is the
     /// sub-portion past the parent — i.e. the trailing
-    /// composite-id segment(s) with the `{parent_agent_id}/`
+    /// composite-id segment(s) with the `{parent_agent_instance_hierarchy}/`
     /// prefix stripped — so callers can paste it back into
     /// commands that re-prepend the parent (e.g. `agents
     /// read pending`).
@@ -2159,15 +2159,15 @@ impl Client {
     /// [`ActiveAgent`]: crate::cli::output::ActiveAgent
     pub async fn list_active(
         &self,
-        parent_agent_id: &str,
+        parent_agent_instance_hierarchy: &str,
     ) -> Result<Vec<crate::cli::output::ActiveAgent>, Error> {
         let conn = super::super::db::connection::connection(self)?;
         let rows = super::super::db::schema::list_direct_active_children_async(
             conn,
-            parent_agent_id.to_string(),
+            parent_agent_instance_hierarchy.to_string(),
         )
         .await?;
-        let prefix = format!("{parent_agent_id}/");
+        let prefix = format!("{parent_agent_instance_hierarchy}/");
         Ok(rows
             .into_iter()
             .map(|(full, last_log)| crate::cli::output::ActiveAgent {

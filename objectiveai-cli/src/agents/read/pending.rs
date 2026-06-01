@@ -7,8 +7,8 @@
 //! Wraps [`objectiveai_sdk::filesystem::Client::read_new_from_queue`]:
 //! atomically advances the per-(caller, spawned) watermark in
 //! `messages_queue` and returns each unread row as a typed
-//! `QueueItem`. The caller id is taken from `cli_config.agent_id`
-//! (env-supplied `OBJECTIVEAI_AGENT_ID`, defaulting to `"cli"` in
+//! `QueueItem`. The caller id is taken from `cli_config.agent_instance_hierarchy`
+//! (env-supplied `OBJECTIVEAI_AGENT_INSTANCE_HIERARCHY`, defaulting to `"cli"` in
 //! `main.rs`).
 //!
 //! Positional args are **sub-ids**, not full composite ids — the
@@ -30,7 +30,7 @@ pub struct CommandArgs {
     /// `agents read pending foo-123 bar-456` emits two
     /// notifications.
     #[arg(required = true)]
-    pub agent_ids: Vec<String>,
+    pub agent_instance_hierarchys: Vec<String>,
 }
 
 pub async fn handle(
@@ -43,9 +43,9 @@ pub async fn handle(
         None::<String>,
         None::<String>,
     );
-    let caller = &cli_config.agent_id;
+    let caller = &cli_config.agent_instance_hierarchy;
 
-    for sub in &args.agent_ids {
+    for sub in &args.agent_instance_hierarchys {
         let spawned = format!("{caller}/{sub}");
         let items = client.read_new_from_queue(caller, &spawned).await?;
 

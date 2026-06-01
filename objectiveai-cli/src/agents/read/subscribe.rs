@@ -58,9 +58,9 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 #[derive(Args)]
 pub struct CommandArgs {
     /// Sub-id (lineage-relative) of the spawned agent to subscribe
-    /// to. The caller prefix (`cli_config.agent_id`) is prepended
+    /// to. The caller prefix (`cli_config.agent_instance_hierarchy`) is prepended
     /// internally — same shape as `agents read pending`.
-    pub agent_id: String,
+    pub agent_instance_hierarchy: String,
 
     /// Optional filter. When supplied, `subscribe` returns only when
     /// a queue item of this kind is observed (or the stream ends).
@@ -113,15 +113,15 @@ pub async fn handle(
         None::<String>,
         None::<String>,
     );
-    let caller = cli_config.agent_id.clone();
-    let spawned = format!("{caller}/{}", args.agent_id);
+    let caller = cli_config.agent_instance_hierarchy.clone();
+    let spawned = format!("{caller}/{}", args.agent_instance_hierarchy);
     let pipes_dir = client.pipes_dir();
     subscribe_recursive(
         client,
         pipes_dir,
         caller,
         spawned,
-        args.agent_id,
+        args.agent_instance_hierarchy,
         kind_filter,
         handle,
     )

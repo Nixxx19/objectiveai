@@ -43,7 +43,7 @@ pub fn resolve_continuation(
                 // Empty here so the api treats this as a fresh build
                 // and mints a composite from its inbound header on
                 // first entry.
-                agent_id: String::new(),
+                agent_instance_hierarchy: String::new(),
                 messages,
                 mcp_sessions: Default::default(),
                 ws_session_id: None,
@@ -60,7 +60,7 @@ pub fn resolve_continuation(
                 // Empty here so the api treats this as a fresh build
                 // and mints a composite from its inbound header on
                 // first entry.
-                agent_id: String::new(),
+                agent_instance_hierarchy: String::new(),
                 messages,
                 mcp_sessions: Default::default(),
                 ws_session_id: None,
@@ -77,7 +77,7 @@ pub fn resolve_continuation(
                 // Empty here so the api treats this as a fresh build
                 // and mints a composite from its inbound header on
                 // first entry.
-                agent_id: String::new(),
+                agent_instance_hierarchy: String::new(),
                 messages,
                 mcp_sessions: Default::default(),
                 ws_session_id: None,
@@ -99,7 +99,7 @@ pub fn resolve_continuation(
                 // Empty here so the api treats this as a fresh build
                 // and mints a composite from its inbound header on
                 // first entry.
-                agent_id: String::new(),
+                agent_instance_hierarchy: String::new(),
                 messages,
                 mcp_sessions: Default::default(),
                 ws_session_id: None,
@@ -116,7 +116,7 @@ pub fn resolve_continuation(
                 // Empty here so the api treats this as a fresh build
                 // and mints a composite from its inbound header on
                 // first entry.
-                agent_id: String::new(),
+                agent_instance_hierarchy: String::new(),
                 messages,
                 mcp_sessions: Default::default(),
                 ws_session_id: None,
@@ -133,7 +133,7 @@ pub fn resolve_continuation(
                 // Empty here so the api treats this as a fresh build
                 // and mints a composite from its inbound header on
                 // first entry.
-                agent_id: String::new(),
+                agent_instance_hierarchy: String::new(),
                 messages,
                 mcp_sessions: Default::default(),
                 ws_session_id: None,
@@ -150,7 +150,7 @@ pub fn resolve_continuation(
                 // Empty here so the api treats this as a fresh build
                 // and mints a composite from its inbound header on
                 // first entry.
-                agent_id: String::new(),
+                agent_instance_hierarchy: String::new(),
                 session_id,
                 mcp_sessions: Default::default(),
                 ws_session_id: None,

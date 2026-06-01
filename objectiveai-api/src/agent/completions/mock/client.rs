@@ -20,13 +20,13 @@ pub struct Client {
 
 /// Resolves the response format for this agent from the request params.
 fn resolve_response_format(
-    agent_id: &str,
+    agent_instance_hierarchy: &str,
     params: &objectiveai_sdk::agent::completions::request::AgentCompletionCreateParams,
 ) -> Option<objectiveai_sdk::agent::completions::request::ResponseFormat> {
     use objectiveai_sdk::agent::completions::request::ResponseFormatParam;
     match params.response_format.as_ref()? {
         ResponseFormatParam::Single(rf) => Some(rf.clone()),
-        ResponseFormatParam::PerAgent(map) => map.get(agent_id).cloned(),
+        ResponseFormatParam::PerAgent(map) => map.get(agent_instance_hierarchy).cloned(),
     }
 }
 
@@ -73,7 +73,7 @@ impl UpstreamClient<objectiveai_sdk::agent::mock::Agent, objectiveai_sdk::agent:
         invention_step: Option<usize>,
         invention_tasks_min: Option<u64>,
         invention_input_schema: Option<String>,
-        _agent_id_header: Option<&str>,
+        _agent_instance_hierarchy_header: Option<&str>,
     ) -> impl Future<
         Output = Result<
             Self::Stream,
@@ -84,7 +84,7 @@ impl UpstreamClient<objectiveai_sdk::agent::mock::Agent, objectiveai_sdk::agent:
         let tools_enabled = tools_enabled;
         let mode = agent.base.mode.unwrap_or_default();
         let id = id.to_string();
-        let agent_id = agent.id.clone();
+        let agent_instance_hierarchy = agent.id.clone();
         let error = agent.base.error == Some(true);
         let error_probability = agent.base.error_probability;
         let top_logprobs = agent.base.top_logprobs;
@@ -360,7 +360,7 @@ impl UpstreamClient<objectiveai_sdk::agent::mock::Agent, objectiveai_sdk::agent:
                         messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
                             index: assistant_index,
                             created,
-                            agent: agent_id.clone(),
+                            agent: agent_instance_hierarchy.clone(),
                             model: "mock".into(),
                             upstream_id: id.clone(),
                             reasoning: Some(reasoning_text.clone()),
@@ -391,7 +391,7 @@ impl UpstreamClient<objectiveai_sdk::agent::mock::Agent, objectiveai_sdk::agent:
                                 messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
                                     index: assistant_index,
                                     created,
-                                    agent: agent_id.clone(),
+                                    agent: agent_instance_hierarchy.clone(),
                                     model: "mock".into(),
                                     upstream_id: id.clone(),
                                     content: Some(RichContent::Text(chunk_text.clone())),
@@ -439,7 +439,7 @@ impl UpstreamClient<objectiveai_sdk::agent::mock::Agent, objectiveai_sdk::agent:
                                     messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
                                         index: assistant_index,
                                         created,
-                                        agent: agent_id.clone(),
+                                        agent: agent_instance_hierarchy.clone(),
                                         model: "mock".into(),
                                         upstream_id: id.clone(),
                                         tool_calls: Some(vec![AssistantToolCallDelta {
@@ -518,7 +518,7 @@ impl UpstreamClient<objectiveai_sdk::agent::mock::Agent, objectiveai_sdk::agent:
             upstream: objectiveai_sdk::agent::mock::Upstream::default(),
             // Stamped by the agent-completions client immediately
             // after this method returns; empty here is fine.
-            agent_id: String::new(),
+            agent_instance_hierarchy: String::new(),
             messages: all_messages,
             mcp_sessions,
             ws_session_id: None,

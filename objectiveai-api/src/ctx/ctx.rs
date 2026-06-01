@@ -44,10 +44,10 @@ pub struct Context<CTXEXT, PC> {
     commit_author_name: Option<Arc<String>>,
     /// Per-request commit author email.
     commit_author_email: Option<Arc<String>>,
-    /// Per-request caller-supplied agent id (`X-OBJECTIVEAI-AGENT-ID`).
+    /// Per-request caller-supplied agent id (`X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY`).
     /// Plays the role of the *parent* when composing the agent id we
     /// forward to the MCP proxy inside agent completions.
-    agent_id: Option<Arc<String>>,
+    agent_instance_hierarchy: Option<Arc<String>>,
     /// Local TCP port the API process is bound on. Used to synthesize
     /// `http://127.0.0.1:{api_port}/objectiveai-mcp/{ws_session_id}`
     /// reverse-attach URLs when an agent declares `client_objectiveai_mcp`.
@@ -164,7 +164,7 @@ impl<CTXEXT, PC> Clone for Context<CTXEXT, PC> {
             viewer_address: self.viewer_address.clone(),
             commit_author_name: self.commit_author_name.clone(),
             commit_author_email: self.commit_author_email.clone(),
-            agent_id: self.agent_id.clone(),
+            agent_instance_hierarchy: self.agent_instance_hierarchy.clone(),
             api_port: self.api_port,
             reverse_attach: self.reverse_attach.clone(),
             openrouter_authorization_cached: self.openrouter_authorization_cached.clone(),
@@ -262,9 +262,9 @@ impl<CTXEXT, PC> Context<CTXEXT, PC> {
             .and_then(|v| v.to_str().ok())
             .map(|s| Arc::new(s.to_owned()));
 
-        let agent_id = headers
-            .get("X-OBJECTIVEAI-AGENT-ID")
-            .or_else(|| headers.get("OBJECTIVEAI-AGENT-ID"))
+        let agent_instance_hierarchy = headers
+            .get("X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY")
+            .or_else(|| headers.get("OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY"))
             .and_then(|v| v.to_str().ok())
             .map(|s| Arc::new(s.to_owned()));
 
@@ -281,7 +281,7 @@ impl<CTXEXT, PC> Context<CTXEXT, PC> {
             viewer_address,
             commit_author_name,
             commit_author_email,
-            agent_id,
+            agent_instance_hierarchy,
             api_port: None,
             reverse_attach: None,
             openrouter_authorization_cached: Arc::new(OnceCell::new()),
@@ -307,11 +307,11 @@ impl<CTXEXT, PC> Context<CTXEXT, PC> {
         self.objectiveai_authorization.as_ref()
     }
 
-    /// Returns the caller-supplied agent id from `X-OBJECTIVEAI-AGENT-ID`,
+    /// Returns the caller-supplied agent id from `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY`,
     /// if present. This is the *parent* prefix used when composing the
     /// agent id we forward to the MCP proxy.
-    pub fn agent_id(&self) -> Option<&str> {
-        self.agent_id.as_deref().map(|s| s.as_str())
+    pub fn agent_instance_hierarchy(&self) -> Option<&str> {
+        self.agent_instance_hierarchy.as_deref().map(|s| s.as_str())
     }
 
     /// Returns the local TCP port the API process is bound on, if a

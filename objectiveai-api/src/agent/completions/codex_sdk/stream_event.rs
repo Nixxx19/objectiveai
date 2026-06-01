@@ -86,7 +86,7 @@ fn upstream_usage(
 fn assistant_chunk(
     id: String,
     created: u64,
-    agent_id: String,
+    agent_instance_hierarchy: String,
     model: String,
     upstream: Upstream,
     upstream_id: String,
@@ -102,7 +102,7 @@ fn assistant_chunk(
         messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
             index: assistant_index,
             created,
-            agent: agent_id,
+            agent: agent_instance_hierarchy,
             model,
             upstream_id,
             reasoning,
@@ -129,7 +129,7 @@ pub fn into_downstream(
     event: ThreadEvent,
     id: String,
     created: u64,
-    agent_id: String,
+    agent_instance_hierarchy: String,
     model: String,
     assistant_index: u64,
     is_byok: bool,
@@ -150,7 +150,7 @@ pub fn into_downstream(
             Some(Ok(assistant_chunk(
                 id,
                 created,
-                agent_id,
+                agent_instance_hierarchy,
                 model,
                 upstream,
                 thread_id.to_string(),
@@ -180,7 +180,7 @@ pub fn into_downstream(
                 KnownThreadItem::AgentMessage(m) => Some(Ok(assistant_chunk(
                     id,
                     created,
-                    agent_id,
+                    agent_instance_hierarchy,
                     model,
                     upstream,
                     thread_id.to_string(),
@@ -193,7 +193,7 @@ pub fn into_downstream(
                 KnownThreadItem::Reasoning(r) => Some(Ok(assistant_chunk(
                     id,
                     created,
-                    agent_id,
+                    agent_instance_hierarchy,
                     model,
                     upstream,
                     thread_id.to_string(),

@@ -1,5 +1,5 @@
 //! `SubscribeEvent` — NDJSON line type written by cli-stream's
-//! outbound per-agent event pipe (`pipes/<agent_id>/events.sock`)
+//! outbound per-agent event pipe (`pipes/<agent_instance_hierarchy>/events.sock`)
 //! and consumed by `objectiveai-cli agents read subscribe`.
 //!
 //! This is an implementation detail of the cli-stream / subscribe

@@ -127,9 +127,9 @@ async fn spawn_then_message_propagates_response_continuation() {
         .find(|l| l.pointer("/type") == Some(&json!("spawned")))
         .expect("agents spawn must emit a Spawned notification");
     let spawn_id = spawned
-        .pointer("/agent_id")
+        .pointer("/agent_instance_hierarchy")
         .and_then(|v| v.as_str())
-        .expect("Spawned.agent_id")
+        .expect("Spawned.agent_instance_hierarchy")
         .to_string();
 
     // ── 2. Wait for cli-stream to fully finish ───────────────────
@@ -178,16 +178,16 @@ async fn spawn_then_message_propagates_response_continuation() {
         .and_then(|v| v.as_str())
         .expect("MessageQueued.response_id")
         .to_string();
-    let echoed_agent_id = queued
-        .pointer("/agent_id")
+    let echoed_agent_instance_hierarchy = queued
+        .pointer("/agent_instance_hierarchy")
         .and_then(|v| v.as_str())
-        .expect("MessageQueued.agent_id");
+        .expect("MessageQueued.agent_instance_hierarchy");
     assert_eq!(
-        echoed_agent_id,
+        echoed_agent_instance_hierarchy,
         format!("cli/{spawn_id}"),
-        "MessageQueued.agent_id should be the full lineage form — \
+        "MessageQueued.agent_instance_hierarchy should be the full lineage form — \
          caller (`cli` by default) glued onto the spawn's chunk.id, \
-         matching what the writer stamps into `messages.agent_id`"
+         matching what the writer stamps into `messages.agent_instance_hierarchy`"
     );
     // Continuations from the api server reuse the original chunk.id
     // as the new turn's response_id (the agent's stable lineage id

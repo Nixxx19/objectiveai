@@ -78,13 +78,13 @@ impl Queue {
     }
 
     /// Reserve and return the next monotonic db index for an agent.
-    /// Seeds the agent's entry from `MAX(index) WHERE agent_id = ?`
+    /// Seeds the agent's entry from `MAX(index) WHERE agent_instance_hierarchy = ?`
     /// + 1 on first use.
     pub async fn reserve_index(
         &self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
     ) -> Result<u64, super::super::Error> {
-        let entry = self.ensure_agent(agent_id).await?;
+        let entry = self.ensure_agent(agent_instance_hierarchy).await?;
         let mut state = entry.state.lock().expect("agent state mutex poisoned");
         let idx = state.next_index;
         state.next_index += 1;
@@ -93,20 +93,20 @@ impl Queue {
 
     /// Insert one row at a caller-given index. `response_id` is the
     /// bare agent-completion chunk id; it's stored in its own column
-    /// so the reader doesn't have to parse it back out of `agent_id`.
+    /// so the reader doesn't have to parse it back out of `agent_instance_hierarchy`.
     pub async fn insert(
         &self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
         response_id: &str,
         kind: MessageKind,
         path: String,
         timestamp: u64,
         index: u64,
     ) -> Result<(), super::super::Error> {
-        self.ensure_agent(agent_id).await?;
+        self.ensure_agent(agent_instance_hierarchy).await?;
         schema::insert_async(
             Arc::clone(&self.inner.conn),
-            agent_id.to_string(),
+            agent_instance_hierarchy.to_string(),
             response_id.to_string(),
             kind,
             path,
@@ -122,13 +122,13 @@ impl Queue {
     /// the row was inserted, `false` if a prior call already did it.
     pub async fn insert_request_once(
         &self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
         response_id: &str,
         kind: MessageKind,
         path: String,
         timestamp: u64,
     ) -> Result<bool, super::super::Error> {
-        let entry = self.ensure_agent(agent_id).await?;
+        let entry = self.ensure_agent(agent_instance_hierarchy).await?;
         let index = {
             let mut state =
                 entry.state.lock().expect("agent state mutex poisoned");
@@ -142,7 +142,7 @@ impl Queue {
         };
         schema::insert_async(
             Arc::clone(&self.inner.conn),
-            agent_id.to_string(),
+            agent_instance_hierarchy.to_string(),
             response_id.to_string(),
             kind,
             path,
@@ -153,12 +153,12 @@ impl Queue {
         Ok(true)
     }
 
-    /// Register a `(kind, path)` pair for dedup under `agent_id`.
+    /// Register a `(kind, path)` pair for dedup under `agent_instance_hierarchy`.
     /// Returns `true` if newly inserted, `false` if already present
     /// (caller should skip the insert).
     ///
     /// The effective unique tuple is `(response_id, kind, path)` —
-    /// `agent_id`'s trailing segment is the response id (set by the
+    /// `agent_instance_hierarchy`'s trailing segment is the response id (set by the
     /// chunk producer and lineage-stamped here), so the per-agent
     /// HashMap entry contributes `response_id` and this set adds
     /// `(kind, path)`. None of the pairwise subsets is unique on its
@@ -166,11 +166,11 @@ impl Queue {
     /// missing axis would alias.
     pub async fn register_path(
         &self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
         kind: MessageKind,
         path: &str,
     ) -> Result<bool, super::super::Error> {
-        let entry = self.ensure_agent(agent_id).await?;
+        let entry = self.ensure_agent(agent_instance_hierarchy).await?;
         let mut state = entry.state.lock().expect("agent state mutex poisoned");
         Ok(state.inserted_paths.insert((kind, path.to_string())))
     }
@@ -190,14 +190,14 @@ impl Queue {
     /// `response_id` is the agent completion the notification targets
     /// — the same value `AgentCompletionNotifyParams.response_id`
     /// carries on the wire. Stored explicitly; never re-derived from
-    /// `agent_id`.
+    /// `agent_instance_hierarchy`.
     pub async fn write_notification(
         &self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
         response_id: &str,
         content: &RichContent,
     ) -> Result<PendingNotification, super::super::Error> {
-        let entry = self.ensure_agent(agent_id).await?;
+        let entry = self.ensure_agent(agent_instance_hierarchy).await?;
         let index = {
             let mut state =
                 entry.state.lock().expect("agent state mutex poisoned");
@@ -246,7 +246,7 @@ impl Queue {
             .map_err(|e| super::super::Error::Write(full_path, e))?;
 
         Ok(PendingNotification {
-            agent_id: agent_id.to_string(),
+            agent_instance_hierarchy: agent_instance_hierarchy.to_string(),
             response_id: response_id.to_string(),
             index,
             // DB column stores just the bare index.
@@ -262,7 +262,7 @@ impl Queue {
         notification: PendingNotification,
     ) -> Result<(), super::super::Error> {
         self.insert(
-            &notification.agent_id,
+            &notification.agent_instance_hierarchy,
             &notification.response_id,
             MessageKind::AgentCompletionNotification,
             notification.path,
@@ -272,8 +272,8 @@ impl Queue {
         .await
     }
 
-    /// Read every message for `spawned_agent_id` whose `index` is
-    /// strictly greater than `caller_agent_id`'s watermark in
+    /// Read every message for `spawned_agent_instance_hierarchy` whose `index` is
+    /// strictly greater than `caller_agent_instance_hierarchy`'s watermark in
     /// `messages_queue`, then upsert the watermark to the max
     /// returned index. Returns the matching `MessageRow`s in
     /// ascending index order.
@@ -288,12 +288,12 @@ impl Queue {
     /// delivery, no torn watermark.
     pub async fn read_new_messages(
         &self,
-        caller_agent_id: &str,
-        spawned_agent_id: &str,
+        caller_agent_instance_hierarchy: &str,
+        spawned_agent_instance_hierarchy: &str,
     ) -> Result<Vec<MessageRow>, super::super::Error> {
         let conn = Arc::clone(&self.inner.conn);
-        let caller = caller_agent_id.to_string();
-        let spawned = spawned_agent_id.to_string();
+        let caller = caller_agent_instance_hierarchy.to_string();
+        let spawned = spawned_agent_instance_hierarchy.to_string();
         tokio::task::spawn_blocking(move || -> Result<Vec<MessageRow>, super::super::Error> {
             use rusqlite::OptionalExtension as _;
             let conn = conn.lock().expect("filesystem db mutex poisoned");
@@ -301,7 +301,7 @@ impl Queue {
             let watermark: i64 = conn
                 .query_row(
                     "SELECT \"index\" FROM messages_queue \
-                     WHERE caller_agent_id = ?1 AND spawned_agent_id = ?2",
+                     WHERE caller_agent_instance_hierarchy = ?1 AND spawned_agent_instance_hierarchy = ?2",
                     rusqlite::params![&caller, &spawned],
                     |row| row.get::<_, i64>(0),
                 )
@@ -310,7 +310,7 @@ impl Queue {
             // 2. Fetch unread rows.
             let mut stmt = conn.prepare_cached(
                 "SELECT kind, response_id, path, timestamp, \"index\" FROM messages \
-                 WHERE agent_id = ?1 AND \"index\" > ?2 ORDER BY \"index\"",
+                 WHERE agent_instance_hierarchy = ?1 AND \"index\" > ?2 ORDER BY \"index\"",
             )?;
             let rows = stmt
                 .query_map(rusqlite::params![&spawned, watermark], |r| {
@@ -331,7 +331,7 @@ impl Queue {
                 .into_iter()
                 .map(|(kind_str, response_id, path, ts, idx)| {
                     Ok(MessageRow {
-                        agent_id: spawned.clone(),
+                        agent_instance_hierarchy: spawned.clone(),
                         response_id,
                         kind: MessageKind::from_str(&kind_str)?,
                         path,
@@ -343,9 +343,9 @@ impl Queue {
             // 3. Upsert watermark to max returned index when we got anything.
             if let Some(new_max) = rows.last().map(|r| r.index as i64) {
                 conn.execute(
-                    "INSERT INTO messages_queue (caller_agent_id, spawned_agent_id, \"index\") \
+                    "INSERT INTO messages_queue (caller_agent_instance_hierarchy, spawned_agent_instance_hierarchy, \"index\") \
                      VALUES (?1, ?2, ?3) \
-                     ON CONFLICT (caller_agent_id, spawned_agent_id) \
+                     ON CONFLICT (caller_agent_instance_hierarchy, spawned_agent_instance_hierarchy) \
                      DO UPDATE SET \"index\" = excluded.\"index\"",
                     rusqlite::params![&caller, &spawned, new_max],
                 )?;
@@ -358,9 +358,9 @@ impl Queue {
         })?
     }
 
-    /// Read every message row for `spawned_agent_id` (no watermark
+    /// Read every message row for `spawned_agent_instance_hierarchy` (no watermark
     /// filter) in ascending index order, then upsert
-    /// `caller_agent_id`'s watermark for the pair to the returned
+    /// `caller_agent_instance_hierarchy`'s watermark for the pair to the returned
     /// max index. Same atomicity guarantee as
     /// [`Self::read_new_messages`]: the SELECT + UPSERT run under
     /// one connection lock.
@@ -370,17 +370,17 @@ impl Queue {
     /// the caller has already drained.
     pub async fn read_all_messages(
         &self,
-        caller_agent_id: &str,
-        spawned_agent_id: &str,
+        caller_agent_instance_hierarchy: &str,
+        spawned_agent_instance_hierarchy: &str,
     ) -> Result<Vec<MessageRow>, super::super::Error> {
         let conn = Arc::clone(&self.inner.conn);
-        let caller = caller_agent_id.to_string();
-        let spawned = spawned_agent_id.to_string();
+        let caller = caller_agent_instance_hierarchy.to_string();
+        let spawned = spawned_agent_instance_hierarchy.to_string();
         tokio::task::spawn_blocking(move || -> Result<Vec<MessageRow>, super::super::Error> {
             let conn = conn.lock().expect("filesystem db mutex poisoned");
             let mut stmt = conn.prepare_cached(
                 "SELECT kind, response_id, path, timestamp, \"index\" FROM messages \
-                 WHERE agent_id = ?1 ORDER BY \"index\"",
+                 WHERE agent_instance_hierarchy = ?1 ORDER BY \"index\"",
             )?;
             let rows = stmt
                 .query_map(rusqlite::params![&spawned], |r| {
@@ -397,7 +397,7 @@ impl Queue {
                 .into_iter()
                 .map(|(kind_str, response_id, path, ts, idx)| {
                     Ok(MessageRow {
-                        agent_id: spawned.clone(),
+                        agent_instance_hierarchy: spawned.clone(),
                         response_id,
                         kind: MessageKind::from_str(&kind_str)?,
                         path,
@@ -408,9 +408,9 @@ impl Queue {
                 .collect::<Result<Vec<_>, super::super::Error>>()?;
             if let Some(new_max) = rows.last().map(|r| r.index as i64) {
                 conn.execute(
-                    "INSERT INTO messages_queue (caller_agent_id, spawned_agent_id, \"index\") \
+                    "INSERT INTO messages_queue (caller_agent_instance_hierarchy, spawned_agent_instance_hierarchy, \"index\") \
                      VALUES (?1, ?2, ?3) \
-                     ON CONFLICT (caller_agent_id, spawned_agent_id) \
+                     ON CONFLICT (caller_agent_instance_hierarchy, spawned_agent_instance_hierarchy) \
                      DO UPDATE SET \"index\" = excluded.\"index\"",
                     rusqlite::params![&caller, &spawned, new_max],
                 )?;
@@ -424,12 +424,12 @@ impl Queue {
     }
 
     /// Internal: ensure the agent's mutable state is initialised.
-    /// Seeds `next_index` from `MAX(index) WHERE agent_id = ?` + 1
+    /// Seeds `next_index` from `MAX(index) WHERE agent_instance_hierarchy = ?` + 1
     /// the first time this id is seen. Idempotent — losing-race
     /// callers see the winner's entry.
     async fn ensure_agent(
         &self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
     ) -> Result<Arc<AgentEntry>, super::super::Error> {
         // Fast path.
         {
@@ -438,14 +438,14 @@ impl Queue {
                 .agents
                 .lock()
                 .expect("queue agents mutex poisoned");
-            if let Some(entry) = guard.get(agent_id) {
+            if let Some(entry) = guard.get(agent_instance_hierarchy) {
                 return Ok(Arc::clone(entry));
             }
         }
         // Slow path: seed next_index via the blocking pool.
         let max = schema::max_index_async(
             Arc::clone(&self.inner.conn),
-            agent_id.to_string(),
+            agent_instance_hierarchy.to_string(),
         )
         .await?;
         let entry = Arc::new(AgentEntry {
@@ -461,7 +461,7 @@ impl Queue {
             .lock()
             .expect("queue agents mutex poisoned");
         Ok(Arc::clone(
-            guard.entry(agent_id.to_string()).or_insert(entry),
+            guard.entry(agent_instance_hierarchy.to_string()).or_insert(entry),
         ))
     }
 }

@@ -1,7 +1,7 @@
 //! Builds the SDK `HttpClient` for endpoint subcommands.
 //!
 //! Precedence for every field is `env var → config file → SDK default`,
-//! except `agent_id` which is sourced from the top-level `cli::Config`
+//! except `agent_instance_hierarchy` which is sourced from the top-level `cli::Config`
 //! (already env-populated by `EnvConfigBuilder` at startup) so per-
 //! request overrides — e.g. the MCP server's per-call header stamp —
 //! flow through to outbound HTTP. The cli disabled the SDK's `env`
@@ -92,14 +92,14 @@ pub fn build_http_client(
         .or_else(|| config.api().get_commit_author_email().map(String::from));
 
     // Source from the top-level cli::Config rather than re-reading the
-    // env: `EnvConfigBuilder` already loads OBJECTIVEAI_AGENT_ID into
-    // cli_config.agent_id at startup, and per-request overrides
-    // (notably the MCP server's per-call X-OBJECTIVEAI-AGENT-ID stamp
+    // env: `EnvConfigBuilder` already loads OBJECTIVEAI_AGENT_INSTANCE_HIERARCHY into
+    // cli_config.agent_instance_hierarchy at startup, and per-request overrides
+    // (notably the MCP server's per-call X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY stamp
     // in objectiveai-mcp/src/objectiveai.rs::run_cli_and_collect) mutate
     // this clone of cli_config — reading from env here would silently
     // drop those overrides and truncate the agent lineage at every
     // MCP-spawn boundary.
-    let agent_id = Some(cli_config.agent_id.clone());
+    let agent_instance_hierarchy = Some(cli_config.agent_instance_hierarchy.clone());
     let mcp_session_id = cli_config.mcp_session_id.clone();
 
     objectiveai_sdk::HttpClient::new(
@@ -116,7 +116,7 @@ pub fn build_http_client(
         x_viewer_address,
         x_commit_author_name,
         x_commit_author_email,
-        agent_id,
+        agent_instance_hierarchy,
         mcp_session_id,
     )
 }

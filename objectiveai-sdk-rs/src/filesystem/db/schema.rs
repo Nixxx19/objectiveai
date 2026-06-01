@@ -88,9 +88,9 @@ impl MessageKind {
     ///
     /// `response_id` is the bare agent-completion chunk id and is
     /// passed in explicitly. We do **not** recover it by parsing
-    /// `agent_id`'s trailing segment — `agent_id` is constructed
+    /// `agent_instance_hierarchy`'s trailing segment — `agent_instance_hierarchy` is constructed
     /// from `response_id` (by lineage-stamping) and the reverse
-    /// direction is unsafe (bare/unstamped agent_ids, sub-lineages,
+    /// direction is unsafe (bare/unstamped agent_instance_hierarchies, sub-lineages,
     /// etc.). For notifications, the on-disk filename is keyed by
     /// `response_id` too (the target agent-completion's id) so the
     /// rule holds uniformly.
@@ -157,9 +157,9 @@ pub struct MessageRow {
     /// Which agent the row is about (column). Lineage-stamped by the
     /// writer (`{caller}/{response_id}` or just `{response_id}` at the
     /// root).
-    pub agent_id: String,
+    pub agent_instance_hierarchy: String,
     /// The bare chunk id (the agent completion's response id). Set
-    /// explicitly by the producer; never re-derived from `agent_id`.
+    /// explicitly by the producer; never re-derived from `agent_instance_hierarchy`.
     pub response_id: String,
     pub kind: MessageKind,
     /// The chunk-given message index (assistant/tool: `MessageChunk::index()`).
@@ -177,7 +177,7 @@ pub struct MessageRow {
 ///
 /// Tables:
 /// - `messages` — one row per request / response / notification.
-/// - `messages_queue` — per-`(caller_agent_id, spawned_agent_id)`
+/// - `messages_queue` — per-`(caller_agent_instance_hierarchy, spawned_agent_instance_hierarchy)`
 ///   watermark of the highest `messages."index"` the caller has
 ///   already consumed. One row per pair; the composite PRIMARY KEY
 ///   doubles as the lookup index.
@@ -189,20 +189,20 @@ pub fn init_tables(conn: &Connection) -> Result<(), super::super::Error> {
     conn.execute_batch(
         "CREATE TABLE IF NOT EXISTS messages (\
             id          INTEGER PRIMARY KEY AUTOINCREMENT, \
-            agent_id    TEXT NOT NULL, \
+            agent_instance_hierarchy    TEXT NOT NULL, \
             response_id TEXT NOT NULL, \
             kind        TEXT NOT NULL, \
             path        TEXT NOT NULL, \
             timestamp   INTEGER NOT NULL, \
             \"index\"   INTEGER NOT NULL\
         );\
-        CREATE INDEX IF NOT EXISTS messages_agent_index_idx ON messages(agent_id, \"index\");\
-        CREATE INDEX IF NOT EXISTS messages_agent_idx ON messages(agent_id);\
+        CREATE INDEX IF NOT EXISTS messages_agent_index_idx ON messages(agent_instance_hierarchy, \"index\");\
+        CREATE INDEX IF NOT EXISTS messages_agent_instance_hierarchyx ON messages(agent_instance_hierarchy);\
         CREATE TABLE IF NOT EXISTS messages_queue (\
-            caller_agent_id  TEXT NOT NULL, \
-            spawned_agent_id TEXT NOT NULL, \
+            caller_agent_instance_hierarchy  TEXT NOT NULL, \
+            spawned_agent_instance_hierarchy TEXT NOT NULL, \
             \"index\"        INTEGER NOT NULL, \
-            PRIMARY KEY (caller_agent_id, spawned_agent_id)\
+            PRIMARY KEY (caller_agent_instance_hierarchy, spawned_agent_instance_hierarchy)\
         );\
         CREATE TABLE IF NOT EXISTS files (\
             id   INTEGER PRIMARY KEY AUTOINCREMENT, \
@@ -271,7 +271,7 @@ pub async fn path_for_file_id_async(
     .map_err(spawn_blocking_join_err)?
 }
 
-/// List every direct-child agent of `parent_agent_id` (one
+/// List every direct-child agent of `parent_agent_instance_hierarchy` (one
 /// lineage segment deeper, no grandchildren) along with the unix-
 /// seconds timestamp of its most recent
 /// [`MessageKind::AssistantResponse`] row. Newest-first.
@@ -281,21 +281,21 @@ pub async fn path_for_file_id_async(
 /// means: `LIKE 'parent/%'` AND no further `/` after the prefix.
 pub fn list_direct_active_children(
     conn: &Connection,
-    parent_agent_id: &str,
+    parent_agent_instance_hierarchy: &str,
 ) -> Result<Vec<(String, u64)>, super::super::Error> {
     let mut stmt = conn.prepare_cached(
-        "SELECT agent_id, MAX(timestamp) AS last_log \
+        "SELECT agent_instance_hierarchy, MAX(timestamp) AS last_log \
          FROM messages \
-         WHERE agent_id LIKE (?1 || '/%') \
-           AND instr(substr(agent_id, length(?1) + 2), '/') = 0 \
+         WHERE agent_instance_hierarchy LIKE (?1 || '/%') \
+           AND instr(substr(agent_instance_hierarchy, length(?1) + 2), '/') = 0 \
            AND kind = ?2 \
-         GROUP BY agent_id \
+         GROUP BY agent_instance_hierarchy \
          ORDER BY last_log DESC",
     )?;
     let rows = stmt
         .query_map(
             rusqlite::params![
-                parent_agent_id,
+                parent_agent_instance_hierarchy,
                 MessageKind::AssistantResponse.as_str()
             ],
             |r| Ok((r.get::<_, String>(0)?, r.get::<_, i64>(1)?.max(0) as u64)),
@@ -307,43 +307,43 @@ pub fn list_direct_active_children(
 /// Async wrapper around [`list_direct_active_children`].
 pub async fn list_direct_active_children_async(
     conn: Arc<Mutex<Connection>>,
-    parent_agent_id: String,
+    parent_agent_instance_hierarchy: String,
 ) -> Result<Vec<(String, u64)>, super::super::Error> {
     tokio::task::spawn_blocking(move || {
         let conn = conn.lock().expect("filesystem db mutex poisoned");
-        list_direct_active_children(&conn, &parent_agent_id)
+        list_direct_active_children(&conn, &parent_agent_instance_hierarchy)
     })
     .await
     .map_err(spawn_blocking_join_err)?
 }
 
-/// `SELECT MAX("index") FROM messages WHERE agent_id = ?`. `None` when
+/// `SELECT MAX("index") FROM messages WHERE agent_instance_hierarchy = ?`. `None` when
 /// no row matches.
 pub fn max_index(
     conn: &Connection,
-    agent_id: &str,
+    agent_instance_hierarchy: &str,
 ) -> Result<Option<u64>, super::super::Error> {
     let mut stmt = conn.prepare_cached(
-        "SELECT MAX(\"index\") FROM messages WHERE agent_id = ?1",
+        "SELECT MAX(\"index\") FROM messages WHERE agent_instance_hierarchy = ?1",
     )?;
     use rusqlite::OptionalExtension as _;
     let row: Option<Option<i64>> = stmt
-        .query_row([agent_id], |r| r.get::<_, Option<i64>>(0))
+        .query_row([agent_instance_hierarchy], |r| r.get::<_, Option<i64>>(0))
         .optional()?;
     Ok(row.flatten().map(|v| v.max(0) as u64))
 }
 
 /// Insert a single row.
 ///
-/// `agent_id` is the lineage-stamped composite (`{caller}/{response_id}`
+/// `agent_instance_hierarchy` is the lineage-stamped composite (`{caller}/{response_id}`
 /// or just `{response_id}` for the unstamped root case). `response_id`
 /// is the *bare* chunk id, passed in explicitly — we never recover it
-/// by parsing `agent_id`, both because `agent_id` may be unstamped and
+/// by parsing `agent_instance_hierarchy`, both because `agent_instance_hierarchy` may be unstamped and
 /// because the trailing-segment trick is a one-way invariant that
 /// callers shouldn't rely on.
 pub fn insert(
     conn: &Connection,
-    agent_id: &str,
+    agent_instance_hierarchy: &str,
     response_id: &str,
     kind: MessageKind,
     path: &str,
@@ -351,10 +351,10 @@ pub fn insert(
     index: u64,
 ) -> Result<(), super::super::Error> {
     conn.execute(
-        "INSERT INTO messages (agent_id, response_id, kind, path, timestamp, \"index\") \
+        "INSERT INTO messages (agent_instance_hierarchy, response_id, kind, path, timestamp, \"index\") \
          VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
         rusqlite::params![
-            agent_id,
+            agent_instance_hierarchy,
             response_id,
             kind.as_str(),
             path,
@@ -370,7 +370,7 @@ pub fn insert(
 /// crosses an `.await`.
 pub async fn insert_async(
     conn: Arc<Mutex<Connection>>,
-    agent_id: String,
+    agent_instance_hierarchy: String,
     response_id: String,
     kind: MessageKind,
     path: String,
@@ -381,7 +381,7 @@ pub async fn insert_async(
         let conn = conn.lock().expect("filesystem db mutex poisoned");
         insert(
             &conn,
-            &agent_id,
+            &agent_instance_hierarchy,
             &response_id,
             kind,
             &path,
@@ -393,15 +393,15 @@ pub async fn insert_async(
     .map_err(spawn_blocking_join_err)?
 }
 
-/// Async wrapper: `SELECT MAX("index") WHERE agent_id = ?` on the
+/// Async wrapper: `SELECT MAX("index") WHERE agent_instance_hierarchy = ?` on the
 /// blocking pool.
 pub async fn max_index_async(
     conn: Arc<Mutex<Connection>>,
-    agent_id: String,
+    agent_instance_hierarchy: String,
 ) -> Result<Option<u64>, super::super::Error> {
     tokio::task::spawn_blocking(move || {
         let conn = conn.lock().expect("filesystem db mutex poisoned");
-        max_index(&conn, &agent_id)
+        max_index(&conn, &agent_instance_hierarchy)
     })
     .await
     .map_err(spawn_blocking_join_err)?

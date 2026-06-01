@@ -162,7 +162,7 @@ impl AgentCompletionChunk {
     /// Yields one [`MessageRow`] per `MessageChunk` for the SQLite
     /// `messages` table. Lazy: borrows from `self`, never collects.
     ///
-    /// `agent_id` is this chunk's `id`; `path` points at the
+    /// `agent_instance_hierarchy` is this chunk's `id`; `path` points at the
     /// per-message log file under `agents/completions/response/messages/`.
     /// Returns an empty iterator when `id` is empty (the chunk hasn't
     /// been assigned a response id yet — same gate `produce_files`
@@ -190,9 +190,9 @@ impl AgentCompletionChunk {
             };
             let idx = m.index();
             Some(MessageRow {
-                agent_id: id.to_string(),
-                // Same value as agent_id at this stage — the writer
-                // will lineage-stamp `agent_id` but `response_id`
+                agent_instance_hierarchy: id.to_string(),
+                // Same value as agent_instance_hierarchy at this stage — the writer
+                // will lineage-stamp `agent_instance_hierarchy` but `response_id`
                 // stays bare so the reader doesn't have to parse it
                 // back out of a stamped string.
                 response_id: id.to_string(),

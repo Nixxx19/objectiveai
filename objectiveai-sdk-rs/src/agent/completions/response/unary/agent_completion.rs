@@ -46,22 +46,22 @@ impl AgentCompletion {
                     asst.created = 0;
                 }
                 super::Message::Tool(tool) => {
-                    // Strip the `agent_id` key the CLI's
+                    // Strip the `agent_instance_hierarchy` key the CLI's
                     // `cli::output::Handle::emit` stamps on every
                     // emitted JSON line. The value is the racy
                     // `next_agent_index` counter — the order-of-task
                     // assignment varies run-to-run, so leaving it in
                     // would break snapshot determinism. Walk text
-                    // payloads, parse each line, drop `agent_id`,
+                    // payloads, parse each line, drop `agent_instance_hierarchy`,
                     // re-serialize.
                     match &mut tool.inner.content {
                         RichContent::Text(s) => {
-                            *s = strip_agent_id_lines(s);
+                            *s = strip_agent_instance_hierarchy_lines(s);
                         }
                         RichContent::Parts(parts) => {
                             for p in parts {
                                 if let RichContentPart::Text { text } = p {
-                                    *text = strip_agent_id_lines(text);
+                                    *text = strip_agent_instance_hierarchy_lines(text);
                                 }
                             }
                         }
@@ -74,7 +74,7 @@ impl AgentCompletion {
         // includes both an `mcp_sessions` map (keyed by proxy URL
         // with freshly-minted session UUIDs as values; the URL's
         // port and the UUIDs are random per run) and the agent's
-        // lineage `agent_id` (minted at first-spawn from a UUID +
+        // lineage `agent_instance_hierarchy` (minted at first-spawn from a UUID +
         // creation timestamp). Both vary run-to-run and would break
         // every snapshot otherwise. Decode, clear them, re-encode.
         if let Some(s) = &mut self.continuation {
@@ -83,19 +83,19 @@ impl AgentCompletion {
                 match &mut c {
                     crate::agent::Continuation::Openrouter(x) => {
                         x.mcp_sessions.clear();
-                        x.agent_id.clear();
+                        x.agent_instance_hierarchy.clear();
                     }
                     crate::agent::Continuation::ClaudeAgentSdk(x) => {
                         x.mcp_sessions.clear();
-                        x.agent_id.clear();
+                        x.agent_instance_hierarchy.clear();
                     }
                     crate::agent::Continuation::CodexSdk(x) => {
                         x.mcp_sessions.clear();
-                        x.agent_id.clear();
+                        x.agent_instance_hierarchy.clear();
                     }
                     crate::agent::Continuation::Mock(x) => {
                         x.mcp_sessions.clear();
-                        x.agent_id.clear();
+                        x.agent_instance_hierarchy.clear();
                     }
                 }
                 *s = c.to_string();
@@ -104,25 +104,25 @@ impl AgentCompletion {
     }
 }
 
-/// Private mirror of `cli::output::strip_agent_id_lines` for use inside
+/// Private mirror of `cli::output::strip_agent_instance_hierarchy_lines` for use inside
 /// `normalize_for_tests`. The shared public copy lives behind the
 /// `cli` feature flag and the SDK core builds without that feature,
 /// so we keep a small local duplicate here. ~15 lines, no shared
 /// state, no drift risk.
-fn strip_agent_id_lines(text: &str) -> String {
+fn strip_agent_instance_hierarchy_lines(text: &str) -> String {
     let mut out: String = text
         .lines()
         .map(|line| {
             // Only rewrite lines that parse as a JSON *object* AND
-            // actually contain an `agent_id` top-level key. See the
-            // sibling helper in `cli::output::strip_agent_id_lines`
+            // actually contain an `agent_instance_hierarchy` top-level key. See the
+            // sibling helper in `cli::output::strip_agent_instance_hierarchy_lines`
             // for the indentation-preservation rationale.
             let Ok(serde_json::Value::Object(mut obj)) =
                 serde_json::from_str::<serde_json::Value>(line)
             else {
                 return line.to_string();
             };
-            if obj.remove("agent_id").is_none() {
+            if obj.remove("agent_instance_hierarchy").is_none() {
                 return line.to_string();
             }
             serde_json::to_string(&serde_json::Value::Object(obj))

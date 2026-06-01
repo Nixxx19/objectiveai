@@ -7,7 +7,7 @@ use crate::api::{BodySource, HttpArgs, PipeArgs};
 pub enum Commands {
     /// Stream a spawned agent completion. Per-chunk NDJSON on
     /// stdout, per-agent pipes under
-    /// `${config_base_dir}/pipes/<agent_id>`, coalesced log files
+    /// `${config_base_dir}/pipes/<agent_instance_hierarchy>`, coalesced log files
     /// under `${config_base_dir}/logs/agents/completions/<acc-id>/`,
     /// and a one-shot `LogStreamReady` notification once the root
     /// log id is available.

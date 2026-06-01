@@ -111,13 +111,14 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         commit_author_email: commit_author_email.clone(),
         github_authorization: None,
         // Server-wide default. Per-request, `run_cli_and_collect`
-        // overrides this with the `X-OBJECTIVEAI-AGENT-ID` header
-        // when present; otherwise the call stays stamped as `"mcp"`.
-        agent_id: "mcp".to_string(),
-        // Same per-request override pattern for the base — populated
-        // from `X-OBJECTIVEAI-AGENT-ID-BASE` when the upstream stamps
-        // it; otherwise stays `None`.
-        agent_id_base: None,
+        // overrides this with the `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY`
+        // header when present; otherwise the call stays stamped as
+        // `"mcp"`.
+        agent_instance_hierarchy: "mcp".to_string(),
+        // Same per-request override pattern for the agent_id — populated
+        // from `X-OBJECTIVEAI-AGENT-ID` when the upstream stamps it;
+        // otherwise stays `None`.
+        agent_id: None,
         mcp_session_id: None,
         mcp: true,
     });

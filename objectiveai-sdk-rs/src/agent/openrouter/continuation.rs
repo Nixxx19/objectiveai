@@ -10,7 +10,7 @@ pub struct Continuation {
     /// agent's first spawn and preserved verbatim across every
     /// continuation round so the agent's identity stays stable
     /// regardless of who resumes the conversation.
-    pub agent_id: String,
+    pub agent_instance_hierarchy: String,
     pub messages: Vec<super::super::completions::message::Message>,
     pub mcp_sessions: indexmap::IndexMap<String, String>,
     /// Per-agent reverse-attach session id baked into this agent's

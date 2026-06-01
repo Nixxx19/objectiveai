@@ -45,11 +45,11 @@ pub async fn handle(
         None::<String>,
         None::<String>,
     );
-    let caller_agent_id = http.objectiveai_agent_id.clone();
+    let caller_agent_instance_hierarchy = http.objectiveai_agent_instance_hierarchy.clone();
     let log_writer = fs_client
         .write_function_execution(&params)
         .map_err(|e| format!("failed to build function-execution log writer: {e}"))?
-        .with_caller_agent_id(caller_agent_id.clone());
+        .with_caller_agent_instance_hierarchy(caller_agent_instance_hierarchy.clone());
 
     let (stream, notifier) =
         objectiveai_sdk::functions::executions::create_function_execution_streaming(
@@ -73,7 +73,7 @@ pub async fn handle(
         stream,
         notifier,
         pipes_root,
-        caller_agent_id,
+        caller_agent_instance_hierarchy,
         log_writer,
         handle,
         |agg: &mut FunctionExecutionChunk, chunk: &FunctionExecutionChunk| agg.push(chunk),

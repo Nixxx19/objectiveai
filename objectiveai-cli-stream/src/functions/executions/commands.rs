@@ -7,7 +7,7 @@ use crate::api::{BodySource, HttpArgs, PipeArgs};
 pub enum Commands {
     /// Stream `/functions/executions`. The streaming chunks are
     /// emitted one-per-NDJSON-line on stdout. Per-agent named pipes
-    /// appear under `${config_base_dir}/pipes/<agent_id>` for as
+    /// appear under `${config_base_dir}/pipes/<agent_instance_hierarchy>` for as
     /// long as that agent is in flight; external processes can
     /// connect and write NDJSON `RichContent` lines to push
     /// notifications at the agent. Log files land under

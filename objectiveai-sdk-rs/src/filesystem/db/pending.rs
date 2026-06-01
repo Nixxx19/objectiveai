@@ -11,11 +11,11 @@ pub struct PendingNotification {
     /// Lineage-stamped agent id (`{caller}/{response_id}` or
     /// `{response_id}` at the root). Used as the per-agent
     /// reservation namespace and as the agent column on the row.
-    pub agent_id: String,
+    pub agent_instance_hierarchy: String,
     /// The bare agent-completion response id the notification targets
     /// (the same value `AgentCompletionNotifyParams.response_id`
     /// carries on the wire). Stored explicitly so the reader doesn't
-    /// have to parse it out of `agent_id`.
+    /// have to parse it out of `agent_instance_hierarchy`.
     pub response_id: String,
     pub index: u64,
     pub path: String,

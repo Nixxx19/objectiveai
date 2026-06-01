@@ -193,7 +193,7 @@ async fn handle_notification<Chunk>(
                     level: Level::Warn,
                     fatal: false,
                     message: inner,
-                    agent_id: None,
+                    agent_instance_hierarchy: None,
                 })
                 .emit(handle)
                 .await;
@@ -211,7 +211,7 @@ async fn handle_notification<Chunk>(
 
 /// Spawn cli-stream as a detached background process, wait for
 /// the [`LogStreamReady`] handshake, emit
-/// [`Spawned { agent_id }`](objectiveai_sdk::cli::output::Spawned),
+/// [`Spawned { agent_instance_hierarchy }`](objectiveai_sdk::cli::output::Spawned),
 /// and return Ok. The cli-stream child keeps running after this
 /// returns; the caller is expected to exit promptly so the orphan
 /// can take over the actual completion stream.
@@ -241,14 +241,14 @@ pub async fn run_detached(
 /// `run_detached` parameterized by the terminal notification emitted
 /// once cli-stream's `LogStreamReady` handshake fires. Used by
 /// `agents message`'s continuation-fallback path to emit
-/// `MessageQueued { agent_id, response_id }` instead of the default
-/// `Spawned { agent_id }`.
+/// `MessageQueued { agent_instance_hierarchy, response_id }` instead of the default
+/// `Spawned { agent_instance_hierarchy }`.
 pub async fn run_detached_with<F>(
     cli_config: &crate::Config,
     endpoint_path: &[&str],
     body: &(impl serde::Serialize + ?Sized),
     handle: &Handle,
-    bind_agent_id: Option<&str>,
+    bind_agent_instance_hierarchy: Option<&str>,
     make_notification: F,
 ) -> Result<(), crate::error::Error>
 where
@@ -272,8 +272,8 @@ where
     // tell cli-stream to bind the per-agent socket *before* opening
     // the API stream. A lost race surfaces as the SLOT_TAKEN exit
     // code, which the dispatch entry maps to a retry.
-    if let Some(id) = bind_agent_id {
-        cmd.args(["--bind-agent-id", id]);
+    if let Some(id) = bind_agent_instance_hierarchy {
+        cmd.args(["--bind-agent-instance-hierarchy", id]);
     }
 
     cmd.stdin(std::process::Stdio::null())
@@ -498,7 +498,7 @@ async fn push_forwarded_args(
         cmd.args(["--commit-author-email", &v]);
     }
 
-    cmd.args(["--objectiveai-agent-id", &cli_config.agent_id]);
+    cmd.args(["--objectiveai-agent-instance-hierarchy", &cli_config.agent_instance_hierarchy]);
 
     if let Some(ref v) = cli_config.mcp_session_id {
         cmd.args(["--mcp-session-id", v]);

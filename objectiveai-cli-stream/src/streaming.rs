@@ -76,7 +76,7 @@ pub async fn run_chunk_loop<S, Chunk, E, F>(
     mut stream: S,
     notifier: Notifier,
     pipes_root: PathBuf,
-    caller_agent_id: Option<String>,
+    caller_agent_instance_hierarchy: Option<String>,
     log_writer: LogWriter<Chunk>,
     handle: &Handle,
     push: F,
@@ -107,9 +107,9 @@ where
     // notification channel carries `RichContent` notifications from
     // the pipe readers into the writer task's local pending queue.
     let (tx, rx) = tokio::sync::mpsc::unbounded_channel::<Chunk>();
-    // Tuple: (lineage_agent_id, response_id, content). Threading both
+    // Tuple: (lineage_agent_instance_hierarchy, response_id, content). Threading both
     // axes keeps the writer from having to re-derive `response_id`
-    // from `agent_id` — see the LogReference doc comment for the rule.
+    // from `agent_instance_hierarchy` — see the LogReference doc comment for the rule.
     let (notif_tx, notif_rx) =
         tokio::sync::mpsc::unbounded_channel::<(String, String, RichContent)>();
     let writer_push = push.clone();
@@ -138,7 +138,7 @@ where
                 //    chunk references. `ensure_pipe` is idempotent —
                 //    repeat ids are no-ops. Lineage-stamp each raw
                 //    chunk-emitted id with the caller prefix so the
-                //    pipe path matches the `messages.agent_id` form
+                //    pipe path matches the `messages.agent_instance_hierarchy` form
                 //    the writer stores; slashes inside the caller
                 //    (multi-segment callers like `cli/parent-X`)
                 //    become real subdirs via `pipes_root.join(...)`.
@@ -154,7 +154,7 @@ where
                     std::collections::HashSet::new();
                 for raw in chunk.agent_completion_ids() {
                     response_ids_this_chunk.insert(raw.to_string());
-                    let lineage_id = match &caller_agent_id {
+                    let lineage_id = match &caller_agent_instance_hierarchy {
                         Some(c) => format!("{c}/{raw}"),
                         None => raw.to_string(),
                     };
@@ -288,7 +288,7 @@ where
 /// is flushed by `log_writer.finalize`.
 ///
 /// After each successful `log_writer.write` / `finalize`, broadcasts
-/// one [`SubscribeEvent::Row`] per inserted (agent_id, kind) tuple to
+/// one [`SubscribeEvent::Row`] per inserted (agent_instance_hierarchy, kind) tuple to
 /// that agent's outbound `events.sock` fanout sender (looked up via
 /// `registry.outbound_sender`). After `finalize` completes,
 /// broadcasts [`SubscribeEvent::StreamEnd`] to every outbound sender
@@ -380,7 +380,7 @@ where
     Ok(())
 }
 
-/// Fan one `Row` event per `(agent_id, kind)` tuple out to the
+/// Fan one `Row` event per `(agent_instance_hierarchy, kind)` tuple out to the
 /// matching outbound broadcast sender. Missing senders are silently
 /// skipped — `register.ensure_outbound_pipe` is called from the main
 /// loop for every chunk-referenced agent id BEFORE the chunk lands
@@ -388,8 +388,8 @@ where
 /// previously failed (in which case the degraded sender is in place
 /// but no listener ever consumes from it — the send is a no-op).
 fn broadcast_rows(registry: &PipeRegistry, inserted: &[(String, MessageKind)]) {
-    for (agent_id, kind) in inserted {
-        if let Some(tx) = registry.outbound_sender(agent_id) {
+    for (agent_instance_hierarchy, kind) in inserted {
+        if let Some(tx) = registry.outbound_sender(agent_instance_hierarchy) {
             let _ = tx.send(SubscribeEvent::Row {
                 message_kind: *kind,
             });

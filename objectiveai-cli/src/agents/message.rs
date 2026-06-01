@@ -5,7 +5,7 @@
 //! unreachable or refuses to ack, we fall back to continuing the
 //! agent's most recent completion via its stored continuation, and
 //! exit emitting [`MessageQueued`] — same envelope shape as a fresh
-//! spawn, but reusing the original `agent_id` instead of minting a new
+//! spawn, but reusing the original `agent_instance_hierarchy` instead of minting a new
 //! one.
 //!
 //! Closes the gap between `agents spawn` (fire-and-forget) and
@@ -70,10 +70,10 @@ impl MessageSource {
 #[derive(Args)]
 pub struct CommandArgs {
     /// Sub-id (lineage-relative) of the target agent. The caller
-    /// prefix (`OBJECTIVEAI_AGENT_ID`, defaulting to `"cli"`) is
+    /// prefix (`OBJECTIVEAI_AGENT_INSTANCE_HIERARCHY`, defaulting to `"cli"`) is
     /// prepended internally — same convention as
     /// `agents read pending`.
-    pub agent_id: String,
+    pub agent_instance_hierarchy: String,
     #[command(flatten)]
     pub message: MessageSource,
     /// Seed for deterministic mock responses on the continuation
@@ -91,22 +91,22 @@ pub async fn handle(
     handle: &Handle,
 ) -> Result<(), crate::error::Error> {
     // Glue the caller's lineage onto the user-supplied sub-id —
-    // matches what `LogWriter::with_caller_agent_id` stores in
-    // `messages.agent_id` and what `streaming.rs` binds the per-agent
+    // matches what `LogWriter::with_caller_agent_instance_hierarchy` stores in
+    // `messages.agent_instance_hierarchy` and what `streaming.rs` binds the per-agent
     // socket at (`pipes/<caller>/<sub-id>/socket`). Same convention
     // every other agent-lookup command (e.g. `agents read pending`)
     // uses on the read side.
-    let caller = &cli_config.agent_id;
-    let full_agent_id = format!("{caller}/{}", args.agent_id);
+    let caller = &cli_config.agent_instance_hierarchy;
+    let full_agent_instance_hierarchy = format!("{caller}/{}", args.agent_instance_hierarchy);
     // Bare leaf — the trailing slash segment. `agents list active`
     // returns this form and `agents read pending` accepts it, so
     // every notification we surface uses the same shape (pastable
     // back into either command without the user having to strip
     // their own caller prefix).
-    let bare_agent_id = full_agent_id
+    let bare_agent_instance_hierarchy = full_agent_instance_hierarchy
         .rsplit_once('/')
         .map(|(_, t)| t.to_string())
-        .unwrap_or_else(|| full_agent_id.clone());
+        .unwrap_or_else(|| full_agent_instance_hierarchy.clone());
     let content = args.message.resolve()?;
 
     // Retry on `CliStreamSlotTaken` — another caller's cli-stream
@@ -119,8 +119,8 @@ pub async fn handle(
     loop {
         match handle_once(
             cli_config,
-            &full_agent_id,
-            &bare_agent_id,
+            &full_agent_instance_hierarchy,
+            &bare_agent_instance_hierarchy,
             content.clone(),
             args.seed,
             handle,
@@ -135,19 +135,19 @@ pub async fn handle(
 
 async fn handle_once(
     cli_config: &crate::Config,
-    full_agent_id: &str,
-    bare_agent_id: &str,
+    full_agent_instance_hierarchy: &str,
+    bare_agent_instance_hierarchy: &str,
     content: RichContent,
     seed: Option<i64>,
     handle: &Handle,
 ) -> Result<(), crate::error::Error> {
     // Try live delivery first. Any failure here triggers the
     // continuation fallback — we never surface pipe errors as fatal.
-    match try_pipe_delivery(cli_config, full_agent_id, &content).await {
+    match try_pipe_delivery(cli_config, full_agent_instance_hierarchy, &content).await {
         Ok(()) => {
             Output::Notification(Notification {
                 value: MessageDelivered {
-                    agent_id: bare_agent_id.to_string(),
+                    agent_id: bare_agent_instance_hierarchy.to_string(),
                 }
                 .into(),
             })
@@ -158,8 +158,8 @@ async fn handle_once(
         Err(_) => {
             fall_back_to_continuation(
                 cli_config,
-                full_agent_id,
-                bare_agent_id,
+                full_agent_instance_hierarchy,
+                bare_agent_instance_hierarchy,
                 content,
                 seed,
                 handle,
@@ -169,13 +169,13 @@ async fn handle_once(
     }
 }
 
-/// Connect to `${config_base_dir}/pipes/<full_agent_id>/socket`,
+/// Connect to `${config_base_dir}/pipes/<full_agent_instance_hierarchy>/socket`,
 /// write one NDJSON `RichContent` line, and read back one `PipeAck`
 /// line. Returns `Ok(())` only on `PipeAck::Ok`; any IO failure,
 /// timeout, parse error, or `PipeAck::Error` is reported as `Err`.
 async fn try_pipe_delivery(
     cli_config: &crate::Config,
-    full_agent_id: &str,
+    full_agent_instance_hierarchy: &str,
     content: &RichContent,
 ) -> Result<(), PipeError> {
     let base_dir = cli_config
@@ -184,7 +184,7 @@ async fn try_pipe_delivery(
         .ok_or_else(|| PipeError::NoBaseDir)?;
     let socket_path = std::path::Path::new(base_dir)
         .join("pipes")
-        .join(full_agent_id)
+        .join(full_agent_instance_hierarchy)
         .join("socket");
     let name = socket_path
         .clone()
@@ -267,8 +267,8 @@ impl std::fmt::Display for PipeError {
 /// handshake fires.
 async fn fall_back_to_continuation(
     cli_config: &crate::Config,
-    full_agent_id: &str,
-    bare_agent_id: &str,
+    full_agent_instance_hierarchy: &str,
+    bare_agent_instance_hierarchy: &str,
     content: RichContent,
     cli_seed: Option<i64>,
     handle: &Handle,
@@ -284,16 +284,16 @@ async fn fall_back_to_continuation(
     // first and returns the most recent one whose continuation file
     // exists, only erroring if NONE have one.
     use objectiveai_sdk::filesystem::logs::LatestContinuationOutcome;
-    let latest = match fs_client.read_latest_continuation(full_agent_id).await? {
+    let latest = match fs_client.read_latest_continuation(full_agent_instance_hierarchy).await? {
         LatestContinuationOutcome::Found(l) => l,
         LatestContinuationOutcome::NoRequests => {
             return Err(crate::error::Error::AgentNoPriorRequest {
-                agent_id: full_agent_id.to_string(),
+                agent_instance_hierarchy: full_agent_instance_hierarchy.to_string(),
             });
         }
         LatestContinuationOutcome::NoContinuationsFound { request_count } => {
             return Err(crate::error::Error::AgentNoContinuation {
-                agent_id: full_agent_id.to_string(),
+                agent_instance_hierarchy: full_agent_instance_hierarchy.to_string(),
                 request_count,
             });
         }
@@ -313,7 +313,7 @@ async fn fall_back_to_continuation(
         continuation: Some(latest.continuation),
     };
 
-    let bare_agent_id_for_notif = bare_agent_id.to_string();
+    let bare_agent_instance_hierarchy_for_notif = bare_agent_instance_hierarchy.to_string();
     crate::api::stream_subprocess::run_detached_with(
         cli_config,
         &["agents", "spawn"],
@@ -323,7 +323,7 @@ async fn fall_back_to_continuation(
         // opening the API stream so a racing peer's cli-stream gets
         // the SLOT_TAKEN exit immediately rather than after some
         // wasted API work.
-        Some(full_agent_id),
+        Some(full_agent_instance_hierarchy),
         move |new_response_id| {
             // The agent's stable identity stays the same across a
             // continuation; surface it as the bare leaf (the form
@@ -333,7 +333,7 @@ async fn fall_back_to_continuation(
             // `LogStreamReady`).
             NotificationValue::Typed(TypedNotificationValue::MessageQueued(
                 objectiveai_sdk::cli::output::MessageQueued {
-                    agent_id: bare_agent_id_for_notif,
+                    agent_id: bare_agent_instance_hierarchy_for_notif,
                     response_id: new_response_id,
                 },
             ))
@@ -360,7 +360,7 @@ mod tests {
             commit_author_name: None,
             commit_author_email: None,
             github_authorization: None,
-            agent_id: "cli".to_string(),
+            agent_instance_hierarchy: "cli".to_string(),
             mcp_session_id: None,
             mcp: false,
         };

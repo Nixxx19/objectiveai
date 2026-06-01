@@ -62,10 +62,10 @@ const MCP_CONFIG_HEADER: &str = "X-OBJECTIVEAI-MCP-CONFIG";
 
 struct ConduitState {
     connection: objectiveai_sdk::mcp::Connection,
-    /// `X-OBJECTIVEAI-AGENT-ID-BASE` of the request that dialed this
+    /// `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY` of the request that dialed this
     /// upstream. Carried for wire-shape parity and diagnostic
     /// readability; the actual sweep key is `response_id` below.
-    agent_id_base: String,
+    agent_instance_hierarchy: String,
     /// `X-OBJECTIVEAI-RESPONSE-ID` of the request that dialed this
     /// upstream — the per-agent-slot leaf the API minted at
     /// `proxy_request_headers` build time. Used by
@@ -224,7 +224,7 @@ impl ConduitMcpHandler {
         request_headers: &IndexMap<String, String>,
     ) -> Result<Arc<ConduitState>, objectiveai_sdk::mcp::Error> {
         let connect_headers = sanitize_connect_headers(request_headers);
-        let agent_id_base = agent_id_base_from_headers(request_headers);
+        let agent_instance_hierarchy = agent_instance_hierarchy_from_headers(request_headers);
         let response_id = response_id_from_headers(request_headers);
         register_response_id_group(&self.inner, request_headers);
         let connection = self
@@ -239,7 +239,7 @@ impl ConduitMcpHandler {
         );
         Ok(Arc::new(ConduitState {
             connection,
-            agent_id_base,
+            agent_instance_hierarchy,
             response_id,
         }))
     }
@@ -305,8 +305,8 @@ async fn dial_plugin_upstream(
     inner: &Arc<Inner>,
     plugin_name: String,
     mcp_name: String,
+    agent_instance_hierarchy: String,
     agent_id: String,
-    agent_id_base: String,
     response_id: String,
     arguments: Option<IndexMap<String, Option<String>>>,
     stored_session_id: Option<String>,
@@ -354,9 +354,9 @@ async fn dial_plugin_upstream(
     // that asked for it, NOT from cli-stream's own config. The other
     // config-shaped env vars travel through the default parent-env
     // inheritance (cli already stamped them on cli-stream).
-    cmd.env("OBJECTIVEAI_AGENT_ID", &agent_id);
-    if !agent_id_base.is_empty() {
-        cmd.env("OBJECTIVEAI_AGENT_ID_BASE", &agent_id_base);
+    cmd.env("OBJECTIVEAI_AGENT_INSTANCE_HIERARCHY", &agent_instance_hierarchy);
+    if !agent_id.is_empty() {
+        cmd.env("OBJECTIVEAI_AGENT_ID", &agent_id);
     }
     let mut child = cmd
         .stdin(std::process::Stdio::null())
@@ -441,7 +441,7 @@ async fn dial_plugin_upstream(
         .as_ref()
         .map(|m| serde_json::to_string(m).unwrap_or_default())
         .unwrap_or_default();
-    // Cache key uses both `agent_id_base` (slot 2, diagnostic) and
+    // Cache key uses both `agent_instance_hierarchy` (slot 2, diagnostic) and
     // `response_id` (slot 3, uniqueness). The streamed chunk's
     // `agent_completion_ids()` are response_ids, so the group-
     // aware sweep in `select_response_ids` matches slot 3 directly.
@@ -449,7 +449,7 @@ async fn dial_plugin_upstream(
         (
             plugin_name,
             mcp_name,
-            agent_id_base,
+            agent_instance_hierarchy,
             response_id,
             args_canonical,
         ),
@@ -725,8 +725,8 @@ async fn forward(
             .unwrap_or(true);
         let plugin_entries: Vec<McpServerConfigEntry> =
             config.map(|c| c.mcp_servers.clone()).unwrap_or_default();
+        let agent_instance_hierarchy = agent_instance_hierarchy_from_headers(&request.headers);
         let agent_id = agent_id_from_headers(&request.headers);
-        let agent_id_base = agent_id_base_from_headers(&request.headers);
         let response_id = response_id_from_headers(&request.headers);
         // Register the sibling group exactly once for this
         // initialize. The per-agent dials below all reuse the same
@@ -763,13 +763,13 @@ async fn forward(
                 .map_err(|_| ConduitError::PrimaryDialFailed)?;
             install_list_changed_pump(&connection, inner.clone(), connection.session_id.clone());
             let session_id = connection.session_id.clone();
-            let agent_id_base_for_state = agent_id_base.clone();
+            let agent_instance_hierarchy_for_state = agent_instance_hierarchy.clone();
             let response_id_for_state = response_id.clone();
             inner.connections.insert(
                 session_id.clone(),
                 Arc::new(ConduitState {
                     connection,
-                    agent_id_base: agent_id_base_for_state,
+                    agent_instance_hierarchy: agent_instance_hierarchy_for_state,
                     response_id: response_id_for_state,
                 }),
             );
@@ -790,16 +790,16 @@ async fn forward(
                         .map(|e| e.mcp_session_id.clone())
                 });
                 let inner = inner.clone();
+                let agent_instance_hierarchy = agent_instance_hierarchy.clone();
                 let agent_id = agent_id.clone();
-                let agent_id_base = agent_id_base.clone();
                 let response_id = response_id.clone();
                 async move {
                     dial_plugin_upstream(
                         &inner,
                         entry.plugin,
                         entry.name,
+                        agent_instance_hierarchy,
                         agent_id,
-                        agent_id_base,
                         response_id,
                         entry.arguments,
                         stored_sid,
@@ -911,12 +911,12 @@ async fn forward(
         if let Some(body) = response.body.as_mut() {
             apply_tools_filter(inner, body, cfg).await;
             let ws_session_id = ws_session_id_from_headers(&request.headers);
-            let agent_id_base = agent_id_base_from_headers(&request.headers);
+            let agent_instance_hierarchy = agent_instance_hierarchy_from_headers(&request.headers);
             let response_id = response_id_from_headers(&request.headers);
             let selection: Vec<PluginUpstreamKey> = cfg
                 .mcp_servers
                 .iter()
-                .map(|e| e.cache_key(&agent_id_base, &response_id))
+                .map(|e| e.cache_key(&agent_instance_hierarchy, &response_id))
                 .collect();
             aggregate_plugin_tools(inner, body, &selection, ws_session_id.as_deref()).await?;
         }
@@ -927,12 +927,12 @@ async fn forward(
         let cfg = config.expect("X-OBJECTIVEAI-MCP-CONFIG header is required on resources/list");
         if let Some(body) = response.body.as_mut() {
             let ws_session_id = ws_session_id_from_headers(&request.headers);
-            let agent_id_base = agent_id_base_from_headers(&request.headers);
+            let agent_instance_hierarchy = agent_instance_hierarchy_from_headers(&request.headers);
             let response_id = response_id_from_headers(&request.headers);
             let selection: Vec<PluginUpstreamKey> = cfg
                 .mcp_servers
                 .iter()
-                .map(|e| e.cache_key(&agent_id_base, &response_id))
+                .map(|e| e.cache_key(&agent_instance_hierarchy, &response_id))
                 .collect();
             aggregate_plugin_resources(inner, body, &selection, ws_session_id.as_deref()).await?;
         }
@@ -1306,12 +1306,12 @@ async fn try_route_tools_call(
         return Ok(None);
     };
 
-    let agent_id_base = agent_id_base_from_headers(&request.headers);
+    let agent_instance_hierarchy = agent_instance_hierarchy_from_headers(&request.headers);
     let response_id = response_id_from_headers(&request.headers);
     let selection: Vec<PluginUpstreamKey> = config
         .mcp_servers
         .iter()
-        .map(|e| e.cache_key(&agent_id_base, &response_id))
+        .map(|e| e.cache_key(&agent_instance_hierarchy, &response_id))
         .collect();
     let states = collect_plugin_states(inner, &selection);
     let plugin_lists_fut =
@@ -1415,12 +1415,12 @@ async fn try_route_resources_read(
         return Ok(None);
     };
 
-    let agent_id_base = agent_id_base_from_headers(&request.headers);
+    let agent_instance_hierarchy = agent_instance_hierarchy_from_headers(&request.headers);
     let response_id = response_id_from_headers(&request.headers);
     let selection: Vec<PluginUpstreamKey> = config
         .mcp_servers
         .iter()
-        .map(|e| e.cache_key(&agent_id_base, &response_id))
+        .map(|e| e.cache_key(&agent_instance_hierarchy, &response_id))
         .collect();
     let states = collect_plugin_states(inner, &selection);
     let plugin_lists_fut =
@@ -1587,15 +1587,15 @@ impl McpServerConfigEntry {
 
     /// Cache key for `Inner::plugin_mcp_connections`. Both
     /// arguments come from the inbound request's headers
-    /// (`X-OBJECTIVEAI-AGENT-ID-BASE` and `X-OBJECTIVEAI-RESPONSE-ID`).
+    /// (`X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY` and `X-OBJECTIVEAI-RESPONSE-ID`).
     /// The per-agent-slot `response_id` is what actually enforces
     /// uniqueness; the base is carried alongside for diagnostic
     /// readability and wire-shape parity.
-    fn cache_key(&self, agent_id_base: &str, response_id: &str) -> PluginUpstreamKey {
+    fn cache_key(&self, agent_instance_hierarchy: &str, response_id: &str) -> PluginUpstreamKey {
         (
             self.plugin.clone(),
             self.name.clone(),
-            agent_id_base.to_string(),
+            agent_instance_hierarchy.to_string(),
             response_id.to_string(),
             self.args_canonical(),
         )
@@ -1603,21 +1603,33 @@ impl McpServerConfigEntry {
 }
 
 /// Composite cache key for plugin-MCP upstream connections.
-/// `(plugin_name, mcp_name, agent_id_base, response_id,
+/// `(plugin_name, mcp_name, agent_instance_hierarchy, response_id,
 /// args_canonical)`. Per-agent isolation comes from slot 3
 /// (`response_id`), which the API mints fresh per agent slot —
-/// guarantees distinct entries even if `agent_id_base` ever
+/// guarantees distinct entries even if `agent_instance_hierarchy` ever
 /// repeats. The streamed chunk's `agent_completion_ids()` emit
 /// these exact response_ids, so the group-aware sweep in
 /// [`ConduitMcpHandler::select_response_ids`] can match by slot 3
 /// directly.
 type PluginUpstreamKey = (String, String, String, String, String);
 
-/// Case-insensitive `X-OBJECTIVEAI-AGENT-ID` lookup on a request's
+/// Case-insensitive `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY` lookup on a request's
 /// headers. Returns the empty string if the header is missing — that
 /// case folds into a single shared cache slot for un-stamped
 /// requests, matching the historical behavior before per-agent
 /// isolation was added.
+fn agent_instance_hierarchy_from_headers(headers: &IndexMap<String, String>) -> String {
+    headers
+        .iter()
+        .find(|(k, _)| k.eq_ignore_ascii_case("X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY"))
+        .map(|(_, v)| v.clone())
+        .unwrap_or_default()
+}
+
+/// Case-insensitive `X-OBJECTIVEAI-AGENT-ID` lookup. Returns
+/// the empty string on absence — the empty-string slot folds all
+/// un-stamped requests together (mirrors `agent_instance_hierarchy_from_headers`),
+/// which matches the historical default-everyone-shares slot.
 fn agent_id_from_headers(headers: &IndexMap<String, String>) -> String {
     headers
         .iter()
@@ -1626,22 +1638,10 @@ fn agent_id_from_headers(headers: &IndexMap<String, String>) -> String {
         .unwrap_or_default()
 }
 
-/// Case-insensitive `X-OBJECTIVEAI-AGENT-ID-BASE` lookup. Returns
-/// the empty string on absence — the empty-string slot folds all
-/// un-stamped requests together (mirrors `agent_id_from_headers`),
-/// which matches the historical default-everyone-shares slot.
-fn agent_id_base_from_headers(headers: &IndexMap<String, String>) -> String {
-    headers
-        .iter()
-        .find(|(k, _)| k.eq_ignore_ascii_case("X-OBJECTIVEAI-AGENT-ID-BASE"))
-        .map(|(_, v)| v.clone())
-        .unwrap_or_default()
-}
-
 /// Case-insensitive `X-OBJECTIVEAI-RESPONSE-ID` lookup. The
 /// API mints one of these per agent slot (one per `filtered_agents`
 /// entry), so distinct slots always have distinct ids regardless
-/// of any `agent_id_base` collision. Used as the per-agent unique
+/// of any `agent_instance_hierarchy` collision. Used as the per-agent unique
 /// component of [`PluginUpstreamKey`].
 fn response_id_from_headers(headers: &IndexMap<String, String>) -> String {
     headers

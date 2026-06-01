@@ -49,7 +49,7 @@ async fn emit_via_collect_handle_appends_to_vec() {
         level: Level::Warn,
         fatal: false,
         message: "heads up".into(),
-        agent_id: None,
+        agent_instance_hierarchy: None,
     })
     .emit(&handle)
     .await;
@@ -75,7 +75,7 @@ fn error_fatal_roundtrip() {
         level: Level::Error,
         fatal: true,
         message: "favorite not found: foo".into(),
-        agent_id: None,
+        agent_instance_hierarchy: None,
     });
     assert_roundtrip_eq(out);
 }
@@ -87,7 +87,7 @@ fn error_non_fatal_warn_roundtrip() {
         level: Level::Warn,
         fatal: false,
         message: json!({"code": "x", "detail": [1, 2, 3]}),
-        agent_id: Some("cli".to_string()),
+        agent_instance_hierarchy: Some("cli".to_string()),
     });
     assert_roundtrip_eq(out);
 }
@@ -98,7 +98,7 @@ fn error_non_fatal_warn_roundtrip() {
 fn nv_active_agent_roundtrip() {
     let out = notif(NotificationValue::Typed(
         TypedNotificationValue::ActiveAgent(ActiveAgent {
-            agent_id: "child-1".into(),
+            agent_instance_hierarchy: "child-1".into(),
             last_log: 1_700_000_000,
         }),
     ));
@@ -109,7 +109,7 @@ fn nv_active_agent_roundtrip() {
 fn nv_agent_items_roundtrip() {
     let out = notif(NotificationValue::Typed(
         TypedNotificationValue::AgentItems(AgentItems {
-            agent_id: "agent-1".into(),
+            agent_instance_hierarchy: "agent-1".into(),
             items: vec![],
         }),
     ));
@@ -121,7 +121,7 @@ fn nv_inactive_roundtrip() {
     let out =
         notif(NotificationValue::Typed(TypedNotificationValue::Inactive(
             crate::cli::output::notification::agents::Inactive {
-                agent_id: "agent-1".into(),
+                agent_instance_hierarchy: "agent-1".into(),
             },
         )));
     assert_roundtrip_eq(out);
@@ -131,7 +131,7 @@ fn nv_inactive_roundtrip() {
 fn nv_spawned_roundtrip() {
     let out = notif(NotificationValue::Typed(TypedNotificationValue::Spawned(
         Spawned {
-            agent_id: "spawn-xyz".into(),
+            agent_instance_hierarchy: "spawn-xyz".into(),
         },
     )));
     assert_roundtrip_eq(out);
@@ -140,7 +140,7 @@ fn nv_spawned_roundtrip() {
 #[test]
 fn nv_me_roundtrip() {
     let out = notif(NotificationValue::Typed(TypedNotificationValue::Me(Me {
-        agent_id: "agent-xyz".into(),
+        agent_instance_hierarchy: "agent-xyz".into(),
     })));
     assert_roundtrip_eq(out);
 }
@@ -158,7 +158,7 @@ fn nv_mcp_roundtrip() {
 fn nv_message_delivered_roundtrip() {
     let out = notif(NotificationValue::Typed(
         TypedNotificationValue::MessageDelivered(MessageDelivered {
-            agent_id: "cli/foo-123".into(),
+            agent_instance_hierarchy: "cli/foo-123".into(),
         }),
     ));
     assert_roundtrip_eq(out);
@@ -168,7 +168,7 @@ fn nv_message_delivered_roundtrip() {
 fn nv_message_queued_roundtrip() {
     let out = notif(NotificationValue::Typed(
         TypedNotificationValue::MessageQueued(MessageQueued {
-            agent_id: "cli/foo-123".into(),
+            agent_instance_hierarchy: "cli/foo-123".into(),
             response_id: "resp-abc".into(),
         }),
     ));
@@ -842,11 +842,11 @@ fn nv_other_raw_object_roundtrip() {
 }
 
 #[test]
-fn full_envelope_with_agent_id_roundtrip() {
+fn full_envelope_with_agent_instance_hierarchy_roundtrip() {
     let out = Output::Notification(Notification {
         value: NotificationValue::Typed(TypedNotificationValue::Spawned(
             Spawned {
-                agent_id: "x".into(),
+                agent_instance_hierarchy: "x".into(),
             },
         )),
     });
@@ -870,11 +870,11 @@ fn other_keys_flatten_at_top_level() {
 fn typed_variant_carries_type_discriminator() {
     let out = notif(NotificationValue::Typed(TypedNotificationValue::Spawned(
         Spawned {
-            agent_id: "abc".into(),
+            agent_instance_hierarchy: "abc".into(),
         },
     )));
     let v = serde_json::to_value(&out).unwrap();
     assert_eq!(v["type"], "spawned");
-    assert_eq!(v["agent_id"], "abc");
+    assert_eq!(v["agent_instance_hierarchy"], "abc");
     assert!(v.get("value").is_none(), "no `value` wrapper");
 }

@@ -13,9 +13,9 @@ use objectiveai_sdk::cli::output::{ActiveAgent, Handle, Items, Notification, Out
 #[derive(Args)]
 pub struct CommandArgs {
     /// Parent agent id whose direct children to enumerate. Defaults
-    /// to the CLI's own `agent_id` (env `OBJECTIVEAI_AGENT_ID`,
+    /// to the CLI's own `agent_instance_hierarchy` (env `OBJECTIVEAI_AGENT_INSTANCE_HIERARCHY`,
     /// falling back to `"cli"` set in `main.rs`).
-    pub parent_agent_id: Option<String>,
+    pub parent_agent_instance_hierarchy: Option<String>,
 }
 
 pub async fn handle(
@@ -29,9 +29,9 @@ pub async fn handle(
         None::<String>,
     );
     let parent = args
-        .parent_agent_id
+        .parent_agent_instance_hierarchy
         .as_deref()
-        .unwrap_or(&cli_config.agent_id);
+        .unwrap_or(&cli_config.agent_instance_hierarchy);
 
     let items = client.list_active(parent).await?;
 

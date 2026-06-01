@@ -246,7 +246,7 @@ impl UpstreamClient<objectiveai_sdk::agent::openrouter::Agent, objectiveai_sdk::
         _invention_step: Option<usize>,
         _invention_tasks_min: Option<u64>,
         _invention_input_schema: Option<String>,
-        _agent_id_header: Option<&str>,
+        _agent_instance_hierarchy_header: Option<&str>,
     ) -> impl Future<
         Output = Result<
             Self::Stream,
@@ -411,7 +411,7 @@ impl UpstreamClient<objectiveai_sdk::agent::openrouter::Agent, objectiveai_sdk::
             upstream: objectiveai_sdk::agent::openrouter::Upstream::default(),
             // Stamped by the agent-completions client immediately
             // after this method returns; empty here is fine.
-            agent_id: String::new(),
+            agent_instance_hierarchy: String::new(),
             messages: all_messages,
             mcp_sessions,
             ws_session_id: None,

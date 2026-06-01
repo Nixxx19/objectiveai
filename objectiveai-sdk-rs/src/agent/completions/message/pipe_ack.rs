@@ -1,6 +1,6 @@
 //! `PipeAck` — server-side response to one `RichContent` notification
 //! line written into the per-agent socket at
-//! `${config_base_dir}/pipes/<agent_id>/socket`.
+//! `${config_base_dir}/pipes/<agent_instance_hierarchy>/socket`.
 //!
 //! The cli-stream socket handler (see `objectiveai-cli-stream/src/pipes.rs`)
 //! used to be write-only from the client side — clients pushed an

@@ -83,21 +83,21 @@ pub const MCP_SESSION_ID_KEY: &str = "Mcp-Session-Id";
 pub async fn connect_all_fresh(
     client: &Client,
     http_headers: &HeaderMap,
+    agent_instance_hierarchy: Option<&str>,
     agent_id: Option<&str>,
-    agent_id_base: Option<&str>,
 ) -> Result<(Vec<(Connection, IndexMap<String, String>)>, IndexMap<String, Vec<String>>), BadInit> {
     let (specs, tool_allowlists) = parse_init_headers(http_headers)?;
     // Capture once; each per-upstream future stamps the same string.
+    let agent_instance_hierarchy_owned: Option<String> =
+        agent_instance_hierarchy.filter(|s| !s.is_empty()).map(str::to_owned);
     let agent_id_owned: Option<String> =
         agent_id.filter(|s| !s.is_empty()).map(str::to_owned);
-    let agent_id_base_owned: Option<String> =
-        agent_id_base.filter(|s| !s.is_empty()).map(str::to_owned);
 
     let attempts = specs.into_iter().map(|spec| {
         let url = spec.url.clone();
         let headers_for_payload = spec.headers.clone();
+        let agent_instance_hierarchy_owned = agent_instance_hierarchy_owned.clone();
         let agent_id_owned = agent_id_owned.clone();
-        let agent_id_base_owned = agent_id_base_owned.clone();
         async move {
             // Hoist any caller-supplied `Mcp-Session-Id` out of the
             // header bag and pass it as the dedicated `session_id` arg.
@@ -113,11 +113,11 @@ pub async fn connect_all_fresh(
             // The proxy-minted agent id wins over anything the caller
             // tried to slip into `X-MCP-Headers` — `insert` (not
             // `entry`) intentionally overwrites.
-            if let Some(id) = &agent_id_owned {
-                headers.insert("X-OBJECTIVEAI-AGENT-ID".to_string(), id.clone());
+            if let Some(id) = &agent_instance_hierarchy_owned {
+                headers.insert("X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY".to_string(), id.clone());
             }
-            if let Some(base) = &agent_id_base_owned {
-                headers.insert("X-OBJECTIVEAI-AGENT-ID-BASE".to_string(), base.clone());
+            if let Some(base) = &agent_id_owned {
+                headers.insert("X-OBJECTIVEAI-AGENT-ID".to_string(), base.clone());
             }
             let conn_result = client
                 .connect(spec.url, session_id, Some(headers))
@@ -155,13 +155,13 @@ pub async fn reconnect_from_payload(
 ) -> Result<Vec<(Connection, IndexMap<String, String>)>, BadInit> {
     // Cold-resume agent id comes straight from the decoded payload —
     // baked into the session id at session-open time, recovered here.
-    let agent_id_owned: Option<String> = payload
-        .agent_id
+    let agent_instance_hierarchy_owned: Option<String> = payload
+        .agent_instance_hierarchy
         .as_deref()
         .filter(|s| !s.is_empty())
         .map(str::to_owned);
-    let agent_id_base_owned: Option<String> = payload
-        .agent_id_base
+    let agent_id_owned: Option<String> = payload
+        .agent_id
         .as_deref()
         .filter(|s| !s.is_empty())
         .map(str::to_owned);
@@ -174,11 +174,11 @@ pub async fn reconnect_from_payload(
         // so it lands inside the canonical map we re-encode into the
         // session id too. Without that, a Branch-2 resume would drop
         // the agent id from its payload on the next round-trip.
-        if let Some(id) = &agent_id_owned {
-            headers.insert("X-OBJECTIVEAI-AGENT-ID".to_string(), id.clone());
+        if let Some(id) = &agent_instance_hierarchy_owned {
+            headers.insert("X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY".to_string(), id.clone());
         }
-        if let Some(base) = &agent_id_base_owned {
-            headers.insert("X-OBJECTIVEAI-AGENT-ID-BASE".to_string(), base.clone());
+        if let Some(base) = &agent_id_owned {
+            headers.insert("X-OBJECTIVEAI-AGENT-ID".to_string(), base.clone());
         }
         // Everything left (Authorization + custom headers) stays in
         // `headers` and gets passed straight through to Client::connect.

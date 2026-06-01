@@ -160,12 +160,12 @@ pub fn run_cli(args: &[&str]) -> serde_json::Value {
     if data_values.len() == 1 {
         let v = data_values.into_iter().next().unwrap();
         if let Some(obj) = v.as_object() {
-            // Single non-`type`/non-`agent_id` key with an object/array
+            // Single non-`type`/non-`agent_instance_hierarchy` key with an object/array
             // value → descend through it (e.g. `{"items": [...]}`,
             // `{"value": <V>}`).
             let data_keys: Vec<(&String, &serde_json::Value)> = obj
                 .iter()
-                .filter(|(k, _)| k.as_str() != "type" && k.as_str() != "agent_id")
+                .filter(|(k, _)| k.as_str() != "type" && k.as_str() != "agent_instance_hierarchy")
                 .collect();
             if data_keys.len() == 1 {
                 let (_, inner) = data_keys[0];

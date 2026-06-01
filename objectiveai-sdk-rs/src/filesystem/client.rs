@@ -68,7 +68,7 @@ impl Client {
 
     /// Root for the per-agent named-pipe tree managed by cli-stream
     /// (inbound `socket` + outbound `events.sock`). Each agent's
-    /// pipes live under `pipes_dir().join(agent_id)/`.
+    /// pipes live under `pipes_dir().join(agent_instance_hierarchy)/`.
     pub fn pipes_dir(&self) -> PathBuf {
         self.base_dir.join("pipes")
     }

@@ -167,11 +167,11 @@ impl ObjectiveAiMcpCli {
 /// Run the ObjectiveAI CLI in-process with `args`, collecting every
 /// emitted `Output`, and format the result into the MCP tool
 /// response `Vec<Content>`. Applies the per-request
-/// `X-OBJECTIVEAI-AGENT-ID` header override (clones the server-wide
+/// `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY` header override (clones the server-wide
 /// `cli_config` so concurrent requests stay independent).
 ///
 /// See [`crate::format`] for the dispatch table. The formatter
-/// always strips `agent_id` from the response body regardless of
+/// always strips `agent_instance_hierarchy` from the response body regardless of
 /// any env vars. Today the returned vector is always a single
 /// `Content::text` block; the shape leaves room for a future change
 /// to start emitting typed media blocks alongside.
@@ -180,7 +180,7 @@ async fn run_cli_and_collect(
     parts: &Parts,
     args: Vec<String>,
 ) -> Vec<rmcp::model::Content> {
-    // Per-request: stamp agent_id + mcp_session_id from headers so
+    // Per-request: stamp agent_instance_hierarchy + mcp_session_id from headers so
     // every cli invocation (and every tool subprocess the cli spawns
     // transitively) sees the values relevant to *this* request.
     // Clone-then-mutate-then-Arc so concurrent requests see
@@ -189,53 +189,53 @@ async fn run_cli_and_collect(
     // The MCP session id is read from `Mcp-Session-Id` (the rmcp
     // transport's standard header). When the upstream MCP client
     // doesn't actually manage sessions, fall back to the per-agent
-    // lineage id from `X-OBJECTIVEAI-AGENT-ID` — stable per agent and
+    // lineage id from `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY` — stable per agent and
     // unique across agents, which is exactly what session-keyed tool
     // state (e.g. per-session counters) wants.
     let mut cfg = (**cli_config).clone();
+    let header_agent_instance_hierarchy = parts
+        .headers
+        .get("X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY")
+        .and_then(|h| h.to_str().ok());
     let header_agent_id = parts
         .headers
         .get("X-OBJECTIVEAI-AGENT-ID")
         .and_then(|h| h.to_str().ok());
-    let header_agent_id_base = parts
-        .headers
-        .get("X-OBJECTIVEAI-AGENT-ID-BASE")
-        .and_then(|h| h.to_str().ok());
-    // Always populate agent_id for MCP-routed calls. When the upstream
+    // Always populate agent_instance_hierarchy for MCP-routed calls. When the upstream
     // MCP client didn't send the header, default to "MCP" so
     // `agents me` (and any other code reading the field) reports
     // the call's actual origin instead of inheriting the server-wide
     // default ("CLI") — which would be misleading.
-    cfg.agent_id = header_agent_id.unwrap_or("mcp").to_string();
-    // Override agent_id_base only when the upstream supplied it;
+    cfg.agent_instance_hierarchy = header_agent_instance_hierarchy.unwrap_or("mcp").to_string();
+    // Override agent_id only when the upstream supplied it;
     // otherwise keep whatever the server was configured with. Empty
     // string is treated as "absent" so a blank header doesn't blank
     // out the inherited base.
-    if let Some(base) = header_agent_id_base.filter(|s| !s.is_empty()) {
-        cfg.agent_id_base = Some(base.to_string());
+    if let Some(base) = header_agent_id.filter(|s| !s.is_empty()) {
+        cfg.agent_id = Some(base.to_string());
     }
     let header_session_id = parts
         .headers
         .get(objectiveai_sdk::mcp::MCP_SESSION_ID_HEADER)
         .and_then(|h| h.to_str().ok());
-    // session_id falls back to the *header-provided* agent_id only —
+    // session_id falls back to the *header-provided* agent_instance_hierarchy only —
     // not the "MCP" default — so the per-session tool state key stays
     // meaningful when the client doesn't actually manage sessions.
     cfg.mcp_session_id = match header_session_id {
         Some(s) => Some(s.to_string()),
-        None => header_agent_id.map(str::to_string),
+        None => header_agent_instance_hierarchy.map(str::to_string),
     };
     let cli_config: Arc<objectiveai_cli::Config> = Arc::new(cfg);
 
     let collected = Arc::new(tokio::sync::Mutex::new(Vec::new()));
-    // Per-request handle: stamp the agent_id from the per-request
+    // Per-request handle: stamp the agent_instance_hierarchy from the per-request
     // cli_config so every notification/error the cli emits during
-    // this Run carries `X-OBJECTIVEAI-AGENT-ID`. The Collect
-    // destination mirrors the same agent_id into the in-memory
+    // this Run carries `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY`. The Collect
+    // destination mirrors the same agent_instance_hierarchy into the in-memory
     // Vec the runner reassembles below.
     let handle = objectiveai_sdk::cli::output::Handle {
         destination: objectiveai_sdk::cli::output::HandleDestination::Collect(collected.clone()),
-        agent_id: Some(cli_config.agent_id.clone()),
+        agent_instance_hierarchy: Some(cli_config.agent_instance_hierarchy.clone()),
     };
     let _ = objectiveai_cli::run(args, &cli_config, handle).await;
 

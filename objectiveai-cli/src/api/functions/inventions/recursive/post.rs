@@ -6,7 +6,7 @@ pub struct Args {
     #[command(flatten)]
     pub body: crate::api::body::BodySource,
     #[command(flatten)]
-    pub agent_id: crate::api::agent_id_arg::AgentIdArg,
+    pub agent_instance_hierarchy: crate::api::agent_instance_hierarchy_arg::AgentIdArg,
 }
 
 pub async fn handle(
@@ -18,7 +18,7 @@ pub async fn handle(
     if params.stream.unwrap_or(false) {
         crate::api::call::call_streaming::<_, objectiveai_sdk::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk>(
             cli_config, handle, reqwest::Method::POST, "functions/inventions/recursive", Some(params),
-            args.agent_id.agent_id,
+            args.agent_instance_hierarchy.agent_instance_hierarchy,
         ).await
     } else {
         crate::api::call::call_unary::<_, serde_json::Value>(
@@ -27,7 +27,7 @@ pub async fn handle(
             reqwest::Method::POST,
             "functions/inventions/recursive",
             Some(params),
-            args.agent_id.agent_id,
+            args.agent_instance_hierarchy.agent_instance_hierarchy,
         )
         .await
     }

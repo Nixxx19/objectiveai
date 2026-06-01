@@ -491,35 +491,35 @@ where
         //      the composite carried in the base64 token. This is what
         //      keeps the agent's identity stable across separate
         //      client requests, regardless of which caller's
-        //      `X-OBJECTIVEAI-AGENT-ID` header is on the resuming
+        //      `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY` header is on the resuming
         //      request.
         //   3. Fresh first call: mint a local id and prefix it with
-        //      the current request's `ctx.agent_id()` (the spawner's
+        //      the current request's `ctx.agent_instance_hierarchy()` (the spawner's
         //      full lineage). Empty parent is its own first-class
         //      slot, yielding a root composite of just the local id.
         //
-        // Used as `agent_ids[0]` below (which is then leaf-projected
+        // Used as `agent_instance_hierarchies[0]` below (which is then leaf-projected
         // into `ids[0]` and finally into `attempts[0].id` —
         // `AgentCompletionChunk.id` / viewer correlation / notify-
         // target key for the primary slot). Fallback slots get fresh
-        // per-slot composites at the `agent_ids` builder; their leaves
+        // per-slot composites at the `agent_instance_hierarchies` builder; their leaves
         // flow downstream the same way via `attempts[i].id`. The
         // pre-yield `send_viewer_err` path correlates against this
         // primary leaf — there's no other meaningful candidate before
         // any agent commits.
         let request_composite = request_continuation
             .as_ref()
-            .map(|c| c.agent_id())
+            .map(|c| c.agent_instance_hierarchy())
             .filter(|s| !s.is_empty());
-        let agent_id: String = match (
-            continuation.as_ref().map(|c| c.agent_id()),
+        let agent_instance_hierarchy: String = match (
+            continuation.as_ref().map(|c| c.agent_instance_hierarchy()),
             request_composite,
         ) {
             (Some(s), _) => s.to_string(),
             (None, Some(s)) => s.to_string(),
             (None, None) => {
                 let local = response_id(created);
-                match ctx.agent_id() {
+                match ctx.agent_instance_hierarchy() {
                     Some(prefix) => format!("{prefix}/{local}"),
                     None => local,
                 }
@@ -534,20 +534,20 @@ where
         // that hit `send_viewer_err` below) never reach that point,
         // so they correlate against the *first agent's* response_id
         // leaf — there's no other meaningful candidate before
-        // commitment, and `agent_ids[0] = agent_id.clone()` makes
-        // this the leaf of the resolved request `agent_id`.
+        // commitment, and `agent_instance_hierarchies[0] = agent_instance_hierarchy.clone()` makes
+        // this the leaf of the resolved request `agent_instance_hierarchy`.
         let send_viewer_err = {
-            let first_agent_id_leaf = agent_id
+            let first_agent_instance_hierarchy_leaf = agent_instance_hierarchy
                 .rsplit_once('/')
                 .map(|(_, t)| t.to_string())
-                .unwrap_or_else(|| agent_id.clone());
+                .unwrap_or_else(|| agent_instance_hierarchy.clone());
             let viewer_client = self.viewer_client.clone();
             let ctx_for_err = ctx.clone();
             move |e: super::Error| -> super::Error {
                 if viewer {
                     viewer_client.send_agent_completion_error(
                         ctx_for_err.clone(),
-                        first_agent_id_leaf.clone(),
+                        first_agent_instance_hierarchy_leaf.clone(),
                         &e,
                     );
                 }
@@ -640,27 +640,27 @@ where
             .as_ref()
             .and_then(|rc| rc.mcp_sessions().get(&proxy_url).cloned());
 
-        // 6.5. Compose the `X-OBJECTIVEAI-AGENT-ID` header we forward
+        // 6.5. Compose the `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY` header we forward
         //      to the proxy for every attempt.
         //
-        // Primary (idx 0) inherits the request-resolved `agent_id`
+        // Primary (idx 0) inherits the request-resolved `agent_instance_hierarchy`
         // (continuation or fresh). Fallbacks each get a brand-new
         // `response_id(created)` leaf so every agent slot has a
         // distinct identity — cli-stream uses these as the per-
-        // slot cache key beyond `agent_id_base`. Backoff retries
+        // slot cache key beyond `agent_instance_hierarchy`. Backoff retries
         // of one slot reuse the same cached `Connection` (and
         // therefore the same leaf), since `attempt_connections[idx]`
         // is populated on first visit and reused for the rest of
         // the retry loop below.
-        let agent_ids: Vec<String> = filtered_agents
+        let agent_instance_hierarchies: Vec<String> = filtered_agents
             .iter()
             .enumerate()
             .map(|(i, _)| {
                 if i == 0 {
-                    agent_id.clone()
+                    agent_instance_hierarchy.clone()
                 } else {
                     let local = response_id(created);
-                    match ctx.agent_id() {
+                    match ctx.agent_instance_hierarchy() {
                         Some(prefix) => format!("{prefix}/{local}"),
                         None => local,
                     }
@@ -669,14 +669,14 @@ where
             .collect();
 
         // Per-slot leaf — trailing slash-segment of each
-        // `agent_ids[i]`. This is the value that ends up as
+        // `agent_instance_hierarchies[i]`. This is the value that ends up as
         // `AgentCompletionChunk.id`, the `notify_targets` key, and
-        // the `X-OBJECTIVEAI-AGENT-ID-BASE` / `X-OBJECTIVEAI-RESPONSE-ID`
+        // the `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY` / `X-OBJECTIVEAI-RESPONSE-ID`
         // header for the corresponding per-agent dial. Single source
         // of truth: everything downstream that needs the "agent's
         // own id" reads from this vec (or, after `AgentAttempt` is
         // built below, from `attempt.id`).
-        let ids: Vec<String> = agent_ids
+        let ids: Vec<String> = agent_instance_hierarchies
             .iter()
             .map(|aid| {
                 aid.rsplit_once('/')
@@ -749,10 +749,10 @@ where
             >,
         > = filtered_agents
             .iter()
-            .zip(agent_ids.iter())
+            .zip(agent_instance_hierarchies.iter())
             .zip(ids.iter())
             .zip(agent_ws_session_ids.iter())
-            .map(|(((agent, agent_id), id), agent_ws_session_id)| {
+            .map(|(((agent, agent_instance_hierarchy), id), agent_ws_session_id)| {
                 // Build the per-agent X-MCP-* header set: the agent's
                 // declared `mcp_servers` plus any caller-supplied
                 // `extra_mcp_servers` (e.g. the function-inventions
@@ -941,9 +941,9 @@ where
                     }
                 }
 
-                // Both `agent_id` and `id` here are the closure's
-                // per-slot bindings (zipped in from `agent_ids` and
-                // `ids` above). `agent_id` is the full hierarchical
+                // Both `agent_instance_hierarchy` and `id` here are the closure's
+                // per-slot bindings (zipped in from `agent_instance_hierarchies` and
+                // `ids` above). `agent_instance_hierarchy` is the full hierarchical
                 // id (caller-lineage + this slot's response_id);
                 // `id` is its trailing segment — same value used
                 // downstream as `attempt.id` (chunk id, notify key).
@@ -954,8 +954,8 @@ where
                     indexmap::indexmap! {
                         "X-MCP-Servers".to_string() => serde_json::to_string(&urls).unwrap(),
                         "X-MCP-Headers".to_string() => serde_json::to_string(&per_url_headers).unwrap(),
-                        "X-OBJECTIVEAI-AGENT-ID".to_string() => agent_id.clone(),
-                        "X-OBJECTIVEAI-AGENT-ID-BASE".to_string() => id.clone(),
+                        "X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY".to_string() => agent_instance_hierarchy.clone(),
+                        "X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY".to_string() => id.clone(),
                         "X-OBJECTIVEAI-RESPONSE-ID".to_string() => id.clone(),
                         "X-OBJECTIVEAI-RESPONSE-IDS".to_string() => response_ids_group.clone(),
                     };
@@ -1034,14 +1034,14 @@ where
                 >,
             >,
             /// Composite per-slot agent id forwarded as
-            /// `X-OBJECTIVEAI-AGENT-ID` to the MCP proxy and (for
-            /// runner-backed upstreams) as `OBJECTIVEAI_AGENT_ID` in
+            /// `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY` to the MCP proxy and (for
+            /// runner-backed upstreams) as `OBJECTIVEAI_AGENT_INSTANCE_HIERARCHY` in
             /// the env dict the runner hands to its child SDK
             /// subprocess. Derived from the response id (see step
             /// 6.5 above).
-            agent_id: String,
+            agent_instance_hierarchy: String,
             /// Per-slot response-id leaf — trailing slash-segment of
-            /// `agent_id`. The value passed into `run_agent_loop`
+            /// `agent_instance_hierarchy`. The value passed into `run_agent_loop`
             /// as the `id` argument, which becomes
             /// `AgentCompletionChunk.id`, the `notify_targets` key,
             /// and the value cli-stream's conduit cache + sibling-
@@ -1051,12 +1051,12 @@ where
         let mut attempts: Vec<AgentAttempt> = filtered_agents
             .into_iter()
             .zip(connect_handles)
-            .zip(agent_ids)
+            .zip(agent_instance_hierarchies)
             .zip(ids)
-            .map(|(((agent, connect_handle), agent_id), id)| AgentAttempt {
+            .map(|(((agent, connect_handle), agent_instance_hierarchy), id)| AgentAttempt {
                 agent,
                 connect_handle,
-                agent_id,
+                agent_instance_hierarchy,
                 id,
             })
             .collect();
@@ -1203,9 +1203,9 @@ where
                                 &mut cont_items_or, &attempt.id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 {
-                                    let agent_id = attempt.agent_id.clone();
+                                    let agent_instance_hierarchy = attempt.agent_instance_hierarchy.clone();
                                     move |items| super::Continuation::Openrouter {
-                                        items, mcp_connection: c, agent_id,
+                                        items, mcp_connection: c, agent_instance_hierarchy,
                                     }
                                 },
                                 |e| super::Error::UpstreamOpenrouter(Box::new(e)),
@@ -1217,7 +1217,7 @@ where
                                 invention_step,
                                 invention_tasks_min,
                                 invention_input_schema.clone(),
-                                Some(attempt.agent_id.as_str()),
+                                Some(attempt.agent_instance_hierarchy.as_str()),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -1251,9 +1251,9 @@ where
                                 &mut cont_items_cas, &attempt.id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 {
-                                    let agent_id = attempt.agent_id.clone();
+                                    let agent_instance_hierarchy = attempt.agent_instance_hierarchy.clone();
                                     move |items| super::Continuation::ClaudeAgentSdk {
-                                        items, mcp_connection: c, agent_id,
+                                        items, mcp_connection: c, agent_instance_hierarchy,
                                     }
                                 },
                                 |e| super::Error::UpstreamClaudeAgentSdk(Box::new(e)),
@@ -1265,7 +1265,7 @@ where
                                 invention_step,
                                 invention_tasks_min,
                                 invention_input_schema.clone(),
-                                Some(attempt.agent_id.as_str()),
+                                Some(attempt.agent_instance_hierarchy.as_str()),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -1299,9 +1299,9 @@ where
                                 &mut cont_items_cdx, &attempt.id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 {
-                                    let agent_id = attempt.agent_id.clone();
+                                    let agent_instance_hierarchy = attempt.agent_instance_hierarchy.clone();
                                     move |items| super::Continuation::CodexSdk {
-                                        items, mcp_connection: c, agent_id,
+                                        items, mcp_connection: c, agent_instance_hierarchy,
                                     }
                                 },
                                 |e| super::Error::UpstreamCodexSdk(Box::new(e)),
@@ -1313,7 +1313,7 @@ where
                                 invention_step,
                                 invention_tasks_min,
                                 invention_input_schema.clone(),
-                                Some(attempt.agent_id.as_str()),
+                                Some(attempt.agent_instance_hierarchy.as_str()),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -1347,9 +1347,9 @@ where
                                 &mut cont_items_mock, &attempt.id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 {
-                                    let agent_id = attempt.agent_id.clone();
+                                    let agent_instance_hierarchy = attempt.agent_instance_hierarchy.clone();
                                     move |items| super::Continuation::Mock {
-                                        items, mcp_connection: c, agent_id,
+                                        items, mcp_connection: c, agent_instance_hierarchy,
                                     }
                                 },
                                 |e| super::Error::UpstreamMock(Box::new(e)),
@@ -1361,7 +1361,7 @@ where
                                 invention_step,
                                 invention_tasks_min,
                                 invention_input_schema.clone(),
-                                Some(attempt.agent_id.as_str()),
+                                Some(attempt.agent_instance_hierarchy.as_str()),
                             ).await {
                                 Ok(stream) => {
                                     if !viewer { return Ok(stream); }
@@ -1439,7 +1439,7 @@ where
         invention_step: Option<usize>,
         invention_tasks_min: Option<u64>,
         invention_input_schema: Option<String>,
-        agent_id_header: Option<&str>,
+        agent_instance_hierarchy_header: Option<&str>,
     ) -> Result<
         Pin<Box<dyn futures::Stream<Item = super::StreamItem<CONT>> + Send>>,
         super::Error,
@@ -1510,7 +1510,7 @@ where
             invention_step,
             invention_tasks_min,
             invention_input_schema.clone(),
-            agent_id_header,
+            agent_instance_hierarchy_header,
         );
         let initial_stream =
             tokio::time::timeout(self.first_chunk_timeout, create_fut)
@@ -1541,7 +1541,7 @@ where
         let params = params.clone();
         let id = id.to_string();
         let byok = byok.map(|s| s.to_string());
-        let agent_id_header = agent_id_header.map(|s| s.to_string());
+        let agent_instance_hierarchy_header = agent_instance_hierarchy_header.map(|s| s.to_string());
         let request_continuation = request_continuation.cloned();
 
         // Register this completion's notify target(s) before the stream
@@ -1750,7 +1750,7 @@ where
                         invention_step,
                         invention_tasks_min,
                         invention_input_schema.clone(),
-                        agent_id_header.as_deref(),
+                        agent_instance_hierarchy_header.as_deref(),
                     )
                     .await
                 {
@@ -1791,8 +1791,8 @@ where
             // Stamp the agent's full lineage on the outgoing wire
             // continuation so the next round (whoever resumes — same
             // caller or any other) reuses the same identity verbatim.
-            continuation_token.set_agent_id(
-                agent_id_header.clone().unwrap_or_default(),
+            continuation_token.set_agent_instance_hierarchy(
+                agent_instance_hierarchy_header.clone().unwrap_or_default(),
             );
             let continuation_token = continuation_token.to_string();
 
@@ -1877,13 +1877,13 @@ where
 
 /// Resolves the response format for a given agent from the request params.
 fn resolve_response_format(
-    agent_id: &str,
+    agent_instance_hierarchy: &str,
     params: &objectiveai_sdk::agent::completions::request::AgentCompletionCreateParams,
 ) -> Option<objectiveai_sdk::agent::completions::request::ResponseFormat> {
     use objectiveai_sdk::agent::completions::request::ResponseFormatParam;
     match params.response_format.as_ref()? {
         ResponseFormatParam::Single(rf) => Some(rf.clone()),
-        ResponseFormatParam::PerAgent(map) => map.get(agent_id).cloned(),
+        ResponseFormatParam::PerAgent(map) => map.get(agent_instance_hierarchy).cloned(),
     }
 }
 

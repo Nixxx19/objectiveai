@@ -317,16 +317,16 @@ async fn handle_initialize(
         // Branch 2 — decrypt and reconnect strictly from the payload.
         let (
             connections_with_headers,
+            decoded_agent_instance_hierarchy,
             decoded_agent_id,
-            decoded_agent_id_base,
             decoded_tool_allowlists,
         ) = match state.sessions.decode_session_id(sid) {
             Some(payload) => {
+                let agent_instance_hierarchy = payload.agent_instance_hierarchy.clone();
                 let agent_id = payload.agent_id.clone();
-                let agent_id_base = payload.agent_id_base.clone();
                 let tool_allowlists = payload.tool_allowlists.clone();
                 match crate::upstream::reconnect_from_payload(&state.client, &payload).await {
-                    Ok(pairs) => (pairs, agent_id, agent_id_base, tool_allowlists),
+                    Ok(pairs) => (pairs, agent_instance_hierarchy, agent_id, tool_allowlists),
                     Err(e @ BadInit::UpstreamConnectFailed { .. }) => {
                         return internal_error_response(request.id, e.to_string());
                     }
@@ -351,8 +351,8 @@ async fn handle_initialize(
         // doesn't echo the id back.
         let _ = state.sessions.add(
             connections_with_headers,
+            decoded_agent_instance_hierarchy,
             decoded_agent_id,
-            decoded_agent_id_base,
             decoded_tool_allowlists,
         );
         ok_response_resume_sse(request.id)
@@ -364,24 +364,24 @@ async fn handle_initialize(
         // SSE-deliver the `InitializeResult`.
         // Capture the caller-supplied agent id at session-open. The
         // value rides inside the encrypted session id we mint below,
-        // is recoverable from `session.payload.agent_id` on every
+        // is recoverable from `session.payload.agent_instance_hierarchy` on every
         // subsequent call, AND gets stamped on every outbound request
         // each upstream connection makes (via connect_all_fresh below).
+        let agent_instance_hierarchy = headers
+            .get("X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY")
+            .or_else(|| headers.get("OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY"))
+            .and_then(|v| v.to_str().ok())
+            .map(str::to_owned);
         let agent_id = headers
             .get("X-OBJECTIVEAI-AGENT-ID")
             .or_else(|| headers.get("OBJECTIVEAI-AGENT-ID"))
             .and_then(|v| v.to_str().ok())
             .map(str::to_owned);
-        let agent_id_base = headers
-            .get("X-OBJECTIVEAI-AGENT-ID-BASE")
-            .or_else(|| headers.get("OBJECTIVEAI-AGENT-ID-BASE"))
-            .and_then(|v| v.to_str().ok())
-            .map(str::to_owned);
         let (connections_with_headers, tool_allowlists) = match crate::upstream::connect_all_fresh(
             &state.client,
             headers,
+            agent_instance_hierarchy.as_deref(),
             agent_id.as_deref(),
-            agent_id_base.as_deref(),
         ).await {
             Ok(pair) => pair,
             Err(e @ (BadInit::NotUtf8 { .. } | BadInit::NotJson { .. })) => {
@@ -393,8 +393,8 @@ async fn handle_initialize(
         };
         let session_id = state.sessions.add(
             connections_with_headers,
+            agent_instance_hierarchy,
             agent_id,
-            agent_id_base,
             tool_allowlists,
         );
         ok_response_fresh_sse(request.id, session_id)

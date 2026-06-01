@@ -73,10 +73,10 @@ pub enum LatestContinuationOutcome {
     /// one, because the walk-back skips turns whose continuation file
     /// is missing.
     Found(LatestContinuation),
-    /// The agent_id has no `AgentCompletionRequest` rows at all —
+    /// The agent_instance_hierarchy has no `AgentCompletionRequest` rows at all —
     /// nothing has ever been logged against it.
     NoRequests,
-    /// The agent_id has at least one request row but no continuation
+    /// The agent_instance_hierarchy has at least one request row but no continuation
     /// file was found in any of them — every prior turn is either
     /// still streaming or didn't finish. `request_count` is the total
     /// row count we walked.
@@ -91,10 +91,10 @@ impl Client {
     /// three terminal shapes.
     pub async fn read_latest_continuation(
         &self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
     ) -> Result<LatestContinuationOutcome, Error> {
         let response_ids = self
-            .agent_completion_request_ids_newest_first(agent_id)
+            .agent_completion_request_ids_newest_first(agent_instance_hierarchy)
             .await?;
         if response_ids.is_empty() {
             return Ok(LatestContinuationOutcome::NoRequests);
@@ -172,7 +172,7 @@ impl Client {
     }
 
     /// Every `AgentCompletionRequest` row's response_id for
-    /// `agent_id`, ordered by `"index"` descending — newest first.
+    /// `agent_instance_hierarchy`, ordered by `"index"` descending — newest first.
     ///
     /// The `messages.path` column for AgentCompletionRequest rows
     /// actually holds the full on-disk path of the request log
@@ -182,20 +182,20 @@ impl Client {
     /// bare id.
     pub async fn agent_completion_request_ids_newest_first(
         &self,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
     ) -> Result<Vec<String>, Error> {
         let conn = crate::filesystem::db::connection::connection(self)?;
-        let agent_id = agent_id.to_string();
+        let agent_instance_hierarchy = agent_instance_hierarchy.to_string();
         tokio::task::spawn_blocking(move || -> Result<Vec<String>, Error> {
             let conn = conn.lock().expect("filesystem db mutex poisoned");
             let mut stmt = conn.prepare_cached(
                 "SELECT path FROM messages \
-                 WHERE agent_id = ?1 AND kind = ?2 \
+                 WHERE agent_instance_hierarchy = ?1 AND kind = ?2 \
                  ORDER BY \"index\" DESC",
             )?;
             let rows = stmt.query_map(
                 rusqlite::params![
-                    agent_id,
+                    agent_instance_hierarchy,
                     crate::filesystem::db::schema::MessageKind::AgentCompletionRequest
                         .as_str()
                 ],
@@ -230,13 +230,13 @@ mod tests {
     use crate::filesystem::db::schema::{MessageKind, init_tables, insert};
 
     /// Build a Client rooted at `base_dir`, insert N
-    /// `AgentCompletionRequest` rows for `agent_id` with increasing
+    /// `AgentCompletionRequest` rows for `agent_instance_hierarchy` with increasing
     /// indices, and write a minimal request-log JSON file for each so
     /// `read_latest_continuation`'s log fetch succeeds. Returns the
     /// list of response_ids in insertion order (oldest first).
     async fn seed_requests(
         base_dir: &std::path::Path,
-        agent_id: &str,
+        agent_instance_hierarchy: &str,
         count: usize,
     ) -> Vec<String> {
         let client = Client::new(
@@ -277,7 +277,7 @@ mod tests {
                 init_tables(&c).expect("init tables idempotent");
                 insert(
                     &c,
-                    agent_id,
+                    agent_instance_hierarchy,
                     &response_id,
                     MessageKind::AgentCompletionRequest,
                     &stored_path,
@@ -317,14 +317,14 @@ mod tests {
     #[tokio::test]
     async fn read_latest_continuation_walks_back_past_missing() {
         let tmp = tempfile::tempdir().expect("tempdir");
-        // The writer stamps the caller's lineage onto `messages.agent_id`,
+        // The writer stamps the caller's lineage onto `messages.agent_instance_hierarchy`,
         // so the query key includes the prefix (`cli/foo/<chunk.id>`)
         // for every row inserted under caller `cli/foo`. The bare
         // chunk.id stays the on-disk filename stem for the response
         // continuation, so the response_id we expect to surface is
         // the un-prefixed `resp-N` string.
-        let agent_id = "cli/foo";
-        let ids = seed_requests(tmp.path(), agent_id, 3).await;
+        let agent_instance_hierarchy = "cli/foo";
+        let ids = seed_requests(tmp.path(), agent_instance_hierarchy, 3).await;
         // Only the OLDER turns have continuation files. The newest
         // (ids[2]) is "still streaming".
         write_continuation(tmp.path(), &ids[0], "cont-old").await;
@@ -336,7 +336,7 @@ mod tests {
             None::<String>,
         );
         let outcome = client
-            .read_latest_continuation(agent_id)
+            .read_latest_continuation(agent_instance_hierarchy)
             .await
             .expect("read_latest_continuation");
         match outcome {
@@ -353,8 +353,8 @@ mod tests {
     #[tokio::test]
     async fn read_latest_continuation_reports_no_continuations_found() {
         let tmp = tempfile::tempdir().expect("tempdir");
-        let agent_id = "cli/bar";
-        let _ids = seed_requests(tmp.path(), agent_id, 2).await;
+        let agent_instance_hierarchy = "cli/bar";
+        let _ids = seed_requests(tmp.path(), agent_instance_hierarchy, 2).await;
         // No continuation files at all.
 
         let client = Client::new(
@@ -363,7 +363,7 @@ mod tests {
             None::<String>,
         );
         let outcome = client
-            .read_latest_continuation(agent_id)
+            .read_latest_continuation(agent_instance_hierarchy)
             .await
             .expect("read_latest_continuation");
         match outcome {

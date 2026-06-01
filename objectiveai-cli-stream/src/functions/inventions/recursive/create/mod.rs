@@ -30,11 +30,11 @@ pub async fn handle(
         None::<String>,
         None::<String>,
     );
-    let caller_agent_id = http.objectiveai_agent_id.clone();
+    let caller_agent_instance_hierarchy = http.objectiveai_agent_instance_hierarchy.clone();
     let log_writer = fs_client
         .write_function_invention_recursive(&params)
         .map_err(|e| format!("failed to build function-invention-recursive log writer: {e}"))?
-        .with_caller_agent_id(caller_agent_id.clone());
+        .with_caller_agent_instance_hierarchy(caller_agent_instance_hierarchy.clone());
 
     let (stream, notifier) =
         objectiveai_sdk::functions::inventions::recursive::create_function_invention_recursive_streaming(
@@ -61,7 +61,7 @@ pub async fn handle(
         stream,
         notifier,
         pipes_root,
-        caller_agent_id,
+        caller_agent_instance_hierarchy,
         log_writer,
         handle,
         |agg: &mut FunctionInventionRecursiveChunk, chunk: &FunctionInventionRecursiveChunk| {

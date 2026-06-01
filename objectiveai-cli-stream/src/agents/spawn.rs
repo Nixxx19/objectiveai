@@ -21,7 +21,7 @@ pub async fn handle(
     let client = http.build_http_client()?;
     let conduit = pipes.build_conduit();
 
-    // Shared between the eager admission probe (if --bind-agent-id
+    // Shared between the eager admission probe (if --bind-agent-instance-hierarchy
     // is set) and the per-chunk binds inside `run_chunk_loop`. The
     // eager probe stashes its `Listener` here; the chunk loop's
     // first matching `ensure_pipe` consumes it.
@@ -33,11 +33,11 @@ pub async fn handle(
         None::<String>,
         None::<String>,
     );
-    let caller_agent_id = http.objectiveai_agent_id.clone();
+    let caller_agent_instance_hierarchy = http.objectiveai_agent_instance_hierarchy.clone();
     let log_writer = fs_client
         .write_agent_completion(&params)
         .map_err(|e| format!("failed to build agent-completion log writer: {e}"))?
-        .with_caller_agent_id(caller_agent_id.clone());
+        .with_caller_agent_instance_hierarchy(caller_agent_instance_hierarchy.clone());
 
     let (stream, notifier) =
         objectiveai_sdk::agent::completions::create_agent_completion_streaming(
@@ -61,7 +61,7 @@ pub async fn handle(
         stream,
         notifier,
         pipes_root,
-        caller_agent_id,
+        caller_agent_instance_hierarchy,
         log_writer,
         handle,
         |agg: &mut AgentCompletionChunk, chunk: &AgentCompletionChunk| agg.push(chunk),

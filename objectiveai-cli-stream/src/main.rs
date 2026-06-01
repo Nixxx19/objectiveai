@@ -74,11 +74,11 @@ impl Commands {
 #[tokio::main]
 async fn main() -> Result<(), String> {
     let cli = Cli::parse();
-    // Stamp the handle's agent_id from --objectiveai-agent-id so
+    // Stamp the handle's agent_instance_hierarchy from --objectiveai-agent-instance-hierarchy so
     // every emitted Notification/Error line carries it — mirrors
     // objectiveai-cli/src/main.rs:16-17.
     let mut handle = Handle::stdout();
-    handle.agent_id = cli.http.objectiveai_agent_id.clone();
+    handle.agent_instance_hierarchy = cli.http.objectiveai_agent_instance_hierarchy.clone();
 
     cli.command.handle(&cli.http, &cli.pipes, &handle).await
 }
