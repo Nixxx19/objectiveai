@@ -91,6 +91,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(crate::agent::ClientObjectiveaiMcp),
         schemars::schema_for!(crate::agent::ClientObjectiveaiMcpEntry),
         schemars::schema_for!(crate::agent::ClientObjectiveaiMcpPluginEntry),
+        schemars::schema_for!(crate::agent::ClientObjectiveaiMcpPluginMcpServer),
         schemars::schema_for!(crate::agent::claude_agent_sdk::Continuation),
         schemars::schema_for!(crate::agent::codex_sdk::Continuation),
         schemars::schema_for!(crate::agent::mock::AgentBase),
@@ -512,7 +513,9 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::cli::output::Output),
             schemars::schema_for!(crate::cli::output::Notification),
             schemars::schema_for!(crate::cli::output::NotificationValue),
+            schemars::schema_for!(crate::cli::output::notification::TypedNotificationValue),
             schemars::schema_for!(crate::cli::output::Error),
+            schemars::schema_for!(crate::cli::output::ErrorType),
             schemars::schema_for!(crate::cli::output::Level),
             schemars::schema_for!(crate::cli::output::notification::Me),
             schemars::schema_for!(crate::cli::output::notification::Ok),
@@ -560,6 +563,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::cli::output::notification::laboratories::LabResultItem),
             schemars::schema_for!(crate::cli::output::notification::swarms::Swarm),
             schemars::schema_for!(crate::cli::plugins::PluginOutput),
+            schemars::schema_for!(crate::cli::plugins::TypedPluginOutput),
         ]);
     }
     #[cfg(feature = "viewer")]

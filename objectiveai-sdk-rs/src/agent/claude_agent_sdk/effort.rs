@@ -30,6 +30,10 @@ pub enum Effort {
     #[schemars(title = "High")]
     #[serde(rename = "high")]
     High,
+    /// Extra-high effort, above `High` but below `Max`.
+    #[schemars(title = "Xhigh")]
+    #[serde(rename = "xhigh")]
+    Xhigh,
     /// Maximum effort, most detailed output possible.
     #[schemars(title = "Max")]
     #[serde(rename = "max")]
@@ -59,6 +63,7 @@ impl Effort {
             Effort::Low => "low",
             Effort::Medium => "medium",
             Effort::High => "high",
+            Effort::Xhigh => "xhigh",
             Effort::Max => "max",
         }
     }
