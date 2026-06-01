@@ -48,12 +48,6 @@ pub struct Context<CTXEXT, PC> {
     /// Plays the role of the *parent* when composing the agent id we
     /// forward to the MCP proxy inside agent completions.
     agent_id: Option<Arc<String>>,
-    /// Per-request bare 22-character leaf identity of the caller
-    /// (`X-OBJECTIVEAI-AGENT-ID-BASE`). Travels alongside `agent_id`
-    /// and gets re-stamped on every outbound header set so the leaf
-    /// identity is preserved across every hop. `None` when the
-    /// caller didn't supply one.
-    agent_id_base: Option<Arc<String>>,
     /// Local TCP port the API process is bound on. Used to synthesize
     /// `http://127.0.0.1:{api_port}/objectiveai-mcp/{ws_session_id}`
     /// reverse-attach URLs when an agent declares `client_objectiveai_mcp`.
@@ -274,12 +268,6 @@ impl<CTXEXT, PC> Context<CTXEXT, PC> {
             .and_then(|v| v.to_str().ok())
             .map(|s| Arc::new(s.to_owned()));
 
-        let agent_id_base = headers
-            .get("X-OBJECTIVEAI-AGENT-ID-BASE")
-            .or_else(|| headers.get("OBJECTIVEAI-AGENT-ID-BASE"))
-            .and_then(|v| v.to_str().ok())
-            .map(|s| Arc::new(s.to_owned()));
-
         Self {
             ext,
             cost_multiplier,
@@ -294,7 +282,6 @@ impl<CTXEXT, PC> Context<CTXEXT, PC> {
             commit_author_name,
             commit_author_email,
             agent_id,
-            agent_id_base,
             api_port: None,
             reverse_attach: None,
             openrouter_authorization_cached: Arc::new(OnceCell::new()),
@@ -325,13 +312,6 @@ impl<CTXEXT, PC> Context<CTXEXT, PC> {
     /// agent id we forward to the MCP proxy.
     pub fn agent_id(&self) -> Option<&str> {
         self.agent_id.as_deref().map(|s| s.as_str())
-    }
-
-    /// Returns the caller-supplied 22-char base identity from
-    /// `X-OBJECTIVEAI-AGENT-ID-BASE`, if present. Travels with
-    /// `agent_id` and gets stamped on every outbound proxy header set.
-    pub fn agent_id_base(&self) -> Option<&str> {
-        self.agent_id_base.as_deref().map(|s| s.as_str())
     }
 
     /// Returns the local TCP port the API process is bound on, if a

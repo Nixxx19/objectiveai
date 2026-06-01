@@ -72,14 +72,6 @@ pub struct HttpArgs {
     #[arg(long, global = true)]
     pub objectiveai_agent_id: Option<String>,
 
-    /// `X-OBJECTIVEAI-AGENT-ID-BASE` header — bare 22-character leaf
-    /// identity of the agent invoking the cli (without the spawn or
-    /// parent lineage that `objectiveai_agent_id` carries). Travels
-    /// alongside `objectiveai_agent_id` on every outbound request.
-    /// Maps to `OBJECTIVEAI_AGENT_ID_BASE`.
-    #[arg(long, global = true)]
-    pub objectiveai_agent_id_base: Option<String>,
-
     /// `Mcp-Session-Id` header. Forwarded into cli-stream by the
     /// cli's `push_forwarded_args` so that downstream tool
     /// invocations (transitive through `objectiveai-mcp` or directly
@@ -131,7 +123,6 @@ impl HttpArgs {
             self.commit_author_name.clone(),
             self.commit_author_email.clone(),
             self.objectiveai_agent_id.clone(),
-            self.objectiveai_agent_id_base.clone(),
             self.mcp_session_id.clone(),
         ))
     }

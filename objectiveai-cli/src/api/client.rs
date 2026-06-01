@@ -100,7 +100,6 @@ pub fn build_http_client(
     // drop those overrides and truncate the agent lineage at every
     // MCP-spawn boundary.
     let agent_id = Some(cli_config.agent_id.clone());
-    let agent_id_base = cli_config.agent_id_base.clone();
     let mcp_session_id = cli_config.mcp_session_id.clone();
 
     objectiveai_sdk::HttpClient::new(
@@ -118,7 +117,6 @@ pub fn build_http_client(
         x_commit_author_name,
         x_commit_author_email,
         agent_id,
-        agent_id_base,
         mcp_session_id,
     )
 }
