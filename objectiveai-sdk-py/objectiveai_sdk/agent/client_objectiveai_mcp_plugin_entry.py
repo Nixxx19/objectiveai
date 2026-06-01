@@ -3,6 +3,7 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
+from objectiveai_sdk.agent.client_objectiveai_mcp_plugin_mcp_server import ClientObjectiveaiMcpPluginMcpServer
 
 
 class ClientObjectiveaiMcpPluginEntry(BaseModel):
@@ -22,7 +23,7 @@ class ClientObjectiveaiMcpPluginEntry(BaseModel):
     model_config = ConfigDict(title='agent.ClientObjectiveaiMcpPluginEntry')
 
     executable: bool = Field(True, description="`true`: spawn the plugin binary and surface its tools the\nusual way. `false`: don't run the plugin; only consume its\ndeclared MCP servers (`mcp_servers` below). Defaults to\n`true` so existing declarations keep their current behavior.")
-    mcp_servers: Optional[list[str]] = Field(None, description="Subset of the plugin's manifest `mcp_servers` to expose, by\n`name`. `None` ⇒ none. Names that aren't present in the\nplugin's manifest are rejected when the API asks the CLI to\nbegin them; declarations themselves don't validate the\nreferent (the plugin may not be installed at declaration\ntime).", json_schema_extra={'omitempty': True})
+    mcp_servers: Optional[list[ClientObjectiveaiMcpPluginMcpServer]] = Field(None, description="Subset of the plugin's manifest `mcp_servers` to expose, each\nreferenced by `name` plus an optional `arguments` map. `None`\n⇒ none. Names that aren't present in the plugin's manifest are\nrejected when the API asks the CLI to begin them; declarations\nthemselves don't validate the referent (the plugin may not be\ninstalled at declaration time).", json_schema_extra={'omitempty': True})
     name: str
     owner: str
     version: str

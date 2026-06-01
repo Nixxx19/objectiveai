@@ -24,23 +24,18 @@ pub enum Commands {
 }
 
 impl Commands {
-    pub async fn handle(
-        self,
-        handle: &objectiveai_sdk::cli::output::Handle,
-    ) -> Result<(), crate::error::Error> {
+    pub async fn handle(self, handle: &objectiveai_sdk::cli::output::Handle) -> Result<(), crate::error::Error> {
         match self {
             Commands::List => {
                 const NAMES: &[&str] = &["request", "response"];
                 objectiveai_sdk::cli::output::Output::Notification(
                     objectiveai_sdk::cli::output::Notification {
+                        agent_id: None,
                         value: objectiveai_sdk::cli::output::Schemas {
                             schemas: NAMES.iter().map(|s| s.to_string()).collect(),
-                        }
-                        .into(),
+                        }.into(),
                     },
-                )
-                .emit(handle)
-                .await;
+                ).emit(handle).await;
                 Ok(())
             }
             Commands::Request { command } => command.handle(handle).await,

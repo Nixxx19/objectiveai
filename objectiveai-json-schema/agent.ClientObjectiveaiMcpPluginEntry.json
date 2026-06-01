@@ -9,12 +9,12 @@
       "default": true
     },
     "mcp_servers": {
-      "description": "Subset of the plugin's manifest `mcp_servers` to expose, by\n`name`. `None` ⇒ none. Names that aren't present in the\nplugin's manifest are rejected when the API asks the CLI to\nbegin them; declarations themselves don't validate the\nreferent (the plugin may not be installed at declaration\ntime).",
+      "description": "Subset of the plugin's manifest `mcp_servers` to expose, each\nreferenced by `name` plus an optional `arguments` map. `None`\n⇒ none. Names that aren't present in the plugin's manifest are\nrejected when the API asks the CLI to begin them; declarations\nthemselves don't validate the referent (the plugin may not be\ninstalled at declaration time).",
       "anyOf": [
         {
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "agent.ClientObjectiveaiMcpPluginMcpServer"
           }
         },
         {

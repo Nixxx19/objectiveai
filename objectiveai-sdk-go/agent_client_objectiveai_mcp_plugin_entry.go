@@ -26,13 +26,13 @@ type AgentClientObjectiveaiMcpPluginEntry struct {
 	// declared MCP servers (`mcp_servers` below). Defaults to
 	// `true` so existing declarations keep their current behavior.
 	Executable bool `json:"executable" default:"true"`
-	// Subset of the plugin's manifest `mcp_servers` to expose, by
-	// `name`. `None` ⇒ none. Names that aren't present in the
-	// plugin's manifest are rejected when the API asks the CLI to
-	// begin them; declarations themselves don't validate the
-	// referent (the plugin may not be installed at declaration
-	// time).
-	MCPServers *[]string `json:"mcp_servers,omitempty"`
+	// Subset of the plugin's manifest `mcp_servers` to expose, each
+	// referenced by `name` plus an optional `arguments` map. `None`
+	// ⇒ none. Names that aren't present in the plugin's manifest are
+	// rejected when the API asks the CLI to begin them; declarations
+	// themselves don't validate the referent (the plugin may not be
+	// installed at declaration time).
+	MCPServers *[]AgentClientObjectiveaiMcpPluginMcpServer `json:"mcp_servers,omitempty"`
 	Name string `json:"name"`
 	Owner string `json:"owner"`
 	Version string `json:"version"`

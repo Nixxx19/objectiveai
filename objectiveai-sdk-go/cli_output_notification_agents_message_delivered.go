@@ -11,7 +11,9 @@ import (
 //
 // Wire: `{"type":"notification","value":{"kind":"message_delivered","agent_id":"<id>"}}`.
 type CliOutputNotificationAgentsMessageDelivered struct {
-	// Full lineage agent_id the message was delivered to.
+	// Bare-leaf agent id (trailing slash segment) the message was
+	// delivered to. Same shape `agents list active` returns and
+	// `agents read pending` accepts — pastable directly into either.
 	AgentID string `json:"agent_id"`
 }
 

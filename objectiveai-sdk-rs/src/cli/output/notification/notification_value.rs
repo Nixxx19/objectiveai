@@ -107,10 +107,11 @@ pub enum TypedNotificationValue {
     // Shared / multi-command
     #[schemars(title = "Cleared")]
     Cleared(Cleared),
-    /// Terminal marker for a plugin-dispatched command. The
-    /// originating plugin's correlation id rides at the envelope
-    /// level (`Handle::request_id` → top-level `request_id` on the
-    /// emitted line); see [`CommandComplete`].
+    /// Terminal marker for a plugin-dispatched command. Rides
+    /// inside the [`crate::cli::plugins::PluginCommandResponse`]
+    /// envelope on the plugin channel — the originating command's
+    /// correlation id (when set) is on the envelope's `id` field,
+    /// not on this struct. See [`CommandComplete`].
     #[schemars(title = "CommandComplete")]
     CommandComplete(CommandComplete),
     #[schemars(title = "Help")]

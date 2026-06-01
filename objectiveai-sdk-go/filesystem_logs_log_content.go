@@ -10,7 +10,7 @@ import (
 // A `.json` envelope parsed as a structured value.
 type FilesystemLogsLogContentJSON struct {
 	Content JsonValue `json:"content"`
-	Type string `json:"type" validate:"oneof=json"`
+	Kind string `json:"kind" validate:"oneof=json"`
 }
 
 func (v *FilesystemLogsLogContentJSON) UnmarshalJSON(data []byte) error {
@@ -18,7 +18,7 @@ func (v *FilesystemLogsLogContentJSON) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"content", "type"} {
+	for _, key := range []string{"content", "kind"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("FilesystemLogsLogContentJSON: missing required field %q", key)
 		}
@@ -35,8 +35,8 @@ func (FilesystemLogsLogContentJSON) SchemaVariantTitle() string { return "Json" 
 
 // A `.txt` file content.
 type FilesystemLogsLogContentText struct {
+	Kind string `json:"kind" validate:"oneof=text"`
 	Text string `json:"text"`
-	Type string `json:"type" validate:"oneof=text"`
 }
 
 func (v *FilesystemLogsLogContentText) UnmarshalJSON(data []byte) error {
@@ -44,7 +44,7 @@ func (v *FilesystemLogsLogContentText) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"text", "type"} {
+	for _, key := range []string{"kind", "text"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("FilesystemLogsLogContentText: missing required field %q", key)
 		}
@@ -62,7 +62,7 @@ func (FilesystemLogsLogContentText) SchemaVariantTitle() string { return "Text" 
 // An image media file under `messages/image/`, etc.
 type FilesystemLogsLogContentImage struct {
 	ImageURL AgentCompletionsMessageImageUrl `json:"image_url"`
-	Type string `json:"type" validate:"oneof=image"`
+	Kind string `json:"kind" validate:"oneof=image"`
 }
 
 func (v *FilesystemLogsLogContentImage) UnmarshalJSON(data []byte) error {
@@ -70,7 +70,7 @@ func (v *FilesystemLogsLogContentImage) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"image_url", "type"} {
+	for _, key := range []string{"image_url", "kind"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("FilesystemLogsLogContentImage: missing required field %q", key)
 		}
@@ -88,7 +88,7 @@ func (FilesystemLogsLogContentImage) SchemaVariantTitle() string { return "Image
 // An audio media file under `messages/audio/`, etc.
 type FilesystemLogsLogContentAudio struct {
 	InputAudio AgentCompletionsMessageInputAudio `json:"input_audio"`
-	Type string `json:"type" validate:"oneof=audio"`
+	Kind string `json:"kind" validate:"oneof=audio"`
 }
 
 func (v *FilesystemLogsLogContentAudio) UnmarshalJSON(data []byte) error {
@@ -96,7 +96,7 @@ func (v *FilesystemLogsLogContentAudio) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"input_audio", "type"} {
+	for _, key := range []string{"input_audio", "kind"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("FilesystemLogsLogContentAudio: missing required field %q", key)
 		}
@@ -113,7 +113,7 @@ func (FilesystemLogsLogContentAudio) SchemaVariantTitle() string { return "Audio
 
 // A video media file under `messages/video/`, etc.
 type FilesystemLogsLogContentVideo struct {
-	Type string `json:"type" validate:"oneof=video"`
+	Kind string `json:"kind" validate:"oneof=video"`
 	VideoURL AgentCompletionsMessageVideoUrl `json:"video_url"`
 }
 
@@ -122,7 +122,7 @@ func (v *FilesystemLogsLogContentVideo) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"type", "video_url"} {
+	for _, key := range []string{"kind", "video_url"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("FilesystemLogsLogContentVideo: missing required field %q", key)
 		}
@@ -140,7 +140,7 @@ func (FilesystemLogsLogContentVideo) SchemaVariantTitle() string { return "Video
 // A generic file under `messages/file/`, etc.
 type FilesystemLogsLogContentFile struct {
 	File AgentCompletionsMessageFile `json:"file"`
-	Type string `json:"type" validate:"oneof=file"`
+	Kind string `json:"kind" validate:"oneof=file"`
 }
 
 func (v *FilesystemLogsLogContentFile) UnmarshalJSON(data []byte) error {
@@ -148,7 +148,7 @@ func (v *FilesystemLogsLogContentFile) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"file", "type"} {
+	for _, key := range []string{"file", "kind"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("FilesystemLogsLogContentFile: missing required field %q", key)
 		}
@@ -170,17 +170,19 @@ func (FilesystemLogsLogContentFile) SchemaVariantTitle() string { return "File" 
 // variant is picked at the call site that already knows the kind.
 //
 // Wire form (when wrapped in
-// [`crate::cli::output::NotificationValue::LogContent`]): the outer
-// `kind: "log_content"` envelope from `NotificationValue` plus this
-// inner `type` discriminator:
+// `TypedNotificationValue::LogContent`): the outer `type:
+// "log_content"` envelope from `TypedNotificationValue` plus this
+// inner `kind` discriminator (`type`/`kind` swap relative to the
+// historical shape — needed to avoid a key collision when the
+// outer enum flattens through `Notification`):
 //
 // ```text
-// {"kind":"log_content","type":"json", "content":{...}}
-// {"kind":"log_content","type":"text", "text":"..."}
-// {"kind":"log_content","type":"image","image_url":{"url":"data:image/png;base64,..."}}
-// {"kind":"log_content","type":"audio","input_audio":{"data":"<base64>","format":"audio/mpeg"}}
-// {"kind":"log_content","type":"video","video_url":{"url":"data:video/mp4;base64,..."}}
-// {"kind":"log_content","type":"file", "file":{"file_data":"<base64>","filename":"<name>"}}
+// {"type":"log_content","kind":"json", "content":{...}}
+// {"type":"log_content","kind":"text", "text":"..."}
+// {"type":"log_content","kind":"image","image_url":{"url":"data:image/png;base64,..."}}
+// {"type":"log_content","kind":"audio","input_audio":{"data":"<base64>","format":"audio/mpeg"}}
+// {"type":"log_content","kind":"video","video_url":{"url":"data:video/mp4;base64,..."}}
+// {"type":"log_content","kind":"file", "file":{"file_data":"<base64>","filename":"<name>"}}
 // ```
 type FilesystemLogsLogContent struct {
 	// A `.json` envelope parsed as a structured value.

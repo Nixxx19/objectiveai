@@ -4,6 +4,7 @@ package objectiveai
 
 func init() {
 	RegisterOrderedMapTypes(variantValidator,
+		OrderedMap[string, *string]{},
 		OrderedMap[string, AgentCompletionsRequestResponseFormat]{},
 		OrderedMap[string, FilesystemLogsLogReference]{},
 		OrderedMap[string, FunctionsExpressionInputSchema]{},

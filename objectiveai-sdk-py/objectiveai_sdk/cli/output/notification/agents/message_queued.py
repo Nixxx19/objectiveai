@@ -11,6 +11,6 @@ completion stream was started from the most recent continuation.
 Wire: `{"type":"notification","value":{"kind":"message_queued","agent_id":"<id>","response_id":"<rid>"}}`."""
     model_config = ConfigDict(title='cli.output.notification.agents.MessageQueued')
 
-    agent_id: str = Field(..., description='Full lineage agent_id (reused from the prior completion).')
+    agent_id: str = Field(..., description='Bare-leaf agent id (trailing slash segment, reused from the\nprior completion). Same shape `agents list active` returns\nand `agents read pending` accepts.')
     response_id: str = Field(..., description='New response id for the continuation completion.')
 

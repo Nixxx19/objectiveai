@@ -9,21 +9,21 @@ import { AgentCompletionsMessageVideoUrlSchema } from "../../agent/completions/m
 
 export const FilesystemLogsLogContentSchema = z.union([z.object({
   content: JsonValueSchema,
-  type: z.literal("json"),
+  kind: z.literal("json"),
 }).describe("A `.json` envelope parsed as a structured value.").meta({"variantTitle":"Json"}), z.object({
+  kind: z.literal("text"),
   text: z.string(),
-  type: z.literal("text"),
 }).describe("A `.txt` file content.").meta({"variantTitle":"Text"}), z.object({
   image_url: AgentCompletionsMessageImageUrlSchema,
-  type: z.literal("image"),
+  kind: z.literal("image"),
 }).describe("An image media file under `messages/image/`, etc.").meta({"variantTitle":"Image"}), z.object({
   input_audio: AgentCompletionsMessageInputAudioSchema,
-  type: z.literal("audio"),
+  kind: z.literal("audio"),
 }).describe("An audio media file under `messages/audio/`, etc.").meta({"variantTitle":"Audio"}), z.object({
-  type: z.literal("video"),
+  kind: z.literal("video"),
   video_url: AgentCompletionsMessageVideoUrlSchema,
 }).describe("A video media file under `messages/video/`, etc.").meta({"variantTitle":"Video"}), z.object({
   file: AgentCompletionsMessageFileSchema,
-  type: z.literal("file"),
-}).describe("A generic file under `messages/file/`, etc.").meta({"variantTitle":"File"})]).describe("Result of reading a log file. The variant is determined by **which\ntyped `read_*` method the caller invoked** (or, for\n[`Client::read_file_by_id`], by the on-disk folder the path\nclassified into). Nothing is guessed from the bytes — each\nvariant is picked at the call site that already knows the kind.\n\nWire form (when wrapped in\n[`crate::cli::output::NotificationValue::LogContent`]): the outer\n`kind: \"log_content\"` envelope from `NotificationValue` plus this\ninner `type` discriminator:\n\n```text\n{\"kind\":\"log_content\",\"type\":\"json\", \"content\":{...}}\n{\"kind\":\"log_content\",\"type\":\"text\", \"text\":\"...\"}\n{\"kind\":\"log_content\",\"type\":\"image\",\"image_url\":{\"url\":\"data:image/png;base64,...\"}}\n{\"kind\":\"log_content\",\"type\":\"audio\",\"input_audio\":{\"data\":\"<base64>\",\"format\":\"audio/mpeg\"}}\n{\"kind\":\"log_content\",\"type\":\"video\",\"video_url\":{\"url\":\"data:video/mp4;base64,...\"}}\n{\"kind\":\"log_content\",\"type\":\"file\", \"file\":{\"file_data\":\"<base64>\",\"filename\":\"<name>\"}}\n```").meta({ title: "filesystem.logs.LogContent" });
+  kind: z.literal("file"),
+}).describe("A generic file under `messages/file/`, etc.").meta({"variantTitle":"File"})]).describe("Result of reading a log file. The variant is determined by **which\ntyped `read_*` method the caller invoked** (or, for\n[`Client::read_file_by_id`], by the on-disk folder the path\nclassified into). Nothing is guessed from the bytes — each\nvariant is picked at the call site that already knows the kind.\n\nWire form (when wrapped in\n`TypedNotificationValue::LogContent`): the outer `type:\n\"log_content\"` envelope from `TypedNotificationValue` plus this\ninner `kind` discriminator (`type`/`kind` swap relative to the\nhistorical shape — needed to avoid a key collision when the\nouter enum flattens through `Notification`):\n\n```text\n{\"type\":\"log_content\",\"kind\":\"json\", \"content\":{...}}\n{\"type\":\"log_content\",\"kind\":\"text\", \"text\":\"...\"}\n{\"type\":\"log_content\",\"kind\":\"image\",\"image_url\":{\"url\":\"data:image/png;base64,...\"}}\n{\"type\":\"log_content\",\"kind\":\"audio\",\"input_audio\":{\"data\":\"<base64>\",\"format\":\"audio/mpeg\"}}\n{\"type\":\"log_content\",\"kind\":\"video\",\"video_url\":{\"url\":\"data:video/mp4;base64,...\"}}\n{\"type\":\"log_content\",\"kind\":\"file\", \"file\":{\"file_data\":\"<base64>\",\"filename\":\"<name>\"}}\n```").meta({ title: "filesystem.logs.LogContent" });
 export type FilesystemLogsLogContent = z.infer<typeof FilesystemLogsLogContentSchema>;

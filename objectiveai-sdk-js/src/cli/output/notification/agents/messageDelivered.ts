@@ -3,6 +3,6 @@
 import { z } from "zod";
 
 export const CliOutputNotificationAgentsMessageDeliveredSchema = z.object({
-  agent_id: z.string().describe("Full lineage agent_id the message was delivered to."),
+  agent_id: z.string().describe("Bare-leaf agent id (trailing slash segment) the message was\ndelivered to. Same shape `agents list active` returns and\n`agents read pending` accepts — pastable directly into either."),
 }).describe("Live-delivery success.\n\nWire: `{\"type\":\"notification\",\"value\":{\"kind\":\"message_delivered\",\"agent_id\":\"<id>\"}}`.").meta({ title: "cli.output.notification.agents.MessageDelivered" });
 export type CliOutputNotificationAgentsMessageDelivered = z.infer<typeof CliOutputNotificationAgentsMessageDeliveredSchema>;

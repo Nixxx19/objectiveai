@@ -7,44 +7,91 @@ import (
 	"fmt"
 )
 
-// Wrapper that nests the notification payload one level deeper under a
-// `value` field. Required because [`super::super::Output`] uses
-// `#[serde(tag = "type")]` — keeping `NotificationValue` under `value`
-// instead of flattening preserves the historical `.value.<field>`
-// access path for downstream consumers.
+type CliOutputNotificationNotificationOther OrderedMap[string,JsonValue]
+
+func (CliOutputNotificationNotificationOther) SchemaVariantTitle() string { return "Other" }
+
+// One emitted notification. The payload's keys flatten directly
+// into the top-level JSON object via `#[serde(flatten)]` — there
+// is no `value` wrapper or `type:"notification"` envelope.
 //
-// `agent_id` is stamped at emit time by [`super::super::Handle`] when
-// its `agent_id` field is set; producers building a `Notification`
-// inline almost always leave the field `None` and let the handle
-// fill it. Serde-skipped when `None`.
+// `Notification` has no struct-level `agent_id` field. Inner
+// payloads that name an agent (e.g. `Spawned`, `MessageQueued`,
+// `Inactive`, `Me`) carry agent_id themselves — flattening would
+// otherwise collide on the wire. For payloads with no inherent
+// agent_id (`Ok`, `LogContent`, `Mcp`, …), the cli session's
+// agent_id is stamped at JSON-serialize time by
+// [`super::super::Handle::emit`] iff the resulting JSON object
+// doesn't already contain one.
 //
-// Wire (in combination with `Output::Notification`):
-// `{"type":"notification","value":{"kind":"<variant>",…},"agent_id":"<id>"?}`.
+// Wire:
+//   `{"type":"<typed-variant>",…fields…}` for typed variants.
+//   `{…object-keys…}` for `Other` payloads.
+//   Handle additionally injects `"agent_id":"<cli-session-id>"`
+//   at JSON level when no inner agent_id is present.
 type CliOutputNotificationNotification struct {
-	AgentID *string `json:"agent_id,omitempty"`
-	Value CliOutputNotificationNotificationValue `json:"value"`
+	Typed *CliOutputNotificationTypedNotificationValue 
+	// Single catch-all for anything that doesn't get a typed
+	// variant: generic emits (`Items<T>`, `Value<V>`),
+	// api/call.rs passthrough (`Resp`, `Chunk`), and raw
+	// `serde_json::Value`. The map's keys flatten directly into
+	// the surrounding [`super::Notification`] — there is no
+	// `kind`/`type` envelope on the wire.
+	//
+	// Construct via [`NotificationValue::other`]. The payload
+	// must serialize to a JSON object (so its entries can sit at
+	// the [`super::Notification`] level via `#[serde(flatten)]`).
+	//
+	// Wire examples:
+	//   `{"items":[…]}`   (Items<T>)
+	//   `{"value":<V>}`   (Value<V>)
+	Other *CliOutputNotificationNotificationOther 
 }
 
-func (CliOutputNotificationNotification) SchemaTitle() string { return "cli.output.notification.Notification" }
-func (v CliOutputNotificationNotification) Validate() error {
-	return variantValidator.Struct(v)
+func (v CliOutputNotificationNotification) MarshalJSON() ([]byte, error) {
+	if v.Typed != nil {
+		return json.Marshal(v.Typed)
+	}
+	if v.Other != nil {
+		return json.Marshal(v.Other)
+	}
+	return []byte("null"), nil
 }
 
 func (v *CliOutputNotificationNotification) UnmarshalJSON(data []byte) error {
-	var raw map[string]json.RawMessage
-	if err := json.Unmarshal(data, &raw); err != nil {
-		return err
-	}
-	for _, key := range []string{"value"} {
-		if _, ok := raw[key]; !ok {
-			return fmt.Errorf("CliOutputNotificationNotification: missing required field %q", key)
+	{
+		var try CliOutputNotificationTypedNotificationValue
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := CliOutputNotificationNotification{}
+			candidate.Typed = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
 		}
 	}
-	type Alias CliOutputNotificationNotification
-	var alias Alias
-	if err := json.Unmarshal(data, &alias); err != nil {
-		return err
+	{
+		var try CliOutputNotificationNotificationOther
+		if err := json.Unmarshal(data, &try); err == nil {
+			candidate := CliOutputNotificationNotification{}
+			candidate.Other = &try
+			if candidate.Validate() == nil {
+				*v = candidate
+				return nil
+			}
+		}
 	}
-	*v = CliOutputNotificationNotification(alias)
-	return nil
+	return fmt.Errorf("data did not match any variant of CliOutputNotificationNotification")
 }
+
+func (v CliOutputNotificationNotification) Validate() error {
+	count := 0
+	if v.Typed != nil { count++ }
+	if v.Other != nil { count++ }
+	if count != 1 {
+		return fmt.Errorf("CliOutputNotificationNotification: exactly one variant must be set, got %d", count)
+	}
+	return variantValidator.Struct(v)
+}
+func (CliOutputNotificationNotification) SchemaTitle() string { return "cli.output.notification.Notification" }
+

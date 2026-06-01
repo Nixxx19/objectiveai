@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 export const CliOutputNotificationAgentsMessageQueuedSchema = z.object({
-  agent_id: z.string().describe("Full lineage agent_id (reused from the prior completion)."),
+  agent_id: z.string().describe("Bare-leaf agent id (trailing slash segment, reused from the\nprior completion). Same shape `agents list active` returns\nand `agents read pending` accepts."),
   response_id: z.string().describe("New response id for the continuation completion."),
 }).describe("Continuation-fallback success — the agent was dormant, so a new\ncompletion stream was started from the most recent continuation.\n\nWire: `{\"type\":\"notification\",\"value\":{\"kind\":\"message_queued\",\"agent_id\":\"<id>\",\"response_id\":\"<rid>\"}}`.").meta({ title: "cli.output.notification.agents.MessageQueued" });
 export type CliOutputNotificationAgentsMessageQueued = z.infer<typeof CliOutputNotificationAgentsMessageQueuedSchema>;

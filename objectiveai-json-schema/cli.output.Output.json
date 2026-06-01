@@ -1,33 +1,15 @@
 {
   "title": "cli.output.Output",
-  "description": "A single line of CLI output.",
+  "description": "A single line of CLI output. Untagged — each variant carries its\nown internal discriminator on the wire (Error has `type:\"error\"`,\nNotification's flattened `NotificationValue` either has\n`type:\"<typed-variant>\"` or is a raw `Other` map).",
   "anyOf": [
     {
       "title": "Error",
-      "type": "object",
-      "$ref": "cli.output.Error",
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": [
-            "error"
-          ]
-        }
-      }
+      "description": "Try Error first: its `type` field is a single-variant\n`ErrorType` (always `\"error\"`), so any non-error wire shape\nfails deserialization quickly and falls through to\n`Notification`. Putting `Notification` first would mean the\nuntagged `NotificationValue::Other` catch-all silently swallows\nError payloads.",
+      "$ref": "cli.output.Error"
     },
     {
       "title": "Notification",
-      "description": "Wraps [`NotificationValue`] in [`Notification`] so its fields\nend up under a nested `value` key.",
-      "type": "object",
-      "$ref": "cli.output.notification.Notification",
-      "properties": {
-        "type": {
-          "type": "string",
-          "enum": [
-            "notification"
-          ]
-        }
-      }
+      "$ref": "cli.output.notification.Notification"
     }
   ]
 }

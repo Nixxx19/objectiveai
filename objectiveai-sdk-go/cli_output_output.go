@@ -7,80 +7,19 @@ import (
 	"fmt"
 )
 
-type CliOutputOutputError struct {
-	CliOutputError
-	Type string `json:"type" validate:"oneof=error"`
-}
-
-func (v *CliOutputOutputError) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.CliOutputError); err != nil {
-		return err
-	}
-	var local struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &local); err != nil {
-		return err
-	}
-	v.Type = local.Type
-	return nil
-}
-
-func (v CliOutputOutputError) MarshalJSON() ([]byte, error) {
-	base, err := json.Marshal(v.CliOutputError)
-	if err != nil {
-		return nil, err
-	}
-	var merged map[string]json.RawMessage
-	json.Unmarshal(base, &merged)
-	if raw, err := json.Marshal(v.Type); err == nil {
-		merged["type"] = raw
-	}
-	return json.Marshal(merged)
-}
-func (CliOutputOutputError) SchemaVariantTitle() string { return "Error" }
-
-// Wraps [`NotificationValue`] in [`Notification`] so its fields
-// end up under a nested `value` key.
-type CliOutputOutputNotification struct {
-	CliOutputNotificationNotification
-	Type string `json:"type" validate:"oneof=notification"`
-}
-
-func (v *CliOutputOutputNotification) UnmarshalJSON(data []byte) error {
-	if err := json.Unmarshal(data, &v.CliOutputNotificationNotification); err != nil {
-		return err
-	}
-	var local struct {
-		Type string `json:"type"`
-	}
-	if err := json.Unmarshal(data, &local); err != nil {
-		return err
-	}
-	v.Type = local.Type
-	return nil
-}
-
-func (v CliOutputOutputNotification) MarshalJSON() ([]byte, error) {
-	base, err := json.Marshal(v.CliOutputNotificationNotification)
-	if err != nil {
-		return nil, err
-	}
-	var merged map[string]json.RawMessage
-	json.Unmarshal(base, &merged)
-	if raw, err := json.Marshal(v.Type); err == nil {
-		merged["type"] = raw
-	}
-	return json.Marshal(merged)
-}
-func (CliOutputOutputNotification) SchemaVariantTitle() string { return "Notification" }
-
-// A single line of CLI output.
+// A single line of CLI output. Untagged — each variant carries its
+// own internal discriminator on the wire (Error has `type:"error"`,
+// Notification's flattened `NotificationValue` either has
+// `type:"<typed-variant>"` or is a raw `Other` map).
 type CliOutputOutput struct {
-	Error *CliOutputOutputError 
-	// Wraps [`NotificationValue`] in [`Notification`] so its fields
-	// end up under a nested `value` key.
-	Notification *CliOutputOutputNotification 
+	// Try Error first: its `type` field is a single-variant
+	// `ErrorType` (always `"error"`), so any non-error wire shape
+	// fails deserialization quickly and falls through to
+	// `Notification`. Putting `Notification` first would mean the
+	// untagged `NotificationValue::Other` catch-all silently swallows
+	// Error payloads.
+	Error *CliOutputError 
+	Notification *CliOutputNotificationNotification 
 }
 
 func (v CliOutputOutput) MarshalJSON() ([]byte, error) {
@@ -95,7 +34,7 @@ func (v CliOutputOutput) MarshalJSON() ([]byte, error) {
 
 func (v *CliOutputOutput) UnmarshalJSON(data []byte) error {
 	{
-		var try CliOutputOutputError
+		var try CliOutputError
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := CliOutputOutput{}
 			candidate.Error = &try
@@ -106,7 +45,7 @@ func (v *CliOutputOutput) UnmarshalJSON(data []byte) error {
 		}
 	}
 	{
-		var try CliOutputOutputNotification
+		var try CliOutputNotificationNotification
 		if err := json.Unmarshal(data, &try); err == nil {
 			candidate := CliOutputOutput{}
 			candidate.Notification = &try

@@ -10,5 +10,5 @@ class MessageDelivered(BaseModel):
 Wire: `{"type":"notification","value":{"kind":"message_delivered","agent_id":"<id>"}}`."""
     model_config = ConfigDict(title='cli.output.notification.agents.MessageDelivered')
 
-    agent_id: str = Field(..., description='Full lineage agent_id the message was delivered to.')
+    agent_id: str = Field(..., description='Bare-leaf agent id (trailing slash segment) the message was\ndelivered to. Same shape `agents list active` returns and\n`agents read pending` accepts — pastable directly into either.')
 

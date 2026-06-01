@@ -3,7 +3,7 @@
 from __future__ import annotations
 from typing import Literal, Union
 from objectiveai_sdk.json_value import JsonValue
-from pydantic import BaseModel, ConfigDict, Field, RootModel
+from pydantic import BaseModel, ConfigDict, RootModel
 from objectiveai_sdk.agent.completions.message.file import File
 from objectiveai_sdk.agent.completions.message.image_url import ImageUrl
 from objectiveai_sdk.agent.completions.message.input_audio import InputAudio
@@ -15,15 +15,15 @@ class LogContentJson(BaseModel):
     model_config = ConfigDict(json_schema_extra={'_variant_title': 'Json'})
 
     content: JsonValue
-    type_: Literal['json'] = Field(..., alias='type')
+    kind: Literal['json']
 
 
 class LogContentText(BaseModel):
     """A `.txt` file content."""
     model_config = ConfigDict(json_schema_extra={'_variant_title': 'Text'})
 
+    kind: Literal['text']
     text: str
-    type_: Literal['text'] = Field(..., alias='type')
 
 
 class LogContentImage(BaseModel):
@@ -31,7 +31,7 @@ class LogContentImage(BaseModel):
     model_config = ConfigDict(json_schema_extra={'_variant_title': 'Image'})
 
     image_url: ImageUrl
-    type_: Literal['image'] = Field(..., alias='type')
+    kind: Literal['image']
 
 
 class LogContentAudio(BaseModel):
@@ -39,14 +39,14 @@ class LogContentAudio(BaseModel):
     model_config = ConfigDict(json_schema_extra={'_variant_title': 'Audio'})
 
     input_audio: InputAudio
-    type_: Literal['audio'] = Field(..., alias='type')
+    kind: Literal['audio']
 
 
 class LogContentVideo(BaseModel):
     """A video media file under `messages/video/`, etc."""
     model_config = ConfigDict(json_schema_extra={'_variant_title': 'Video'})
 
-    type_: Literal['video'] = Field(..., alias='type')
+    kind: Literal['video']
     video_url: VideoUrl
 
 
@@ -55,7 +55,7 @@ class LogContentFile(BaseModel):
     model_config = ConfigDict(json_schema_extra={'_variant_title': 'File'})
 
     file: File
-    type_: Literal['file'] = Field(..., alias='type')
+    kind: Literal['file']
 
 
 class LogContent(RootModel):
@@ -66,17 +66,19 @@ classified into). Nothing is guessed from the bytes — each
 variant is picked at the call site that already knows the kind.
 
 Wire form (when wrapped in
-[`crate::cli::output::NotificationValue::LogContent`]): the outer
-`kind: "log_content"` envelope from `NotificationValue` plus this
-inner `type` discriminator:
+`TypedNotificationValue::LogContent`): the outer `type:
+"log_content"` envelope from `TypedNotificationValue` plus this
+inner `kind` discriminator (`type`/`kind` swap relative to the
+historical shape — needed to avoid a key collision when the
+outer enum flattens through `Notification`):
 
 ```text
-{"kind":"log_content","type":"json", "content":{...}}
-{"kind":"log_content","type":"text", "text":"..."}
-{"kind":"log_content","type":"image","image_url":{"url":"data:image/png;base64,..."}}
-{"kind":"log_content","type":"audio","input_audio":{"data":"<base64>","format":"audio/mpeg"}}
-{"kind":"log_content","type":"video","video_url":{"url":"data:video/mp4;base64,..."}}
-{"kind":"log_content","type":"file", "file":{"file_data":"<base64>","filename":"<name>"}}
+{"type":"log_content","kind":"json", "content":{...}}
+{"type":"log_content","kind":"text", "text":"..."}
+{"type":"log_content","kind":"image","image_url":{"url":"data:image/png;base64,..."}}
+{"type":"log_content","kind":"audio","input_audio":{"data":"<base64>","format":"audio/mpeg"}}
+{"type":"log_content","kind":"video","video_url":{"url":"data:video/mp4;base64,..."}}
+{"type":"log_content","kind":"file", "file":{"file_data":"<base64>","filename":"<name>"}}
 ```"""
     model_config = ConfigDict(title='filesystem.logs.LogContent')
 

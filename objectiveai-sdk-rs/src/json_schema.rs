@@ -520,6 +520,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::cli::output::notification::Me),
             schemars::schema_for!(crate::cli::output::notification::Ok),
             schemars::schema_for!(crate::cli::output::notification::Cleared),
+            schemars::schema_for!(crate::cli::output::notification::CommandComplete),
             schemars::schema_for!(crate::cli::output::notification::Help),
             schemars::schema_for!(crate::cli::output::notification::Instructions),
             schemars::schema_for!(crate::cli::output::notification::ViewerSendResult),
@@ -564,6 +565,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
             schemars::schema_for!(crate::cli::output::notification::swarms::Swarm),
             schemars::schema_for!(crate::cli::plugins::PluginOutput),
             schemars::schema_for!(crate::cli::plugins::TypedPluginOutput),
+            schemars::schema_for!(crate::cli::plugins::PluginCommandResponse),
         ]);
     }
     #[cfg(feature = "viewer")]

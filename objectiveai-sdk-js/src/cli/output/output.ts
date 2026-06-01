@@ -4,9 +4,5 @@ import { z } from "zod";
 import { CliOutputErrorSchema } from "./error";
 import { CliOutputNotificationNotificationSchema } from "./notification/notification";
 
-export const CliOutputOutputSchema = z.union([CliOutputErrorSchema.and(z.object({
-  type: z.literal("error"),
-})).meta({"variantTitle":"Error"}), CliOutputNotificationNotificationSchema.and(z.object({
-  type: z.literal("notification"),
-})).describe("Wraps [`NotificationValue`] in [`Notification`] so its fields\nend up under a nested `value` key.").meta({"variantTitle":"Notification"})]).describe("A single line of CLI output.").meta({ title: "cli.output.Output" });
+export const CliOutputOutputSchema = z.union([CliOutputErrorSchema.describe("Try Error first: its `type` field is a single-variant\n`ErrorType` (always `\"error\"`), so any non-error wire shape\nfails deserialization quickly and falls through to\n`Notification`. Putting `Notification` first would mean the\nuntagged `NotificationValue::Other` catch-all silently swallows\nError payloads.").meta({"title":"cli.output.Error","variantTitle":"Error"}), CliOutputNotificationNotificationSchema.meta({"title":"cli.output.notification.Notification","variantTitle":"Notification"})]).describe("A single line of CLI output. Untagged — each variant carries its\nown internal discriminator on the wire (Error has `type:\"error\"`,\nNotification's flattened `NotificationValue` either has\n`type:\"<typed-variant>\"` or is a raw `Other` map).").meta({ title: "cli.output.Output" });
 export type CliOutputOutput = z.infer<typeof CliOutputOutputSchema>;

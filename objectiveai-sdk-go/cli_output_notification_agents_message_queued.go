@@ -12,7 +12,9 @@ import (
 //
 // Wire: `{"type":"notification","value":{"kind":"message_queued","agent_id":"<id>","response_id":"<rid>"}}`.
 type CliOutputNotificationAgentsMessageQueued struct {
-	// Full lineage agent_id (reused from the prior completion).
+	// Bare-leaf agent id (trailing slash segment, reused from the
+	// prior completion). Same shape `agents list active` returns
+	// and `agents read pending` accepts.
 	AgentID string `json:"agent_id"`
 	// New response id for the continuation completion.
 	ResponseID string `json:"response_id"`

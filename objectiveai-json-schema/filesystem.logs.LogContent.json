@@ -1,6 +1,6 @@
 {
   "title": "filesystem.logs.LogContent",
-  "description": "Result of reading a log file. The variant is determined by **which\ntyped `read_*` method the caller invoked** (or, for\n[`Client::read_file_by_id`], by the on-disk folder the path\nclassified into). Nothing is guessed from the bytes — each\nvariant is picked at the call site that already knows the kind.\n\nWire form (when wrapped in\n[`crate::cli::output::NotificationValue::LogContent`]): the outer\n`kind: \"log_content\"` envelope from `NotificationValue` plus this\ninner `type` discriminator:\n\n```text\n{\"kind\":\"log_content\",\"type\":\"json\", \"content\":{...}}\n{\"kind\":\"log_content\",\"type\":\"text\", \"text\":\"...\"}\n{\"kind\":\"log_content\",\"type\":\"image\",\"image_url\":{\"url\":\"data:image/png;base64,...\"}}\n{\"kind\":\"log_content\",\"type\":\"audio\",\"input_audio\":{\"data\":\"<base64>\",\"format\":\"audio/mpeg\"}}\n{\"kind\":\"log_content\",\"type\":\"video\",\"video_url\":{\"url\":\"data:video/mp4;base64,...\"}}\n{\"kind\":\"log_content\",\"type\":\"file\", \"file\":{\"file_data\":\"<base64>\",\"filename\":\"<name>\"}}\n```",
+  "description": "Result of reading a log file. The variant is determined by **which\ntyped `read_*` method the caller invoked** (or, for\n[`Client::read_file_by_id`], by the on-disk folder the path\nclassified into). Nothing is guessed from the bytes — each\nvariant is picked at the call site that already knows the kind.\n\nWire form (when wrapped in\n`TypedNotificationValue::LogContent`): the outer `type:\n\"log_content\"` envelope from `TypedNotificationValue` plus this\ninner `kind` discriminator (`type`/`kind` swap relative to the\nhistorical shape — needed to avoid a key collision when the\nouter enum flattens through `Notification`):\n\n```text\n{\"type\":\"log_content\",\"kind\":\"json\", \"content\":{...}}\n{\"type\":\"log_content\",\"kind\":\"text\", \"text\":\"...\"}\n{\"type\":\"log_content\",\"kind\":\"image\",\"image_url\":{\"url\":\"data:image/png;base64,...\"}}\n{\"type\":\"log_content\",\"kind\":\"audio\",\"input_audio\":{\"data\":\"<base64>\",\"format\":\"audio/mpeg\"}}\n{\"type\":\"log_content\",\"kind\":\"video\",\"video_url\":{\"url\":\"data:video/mp4;base64,...\"}}\n{\"type\":\"log_content\",\"kind\":\"file\", \"file\":{\"file_data\":\"<base64>\",\"filename\":\"<name>\"}}\n```",
   "anyOf": [
     {
       "title": "Json",
@@ -8,7 +8,7 @@
       "type": "object",
       "properties": {
         "content": {},
-        "type": {
+        "kind": {
           "type": "string",
           "enum": [
             "json"
@@ -21,14 +21,14 @@
       "description": "A `.txt` file content.",
       "type": "object",
       "properties": {
-        "text": {
-          "type": "string"
-        },
-        "type": {
+        "kind": {
           "type": "string",
           "enum": [
             "text"
           ]
+        },
+        "text": {
+          "type": "string"
         }
       }
     },
@@ -40,7 +40,7 @@
         "image_url": {
           "$ref": "agent.completions.message.ImageUrl"
         },
-        "type": {
+        "kind": {
           "type": "string",
           "enum": [
             "image"
@@ -56,7 +56,7 @@
         "input_audio": {
           "$ref": "agent.completions.message.InputAudio"
         },
-        "type": {
+        "kind": {
           "type": "string",
           "enum": [
             "audio"
@@ -69,7 +69,7 @@
       "description": "A video media file under `messages/video/`, etc.",
       "type": "object",
       "properties": {
-        "type": {
+        "kind": {
           "type": "string",
           "enum": [
             "video"
@@ -88,7 +88,7 @@
         "file": {
           "$ref": "agent.completions.message.File"
         },
-        "type": {
+        "kind": {
           "type": "string",
           "enum": [
             "file"
