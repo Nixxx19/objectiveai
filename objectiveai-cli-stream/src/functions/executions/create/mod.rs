@@ -33,6 +33,9 @@ pub async fn handle(
     let client = http.build_http_client()?;
     let conduit = pipes.build_conduit();
 
+    let registry = crate::pipes::PipeRegistry::new();
+    pipes.try_eager_acquire(&registry, handle).await?;
+
     // Build the on-disk log writer. `filesystem::Client::logs_dir()`
     // = `${base_dir}/logs`, so this lands at
     // `${config_base_dir}/logs/functions/executions/<fexc-id>/...` —
@@ -77,6 +80,7 @@ pub async fn handle(
         Some(Box::new(move |seen: &std::collections::HashSet<String>| {
             conduit_for_drop.select_response_ids(seen);
         })),
+        registry,
     )
     .await?;
 

@@ -84,6 +84,14 @@ pub enum Error {
     #[error("cli-stream subprocess exited with code {code}:\n{stderr_tail}")]
     CliStreamSubprocess { code: i32, stderr_tail: String },
     #[error(
+        "cli-stream lost the single-flight bind race for the target agent (slot taken):\n{stderr_tail}"
+    )]
+    CliStreamSlotTaken { stderr_tail: String },
+    #[error(
+        "agent slot for {agent_id:?} was still taken after {attempts} retries; another caller appears to be holding the listener persistently"
+    )]
+    AgentSlotPersistentlyTaken { agent_id: String, attempts: usize },
+    #[error(
         "no prior agent_completion_request for agent {agent_id:?}; spawn the agent first with `agents spawn`"
     )]
     AgentNoPriorRequest { agent_id: String },

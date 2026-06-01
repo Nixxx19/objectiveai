@@ -21,6 +21,13 @@ pub async fn handle(
     let client = http.build_http_client()?;
     let conduit = pipes.build_conduit();
 
+    // Shared between the eager admission probe (if --bind-agent-id
+    // is set) and the per-chunk binds inside `run_chunk_loop`. The
+    // eager probe stashes its `Listener` here; the chunk loop's
+    // first matching `ensure_pipe` consumes it.
+    let registry = crate::pipes::PipeRegistry::new();
+    pipes.try_eager_acquire(&registry, handle).await?;
+
     let fs_client = objectiveai_sdk::filesystem::Client::new(
         Some(config_base_dir),
         None::<String>,
@@ -61,6 +68,7 @@ pub async fn handle(
         Some(Box::new(move |seen: &std::collections::HashSet<String>| {
             conduit_for_drop.select_response_ids(seen);
         })),
+        registry,
     )
     .await?;
 

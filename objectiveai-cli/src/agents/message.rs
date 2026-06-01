@@ -85,6 +85,15 @@ pub struct CommandArgs {
     pub seed: Option<i64>,
 }
 
+/// Bound on the recursive retry that fires when cli-stream loses
+/// the per-agent single-flight bind race. Protects against logic
+/// bugs that would otherwise spin forever — real contention should
+/// resolve well within a handful of retries (the winner either
+/// finishes quickly and we deliver via the pipe path, or it's
+/// genuinely long-running and we should surface that instead of
+/// looping).
+const SLOT_TAKEN_MAX_RETRIES: usize = 32;
+
 pub async fn handle(
     args: CommandArgs,
     cli_config: &crate::Config,
@@ -100,13 +109,37 @@ pub async fn handle(
     let full_agent_id = format!("{caller}/{}", args.agent_id);
     let content = args.message.resolve()?;
 
+    // Retry on `CliStreamSlotTaken` — another caller's cli-stream
+    // currently owns the per-agent socket. Each retry first re-runs
+    // `try_pipe_delivery` (cheap), so once the winner has bound and
+    // is serving, our next pass delivers via the pipe and never
+    // spawns. Bounded so a stuck winner can't livelock us.
+    for _ in 0..SLOT_TAKEN_MAX_RETRIES {
+        match handle_once(cli_config, &full_agent_id, content.clone(), args.seed, handle).await {
+            Err(crate::error::Error::CliStreamSlotTaken { .. }) => continue,
+            other => return other,
+        }
+    }
+    Err(crate::error::Error::AgentSlotPersistentlyTaken {
+        agent_id: full_agent_id,
+        attempts: SLOT_TAKEN_MAX_RETRIES,
+    })
+}
+
+async fn handle_once(
+    cli_config: &crate::Config,
+    full_agent_id: &str,
+    content: RichContent,
+    seed: Option<i64>,
+    handle: &Handle,
+) -> Result<(), crate::error::Error> {
     // Try live delivery first. Any failure here triggers the
     // continuation fallback — we never surface pipe errors as fatal.
-    match try_pipe_delivery(cli_config, &full_agent_id, &content).await {
+    match try_pipe_delivery(cli_config, full_agent_id, &content).await {
         Ok(()) => {
             Output::Notification(Notification {
                 value: MessageDelivered {
-                    agent_id: full_agent_id,
+                    agent_id: full_agent_id.to_string(),
                 }
                 .into(),
             })
@@ -114,9 +147,7 @@ pub async fn handle(
             .await;
             Ok(())
         }
-        Err(_) => {
-            fall_back_to_continuation(cli_config, &full_agent_id, content, args.seed, handle).await
-        }
+        Err(_) => fall_back_to_continuation(cli_config, full_agent_id, content, seed, handle).await,
     }
 }
 
@@ -269,6 +300,11 @@ async fn fall_back_to_continuation(
         &["agents", "spawn"],
         &params,
         handle,
+        // Eager admission probe — claim the per-agent socket before
+        // opening the API stream so a racing peer's cli-stream gets
+        // the SLOT_TAKEN exit immediately rather than after some
+        // wasted API work.
+        Some(full_agent_id),
         move |new_response_id| {
             // The original agent_id stays the same across a
             // continuation; we surface the NEW response_id (cli-stream

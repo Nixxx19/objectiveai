@@ -22,6 +22,9 @@ pub async fn handle(
     let client = http.build_http_client()?;
     let conduit = pipes.build_conduit();
 
+    let registry = crate::pipes::PipeRegistry::new();
+    pipes.try_eager_acquire(&registry, handle).await?;
+
     let fs_client = objectiveai_sdk::filesystem::Client::new(
         Some(config_base_dir),
         None::<String>,
@@ -67,6 +70,7 @@ pub async fn handle(
         Some(Box::new(move |seen: &std::collections::HashSet<String>| {
             conduit_for_drop.select_response_ids(seen);
         })),
+        registry,
     )
     .await?;
 

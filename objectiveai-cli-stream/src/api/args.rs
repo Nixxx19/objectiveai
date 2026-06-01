@@ -151,6 +151,21 @@ pub struct PipeArgs {
     /// nor on-disk config supplies one.
     #[arg(long, global = true)]
     pub mcp_address: Option<String>,
+
+    /// Full lineage-stamped agent id (e.g. `caller/sub-id`) the
+    /// endpoint should claim eagerly — *before* opening the API
+    /// stream — by binding the per-agent inbound listener at
+    /// `${config_base_dir}/pipes/<bind_agent_id>/socket`. On bind
+    /// conflict (path already owned by a live listener) cli-stream
+    /// exits with [`SLOT_TAKEN_EXIT_CODE`](crate::api::SLOT_TAKEN_EXIT_CODE);
+    /// the wrapper `objectiveai-cli` then recursively retries the
+    /// dispatch entry. Used today only by `agents message`'s
+    /// continuation fallback (the only spawn path that targets a
+    /// pre-known full agent id). Omit for fresh-spawn flows where
+    /// the response_id is minted randomly server-side and admission
+    /// races cannot occur by construction.
+    #[arg(long, global = true)]
+    pub bind_agent_id: Option<String>,
 }
 
 impl PipeArgs {
@@ -180,5 +195,34 @@ impl PipeArgs {
     /// bound under.
     pub fn pipes_root(&self) -> Result<PathBuf, String> {
         Ok(self.config_base_dir()?.join("pipes"))
+    }
+
+    /// Run the eager admission probe against `registry` when
+    /// `--bind-agent-id` is set. On [`crate::pipes::BindStatus::Live`]
+    /// the process exits with [`super::SLOT_TAKEN_EXIT_CODE`] —
+    /// **does not return**. On success the listener is stashed in
+    /// `registry.pending_listeners` and the matching per-chunk
+    /// `ensure_pipe` call inside `run_chunk_loop` consumes it.
+    /// `Err(BindStatus::Io)` already emitted a warning; we let the
+    /// stream continue and fall through to lazy bind.
+    pub async fn try_eager_acquire(
+        &self,
+        registry: &crate::pipes::PipeRegistry,
+        handle: &objectiveai_sdk::cli::output::Handle,
+    ) -> Result<(), String> {
+        let Some(bind_agent_id) = self.bind_agent_id.as_deref() else {
+            return Ok(());
+        };
+        let pipes_root = self.pipes_root()?;
+        match registry
+            .try_acquire_pipe(bind_agent_id, &pipes_root, handle)
+            .await
+        {
+            Ok(()) => Ok(()),
+            Err(crate::pipes::BindStatus::Live) => {
+                std::process::exit(super::SLOT_TAKEN_EXIT_CODE);
+            }
+            Err(crate::pipes::BindStatus::Io) => Ok(()),
+        }
     }
 }

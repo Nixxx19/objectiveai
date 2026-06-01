@@ -30,6 +30,13 @@ use objectiveai_sdk::cli::output::{
     Spawned, TypedNotificationValue,
 };
 
+/// Exit code cli-stream uses when it loses the single-flight bind
+/// race for the per-agent socket. Kept in sync with
+/// `objectiveai-cli-stream/src/api/mod.rs::SLOT_TAKEN_EXIT_CODE`
+/// (objectiveai-cli does not depend on cli-stream as a library, so
+/// the constant is duplicated rather than imported).
+pub const SLOT_TAKEN_EXIT_CODE: i32 = 42;
+
 /// Spawn `objectiveai-cli-stream <endpoint_path...> --body <JSON>` and
 /// consume its NDJSON stdout. Returns the in-memory aggregate built by
 /// applying `push` to every chunk Notification the subprocess emits.
@@ -127,7 +134,10 @@ where
         // it), let the caller handle `.error` → `ResponseError`. We
         // return the aggregate so the caller's existing `.error.take()`
         // path still works. If there's no aggregate, the failure was
-        // before any chunks arrived — surface as CliStreamSubprocess.
+        // before any chunks arrived — surface as CliStreamSubprocess
+        // unless the exit code identifies the slot-taken admission
+        // race specifically, in which case the dispatch entry will
+        // recursively retry.
         if aggregate.is_some() {
             return Ok(aggregate);
         }
@@ -139,6 +149,9 @@ where
             .cloned()
             .collect::<Vec<_>>()
             .join("\n");
+        if status.code() == Some(SLOT_TAKEN_EXIT_CODE) {
+            return Err(crate::error::Error::CliStreamSlotTaken { stderr_tail: tail });
+        }
         return Err(crate::error::Error::CliStreamSubprocess {
             code: status.code().unwrap_or(-1),
             stderr_tail: tail,
@@ -219,7 +232,7 @@ pub async fn run_detached(
     body: &(impl serde::Serialize + ?Sized),
     handle: &Handle,
 ) -> Result<(), crate::error::Error> {
-    run_detached_with(cli_config, endpoint_path, body, handle, |ready| {
+    run_detached_with(cli_config, endpoint_path, body, handle, None, |ready| {
         Spawned { agent_id: ready }.into()
     })
     .await
@@ -235,6 +248,7 @@ pub async fn run_detached_with<F>(
     endpoint_path: &[&str],
     body: &(impl serde::Serialize + ?Sized),
     handle: &Handle,
+    bind_agent_id: Option<&str>,
     make_notification: F,
 ) -> Result<(), crate::error::Error>
 where
@@ -252,6 +266,15 @@ where
     let body_json = serde_json::to_string(body)
         .expect("body serialization to JSON should not fail for valid params");
     cmd.args(["--body", &body_json]);
+
+    // Eager admission probe: when the caller knows the full agent id
+    // ahead of time (e.g. `agents message`'s continuation fallback),
+    // tell cli-stream to bind the per-agent socket *before* opening
+    // the API stream. A lost race surfaces as the SLOT_TAKEN exit
+    // code, which the dispatch entry maps to a retry.
+    if let Some(id) = bind_agent_id {
+        cmd.args(["--bind-agent-id", id]);
+    }
 
     cmd.stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
@@ -345,6 +368,9 @@ where
         .cloned()
         .collect::<Vec<_>>()
         .join("\n");
+    if status.code() == Some(SLOT_TAKEN_EXIT_CODE) {
+        return Err(crate::error::Error::CliStreamSlotTaken { stderr_tail: tail });
+    }
     Err(crate::error::Error::CliStreamSubprocess {
         code: status.code().unwrap_or(-1),
         stderr_tail: tail,

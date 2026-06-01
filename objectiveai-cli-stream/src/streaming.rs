@@ -49,7 +49,7 @@ use objectiveai_sdk::filesystem::db::schema::MessageKind;
 use objectiveai_sdk::filesystem::logs::{LogWriter, SubscribeEvent};
 use serde::Serialize;
 
-use crate::pipes::PipeRegistry;
+use crate::pipes::{BindStatus, PipeRegistry};
 
 /// Outcome of consuming a stream: the accumulated chunk (None when
 /// the stream produced zero items) + the count of chunks consumed.
@@ -63,6 +63,15 @@ pub struct Consumed<Chunk> {
 /// emit `LogStreamReady` once, accumulate. On stream end (success or
 /// first error), tears down every active pipe and waits for the
 /// writer task to flush its final batch.
+///
+/// `registry` is supplied by the caller so the endpoint-level eager
+/// admission probe (`PipeRegistry::try_acquire_pipe`) and the per-
+/// chunk `ensure_pipe` calls below share one registry instance.
+/// When a per-chunk `ensure_pipe` reports [`BindStatus::Live`], the
+/// loop exits the process with [`SLOT_TAKEN_EXIT_CODE`] so the
+/// wrapper CLI can recursively retry. Eager-bound listeners
+/// stashed in `registry.pending_listeners` are consumed by the
+/// first matching `ensure_pipe` call here.
 pub async fn run_chunk_loop<S, Chunk, E, F>(
     mut stream: S,
     notifier: Notifier,
@@ -74,6 +83,7 @@ pub async fn run_chunk_loop<S, Chunk, E, F>(
     mut on_chunk_response_ids: Option<
         Box<dyn FnMut(&std::collections::HashSet<String>) + Send>,
     >,
+    registry: PipeRegistry,
 ) -> Result<Consumed<Chunk>, String>
 where
     S: Stream<Item = Result<Chunk, E>> + Unpin,
@@ -81,7 +91,6 @@ where
     E: std::fmt::Display,
     F: Fn(&mut Chunk, &Chunk) + Clone + Send + 'static,
 {
-    let registry = PipeRegistry::new();
     let mut aggregate: Option<Chunk> = None;
     let mut chunk_count: usize = 0;
     // `on_chunk_response_ids`: fires once per chunk that carries
@@ -149,7 +158,7 @@ where
                         Some(c) => format!("{c}/{raw}"),
                         None => raw.to_string(),
                     };
-                    registry
+                    match registry
                         .ensure_pipe(
                             &lineage_id,
                             raw,
@@ -158,7 +167,24 @@ where
                             notif_tx.clone(),
                             handle,
                         )
-                        .await;
+                        .await
+                    {
+                        Ok(()) => {}
+                        Err(BindStatus::Live) => {
+                            // The slot is owned by another live
+                            // cli-stream — the wrapper CLI's spawn
+                            // raced and lost. Bail with the
+                            // admission-loss exit code so the
+                            // wrapper recursively retries. We do
+                            // NOT touch the API stream further
+                            // (drop on exit cancels it server-side).
+                            std::process::exit(crate::api::SLOT_TAKEN_EXIT_CODE);
+                        }
+                        Err(BindStatus::Io) => {
+                            // Bind-only IO error — warning already
+                            // emitted; existing degraded behavior.
+                        }
+                    }
                     // Sibling endpoint: outbound `events.sock`. Same
                     // per-agent directory as the inbound socket. Must
                     // exist BEFORE the first matching DB insert hits

@@ -32,6 +32,7 @@
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
+use std::time::Duration;
 
 use dashmap::DashMap;
 use interprocess::local_socket::tokio::{Listener, prelude::*};
@@ -50,6 +51,103 @@ use tokio::sync::{broadcast, oneshot};
 /// `broadcast::Receiver::recv` and disconnects, mirroring the pipe-
 /// disappearance case (subscribe retries from the top).
 const OUTBOUND_BROADCAST_CAPACITY: usize = 1024;
+
+/// Timeout for the connect-probe in [`bind_or_busy`]. Short — a
+/// live listener accepts immediately; a stale file produces an
+/// instant refused/notfound. Generous enough to cover loaded
+/// systems but short enough that a real `kill -9` recovery doesn't
+/// pay a perceptible wait.
+const PROBE_TIMEOUT: Duration = Duration::from_millis(250);
+
+/// Outcome of [`Self::ensure_pipe`] / [`Self::try_acquire_pipe`].
+/// The `Live` variant is the admission-gate signal — a second caller
+/// for the same agent identity must back out. `Io` is the existing
+/// degraded-bind path: emit a warning, keep going (today's behaviour
+/// preserved for non-conflict bind errors like permission denied).
+#[derive(Debug)]
+pub enum BindStatus {
+    /// The socket path is currently owned by a live listener — the
+    /// caller has lost the admission race. Surface as the
+    /// `SLOT_TAKEN` exit code so the wrapper CLI can retry.
+    Live,
+    /// Path/permission/FS error during bind. Already logged via
+    /// `handle.emit`; caller can treat as degraded same as today.
+    Io,
+}
+
+/// Internal outcome of a single [`bind_or_busy`] attempt.
+enum BindOutcome {
+    Bound(Listener),
+    SlotTaken,
+    Io(std::io::Error),
+}
+
+/// True if `e` is an "address already in use" / "pipe busy" surface
+/// from `ListenerOptions::create_tokio`. We accept the standard
+/// portable kind plus Windows's pipe-busy raw code (231) and the
+/// AF_UNIX-on-Windows access-denied surface (5), which is what
+/// `interprocess` reports when the name collides with a live owner.
+fn is_addr_in_use(e: &std::io::Error) -> bool {
+    use std::io::ErrorKind;
+    if matches!(e.kind(), ErrorKind::AddrInUse | ErrorKind::AlreadyExists) {
+        return true;
+    }
+    if let Some(code) = e.raw_os_error() {
+        // Windows: ERROR_PIPE_BUSY = 231, ERROR_ACCESS_DENIED = 5.
+        // Unix: EADDRINUSE is already covered by the kind check above.
+        if cfg!(windows) && (code == 231 || code == 5) {
+            return true;
+        }
+    }
+    false
+}
+
+/// Atomically claim ownership of `address`, or report the slot as
+/// `SlotTaken` if a live listener already holds it.
+///
+/// Protocol: try to bind. On `AddrInUse`, connect-probe — if the
+/// probe succeeds, the path is owned by a live listener and we
+/// return `SlotTaken`. If the probe fails (stale file from a prior
+/// crash), unlink and loop. Concurrent stale-claimers all funnel
+/// through the OS-level bind atomicity at the next iteration: at
+/// most one of their `create_tokio()` calls wins, the others probe
+/// the new live owner and bail correctly.
+async fn bind_or_busy(address: &PipeAddress) -> BindOutcome {
+    const MAX_ATTEMPTS: usize = 4;
+    for _ in 0..MAX_ATTEMPTS {
+        match ListenerOptions::new()
+            .name(address.name.clone())
+            .create_tokio()
+        {
+            Ok(l) => return BindOutcome::Bound(l),
+            Err(e) if is_addr_in_use(&e) => {
+                // Probe: does a live listener answer at this path?
+                let probe_name = address.fs_path.clone().to_fs_name::<GenericFilePath>();
+                let live = match probe_name {
+                    Ok(n) => tokio::time::timeout(
+                        PROBE_TIMEOUT,
+                        interprocess::local_socket::tokio::Stream::connect(n),
+                    )
+                    .await
+                    .is_ok_and(|r| r.is_ok()),
+                    Err(_) => false,
+                };
+                if live {
+                    return BindOutcome::SlotTaken;
+                }
+                // Stale — best-effort unlink and retry. Two
+                // concurrent stale-claimers can both reach this
+                // branch; only one of their next `create_tokio()`
+                // calls succeeds. The other loops back, probes the
+                // new live owner, and returns SlotTaken.
+                let _ = tokio::fs::remove_file(&address.fs_path).await;
+            }
+            Err(e) => return BindOutcome::Io(e),
+        }
+    }
+    // Pathological thrash — treat as taken so the caller backs off.
+    BindOutcome::SlotTaken
+}
 
 /// Compute the pipe address for `agent_id` under `pipes_root`.
 ///
@@ -97,6 +195,15 @@ pub struct PipeRegistry {
 #[derive(Default)]
 struct Inner {
     cancellers: DashMap<String, oneshot::Sender<()>>,
+    /// Listeners pre-bound by [`PipeRegistry::try_acquire_pipe`] but
+    /// not yet handed to a reader task (because `notifier` / `notif_tx`
+    /// weren't ready yet). [`PipeRegistry::ensure_pipe`] consumes
+    /// from here first, falling back to a fresh `bind_or_busy` if
+    /// absent. This is the handoff between the eager admission probe
+    /// (which fires at endpoint entry, before the API stream opens)
+    /// and the per-chunk reader spawn (which fires inside
+    /// `run_chunk_loop`).
+    pending_listeners: DashMap<String, Listener>,
     /// Cancellers for the outbound `events.sock` listeners — one per
     /// agent. Tracked separately from the inbound cancellers so the
     /// two pipes have independent lifecycles (e.g. a malformed
@@ -118,10 +225,79 @@ impl PipeRegistry {
         Self::default()
     }
 
+    /// Eager admission probe — atomically bind the inbound socket
+    /// for `agent_id` and stash the resulting [`Listener`] in
+    /// `pending_listeners`. The matching [`Self::ensure_pipe`] call
+    /// (which fires per-chunk from `run_chunk_loop` once `notifier` /
+    /// `notif_tx` are ready) consumes the stashed listener and spawns
+    /// the reader task on top.
+    ///
+    /// Returns `Err(BindStatus::Live)` when the slot is currently
+    /// owned by another live listener — the wrapper CLI translates
+    /// that to the `SLOT_TAKEN` exit code and recursively retries.
+    /// Idempotent: re-calls for an already-pending or already-bound
+    /// id are `Ok(())` no-ops.
+    pub async fn try_acquire_pipe(
+        &self,
+        agent_id: &str,
+        pipes_root: &Path,
+        handle: &Handle,
+    ) -> Result<(), BindStatus> {
+        if self.inner.cancellers.contains_key(agent_id)
+            || self.inner.pending_listeners.contains_key(agent_id)
+        {
+            return Ok(());
+        }
+
+        let address = match pipe_address_for_agent(pipes_root, agent_id) {
+            Ok(a) => a,
+            Err(e) => {
+                emit_error(handle, format!("pipe addr for {agent_id:?}: {e}")).await;
+                return Err(BindStatus::Io);
+            }
+        };
+
+        if let Some(parent) = address.fs_path.parent() {
+            if let Err(e) = tokio::fs::create_dir_all(parent).await {
+                emit_error(
+                    handle,
+                    format!("mkdir parent for {}: {e}", address.fs_path.display()),
+                )
+                .await;
+                return Err(BindStatus::Io);
+            }
+        }
+
+        match bind_or_busy(&address).await {
+            BindOutcome::Bound(l) => {
+                self.inner
+                    .pending_listeners
+                    .insert(agent_id.to_string(), l);
+                Ok(())
+            }
+            BindOutcome::SlotTaken => Err(BindStatus::Live),
+            BindOutcome::Io(e) => {
+                emit_error(
+                    handle,
+                    format!(
+                        "bind pipe for {agent_id:?} at {}: {e}",
+                        address.fs_path.display()
+                    ),
+                )
+                .await;
+                Err(BindStatus::Io)
+            }
+        }
+    }
+
     /// Bind a pipe for `agent_id` and spawn its reader task. No-op
-    /// if a pipe for this id is already tracked. Errors during bind
-    /// surface via `handle` and prevent the id from being inserted,
-    /// so a later `ensure_pipe` call will retry.
+    /// if a pipe for this id is already tracked. Returns
+    /// `Err(BindStatus::Live)` when the slot is owned by another
+    /// live listener — the run_chunk_loop caller propagates that to
+    /// a `SLOT_TAKEN` process exit. `Err(BindStatus::Io)` is the
+    /// existing degraded-bind path (path/permission errors): emit
+    /// a warning, prevent insertion so a later call retries, and
+    /// let the stream continue.
     ///
     /// `notif_tx` is a side-channel sender into the cli-stream's
     /// writer task. Every line the reader successfully parses as
@@ -137,46 +313,49 @@ impl PipeRegistry {
         notifier: Notifier,
         notif_tx: tokio::sync::mpsc::UnboundedSender<(String, String, RichContent)>,
         handle: &Handle,
-    ) {
+    ) -> Result<(), BindStatus> {
         if self.inner.cancellers.contains_key(agent_id) {
-            return;
+            return Ok(());
         }
 
-        let address = match pipe_address_for_agent(pipes_root, agent_id) {
-            Ok(a) => a,
-            Err(e) => {
-                emit_error(handle, format!("pipe addr for {agent_id:?}: {e}")).await;
-                return;
-            }
-        };
+        // Take the pre-bound listener if `try_acquire_pipe` already
+        // claimed this slot. Otherwise bind fresh.
+        let listener = if let Some((_, l)) = self.inner.pending_listeners.remove(agent_id) {
+            l
+        } else {
+            let address = match pipe_address_for_agent(pipes_root, agent_id) {
+                Ok(a) => a,
+                Err(e) => {
+                    emit_error(handle, format!("pipe addr for {agent_id:?}: {e}")).await;
+                    return Err(BindStatus::Io);
+                }
+            };
 
-        if let Some(parent) = address.fs_path.parent() {
-            if let Err(e) = tokio::fs::create_dir_all(parent).await {
-                emit_error(
-                    handle,
-                    format!("mkdir parent for {}: {e}", address.fs_path.display()),
-                )
-                .await;
-                return;
+            if let Some(parent) = address.fs_path.parent() {
+                if let Err(e) = tokio::fs::create_dir_all(parent).await {
+                    emit_error(
+                        handle,
+                        format!("mkdir parent for {}: {e}", address.fs_path.display()),
+                    )
+                    .await;
+                    return Err(BindStatus::Io);
+                }
             }
-        }
-        // Best-effort unlink — recover from a stale socket left
-        // behind by a previous `kill -9`. Real failures surface from
-        // the bind below.
-        let _ = tokio::fs::remove_file(&address.fs_path).await;
 
-        let listener = match ListenerOptions::new().name(address.name).create_tokio() {
-            Ok(l) => l,
-            Err(e) => {
-                emit_error(
-                    handle,
-                    format!(
-                        "bind pipe for {agent_id:?} at {}: {e}",
-                        address.fs_path.display()
-                    ),
-                )
-                .await;
-                return;
+            match bind_or_busy(&address).await {
+                BindOutcome::Bound(l) => l,
+                BindOutcome::SlotTaken => return Err(BindStatus::Live),
+                BindOutcome::Io(e) => {
+                    emit_error(
+                        handle,
+                        format!(
+                            "bind pipe for {agent_id:?} at {}: {e}",
+                            address.fs_path.display()
+                        ),
+                    )
+                    .await;
+                    return Err(BindStatus::Io);
+                }
             }
         };
 
@@ -204,6 +383,7 @@ impl PipeRegistry {
             )
             .await;
         });
+        Ok(())
     }
 
     /// Bind the outbound `events.sock` for `agent_id` and spawn its
@@ -249,13 +429,28 @@ impl PipeRegistry {
                 return self.install_outbound_sender(agent_id, tx);
             }
         }
-        // Best-effort unlink — recover from a stale socket left by a
-        // previous abnormal exit. Real failures surface from the bind.
-        let _ = tokio::fs::remove_file(&address.fs_path).await;
-
-        let listener = match ListenerOptions::new().name(address.name).create_tokio() {
-            Ok(l) => l,
-            Err(e) => {
+        // Atomic claim with stale-recovery — see [`bind_or_busy`].
+        // The inbound socket is the canonical admission gate, so a
+        // `SlotTaken` here in steady state would imply the matching
+        // inbound bind had already failed and the process would be
+        // exiting. Defensively, we still treat the outbound `Live`
+        // case as a degraded condition (return the soft sender) so
+        // a rare race doesn't crash the otherwise-healthy stream.
+        let listener = match bind_or_busy(&address).await {
+            BindOutcome::Bound(l) => l,
+            BindOutcome::SlotTaken => {
+                emit_error(
+                    handle,
+                    format!(
+                        "outbound pipe slot already taken for {agent_id:?} at {}",
+                        address.fs_path.display()
+                    ),
+                )
+                .await;
+                let (tx, _) = broadcast::channel(OUTBOUND_BROADCAST_CAPACITY);
+                return self.install_outbound_sender(agent_id, tx);
+            }
+            BindOutcome::Io(e) => {
                 emit_error(
                     handle,
                     format!(
