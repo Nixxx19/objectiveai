@@ -833,7 +833,7 @@ where
                             plugin: &'a str,
                             name: &'a str,
                             #[serde(skip_serializing_if = "Option::is_none")]
-                            arguments: Option<&'a indexmap::IndexMap<String, String>>,
+                            arguments: Option<&'a indexmap::IndexMap<String, Option<String>>>,
                         }
                         #[derive(serde::Serialize)]
                         struct McpConfig<'a> {

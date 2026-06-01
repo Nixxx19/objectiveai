@@ -122,15 +122,17 @@ pub struct ClientObjectiveaiMcpPluginMcpServer {
     /// manifest's `mcp_servers` list. The CLI feeds this as the
     /// first positional arg when starting the plugin.
     pub name: String,
-    /// Optional key→value arguments forwarded to the plugin
-    /// alongside `name` (as `--{k}={v}` CLI flags). The plugin
-    /// author decides how to interpret them. [`prepare`] sorts the
-    /// map by key and collapses an empty map to `None` so two
-    /// equivalent declarations canonicalize to byte-identical JSON.
+    /// Optional key→value arguments forwarded to the plugin alongside
+    /// `name`. `Some(value)` ⇒ `--key value` on the spawned plugin's
+    /// argv; `None` ⇒ a bare `--key` flag with no following token. The
+    /// plugin author decides how to interpret them. [`prepare`]
+    /// normalizes (`Some("") → None`), sorts the map by key, and
+    /// collapses an empty map to `None` so two equivalent declarations
+    /// canonicalize to byte-identical JSON.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     #[schemars(extend("omitempty" = true))]
-    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_indexmap_string_string)]
-    pub arguments: Option<IndexMap<String, String>>,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_indexmap_string_option_string)]
+    pub arguments: Option<IndexMap<String, Option<String>>>,
 }
 
 impl PartialOrd for ClientObjectiveaiMcpPluginMcpServer {
@@ -145,14 +147,15 @@ impl Ord for ClientObjectiveaiMcpPluginMcpServer {
         // we walk the entries in iteration order — after `prepare`'s
         // `sort_keys` pass that order is deterministic. `None`
         // arguments sorts before `Some(...)` via the standard
-        // `Option<T>::cmp` ordering.
+        // `Option<T>::cmp` ordering (so a bare `--flag` sorts before
+        // `--flag value`).
         let by_name = self.name.cmp(&other.name);
         if by_name.is_ne() {
             return by_name;
         }
-        let a: Option<Vec<(&String, &String)>> =
+        let a: Option<Vec<(&String, &Option<String>)>> =
             self.arguments.as_ref().map(|m| m.iter().collect());
-        let b: Option<Vec<(&String, &String)>> =
+        let b: Option<Vec<(&String, &Option<String>)>> =
             other.arguments.as_ref().map(|m| m.iter().collect());
         a.cmp(&b)
     }
@@ -315,11 +318,20 @@ pub fn prepare(mut this: ClientObjectiveaiMcp) -> Option<ClientObjectiveaiMcp> {
     for plugin in &mut this.plugins {
         if let Some(servers) = plugin.mcp_servers.as_mut() {
             for entry in servers.iter_mut() {
-                // Sort arguments by key, then collapse an empty map
-                // to `None` so the canonical form omits the field
-                // entirely.
+                // Normalize each value (`Some("") → None` so an
+                // explicit empty string canonicalizes the same way
+                // as a missing value — i.e., a bare `--flag`), sort
+                // by key, then collapse an empty map to `None` so
+                // the canonical form omits the field entirely.
                 let drop_empty = match entry.arguments.as_mut() {
                     Some(args) => {
+                        for (_, v) in args.iter_mut() {
+                            if let Some(s) = v.as_deref() {
+                                if s.is_empty() {
+                                    *v = None;
+                                }
+                            }
+                        }
                         args.sort_keys();
                         args.is_empty()
                     }
@@ -345,13 +357,13 @@ pub fn prepare(mut this: ClientObjectiveaiMcp) -> Option<ClientObjectiveaiMcp> {
 mod tests {
     use super::*;
 
-    fn entry(name: &str, args: &[(&str, &str)]) -> ClientObjectiveaiMcpPluginMcpServer {
+    fn entry(name: &str, args: &[(&str, Option<&str>)]) -> ClientObjectiveaiMcpPluginMcpServer {
         let arguments = if args.is_empty() {
             None
         } else {
             let mut m = IndexMap::new();
             for (k, v) in args {
-                m.insert(k.to_string(), v.to_string());
+                m.insert(k.to_string(), v.map(|s| s.to_string()));
             }
             Some(m)
         };
@@ -381,8 +393,14 @@ mod tests {
 
     #[test]
     fn prepare_sorts_arguments_by_key_so_order_does_not_matter() {
-        let a = shell(vec![plugin("p", vec![entry("s", &[("b", "1"), ("a", "2")])])]);
-        let b = shell(vec![plugin("p", vec![entry("s", &[("a", "2"), ("b", "1")])])]);
+        let a = shell(vec![plugin(
+            "p",
+            vec![entry("s", &[("b", Some("1")), ("a", Some("2"))])],
+        )]);
+        let b = shell(vec![plugin(
+            "p",
+            vec![entry("s", &[("a", Some("2")), ("b", Some("1"))])],
+        )]);
         let ap = prepare(a).expect("non-empty after prepare");
         let bp = prepare(b).expect("non-empty after prepare");
         assert_eq!(
@@ -396,7 +414,10 @@ mod tests {
     fn prepare_sorts_mcp_servers_vec_by_name_then_arguments() {
         let a = shell(vec![plugin(
             "p",
-            vec![entry("z", &[("a", "1")]), entry("a", &[("k", "v")])],
+            vec![
+                entry("z", &[("a", Some("1"))]),
+                entry("a", &[("k", Some("v"))]),
+            ],
         )]);
         let ap = prepare(a).expect("non-empty after prepare");
         let servers = ap.plugins[0].mcp_servers.as_ref().unwrap();
@@ -408,7 +429,7 @@ mod tests {
     fn validate_rejects_duplicate_mcp_server_names_within_plugin() {
         let bad = shell(vec![plugin(
             "p",
-            vec![entry("dup", &[]), entry("dup", &[("k", "v")])],
+            vec![entry("dup", &[]), entry("dup", &[("k", Some("v"))])],
         )]);
         let err = validate(&bad).expect_err("duplicate names must be rejected");
         assert!(err.contains("duplicate name"), "unexpected error: {err}");
@@ -416,7 +437,7 @@ mod tests {
 
     #[test]
     fn validate_rejects_empty_argument_key() {
-        let bad = shell(vec![plugin("p", vec![entry("s", &[("", "v")])])]);
+        let bad = shell(vec![plugin("p", vec![entry("s", &[("", Some("v"))])])]);
         let err = validate(&bad).expect_err("empty argument keys must be rejected");
         assert!(err.contains("`arguments` key"), "unexpected error: {err}");
     }
@@ -435,10 +456,39 @@ mod tests {
 
     #[test]
     fn populated_arguments_round_trip() {
-        let s = entry("name", &[("a", "1"), ("b", "2")]);
+        // Mix of valued and flag-only args.
+        let s = entry("name", &[("a", Some("1")), ("debug", None), ("b", Some("2"))]);
         let json = serde_json::to_string(&s).unwrap();
         let back: ClientObjectiveaiMcpPluginMcpServer = serde_json::from_str(&json).unwrap();
         assert_eq!(back, s);
+    }
+
+    #[test]
+    fn prepare_normalizes_empty_string_value_to_none() {
+        // Caller wrote `--debug ""` — prepare must canonicalize that
+        // to a bare `--debug` flag (None) so identical declarations
+        // hash byte-identically regardless of whether the author
+        // wrote `None` or `Some("")`.
+        let with_empty = shell(vec![plugin("p", vec![entry("s", &[("debug", Some(""))])])]);
+        let prepared = prepare(with_empty).expect("non-empty after prepare");
+        let args = prepared.plugins[0].mcp_servers.as_ref().unwrap()[0]
+            .arguments
+            .as_ref()
+            .unwrap();
+        assert_eq!(
+            args.get("debug").unwrap(),
+            &None,
+            "Some(\"\") must canonicalize to None"
+        );
+
+        // And the canonical JSON for `Some("")` must equal the one
+        // for `None`.
+        let with_none = shell(vec![plugin("p", vec![entry("s", &[("debug", None)])])]);
+        let prepared_none = prepare(with_none).expect("non-empty after prepare");
+        assert_eq!(
+            serde_json::to_string(&prepared).unwrap(),
+            serde_json::to_string(&prepared_none).unwrap(),
+        );
     }
 
     #[test]

@@ -233,7 +233,7 @@ async fn dial_plugin_upstream(
     mcp_name: String,
     agent_id: String,
     agent_id_base: Option<String>,
-    arguments: Option<IndexMap<String, String>>,
+    arguments: Option<IndexMap<String, Option<String>>>,
     stored_session_id: Option<String>,
 ) -> Result<String, ConduitError> {
     let fail = |reason: String| ConduitError::PluginDialFailed {
@@ -269,7 +269,10 @@ async fn dial_plugin_upstream(
     cmd.arg("mcp").arg(&mcp_name).arg("begin");
     if let Some(args) = arguments.as_ref() {
         for (k, v) in args {
-            cmd.arg(format!("--{k}")).arg(v);
+            cmd.arg(format!("--{k}"));
+            if let Some(value) = v {
+                cmd.arg(value);
+            }
         }
     }
     // Agent identity for this MCP run comes from the upstream request
@@ -1461,7 +1464,7 @@ struct McpServerConfigEntry {
     plugin: String,
     name: String,
     #[serde(default)]
-    arguments: Option<IndexMap<String, String>>,
+    arguments: Option<IndexMap<String, Option<String>>>,
 }
 
 impl McpServerConfigEntry {
