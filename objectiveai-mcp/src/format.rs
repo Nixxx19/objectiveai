@@ -539,6 +539,201 @@ mod tests {
         assert_eq!(arr, vec![r#"with "quotes" and \backslash"#]);
     }
 
+    // ───────────────────────────────────────────────────────────────
+    // Mangle-and-length round-trip tests.
+    //
+    // Each test builds a `Vec<Output>` whose i-th entry is paired
+    // with a known *expected string* at index i in the strip-media
+    // JSON-array view: string-carrier outputs expect their raw
+    // payload, media outputs expect `""` (the empty quoted-string
+    // slot that the `"`-image-`"` flanking pattern collapses to
+    // when the media block is removed). The harness round-trips
+    // through `format_outputs` and asserts (a) the body parses as
+    // `Vec<String>`, (b) every element matches by index, (c) the
+    // expected number of `RawContent::Image` blocks survives.
+    // ───────────────────────────────────────────────────────────────
+
+    /// Tiny but valid 1×1 transparent PNG, base64-encoded as a data
+    /// URL. The SDK pipeline picks this up via
+    /// `RichContentPart::from_text_or_data_url` → `Image` → bridge
+    /// → `rmcp::Content::Image`, so the formatter emits a real
+    /// `RawContent::Image` block.
+    fn valid_png_data_url() -> &'static str {
+        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII="
+    }
+
+    fn image_output() -> Output {
+        notif(NotificationValue::Typed(
+            TypedNotificationValue::LogContent(LogContent::Image {
+                image_url: ImageUrl {
+                    url: valid_png_data_url().into(),
+                    detail: None,
+                },
+            }),
+        ))
+    }
+
+    fn plugin_notification_string(s: &str) -> Output {
+        notif(NotificationValue::Typed(
+            TypedNotificationValue::PluginNotification {
+                value: Value::String(s.to_string()),
+            },
+        ))
+    }
+
+    /// Adversarial string corpus shared across the mangle tests.
+    /// Returns owned `String`s so the 8 KiB length-stress entry
+    /// can be built at runtime via `repeat`.
+    fn tricky_corpus() -> Vec<String> {
+        vec![
+            "plain".to_string(),
+            "with \"embedded quotes\"".to_string(),
+            "with\nreal\nnewlines".to_string(),
+            "with\treal\ttabs".to_string(),
+            "with \\backslash\\ pairs".to_string(),
+            "mixed \"quotes\" + \\esc + \nnewline + \tend".to_string(),
+            // Control bytes force the `\u00XX` escape path through json_escape.
+            "control \x07 bell + \x1b ESC + \x00 nul".to_string(),
+            "unicode ✓ ✗ → ← 漢字 🦀".to_string(),
+            // Looks like a JSON payload but is opaque to the formatter —
+            // must survive as a single string element.
+            "{\"json\":\"in a string\",\"nested\":[1,2,3]}".to_string(),
+            "\"\"".to_string(),
+            String::new(),
+            "x".repeat(8 * 1024),
+        ]
+    }
+
+    /// Run the round-trip pipeline and assert that the strip-media
+    /// JSON-array body matches `expected` element-for-element.
+    /// Also asserts that the response carries `expected_image_count`
+    /// `RawContent::Image` blocks (proving media survived as media,
+    /// not collapsed into text).
+    fn assert_strings_survive(
+        outputs: &[Output],
+        expected: &[&str],
+        expected_image_count: usize,
+    ) {
+        let blocks = format_outputs(outputs);
+        let body = collect_body_strip_media(&blocks);
+        let arr = parse_array_of_strings(&body);
+        assert_eq!(
+            arr.len(),
+            expected.len(),
+            "array length mismatch: got {} elements, expected {}",
+            arr.len(),
+            expected.len()
+        );
+        for (i, (got, exp)) in arr.iter().zip(expected.iter()).enumerate() {
+            assert_eq!(
+                got, exp,
+                "mismatch at index {i}: got {got:?}, expected {exp:?}"
+            );
+        }
+        let image_count = blocks
+            .iter()
+            .filter(|b| matches!(b.raw, RawContent::Image(_)))
+            .count();
+        assert_eq!(
+            image_count, expected_image_count,
+            "image block count mismatch"
+        );
+    }
+
+    #[test]
+    fn tricky_strings_survive_roundtrip_with_images_between() {
+        let corpus = tricky_corpus();
+
+        // For each k: stdout_line(TRICKY[k]), Image, plugin_notif_str(TRICKY[k]), Image.
+        // So every string sits next to a media element on at least
+        // one side, and both string-carrier paths (ToolLine /
+        // PluginNotification) get exercised against the full corpus.
+        let mut outputs: Vec<Output> = Vec::with_capacity(corpus.len() * 4);
+        for s in &corpus {
+            outputs.push(stdout_line(s));
+            outputs.push(image_output());
+            outputs.push(plugin_notification_string(s));
+            outputs.push(image_output());
+        }
+
+        let expected: Vec<&str> = corpus
+            .iter()
+            .flat_map(|s| [s.as_str(), "", s.as_str(), ""])
+            .collect();
+        let expected_images = corpus.len() * 2;
+        assert_strings_survive(&outputs, &expected, expected_images);
+    }
+
+    #[test]
+    fn back_to_back_images_between_strings_survive_roundtrip() {
+        // [before, Image, Image, Image, between (quotes+backslash),
+        //  Image, end (newlines)]
+        let outputs = vec![
+            stdout_line("before"),
+            image_output(),
+            image_output(),
+            image_output(),
+            stdout_line("\"between\" \\quotes\\"),
+            image_output(),
+            plugin_notification_string("end\nwith\nnewlines"),
+        ];
+        let expected: Vec<&str> = vec![
+            "before",
+            "",
+            "",
+            "",
+            "\"between\" \\quotes\\",
+            "",
+            "end\nwith\nnewlines",
+        ];
+        // Four image inputs ⇒ four image blocks in the response.
+        assert_strings_survive(&outputs, &expected, 4);
+    }
+
+    #[test]
+    fn extreme_length_with_dense_quotes_and_image_survives() {
+        // ~50+ KiB adversarial string (quotes, backslashes, real
+        // \n / \t, high-bit unicode). Big enough to push the
+        // pipeline past any per-chunk fast-path assumptions.
+        let unit = "\"adv\" \\seg\\ \n\t mix ✓✗ ";
+        let big = unit.repeat(2200);
+        assert!(big.len() > 50 * 1024, "big string too small: {}", big.len());
+
+        let outputs = vec![
+            stdout_line(&big),
+            image_output(),
+            stdout_line("tail"),
+        ];
+        let blocks = format_outputs(&outputs);
+        let body = collect_body_strip_media(&blocks);
+        let arr = parse_array_of_strings(&body);
+
+        assert_eq!(arr.len(), 3, "expected 3 array elements");
+        // Byte-for-byte equality for the big payload so any single-
+        // byte drift surfaces as a localized panic rather than a
+        // multi-KB string diff.
+        assert_eq!(
+            arr[0].as_bytes(),
+            big.as_bytes(),
+            "big string differs by {} bytes at length {}",
+            arr[0]
+                .as_bytes()
+                .iter()
+                .zip(big.as_bytes())
+                .filter(|(a, b)| a != b)
+                .count(),
+            arr[0].len(),
+        );
+        assert_eq!(arr[1], "", "image slot must be empty string");
+        assert_eq!(arr[2], "tail");
+
+        let image_count = blocks
+            .iter()
+            .filter(|b| matches!(b.raw, RawContent::Image(_)))
+            .count();
+        assert_eq!(image_count, 1, "exactly one image block expected");
+    }
+
     #[test]
     fn agent_id_stripped_from_errors() {
         let outputs = vec![err_with_agent("nope", "agent-x")];
