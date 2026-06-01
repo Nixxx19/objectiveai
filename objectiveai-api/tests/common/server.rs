@@ -136,6 +136,7 @@ pub fn client() -> Arc<HttpClient> {
         None::<String>,
         None::<String>,
         None::<String>,
+        None::<String>,
     ))
 }
 

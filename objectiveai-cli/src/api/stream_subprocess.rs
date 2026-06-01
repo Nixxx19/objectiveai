@@ -474,6 +474,10 @@ async fn push_forwarded_args(
 
     cmd.args(["--objectiveai-agent-id", &cli_config.agent_id]);
 
+    if let Some(ref v) = cli_config.agent_id_base {
+        cmd.args(["--objectiveai-agent-id-base", v]);
+    }
+
     if let Some(ref v) = cli_config.mcp_session_id {
         cmd.args(["--mcp-session-id", v]);
     }

@@ -257,12 +257,11 @@ pub async fn dispatch_external(
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
-    // Re-emit the "we're under objectiveai-mcp" marker so the plugin
-    // (and anything it spawns) can tell. Mirrors `dispatch_tool` in
-    // `crate::tools` — same env, same condition.
-    if cli_config.mcp {
-        cmd.env(objectiveai_sdk::mcp::OBJECTIVEAI_MCP_ENV, "true");
-    }
+    // Forward the full cli Config (agent lineage, MCP session, auth
+    // tokens, config_base_dir, the "we're under objectiveai-mcp"
+    // marker, …) to the plugin subprocess via the same env-var
+    // names `EnvConfigBuilder` reads.
+    crate::spawn::apply_config_env(&mut cmd, cli_config);
 
     let mut child = cmd.spawn().map_err(crate::error::Error::PluginSpawn)?;
 

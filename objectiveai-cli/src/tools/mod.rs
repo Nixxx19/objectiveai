@@ -135,17 +135,11 @@ pub async fn dispatch_tool(
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
-    // Forward the per-invocation lineage and MCP session to the tool
-    // subprocess. Tools that key per-session state (e.g. count files,
-    // caches) read these from env; tools that don't need them ignore
-    // them. Inherit-everything-else stays; we only add to the env.
-    cmd.env("OBJECTIVEAI_AGENT_ID", &cli_config.agent_id);
-    if let Some(session_id) = cli_config.mcp_session_id.as_deref() {
-        cmd.env(objectiveai_sdk::mcp::MCP_SESSION_ID_ENV, session_id);
-    }
-    if cli_config.mcp {
-        cmd.env(objectiveai_sdk::mcp::OBJECTIVEAI_MCP_ENV, "true");
-    }
+    // Forward the full cli Config (lineage, MCP session, auth tokens,
+    // config_base_dir, …) to the tool subprocess via the same env-var
+    // names `EnvConfigBuilder` reads. Inherit-everything-else stays;
+    // we only add to the env.
+    crate::spawn::apply_config_env(&mut cmd, cli_config);
 
     let mut child = cmd.spawn().map_err(crate::error::Error::ToolSpawn)?;
 

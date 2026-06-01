@@ -232,6 +232,7 @@ async fn dial_plugin_upstream(
     plugin_name: String,
     mcp_name: String,
     agent_id: String,
+    agent_id_base: Option<String>,
     arguments: Option<IndexMap<String, String>>,
     stored_session_id: Option<String>,
 ) -> Result<String, ConduitError> {
@@ -270,6 +271,14 @@ async fn dial_plugin_upstream(
         for (k, v) in args {
             cmd.arg(format!("--{k}")).arg(v);
         }
+    }
+    // Agent identity for this MCP run comes from the upstream request
+    // that asked for it, NOT from cli-stream's own config. The other
+    // config-shaped env vars travel through the default parent-env
+    // inheritance (cli already stamped them on cli-stream).
+    cmd.env("OBJECTIVEAI_AGENT_ID", &agent_id);
+    if let Some(base) = agent_id_base.as_deref() {
+        cmd.env("OBJECTIVEAI_AGENT_ID_BASE", base);
     }
     let mut child = cmd
         .stdin(std::process::Stdio::null())
@@ -628,6 +637,7 @@ async fn forward(
         let plugin_entries: Vec<McpServerConfigEntry> =
             config.map(|c| c.mcp_servers.clone()).unwrap_or_default();
         let agent_id = agent_id_from_headers(&request.headers);
+        let agent_id_base = agent_id_base_from_headers(&request.headers);
 
         if !needs_primary && plugin_entries.is_empty() {
             return Ok(jsonrpc_error_envelope(
@@ -679,12 +689,14 @@ async fn forward(
                 });
                 let inner = inner.clone();
                 let agent_id = agent_id.clone();
+                let agent_id_base = agent_id_base.clone();
                 async move {
                     dial_plugin_upstream(
                         &inner,
                         entry.plugin,
                         entry.name,
                         agent_id,
+                        agent_id_base,
                         entry.arguments,
                         stored_sid,
                     )
@@ -1499,6 +1511,17 @@ fn agent_id_from_headers(headers: &IndexMap<String, String>) -> String {
         .find(|(k, _)| k.eq_ignore_ascii_case("X-OBJECTIVEAI-AGENT-ID"))
         .map(|(_, v)| v.clone())
         .unwrap_or_default()
+}
+
+/// Case-insensitive `X-OBJECTIVEAI-AGENT-ID-BASE` lookup. Returns
+/// `None` on absence (the base is genuinely optional — only present
+/// when the caller stamped it) so the env-var stamp at the
+/// `dial_plugin_upstream` site can skip it cleanly.
+fn agent_id_base_from_headers(headers: &IndexMap<String, String>) -> Option<String> {
+    headers
+        .iter()
+        .find(|(k, _)| k.eq_ignore_ascii_case("X-OBJECTIVEAI-AGENT-ID-BASE"))
+        .map(|(_, v)| v.clone())
 }
 
 fn read_mcp_config_header(headers: &IndexMap<String, String>) -> Option<McpConfig> {

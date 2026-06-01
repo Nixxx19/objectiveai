@@ -197,12 +197,23 @@ async fn run_cli_and_collect(
         .headers
         .get("X-OBJECTIVEAI-AGENT-ID")
         .and_then(|h| h.to_str().ok());
+    let header_agent_id_base = parts
+        .headers
+        .get("X-OBJECTIVEAI-AGENT-ID-BASE")
+        .and_then(|h| h.to_str().ok());
     // Always populate agent_id for MCP-routed calls. When the upstream
     // MCP client didn't send the header, default to "MCP" so
     // `agents me` (and any other code reading the field) reports
     // the call's actual origin instead of inheriting the server-wide
     // default ("CLI") — which would be misleading.
     cfg.agent_id = header_agent_id.unwrap_or("mcp").to_string();
+    // Override agent_id_base only when the upstream supplied it;
+    // otherwise keep whatever the server was configured with. Empty
+    // string is treated as "absent" so a blank header doesn't blank
+    // out the inherited base.
+    if let Some(base) = header_agent_id_base.filter(|s| !s.is_empty()) {
+        cfg.agent_id_base = Some(base.to_string());
+    }
     let header_session_id = parts
         .headers
         .get(objectiveai_sdk::mcp::MCP_SESSION_ID_HEADER)

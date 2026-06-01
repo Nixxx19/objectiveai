@@ -84,16 +84,20 @@ pub async fn connect_all_fresh(
     client: &Client,
     http_headers: &HeaderMap,
     agent_id: Option<&str>,
+    agent_id_base: Option<&str>,
 ) -> Result<(Vec<(Connection, IndexMap<String, String>)>, IndexMap<String, Vec<String>>), BadInit> {
     let (specs, tool_allowlists) = parse_init_headers(http_headers)?;
     // Capture once; each per-upstream future stamps the same string.
     let agent_id_owned: Option<String> =
         agent_id.filter(|s| !s.is_empty()).map(str::to_owned);
+    let agent_id_base_owned: Option<String> =
+        agent_id_base.filter(|s| !s.is_empty()).map(str::to_owned);
 
     let attempts = specs.into_iter().map(|spec| {
         let url = spec.url.clone();
         let headers_for_payload = spec.headers.clone();
         let agent_id_owned = agent_id_owned.clone();
+        let agent_id_base_owned = agent_id_base_owned.clone();
         async move {
             // Hoist any caller-supplied `Mcp-Session-Id` out of the
             // header bag and pass it as the dedicated `session_id` arg.
@@ -111,6 +115,9 @@ pub async fn connect_all_fresh(
             // `entry`) intentionally overwrites.
             if let Some(id) = &agent_id_owned {
                 headers.insert("X-OBJECTIVEAI-AGENT-ID".to_string(), id.clone());
+            }
+            if let Some(base) = &agent_id_base_owned {
+                headers.insert("X-OBJECTIVEAI-AGENT-ID-BASE".to_string(), base.clone());
             }
             let conn_result = client
                 .connect(spec.url, session_id, Some(headers))
@@ -153,6 +160,11 @@ pub async fn reconnect_from_payload(
         .as_deref()
         .filter(|s| !s.is_empty())
         .map(str::to_owned);
+    let agent_id_base_owned: Option<String> = payload
+        .agent_id_base
+        .as_deref()
+        .filter(|s| !s.is_empty())
+        .map(str::to_owned);
 
     let attempts = payload.connections.iter().map(|(url, headers)| {
         let url = url.clone();
@@ -164,6 +176,9 @@ pub async fn reconnect_from_payload(
         // the agent id from its payload on the next round-trip.
         if let Some(id) = &agent_id_owned {
             headers.insert("X-OBJECTIVEAI-AGENT-ID".to_string(), id.clone());
+        }
+        if let Some(base) = &agent_id_base_owned {
+            headers.insert("X-OBJECTIVEAI-AGENT-ID-BASE".to_string(), base.clone());
         }
         // Everything left (Authorization + custom headers) stays in
         // `headers` and gets passed straight through to Client::connect.

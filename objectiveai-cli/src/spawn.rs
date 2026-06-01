@@ -139,6 +139,45 @@ pub async fn spawn_and_wait_for_listening(
     Ok(line)
 }
 
+/// Stamp every field of the cli's [`crate::Config`] onto `cmd`'s env
+/// using the same env-var names the [`crate::run::EnvConfigBuilder`]
+/// reads on the receiving side. So a child cli (or any subprocess
+/// that uses the same `Envconfig`-based loader) round-trips its
+/// parent's config byte-identically.
+///
+/// `Option`-typed fields are skipped on `None`. Boolean fields are
+/// stamped only when `true`. The plugin-MCP spawn in
+/// `objectiveai-cli-stream` does **not** call this — it uses the
+/// per-request agent identity from the upstream's headers instead;
+/// see `dial_plugin_upstream`.
+pub fn apply_config_env(cmd: &mut Command, cfg: &crate::Config) {
+    if cfg.config_set_forbidden {
+        cmd.env("CONFIG_SET_FORBIDDEN", "true");
+    }
+    if let Some(v) = cfg.config_base_dir.as_deref() {
+        cmd.env("CONFIG_BASE_DIR", v);
+    }
+    if let Some(v) = cfg.commit_author_name.as_deref() {
+        cmd.env("COMMIT_AUTHOR_NAME", v);
+    }
+    if let Some(v) = cfg.commit_author_email.as_deref() {
+        cmd.env("COMMIT_AUTHOR_EMAIL", v);
+    }
+    if let Some(v) = cfg.github_authorization.as_deref() {
+        cmd.env("GITHUB_AUTHORIZATION", v);
+    }
+    cmd.env("OBJECTIVEAI_AGENT_ID", &cfg.agent_id);
+    if let Some(v) = cfg.agent_id_base.as_deref() {
+        cmd.env("OBJECTIVEAI_AGENT_ID_BASE", v);
+    }
+    if let Some(v) = cfg.mcp_session_id.as_deref() {
+        cmd.env(objectiveai_sdk::mcp::MCP_SESSION_ID_ENV, v);
+    }
+    if cfg.mcp {
+        cmd.env(objectiveai_sdk::mcp::OBJECTIVEAI_MCP_ENV, "true");
+    }
+}
+
 /// Case-insensitive match between an observed process name and a target
 /// binary name. Strips a trailing `.exe` so the same target string
 /// (`"objectiveai-api"`) works on every platform.

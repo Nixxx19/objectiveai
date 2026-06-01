@@ -62,6 +62,11 @@ pub struct HttpClient {
     pub x_commit_author_email: Option<Arc<String>>,
     /// Value for the `X-OBJECTIVEAI-AGENT-ID` header.
     pub agent_id: Option<Arc<String>>,
+    /// Value for the `X-OBJECTIVEAI-AGENT-ID-BASE` header — the bare
+    /// 22-character leaf identity of the agent invoking the cli,
+    /// without the spawn/parent lineage that `agent_id` carries.
+    /// Travels alongside `agent_id` on every outbound request.
+    pub agent_id_base: Option<Arc<String>>,
     /// Value for the `Mcp-Session-Id` header — propagated through to
     /// `objectiveai-mcp` so server-side tool invocations see a stable
     /// per-session id. See `objectiveai_sdk::mcp::MCP_SESSION_ID_HEADER`.
@@ -103,6 +108,7 @@ impl HttpClient {
         x_commit_author_name: Option<impl Into<String>>,
         x_commit_author_email: Option<impl Into<String>>,
         agent_id: Option<impl Into<String>>,
+        agent_id_base: Option<impl Into<String>>,
         mcp_session_id: Option<impl Into<String>>,
     ) -> Self {
         #[cfg(feature = "env")]
@@ -257,6 +263,16 @@ impl HttpClient {
                     None
                 }
             }),
+            agent_id_base: agent_id_base.map(|v| Arc::new(v.into())).or_else(|| {
+                #[cfg(feature = "env")]
+                {
+                    env("OBJECTIVEAI_AGENT_ID_BASE").map(Arc::new)
+                }
+                #[cfg(not(feature = "env"))]
+                {
+                    None
+                }
+            }),
             mcp_session_id: mcp_session_id.map(|v| Arc::new(v.into())).or_else(
                 || {
                     #[cfg(feature = "env")]
@@ -328,6 +344,9 @@ impl HttpClient {
         }
         if let Some(id) = &self.agent_id {
             request = request.header("X-OBJECTIVEAI-AGENT-ID", id.as_str());
+        }
+        if let Some(base) = &self.agent_id_base {
+            request = request.header("X-OBJECTIVEAI-AGENT-ID-BASE", base.as_str());
         }
         if let Some(s) = &self.mcp_session_id {
             request =
@@ -660,6 +679,9 @@ impl HttpClient {
         }
         if let Some(id) = &self.agent_id {
             req = req.header("X-OBJECTIVEAI-AGENT-ID", id.as_str());
+        }
+        if let Some(base) = &self.agent_id_base {
+            req = req.header("X-OBJECTIVEAI-AGENT-ID-BASE", base.as_str());
         }
         if let Some(s) = &self.mcp_session_id {
             req = req.header(crate::mcp::MCP_SESSION_ID_HEADER, s.as_str());

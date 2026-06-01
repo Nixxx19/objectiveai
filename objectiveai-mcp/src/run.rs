@@ -114,6 +114,10 @@ pub async fn setup(config: Config) -> std::io::Result<(tokio::net::TcpListener, 
         // overrides this with the `X-OBJECTIVEAI-AGENT-ID` header
         // when present; otherwise the call stays stamped as `"mcp"`.
         agent_id: "mcp".to_string(),
+        // Same per-request override pattern for the base — populated
+        // from `X-OBJECTIVEAI-AGENT-ID-BASE` when the upstream stamps
+        // it; otherwise stays `None`.
+        agent_id_base: None,
         mcp_session_id: None,
         mcp: true,
     });
