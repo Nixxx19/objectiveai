@@ -268,7 +268,7 @@ async fn dial_plugin_upstream(
     cmd.arg("mcp").arg(&mcp_name).arg("begin");
     if let Some(args) = arguments.as_ref() {
         for (k, v) in args {
-            cmd.arg(format!("--{k}={v}"));
+            cmd.arg(format!("--{k}")).arg(v);
         }
     }
     let mut child = cmd
