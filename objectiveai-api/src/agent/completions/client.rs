@@ -884,18 +884,20 @@ where
                     }
                 }
 
-                let mut proxy_request_headers: indexmap::IndexMap<String, String> =
+                // `agent_id` is the new agent's full hierarchical id
+                // (caller-lineage + this completion's response_id).
+                // The matching base is the trailing slash-separated
+                // segment — that's the `id` variable resolved at
+                // line ~522, equal to `response_id(created)` on a
+                // fresh call. Stamp the same leaf as the base so the
+                // pair is internally consistent at every hop.
+                let proxy_request_headers: indexmap::IndexMap<String, String> =
                     indexmap::indexmap! {
                         "X-MCP-Servers".to_string() => serde_json::to_string(&urls).unwrap(),
                         "X-MCP-Headers".to_string() => serde_json::to_string(&per_url_headers).unwrap(),
                         "X-OBJECTIVEAI-AGENT-ID".to_string() => agent_id.clone(),
+                        "X-OBJECTIVEAI-AGENT-ID-BASE".to_string() => id.clone(),
                     };
-                if let Some(base) = ctx.agent_id_base() {
-                    proxy_request_headers.insert(
-                        "X-OBJECTIVEAI-AGENT-ID-BASE".to_string(),
-                        base.to_string(),
-                    );
-                }
 
                 let mcp_client = self.mcp_client.clone();
                 let proxy_url = proxy_url.clone();
