@@ -519,24 +519,34 @@ where
                 }
             }
         };
-        let id: String = agent_id
-            .rsplit_once('/')
-            .map(|(_, tail)| tail.to_string())
-            .unwrap_or_else(|| agent_id.clone());
-
-        // Send viewer begin.
-        if viewer {
-            self.viewer_client.send_agent_completion_begin(
-                ctx.clone(), id.clone(), params.clone(),
-            );
-        }
-        let send_viewer_err = |e: super::Error| -> super::Error {
-            if viewer {
-                self.viewer_client.send_agent_completion_error(
-                    ctx.clone(), id.clone(), &e,
-                );
+        // Viewer-begin is *not* fired here. The id that should
+        // correlate begin/continue/end is the winning slot's
+        // response_id leaf — which we only learn once that slot
+        // yields its first chunk. The per-attempt success wrappers
+        // below (one per upstream variant) fire begin on the first
+        // observed chunk using `chunk.id`. Pre-yield errors (paths
+        // that hit `send_viewer_err` below) never reach that point,
+        // so they correlate against the *first agent's* response_id
+        // leaf — there's no other meaningful candidate before
+        // commitment, and `agent_ids[0] = agent_id.clone()` makes
+        // this the leaf of the resolved request `agent_id`.
+        let send_viewer_err = {
+            let first_agent_id_leaf = agent_id
+                .rsplit_once('/')
+                .map(|(_, t)| t.to_string())
+                .unwrap_or_else(|| agent_id.clone());
+            let viewer_client = self.viewer_client.clone();
+            let ctx_for_err = ctx.clone();
+            move |e: super::Error| -> super::Error {
+                if viewer {
+                    viewer_client.send_agent_completion_error(
+                        ctx_for_err.clone(),
+                        first_agent_id_leaf.clone(),
+                        &e,
+                    );
+                }
+                e
             }
-            e
         };
 
         // 1. Panic if internal and request continuation upstream types conflict.
@@ -652,6 +662,23 @@ where
             })
             .collect();
 
+        // Per-slot leaf — trailing slash-segment of each
+        // `agent_ids[i]`. This is the value that ends up as
+        // `AgentCompletionChunk.id`, the `notify_targets` key, and
+        // the `X-OBJECTIVEAI-AGENT-ID-BASE` / `X-OBJECTIVEAI-RESPONSE-ID`
+        // header for the corresponding per-agent dial. Single source
+        // of truth: everything downstream that needs the "agent's
+        // own id" reads from this vec (or, after `AgentAttempt` is
+        // built below, from `attempt.id`).
+        let ids: Vec<String> = agent_ids
+            .iter()
+            .map(|aid| {
+                aid.rsplit_once('/')
+                    .map(|(_, tail)| tail.to_string())
+                    .unwrap_or_else(|| aid.clone())
+            })
+            .collect();
+
         // Resolve a per-agent `ws_session_id` for any agent that
         // declares `client_objectiveai_mcp`. For the primary agent
         // (the first in `filtered_agents`), if the incoming
@@ -698,15 +725,7 @@ where
         // learns the sibling set from whichever connect lands first
         // — driving the group-local loser sweep in
         // `ConduitMcpHandler::select_response_ids`.
-        let response_ids_group: String = agent_ids
-            .iter()
-            .map(|aid| {
-                aid.rsplit_once('/')
-                    .map(|(_, tail)| tail)
-                    .unwrap_or(aid.as_str())
-            })
-            .collect::<Vec<_>>()
-            .join("-");
+        let response_ids_group: String = ids.join("-");
 
         let connect_handles: Vec<
             Option<
@@ -725,8 +744,9 @@ where
         > = filtered_agents
             .iter()
             .zip(agent_ids.iter())
+            .zip(ids.iter())
             .zip(agent_ws_session_ids.iter())
-            .map(|((agent, agent_id), agent_ws_session_id)| {
+            .map(|(((agent, agent_id), id), agent_ws_session_id)| {
                 // Build the per-agent X-MCP-* header set: the agent's
                 // declared `mcp_servers` plus any caller-supplied
                 // `extra_mcp_servers` (e.g. the function-inventions
@@ -915,14 +935,15 @@ where
                     }
                 }
 
-                // `agent_id` is the new agent's full hierarchical id
-                // (caller-lineage + this agent's response_id).
-                // The matching base is the trailing slash-separated
-                // segment — that's the `id` variable resolved at
-                // line ~522, equal to `response_id(created)` on a
-                // fresh call. `RESPONSE-ID` is the same leaf;
+                // Both `agent_id` and `id` here are the closure's
+                // per-slot bindings (zipped in from `agent_ids` and
+                // `ids` above). `agent_id` is the full hierarchical
+                // id (caller-lineage + this slot's response_id);
+                // `id` is its trailing segment — same value used
+                // downstream as `attempt.id` (chunk id, notify key).
                 // `RESPONSE-IDS` is the dash-joined group of every
-                // sibling response_id in this completion.
+                // sibling response_id in this completion, stamped
+                // identically on every per-agent connect.
                 let proxy_request_headers: indexmap::IndexMap<String, String> =
                     indexmap::indexmap! {
                         "X-MCP-Servers".to_string() => serde_json::to_string(&urls).unwrap(),
@@ -1006,21 +1027,31 @@ where
                     >,
                 >,
             >,
-            /// Composite agent id forwarded as `X-OBJECTIVEAI-AGENT-ID`
-            /// to the MCP proxy and (for runner-backed upstreams) as
-            /// `OBJECTIVEAI_AGENT_ID` in the env dict the runner hands
-            /// to its child SDK subprocess. Derived from the response
-            /// id (see step 6.5 above).
+            /// Composite per-slot agent id forwarded as
+            /// `X-OBJECTIVEAI-AGENT-ID` to the MCP proxy and (for
+            /// runner-backed upstreams) as `OBJECTIVEAI_AGENT_ID` in
+            /// the env dict the runner hands to its child SDK
+            /// subprocess. Derived from the response id (see step
+            /// 6.5 above).
             agent_id: String,
+            /// Per-slot response-id leaf — trailing slash-segment of
+            /// `agent_id`. The value passed into `run_agent_loop`
+            /// as the `id` argument, which becomes
+            /// `AgentCompletionChunk.id`, the `notify_targets` key,
+            /// and the value cli-stream's conduit cache + sibling-
+            /// group sweep match on.
+            id: String,
         }
         let mut attempts: Vec<AgentAttempt> = filtered_agents
             .into_iter()
             .zip(connect_handles)
             .zip(agent_ids)
-            .map(|((agent, connect_handle), agent_id)| AgentAttempt {
+            .zip(ids)
+            .map(|(((agent, connect_handle), agent_id), id)| AgentAttempt {
                 agent,
                 connect_handle,
                 agent_id,
+                id,
             })
             .collect();
         // Slot of resolved-or-None per attempt — populated lazily on
@@ -1163,10 +1194,10 @@ where
                             };
                             match self.run_agent_loop(
                                 self.openrouter.clone(), or_agent, rc, &params, mcp_connection.clone(),
-                                &mut cont_items_or, &id, created,
+                                &mut cont_items_or, &attempt.id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 {
-                                    let agent_id = agent_id.clone();
+                                    let agent_id = attempt.agent_id.clone();
                                     move |items| super::Continuation::Openrouter {
                                         items, mcp_connection: c, agent_id,
                                     }
@@ -1186,8 +1217,16 @@ where
                                     if !viewer { return Ok(stream); }
                                     let vc = self.viewer_client.clone();
                                     let vctx = ctx.clone();
+                                    let params_for_viewer = params.clone();
+                                    let mut sent_begin = false;
                                     return Ok(Box::pin(futures::StreamExt::inspect(stream, move |item| {
                                         if let super::StreamItem::Chunk(chunk) = item {
+                                            if !sent_begin {
+                                                sent_begin = true;
+                                                vc.send_agent_completion_begin(
+                                                    vctx.clone(), chunk.id.clone(), params_for_viewer.clone(),
+                                                );
+                                            }
                                             vc.send_agent_completion_continue(vctx.clone(), chunk.clone());
                                         }
                                     })));
@@ -1203,10 +1242,10 @@ where
                             };
                             match self.run_agent_loop(
                                 self.claude_agent_sdk.clone(), cas_agent, rc, &params, mcp_connection.clone(),
-                                &mut cont_items_cas, &id, created,
+                                &mut cont_items_cas, &attempt.id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 {
-                                    let agent_id = agent_id.clone();
+                                    let agent_id = attempt.agent_id.clone();
                                     move |items| super::Continuation::ClaudeAgentSdk {
                                         items, mcp_connection: c, agent_id,
                                     }
@@ -1226,8 +1265,16 @@ where
                                     if !viewer { return Ok(stream); }
                                     let vc = self.viewer_client.clone();
                                     let vctx = ctx.clone();
+                                    let params_for_viewer = params.clone();
+                                    let mut sent_begin = false;
                                     return Ok(Box::pin(futures::StreamExt::inspect(stream, move |item| {
                                         if let super::StreamItem::Chunk(chunk) = item {
+                                            if !sent_begin {
+                                                sent_begin = true;
+                                                vc.send_agent_completion_begin(
+                                                    vctx.clone(), chunk.id.clone(), params_for_viewer.clone(),
+                                                );
+                                            }
                                             vc.send_agent_completion_continue(vctx.clone(), chunk.clone());
                                         }
                                     })));
@@ -1243,10 +1290,10 @@ where
                             };
                             match self.run_agent_loop(
                                 self.codex_sdk.clone(), cdx_agent, rc, &params, mcp_connection.clone(),
-                                &mut cont_items_cdx, &id, created,
+                                &mut cont_items_cdx, &attempt.id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 {
-                                    let agent_id = agent_id.clone();
+                                    let agent_id = attempt.agent_id.clone();
                                     move |items| super::Continuation::CodexSdk {
                                         items, mcp_connection: c, agent_id,
                                     }
@@ -1266,8 +1313,16 @@ where
                                     if !viewer { return Ok(stream); }
                                     let vc = self.viewer_client.clone();
                                     let vctx = ctx.clone();
+                                    let params_for_viewer = params.clone();
+                                    let mut sent_begin = false;
                                     return Ok(Box::pin(futures::StreamExt::inspect(stream, move |item| {
                                         if let super::StreamItem::Chunk(chunk) = item {
+                                            if !sent_begin {
+                                                sent_begin = true;
+                                                vc.send_agent_completion_begin(
+                                                    vctx.clone(), chunk.id.clone(), params_for_viewer.clone(),
+                                                );
+                                            }
                                             vc.send_agent_completion_continue(vctx.clone(), chunk.clone());
                                         }
                                     })));
@@ -1283,10 +1338,10 @@ where
                             };
                             match self.run_agent_loop(
                                 self.mock.clone(), mock_agent, rc, &params, mcp_connection.clone(),
-                                &mut cont_items_mock, &id, created,
+                                &mut cont_items_mock, &attempt.id, created,
                                 *byok_attempt, ctx.cost_multiplier,
                                 {
-                                    let agent_id = agent_id.clone();
+                                    let agent_id = attempt.agent_id.clone();
                                     move |items| super::Continuation::Mock {
                                         items, mcp_connection: c, agent_id,
                                     }
@@ -1306,8 +1361,16 @@ where
                                     if !viewer { return Ok(stream); }
                                     let vc = self.viewer_client.clone();
                                     let vctx = ctx.clone();
+                                    let params_for_viewer = params.clone();
+                                    let mut sent_begin = false;
                                     return Ok(Box::pin(futures::StreamExt::inspect(stream, move |item| {
                                         if let super::StreamItem::Chunk(chunk) = item {
+                                            if !sent_begin {
+                                                sent_begin = true;
+                                                vc.send_agent_completion_begin(
+                                                    vctx.clone(), chunk.id.clone(), params_for_viewer.clone(),
+                                                );
+                                            }
                                             vc.send_agent_completion_continue(vctx.clone(), chunk.clone());
                                         }
                                     })));
