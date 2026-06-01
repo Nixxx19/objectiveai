@@ -98,6 +98,15 @@ pub async fn handle(
     // uses on the read side.
     let caller = &cli_config.agent_id;
     let full_agent_id = format!("{caller}/{}", args.agent_id);
+    // Bare leaf — the trailing slash segment. `agents list active`
+    // returns this form and `agents read pending` accepts it, so
+    // every notification we surface uses the same shape (pastable
+    // back into either command without the user having to strip
+    // their own caller prefix).
+    let bare_agent_id = full_agent_id
+        .rsplit_once('/')
+        .map(|(_, t)| t.to_string())
+        .unwrap_or_else(|| full_agent_id.clone());
     let content = args.message.resolve()?;
 
     // Retry on `CliStreamSlotTaken` — another caller's cli-stream
@@ -108,7 +117,16 @@ pub async fn handle(
     // the winner to release the socket, at which point we win or
     // deliver via the now-live pipe.
     loop {
-        match handle_once(cli_config, &full_agent_id, content.clone(), args.seed, handle).await {
+        match handle_once(
+            cli_config,
+            &full_agent_id,
+            &bare_agent_id,
+            content.clone(),
+            args.seed,
+            handle,
+        )
+        .await
+        {
             Err(crate::error::Error::CliStreamSlotTaken { .. }) => continue,
             other => return other,
         }
@@ -118,6 +136,7 @@ pub async fn handle(
 async fn handle_once(
     cli_config: &crate::Config,
     full_agent_id: &str,
+    bare_agent_id: &str,
     content: RichContent,
     seed: Option<i64>,
     handle: &Handle,
@@ -128,7 +147,7 @@ async fn handle_once(
         Ok(()) => {
             Output::Notification(Notification {
                 value: MessageDelivered {
-                    agent_id: full_agent_id.to_string(),
+                    agent_id: bare_agent_id.to_string(),
                 }
                 .into(),
             })
@@ -136,7 +155,17 @@ async fn handle_once(
             .await;
             Ok(())
         }
-        Err(_) => fall_back_to_continuation(cli_config, full_agent_id, content, seed, handle).await,
+        Err(_) => {
+            fall_back_to_continuation(
+                cli_config,
+                full_agent_id,
+                bare_agent_id,
+                content,
+                seed,
+                handle,
+            )
+            .await
+        }
     }
 }
 
@@ -239,6 +268,7 @@ impl std::fmt::Display for PipeError {
 async fn fall_back_to_continuation(
     cli_config: &crate::Config,
     full_agent_id: &str,
+    bare_agent_id: &str,
     content: RichContent,
     cli_seed: Option<i64>,
     handle: &Handle,
@@ -283,7 +313,7 @@ async fn fall_back_to_continuation(
         continuation: Some(latest.continuation),
     };
 
-    let full_agent_id_for_notif = full_agent_id.to_string();
+    let bare_agent_id_for_notif = bare_agent_id.to_string();
     crate::api::stream_subprocess::run_detached_with(
         cli_config,
         &["agents", "spawn"],
@@ -295,13 +325,15 @@ async fn fall_back_to_continuation(
         // wasted API work.
         Some(full_agent_id),
         move |new_response_id| {
-            // The original agent_id stays the same across a
-            // continuation; we surface the NEW response_id (cli-stream
-            // emits its root log id via `LogStreamReady`) so callers
-            // can correlate the freshly-started continuation turn.
+            // The agent's stable identity stays the same across a
+            // continuation; surface it as the bare leaf (the form
+            // `agents list active` returns and `agents read pending`
+            // accepts) alongside the NEW response_id of the freshly-
+            // started turn (cli-stream emits its root log id via
+            // `LogStreamReady`).
             NotificationValue::Typed(TypedNotificationValue::MessageQueued(
                 objectiveai_sdk::cli::output::MessageQueued {
-                    agent_id: full_agent_id_for_notif,
+                    agent_id: bare_agent_id_for_notif,
                     response_id: new_response_id,
                 },
             ))

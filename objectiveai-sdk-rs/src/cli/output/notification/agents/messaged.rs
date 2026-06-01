@@ -19,7 +19,9 @@ use serde::{Deserialize, Serialize};
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
 #[schemars(rename = "cli.output.notification.agents.MessageDelivered")]
 pub struct MessageDelivered {
-    /// Full lineage agent_id the message was delivered to.
+    /// Bare-leaf agent id (trailing slash segment) the message was
+    /// delivered to. Same shape `agents list active` returns and
+    /// `agents read pending` accepts — pastable directly into either.
     pub agent_id: String,
 }
 
@@ -30,7 +32,9 @@ pub struct MessageDelivered {
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, JsonSchema)]
 #[schemars(rename = "cli.output.notification.agents.MessageQueued")]
 pub struct MessageQueued {
-    /// Full lineage agent_id (reused from the prior completion).
+    /// Bare-leaf agent id (trailing slash segment, reused from the
+    /// prior completion). Same shape `agents list active` returns
+    /// and `agents read pending` accepts.
     pub agent_id: String,
     /// New response id for the continuation completion.
     pub response_id: String,
