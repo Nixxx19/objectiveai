@@ -48,6 +48,12 @@ pub async fn handle(
     // per-invention inner errors that ride out on the NDJSON chunk
     // stream. The fatal-error post-condition the other endpoints
     // surface doesn't apply here.
+    //
+    // Recursive-invention chunks fan out many agent completions over
+    // time. Wire the per-chunk callback so each winner response_id
+    // triggers a group-local sweep limited to that completion's
+    // siblings.
+    let conduit_for_drop = conduit.clone();
     let _consumed = streaming::run_chunk_loop::<_, FunctionInventionRecursiveChunk, _, _>(
         stream,
         notifier,
@@ -58,7 +64,9 @@ pub async fn handle(
         |agg: &mut FunctionInventionRecursiveChunk, chunk: &FunctionInventionRecursiveChunk| {
             agg.push(chunk)
         },
-        None,
+        Some(Box::new(move |seen: &std::collections::HashSet<String>| {
+            conduit_for_drop.select_response_ids(seen);
+        })),
     )
     .await?;
 

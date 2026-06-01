@@ -60,6 +60,12 @@ pub async fn handle(
 
     let stream = Box::pin(stream);
 
+    // Function-execution chunks fan out N nested agent completions;
+    // each completion's chunk carries its winner response_id. Wire
+    // the per-chunk callback so the conduit can evict that group's
+    // losers as soon as the winner emerges, even though the
+    // selections land in arbitrary order over time.
+    let conduit_for_drop = conduit.clone();
     let consumed = streaming::run_chunk_loop::<_, FunctionExecutionChunk, _, _>(
         stream,
         notifier,
@@ -68,7 +74,9 @@ pub async fn handle(
         log_writer,
         handle,
         |agg: &mut FunctionExecutionChunk, chunk: &FunctionExecutionChunk| agg.push(chunk),
-        None,
+        Some(Box::new(move |seen: &std::collections::HashSet<String>| {
+            conduit_for_drop.select_response_ids(seen);
+        })),
     )
     .await?;
 

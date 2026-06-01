@@ -627,14 +627,29 @@ where
         // 6.5. Compose the `X-OBJECTIVEAI-AGENT-ID` header we forward
         //      to the proxy for every attempt.
         //
-        // `agent_id` was resolved at the top of this fn
-        // (internal continuation > wire continuation > fresh build).
-        // All attempts (primary + fallbacks) within one
-        // `create_streaming` share the same composite — they're
-        // sequential alternatives and only one ever runs to completion.
+        // Primary (idx 0) inherits the request-resolved `agent_id`
+        // (continuation or fresh). Fallbacks each get a brand-new
+        // `response_id(created)` leaf so every agent slot has a
+        // distinct identity — cli-stream uses these as the per-
+        // slot cache key beyond `agent_id_base`. Backoff retries
+        // of one slot reuse the same cached `Connection` (and
+        // therefore the same leaf), since `attempt_connections[idx]`
+        // is populated on first visit and reused for the rest of
+        // the retry loop below.
         let agent_ids: Vec<String> = filtered_agents
             .iter()
-            .map(|_| agent_id.clone())
+            .enumerate()
+            .map(|(i, _)| {
+                if i == 0 {
+                    agent_id.clone()
+                } else {
+                    let local = response_id(created);
+                    match ctx.agent_id() {
+                        Some(prefix) => format!("{prefix}/{local}"),
+                        None => local,
+                    }
+                }
+            })
             .collect();
 
         // Resolve a per-agent `ws_session_id` for any agent that
@@ -676,6 +691,22 @@ where
             })
             .collect();
         let api_port_for_synth = ctx.api_port();
+
+        // Dash-joined list of every per-agent response_id leaf in
+        // this completion. Stamped identically on every per-agent
+        // proxy connect (`X-OBJECTIVEAI-RESPONSE-IDS`) so cli-stream
+        // learns the sibling set from whichever connect lands first
+        // — driving the group-local loser sweep in
+        // `ConduitMcpHandler::select_response_ids`.
+        let response_ids_group: String = agent_ids
+            .iter()
+            .map(|aid| {
+                aid.rsplit_once('/')
+                    .map(|(_, tail)| tail)
+                    .unwrap_or(aid.as_str())
+            })
+            .collect::<Vec<_>>()
+            .join("-");
 
         let connect_handles: Vec<
             Option<
@@ -885,18 +916,21 @@ where
                 }
 
                 // `agent_id` is the new agent's full hierarchical id
-                // (caller-lineage + this completion's response_id).
+                // (caller-lineage + this agent's response_id).
                 // The matching base is the trailing slash-separated
                 // segment — that's the `id` variable resolved at
                 // line ~522, equal to `response_id(created)` on a
-                // fresh call. Stamp the same leaf as the base so the
-                // pair is internally consistent at every hop.
+                // fresh call. `RESPONSE-ID` is the same leaf;
+                // `RESPONSE-IDS` is the dash-joined group of every
+                // sibling response_id in this completion.
                 let proxy_request_headers: indexmap::IndexMap<String, String> =
                     indexmap::indexmap! {
                         "X-MCP-Servers".to_string() => serde_json::to_string(&urls).unwrap(),
                         "X-MCP-Headers".to_string() => serde_json::to_string(&per_url_headers).unwrap(),
                         "X-OBJECTIVEAI-AGENT-ID".to_string() => agent_id.clone(),
                         "X-OBJECTIVEAI-AGENT-ID-BASE".to_string() => id.clone(),
+                        "X-OBJECTIVEAI-RESPONSE-ID".to_string() => id.clone(),
+                        "X-OBJECTIVEAI-RESPONSE-IDS".to_string() => response_ids_group.clone(),
                     };
 
                 let mcp_client = self.mcp_client.clone();

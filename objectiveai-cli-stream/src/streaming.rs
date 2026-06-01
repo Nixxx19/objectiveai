@@ -71,7 +71,9 @@ pub async fn run_chunk_loop<S, Chunk, E, F>(
     log_writer: LogWriter<Chunk>,
     handle: &Handle,
     push: F,
-    on_first_chunk_agent_ids: Option<Box<dyn FnOnce(&std::collections::HashSet<String>) + Send>>,
+    mut on_chunk_response_ids: Option<
+        Box<dyn FnMut(&std::collections::HashSet<String>) + Send>,
+    >,
 ) -> Result<Consumed<Chunk>, String>
 where
     S: Stream<Item = Result<Chunk, E>> + Unpin,
@@ -82,11 +84,12 @@ where
     let registry = PipeRegistry::new();
     let mut aggregate: Option<Chunk> = None;
     let mut chunk_count: usize = 0;
-    // Once-only: fires after the first chunk whose
-    // `agent_completion_ids()` returns at least one id. The lineage-
-    // stamped ids identify the winning agent(s); the callback
-    // typically tells the conduit to sweep state for non-winners.
-    let mut on_first_chunk = on_first_chunk_agent_ids;
+    // `on_chunk_response_ids`: fires once per chunk that carries
+    // at least one id. The chunk's `agent_completion_ids()` are the
+    // per-agent response_ids the API minted at proxy connect time;
+    // the callback typically dispatches to the conduit's
+    // `select_response_ids` which evicts the group's losers in O(1)
+    // amortized per agent group.
 
     // Spawn the coalescing writer task. Main loop sends each chunk
     // via the unbounded channel; the writer task batches them up
@@ -130,16 +133,18 @@ where
                 //    the writer stores; slashes inside the caller
                 //    (multi-segment callers like `cli/parent-X`)
                 //    become real subdirs via `pipes_root.join(...)`.
-                // The chunk's raw `agent_completion_ids()` are bare
-                // 22-character base ids — exactly what the conduit
-                // keys its per-agent state on. Collect them here so
-                // the once-only selection callback can match
+                // The chunk's raw `agent_completion_ids()` are the
+                // per-agent response_ids the API minted at proxy
+                // connect time — exactly what the conduit keys its
+                // per-agent state on (slot 3 of `PluginUpstreamKey`,
+                // `ConduitState.response_id`). Collect them here so
+                // the per-chunk selection callback can match
                 // directly. (The lineage-stamped form, used below
                 // for pipe directory layout, is a separate concern.)
-                let mut bare_ids_this_chunk: std::collections::HashSet<String> =
+                let mut response_ids_this_chunk: std::collections::HashSet<String> =
                     std::collections::HashSet::new();
                 for raw in chunk.agent_completion_ids() {
-                    bare_ids_this_chunk.insert(raw.to_string());
+                    response_ids_this_chunk.insert(raw.to_string());
                     let lineage_id = match &caller_agent_id {
                         Some(c) => format!("{c}/{raw}"),
                         None => raw.to_string(),
@@ -167,14 +172,14 @@ where
                         .await;
                 }
 
-                // First chunk with at least one agent id identifies
-                // the winning agent(s) — fire the callback exactly
-                // once so the conduit can drop state for losers. The
-                // ids are the bare bases, which the conduit's
-                // per-agent state is keyed on directly.
-                if !bare_ids_this_chunk.is_empty() {
-                    if let Some(cb) = on_first_chunk.take() {
-                        cb(&bare_ids_this_chunk);
+                // Fire the per-chunk selection callback whenever
+                // the chunk references at least one agent completion
+                // response_id. The conduit-side `select_response_ids`
+                // dedups by removing losers from its group map, so
+                // a chunk for an already-swept group is a no-op.
+                if !response_ids_this_chunk.is_empty() {
+                    if let Some(cb) = on_chunk_response_ids.as_mut() {
+                        cb(&response_ids_this_chunk);
                     }
                 }
 

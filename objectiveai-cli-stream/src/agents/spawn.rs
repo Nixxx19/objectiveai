@@ -44,11 +44,11 @@ pub async fn handle(
 
     let stream = Box::pin(stream);
 
-    // Once the API yields its first chunk, we know which agent(s)
-    // have been ultimately selected. Tell the conduit to drop every
-    // upstream `Connection` (primary + plugin-MCP) tied to a
-    // non-selected agent — those are dead weight after the API has
-    // committed.
+    // For every chunk that carries an agent response_id, ask the
+    // conduit to evict that response_id's sibling losers. After the
+    // first such chunk the winner's group is collapsed — subsequent
+    // chunks for the same response_id are no-ops in the conduit's
+    // group map. Generalizes cleanly to nested chunk trees.
     let conduit_for_drop = conduit.clone();
     let consumed = streaming::run_chunk_loop::<_, AgentCompletionChunk, _, _>(
         stream,
@@ -58,8 +58,8 @@ pub async fn handle(
         log_writer,
         handle,
         |agg: &mut AgentCompletionChunk, chunk: &AgentCompletionChunk| agg.push(chunk),
-        Some(Box::new(move |selected: &std::collections::HashSet<String>| {
-            conduit_for_drop.drop_other_agents(selected);
+        Some(Box::new(move |seen: &std::collections::HashSet<String>| {
+            conduit_for_drop.select_response_ids(seen);
         })),
     )
     .await?;

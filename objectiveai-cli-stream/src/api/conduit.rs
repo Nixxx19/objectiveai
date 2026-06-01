@@ -63,13 +63,16 @@ const MCP_CONFIG_HEADER: &str = "X-OBJECTIVEAI-MCP-CONFIG";
 struct ConduitState {
     connection: objectiveai_sdk::mcp::Connection,
     /// `X-OBJECTIVEAI-AGENT-ID-BASE` of the request that dialed this
-    /// upstream — the bare 22-character leaf identity, exactly what
-    /// the first streamed chunk's `agent` field carries. Used by
-    /// [`ConduitMcpHandler::drop_other_agents`] to sweep the
-    /// per-primary `connections` map once the API commits to a
-    /// winner; matching is a direct equality check (no lineage
-    /// composition).
+    /// upstream. Carried for wire-shape parity and diagnostic
+    /// readability; the actual sweep key is `response_id` below.
     agent_id_base: String,
+    /// `X-OBJECTIVEAI-RESPONSE-ID` of the request that dialed this
+    /// upstream — the per-agent-slot leaf the API minted at
+    /// `proxy_request_headers` build time. Used by
+    /// [`ConduitMcpHandler::select_response_ids`] for direct
+    /// equality match against the streamed chunk's
+    /// `agent_completion_ids()`.
+    response_id: String,
 }
 
 /// One MCP connection the CLI has dialed during `initialize`. Wraps
@@ -148,6 +151,16 @@ struct Inner {
     /// callbacks installed at dial time, which fan list_changed
     /// events out to every `ws_session_id` in `interested_sessions`.
     plugin_mcp_connections: DashMap<PluginUpstreamKey, Arc<PluginMcpState>>,
+    /// `response_id → sibling group` map. Populated at every dial
+    /// site by inserting one entry per id in the dial's
+    /// `X-OBJECTIVEAI-RESPONSE-IDS` header, all pointing at the same
+    /// `Arc<Vec<String>>`. Consumed by
+    /// [`ConduitMcpHandler::select_response_ids`]: when a streamed
+    /// chunk yields a response_id, its sibling group is looked up
+    /// and the losers are evicted. Entries are removed as their
+    /// groups are processed so a re-fire on the same winner is a
+    /// no-op.
+    response_id_groups: DashMap<String, Arc<Vec<String>>>,
     /// Per-`ws_session_id` `SessionState`, lazily created on first
     /// inbound request that carries an `X-OBJECTIVEAI-RESPONSE-ID`
     /// (or first `initialize` we see). Tracks the most recent
@@ -189,6 +202,7 @@ impl ConduitMcpHandler {
                 config_base_dir,
                 installed_names: OnceCell::new(),
                 plugin_mcp_connections: DashMap::new(),
+                response_id_groups: DashMap::new(),
                 sessions: DashMap::new(),
             }),
         }
@@ -211,6 +225,8 @@ impl ConduitMcpHandler {
     ) -> Result<Arc<ConduitState>, objectiveai_sdk::mcp::Error> {
         let connect_headers = sanitize_connect_headers(request_headers);
         let agent_id_base = agent_id_base_from_headers(request_headers);
+        let response_id = response_id_from_headers(request_headers);
+        register_response_id_group(&self.inner, request_headers);
         let connection = self
             .inner
             .client
@@ -224,22 +240,53 @@ impl ConduitMcpHandler {
         Ok(Arc::new(ConduitState {
             connection,
             agent_id_base,
+            response_id,
         }))
     }
 
-    /// Drop every `ConduitState` and every `PluginMcpState` whose
-    /// `agent_id_base` is NOT in `keep`. Called by cli-stream's chunk
-    /// consumer once the API's first streamed chunk identifies the
-    /// winning agent(s) — the losers' state becomes dead weight at
-    /// that point. The drop fires each `Connection`'s `Drop` impl,
-    /// which closes the upstream HTTP/SSE listener.
-    pub fn drop_other_agents(&self, keep: &std::collections::HashSet<String>) {
-        self.inner
-            .connections
-            .retain(|_, state| keep.contains(&state.agent_id_base));
-        self.inner
-            .plugin_mcp_connections
-            .retain(|key, _| keep.contains(&key.2));
+
+    /// For each `winner` response_id, look up its sibling group in
+    /// [`Inner::response_id_groups`]. Drop every `ConduitState` and
+    /// every `PluginMcpState` whose `response_id` is in
+    /// `siblings − {winner}`. Subsequent calls with the same winner
+    /// are no-ops because we also forget the losers' entries from
+    /// the group map.
+    ///
+    /// Called by cli-stream's chunk consumer on every chunk with
+    /// at least one id in `chunk.agent_completion_ids()`. The
+    /// API's `X-OBJECTIVEAI-RESPONSE-IDS` header at dial time is
+    /// what populated the group map; un-stamped requests skip
+    /// sweep cleanly (group miss = no-op).
+    pub fn select_response_ids(&self, winners: &std::collections::HashSet<String>) {
+        for winner in winners {
+            let Some(group_arc) = self.inner.response_id_groups.get(winner) else {
+                continue;
+            };
+            let losers: std::collections::HashSet<String> = group_arc
+                .value()
+                .iter()
+                .filter(|id| id.as_str() != winner.as_str())
+                .cloned()
+                .collect();
+            // Release the DashMap read guard before mutating the
+            // same map below.
+            drop(group_arc);
+            if losers.is_empty() {
+                continue;
+            }
+            self.inner
+                .connections
+                .retain(|_, state| !losers.contains(&state.response_id));
+            self.inner
+                .plugin_mcp_connections
+                .retain(|key, _| !losers.contains(&key.3));
+            // Forget the losers' group entries so a chunk for one
+            // of them (if any straggles in) is a clean no-op
+            // instead of re-firing the sweep.
+            for loser in &losers {
+                self.inner.response_id_groups.remove(loser);
+            }
+        }
     }
 }
 
@@ -260,6 +307,7 @@ async fn dial_plugin_upstream(
     mcp_name: String,
     agent_id: String,
     agent_id_base: String,
+    response_id: String,
     arguments: Option<IndexMap<String, Option<String>>>,
     stored_session_id: Option<String>,
 ) -> Result<String, ConduitError> {
@@ -393,11 +441,18 @@ async fn dial_plugin_upstream(
         .as_ref()
         .map(|m| serde_json::to_string(m).unwrap_or_default())
         .unwrap_or_default();
-    // Cache key uses `agent_id_base` (bare 22-char leaf) in slot 2
-    // so the first streamed chunk's `agent` field — which is the
-    // same base — can directly identify which entries to keep.
+    // Cache key uses both `agent_id_base` (slot 2, diagnostic) and
+    // `response_id` (slot 3, uniqueness). The streamed chunk's
+    // `agent_completion_ids()` are response_ids, so the group-
+    // aware sweep in `select_response_ids` matches slot 3 directly.
     inner.plugin_mcp_connections.insert(
-        (plugin_name, mcp_name, agent_id_base, args_canonical),
+        (
+            plugin_name,
+            mcp_name,
+            agent_id_base,
+            response_id,
+            args_canonical,
+        ),
         state,
     );
 
@@ -672,6 +727,12 @@ async fn forward(
             config.map(|c| c.mcp_servers.clone()).unwrap_or_default();
         let agent_id = agent_id_from_headers(&request.headers);
         let agent_id_base = agent_id_base_from_headers(&request.headers);
+        let response_id = response_id_from_headers(&request.headers);
+        // Register the sibling group exactly once for this
+        // initialize. The per-agent dials below all reuse the same
+        // shared `Arc<Vec<String>>` via re-insert of the same ids,
+        // which is idempotent.
+        register_response_id_group(inner, &request.headers);
 
         if !needs_primary && plugin_entries.is_empty() {
             return Ok(jsonrpc_error_envelope(
@@ -703,15 +764,15 @@ async fn forward(
             install_list_changed_pump(&connection, inner.clone(), connection.session_id.clone());
             let session_id = connection.session_id.clone();
             let agent_id_base_for_state = agent_id_base.clone();
-            inner
-                .connections
-                .insert(
-                    session_id.clone(),
-                    Arc::new(ConduitState {
-                        connection,
-                        agent_id_base: agent_id_base_for_state,
-                    }),
-                );
+            let response_id_for_state = response_id.clone();
+            inner.connections.insert(
+                session_id.clone(),
+                Arc::new(ConduitState {
+                    connection,
+                    agent_id_base: agent_id_base_for_state,
+                    response_id: response_id_for_state,
+                }),
+            );
             Ok(Some(session_id))
         };
 
@@ -731,6 +792,7 @@ async fn forward(
                 let inner = inner.clone();
                 let agent_id = agent_id.clone();
                 let agent_id_base = agent_id_base.clone();
+                let response_id = response_id.clone();
                 async move {
                     dial_plugin_upstream(
                         &inner,
@@ -738,6 +800,7 @@ async fn forward(
                         entry.name,
                         agent_id,
                         agent_id_base,
+                        response_id,
                         entry.arguments,
                         stored_sid,
                     )
@@ -849,10 +912,11 @@ async fn forward(
             apply_tools_filter(inner, body, cfg).await;
             let ws_session_id = ws_session_id_from_headers(&request.headers);
             let agent_id_base = agent_id_base_from_headers(&request.headers);
+            let response_id = response_id_from_headers(&request.headers);
             let selection: Vec<PluginUpstreamKey> = cfg
                 .mcp_servers
                 .iter()
-                .map(|e| e.cache_key(&agent_id_base))
+                .map(|e| e.cache_key(&agent_id_base, &response_id))
                 .collect();
             aggregate_plugin_tools(inner, body, &selection, ws_session_id.as_deref()).await?;
         }
@@ -864,10 +928,11 @@ async fn forward(
         if let Some(body) = response.body.as_mut() {
             let ws_session_id = ws_session_id_from_headers(&request.headers);
             let agent_id_base = agent_id_base_from_headers(&request.headers);
+            let response_id = response_id_from_headers(&request.headers);
             let selection: Vec<PluginUpstreamKey> = cfg
                 .mcp_servers
                 .iter()
-                .map(|e| e.cache_key(&agent_id_base))
+                .map(|e| e.cache_key(&agent_id_base, &response_id))
                 .collect();
             aggregate_plugin_resources(inner, body, &selection, ws_session_id.as_deref()).await?;
         }
@@ -1051,7 +1116,7 @@ async fn aggregate_plugin_tools(
 
     // Build prefixed plugin tool entries (key on "name").
     let mut plugin_entries: Vec<serde_json::Value> = Vec::new();
-    for ((_plugin, mcp_name, _agent_id, _args_canonical), arc) in plugin_tool_lists {
+    for ((_plugin, mcp_name, _base, _rid, _args), arc) in plugin_tool_lists {
         for tool in arc.iter() {
             let value = serde_json::to_value(tool).unwrap_or(serde_json::Value::Null);
             plugin_entries.push(prefix_entry_field(value, "name", &mcp_name));
@@ -1105,7 +1170,7 @@ async fn aggregate_plugin_resources(
     };
 
     let mut plugin_entries: Vec<serde_json::Value> = Vec::new();
-    for ((_plugin, mcp_name, _agent_id, _args_canonical), arc) in plugin_resource_lists {
+    for ((_plugin, mcp_name, _base, _rid, _args), arc) in plugin_resource_lists {
         for resource in arc.iter() {
             let value = serde_json::to_value(resource).unwrap_or(serde_json::Value::Null);
             plugin_entries.push(prefix_entry_field(value, "uri", &mcp_name));
@@ -1242,10 +1307,11 @@ async fn try_route_tools_call(
     };
 
     let agent_id_base = agent_id_base_from_headers(&request.headers);
+    let response_id = response_id_from_headers(&request.headers);
     let selection: Vec<PluginUpstreamKey> = config
         .mcp_servers
         .iter()
-        .map(|e| e.cache_key(&agent_id_base))
+        .map(|e| e.cache_key(&agent_id_base, &response_id))
         .collect();
     let states = collect_plugin_states(inner, &selection);
     let plugin_lists_fut =
@@ -1279,7 +1345,7 @@ async fn try_route_tools_call(
     // primary_tools is empty.)
     let plugin_prefixed: HashSet<String> = plugin_lists
         .iter()
-        .flat_map(|((_p, mcp_name, _aid, _args), _s, tools)| {
+        .flat_map(|((_p, mcp_name, _base, _rid, _args), _s, tools)| {
             let mcp_name = mcp_name.clone();
             tools
                 .iter()
@@ -1306,7 +1372,7 @@ async fn try_route_tools_call(
     }
 
     // Try each selected plugin.
-    for ((_plugin, mcp_name, _aid, _args), state, tools) in &plugin_lists {
+    for ((_plugin, mcp_name, _base, _rid, _args), state, tools) in &plugin_lists {
         let prefix = format!("{mcp_name}_");
         if let Some(stripped) = requested.strip_prefix(&prefix) {
             if tools.iter().any(|t| t.name == stripped) {
@@ -1350,10 +1416,11 @@ async fn try_route_resources_read(
     };
 
     let agent_id_base = agent_id_base_from_headers(&request.headers);
+    let response_id = response_id_from_headers(&request.headers);
     let selection: Vec<PluginUpstreamKey> = config
         .mcp_servers
         .iter()
-        .map(|e| e.cache_key(&agent_id_base))
+        .map(|e| e.cache_key(&agent_id_base, &response_id))
         .collect();
     let states = collect_plugin_states(inner, &selection);
     let plugin_lists_fut =
@@ -1379,7 +1446,7 @@ async fn try_route_resources_read(
 
     let plugin_prefixed: HashSet<String> = plugin_lists
         .iter()
-        .flat_map(|((_p, mcp_name, _aid, _args), _s, resources)| {
+        .flat_map(|((_p, mcp_name, _base, _rid, _args), _s, resources)| {
             let mcp_name = mcp_name.clone();
             resources
                 .iter()
@@ -1404,7 +1471,7 @@ async fn try_route_resources_read(
         }
     }
 
-    for ((_plugin, mcp_name, _aid, _args), state, resources) in &plugin_lists {
+    for ((_plugin, mcp_name, _base, _rid, _args), state, resources) in &plugin_lists {
         let prefix = format!("{mcp_name}_");
         if let Some(stripped) = requested.strip_prefix(&prefix) {
             if resources.iter().any(|r| r.uri == stripped) {
@@ -1518,30 +1585,33 @@ impl McpServerConfigEntry {
             .unwrap_or_default()
     }
 
-    /// Cache key for `Inner::plugin_mcp_connections`. The
-    /// `agent_id_base` argument is the value read from the request's
-    /// `X-OBJECTIVEAI-AGENT-ID-BASE` header (empty string if absent).
-    fn cache_key(&self, agent_id_base: &str) -> PluginUpstreamKey {
+    /// Cache key for `Inner::plugin_mcp_connections`. Both
+    /// arguments come from the inbound request's headers
+    /// (`X-OBJECTIVEAI-AGENT-ID-BASE` and `X-OBJECTIVEAI-RESPONSE-ID`).
+    /// The per-agent-slot `response_id` is what actually enforces
+    /// uniqueness; the base is carried alongside for diagnostic
+    /// readability and wire-shape parity.
+    fn cache_key(&self, agent_id_base: &str, response_id: &str) -> PluginUpstreamKey {
         (
             self.plugin.clone(),
             self.name.clone(),
             agent_id_base.to_string(),
+            response_id.to_string(),
             self.args_canonical(),
         )
     }
 }
 
 /// Composite cache key for plugin-MCP upstream connections.
-/// `(plugin_name, mcp_name, agent_id_base, args_canonical)` —
-/// extending the historical `(plugin, mcp_name)` tuple with the
-/// agent's bare 22-char leaf identity (from
-/// `X-OBJECTIVEAI-AGENT-ID-BASE`) and a canonical stringification of
-/// the entry's `arguments`. Per-agent isolation is in slot 2:
-/// distinct bases ⇒ distinct entries ⇒ distinct plugin processes.
-/// Keying on the base (not the full lineage) lets cli-stream's
-/// chunk consumer match the first chunk's `agent` field directly
-/// when sweeping losing-agent state.
-type PluginUpstreamKey = (String, String, String, String);
+/// `(plugin_name, mcp_name, agent_id_base, response_id,
+/// args_canonical)`. Per-agent isolation comes from slot 3
+/// (`response_id`), which the API mints fresh per agent slot —
+/// guarantees distinct entries even if `agent_id_base` ever
+/// repeats. The streamed chunk's `agent_completion_ids()` emit
+/// these exact response_ids, so the group-aware sweep in
+/// [`ConduitMcpHandler::select_response_ids`] can match by slot 3
+/// directly.
+type PluginUpstreamKey = (String, String, String, String, String);
 
 /// Case-insensitive `X-OBJECTIVEAI-AGENT-ID` lookup on a request's
 /// headers. Returns the empty string if the header is missing — that
@@ -1566,6 +1636,50 @@ fn agent_id_base_from_headers(headers: &IndexMap<String, String>) -> String {
         .find(|(k, _)| k.eq_ignore_ascii_case("X-OBJECTIVEAI-AGENT-ID-BASE"))
         .map(|(_, v)| v.clone())
         .unwrap_or_default()
+}
+
+/// Case-insensitive `X-OBJECTIVEAI-RESPONSE-ID` lookup. The
+/// API mints one of these per agent slot (one per `filtered_agents`
+/// entry), so distinct slots always have distinct ids regardless
+/// of any `agent_id_base` collision. Used as the per-agent unique
+/// component of [`PluginUpstreamKey`].
+fn response_id_from_headers(headers: &IndexMap<String, String>) -> String {
+    headers
+        .iter()
+        .find(|(k, _)| k.eq_ignore_ascii_case("X-OBJECTIVEAI-RESPONSE-ID"))
+        .map(|(_, v)| v.clone())
+        .unwrap_or_default()
+}
+
+/// Parse `X-OBJECTIVEAI-RESPONSE-IDS` — the dash-joined sibling
+/// group of response_ids the API minted for one agent completion.
+/// Empty vec on absence; that's a no-op for the group-aware loser
+/// sweep, so un-stamped requests degrade gracefully.
+fn response_ids_group_from_headers(headers: &IndexMap<String, String>) -> Vec<String> {
+    headers
+        .iter()
+        .find(|(k, _)| k.eq_ignore_ascii_case("X-OBJECTIVEAI-RESPONSE-IDS"))
+        .map(|(_, v)| v.split('-').map(str::to_owned).collect())
+        .unwrap_or_default()
+}
+
+/// Register every response_id in this request's
+/// `X-OBJECTIVEAI-RESPONSE-IDS` header under the same shared
+/// `Arc<Vec<String>>` in [`Inner::response_id_groups`]. Cheap
+/// (`Arc::clone` per id), idempotent under concurrent dials
+/// (re-inserts of the same id overwrite with a logically-identical
+/// Arc), no-op when the header is absent.
+fn register_response_id_group(inner: &Arc<Inner>, headers: &IndexMap<String, String>) {
+    let group = response_ids_group_from_headers(headers);
+    if group.is_empty() {
+        return;
+    }
+    let shared = Arc::new(group);
+    for id in shared.iter() {
+        inner
+            .response_id_groups
+            .insert(id.clone(), shared.clone());
+    }
 }
 
 fn read_mcp_config_header(headers: &IndexMap<String, String>) -> Option<McpConfig> {
