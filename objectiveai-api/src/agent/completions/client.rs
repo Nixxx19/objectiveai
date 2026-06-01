@@ -829,10 +829,17 @@ where
                         );
 
                         #[derive(serde::Serialize)]
+                        struct McpServerConfig<'a> {
+                            plugin: &'a str,
+                            name: &'a str,
+                            #[serde(skip_serializing_if = "Option::is_none")]
+                            arguments: Option<&'a indexmap::IndexMap<String, String>>,
+                        }
+                        #[derive(serde::Serialize)]
                         struct McpConfig<'a> {
                             names: Vec<&'a str>,
                             objectiveai_builtins: bool,
-                            mcp_servers: Vec<(&'a str, &'a str)>,
+                            mcp_servers: Vec<McpServerConfig<'a>>,
                         }
                         let config = McpConfig {
                             names: client_mcp
@@ -859,8 +866,10 @@ where
                                         .as_deref()
                                         .unwrap_or(&[])
                                         .iter()
-                                        .map(move |name| {
-                                            (plugin.name.as_str(), name.as_str())
+                                        .map(move |entry| McpServerConfig {
+                                            plugin: plugin.name.as_str(),
+                                            name: entry.name.as_str(),
+                                            arguments: entry.arguments.as_ref(),
                                         })
                                 })
                                 .collect(),

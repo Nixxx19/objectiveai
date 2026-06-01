@@ -156,6 +156,15 @@ pub fn arbitrary_option_indexmap_string_i64(
     })
 }
 
+/// Generates an arbitrary `Option<IndexMap<String, String>>`.
+pub fn arbitrary_option_indexmap_string_string(
+    u: &mut arbitrary::Unstructured,
+) -> arbitrary::Result<Option<indexmap::IndexMap<String, String>>> {
+    arbitrary_option(u, |u| {
+        arbitrary_index_map(u, |u| u.arbitrary(), |u| u.arbitrary())
+    })
+}
+
 /// Generates an arbitrary `Option<u64>` (bounded range).
 pub fn arbitrary_option_u64(
     u: &mut arbitrary::Unstructured,

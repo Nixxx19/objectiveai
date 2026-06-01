@@ -87,7 +87,7 @@ struct PluginMcpState {
 /// this ws_session_id, used as the `mcp_session_id` on
 /// `McpListChanged` frames fanned out from plugin upstreams).
 struct SessionState {
-    last_selected: std::sync::Mutex<Vec<(String, String)>>,
+    last_selected: std::sync::Mutex<Vec<PluginUpstreamKey>>,
     /// Aggregate `Mcp-Session-Id` minted on this ws_session_id's
     /// first `initialize` — base62 of [`AggregateSession`]. Used by
     /// `fan_list_changed` as the outbound `mcp_session_id` field on
@@ -139,7 +139,7 @@ struct Inner {
     /// per-connection `set_on_{tools,resources}_list_changed`
     /// callbacks installed at dial time, which fan list_changed
     /// events out to every `ws_session_id` in `interested_sessions`.
-    plugin_mcp_connections: DashMap<(String, String), Arc<PluginMcpState>>,
+    plugin_mcp_connections: DashMap<PluginUpstreamKey, Arc<PluginMcpState>>,
     /// Per-`ws_session_id` `SessionState`, lazily created on first
     /// inbound request that carries an `X-OBJECTIVEAI-RESPONSE-ID`
     /// (or first `initialize` we see). Tracks the most recent
@@ -231,6 +231,8 @@ async fn dial_plugin_upstream(
     inner: &Arc<Inner>,
     plugin_name: String,
     mcp_name: String,
+    agent_id: String,
+    arguments: Option<IndexMap<String, String>>,
     stored_session_id: Option<String>,
 ) -> Result<String, ConduitError> {
     let fail = |reason: String| ConduitError::PluginDialFailed {
@@ -262,10 +264,14 @@ async fn dial_plugin_upstream(
         return Err(fail(format!("plugin {plugin_name:?} binary not found")));
     };
 
-    let mut child = tokio::process::Command::new(&exe)
-        .arg("mcp")
-        .arg(&mcp_name)
-        .arg("begin")
+    let mut cmd = tokio::process::Command::new(&exe);
+    cmd.arg("mcp").arg(&mcp_name).arg("begin");
+    if let Some(args) = arguments.as_ref() {
+        for (k, v) in args {
+            cmd.arg(format!("--{k}={v}"));
+        }
+    }
+    let mut child = cmd
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
@@ -344,9 +350,13 @@ async fn dial_plugin_upstream(
     state.connection.set_on_resources_list_changed(move || {
         fan_list_changed(&inner_r, &state_r, McpListChangedKind::Resources);
     });
+    let args_canonical = arguments
+        .as_ref()
+        .map(|m| serde_json::to_string(m).unwrap_or_default())
+        .unwrap_or_default();
     inner
         .plugin_mcp_connections
-        .insert((plugin_name, mcp_name), state);
+        .insert((plugin_name, mcp_name, agent_id, args_canonical), state);
 
     Ok(session_id)
 }
@@ -615,10 +625,11 @@ async fn forward(
             // bug. Default to dialing primary so we degrade toward
             // today's behavior rather than dropping the call.
             .unwrap_or(true);
-        let plugin_pairs: Vec<(String, String)> =
+        let plugin_entries: Vec<McpServerConfigEntry> =
             config.map(|c| c.mcp_servers.clone()).unwrap_or_default();
+        let agent_id = agent_id_from_headers(&request.headers);
 
-        if !needs_primary && plugin_pairs.is_empty() {
+        if !needs_primary && plugin_entries.is_empty() {
             return Ok(jsonrpc_error_envelope(
                 request.id,
                 rpc_id.unwrap_or(serde_json::Value::Null),
@@ -653,21 +664,32 @@ async fn forward(
             Ok(Some(session_id))
         };
 
-        // Plugin futures: one per `(plugin, mcp_name)` pair in the
+        // Plugin futures: one per `(plugin, mcp_name)` entry in the
         // agent declaration. Each resumes its upstream session if
         // the inbound aggregate carries a matching entry.
-        let plugin_futs: Vec<_> = plugin_pairs
+        let plugin_futs: Vec<_> = plugin_entries
             .iter()
             .cloned()
-            .map(|(plugin, mcp)| {
+            .map(|entry| {
                 let stored_sid = inbound_aggregate.as_ref().and_then(|a| {
                     a.plugins
                         .iter()
-                        .find(|e| e.plugin_name == plugin && e.mcp_name == mcp)
+                        .find(|e| e.plugin_name == entry.plugin && e.mcp_name == entry.name)
                         .map(|e| e.mcp_session_id.clone())
                 });
                 let inner = inner.clone();
-                async move { dial_plugin_upstream(&inner, plugin, mcp, stored_sid).await }
+                let agent_id = agent_id.clone();
+                async move {
+                    dial_plugin_upstream(
+                        &inner,
+                        entry.plugin,
+                        entry.name,
+                        agent_id,
+                        entry.arguments,
+                        stored_sid,
+                    )
+                    .await
+                }
             })
             .collect();
 
@@ -675,20 +697,18 @@ async fn forward(
         let (primary_sid_opt, plugin_results) = tokio::try_join!(primary_fut, plugin_joined)?;
 
         // Build the outbound aggregate from the dialed session ids.
-        // Input ordering of `plugin_pairs` is preserved through
+        // Input ordering of `plugin_entries` is preserved through
         // `try_join_all`'s `Vec<Output>`.
         let aggregate = AggregateSession {
             primary: primary_sid_opt,
-            plugins: plugin_pairs
+            plugins: plugin_entries
                 .into_iter()
                 .zip(plugin_results.into_iter())
-                .map(
-                    |((plugin_name, mcp_name), mcp_session_id)| AggregatePluginEntry {
-                        plugin_name,
-                        mcp_name,
-                        mcp_session_id,
-                    },
-                )
+                .map(|(entry, mcp_session_id)| AggregatePluginEntry {
+                    plugin_name: entry.plugin,
+                    mcp_name: entry.name,
+                    mcp_session_id,
+                })
                 .collect(),
         };
         let aggregate_encoded = aggregate.encode();
@@ -775,7 +795,13 @@ async fn forward(
         if let Some(body) = response.body.as_mut() {
             apply_tools_filter(inner, body, cfg).await;
             let ws_session_id = ws_session_id_from_headers(&request.headers);
-            aggregate_plugin_tools(inner, body, &cfg.mcp_servers, ws_session_id.as_deref()).await?;
+            let agent_id = agent_id_from_headers(&request.headers);
+            let selection: Vec<PluginUpstreamKey> = cfg
+                .mcp_servers
+                .iter()
+                .map(|e| e.cache_key(&agent_id))
+                .collect();
+            aggregate_plugin_tools(inner, body, &selection, ws_session_id.as_deref()).await?;
         }
     } else if rpc_method.as_deref() == Some("resources/list") {
         // `resources/list`: same shape as tools/list aggregation,
@@ -784,8 +810,13 @@ async fn forward(
         let cfg = config.expect("X-OBJECTIVEAI-MCP-CONFIG header is required on resources/list");
         if let Some(body) = response.body.as_mut() {
             let ws_session_id = ws_session_id_from_headers(&request.headers);
-            aggregate_plugin_resources(inner, body, &cfg.mcp_servers, ws_session_id.as_deref())
-                .await?;
+            let agent_id = agent_id_from_headers(&request.headers);
+            let selection: Vec<PluginUpstreamKey> = cfg
+                .mcp_servers
+                .iter()
+                .map(|e| e.cache_key(&agent_id))
+                .collect();
+            aggregate_plugin_resources(inner, body, &selection, ws_session_id.as_deref()).await?;
         }
     }
 
@@ -933,7 +964,7 @@ async fn forward_through(
 async fn aggregate_plugin_tools(
     inner: &Arc<Inner>,
     body: &mut serde_json::Value,
-    selection: &[(String, String)],
+    selection: &[PluginUpstreamKey],
     ws_session_id: Option<&str>,
 ) -> Result<(), ConduitError> {
     if let Some(ws_session_id) = ws_session_id {
@@ -946,14 +977,14 @@ async fn aggregate_plugin_tools(
 
     // Fan out list_tools across selected plugin connections.
     let states = collect_plugin_states(inner, selection);
-    let plugin_tool_lists: Vec<((String, String), Arc<Vec<objectiveai_sdk::mcp::tool::Tool>>)> =
-        futures::future::try_join_all(states.into_iter().map(|(pair, state)| async move {
+    let plugin_tool_lists: Vec<(PluginUpstreamKey, Arc<Vec<objectiveai_sdk::mcp::tool::Tool>>)> =
+        futures::future::try_join_all(states.into_iter().map(|(key, state)| async move {
             let tools = state
                 .connection
                 .list_tools()
                 .await
                 .map_err(|_| ConduitError::PluginListFailed)?;
-            Ok::<_, ConduitError>((pair, tools))
+            Ok::<_, ConduitError>((key, tools))
         }))
         .await?;
 
@@ -967,7 +998,7 @@ async fn aggregate_plugin_tools(
 
     // Build prefixed plugin tool entries (key on "name").
     let mut plugin_entries: Vec<serde_json::Value> = Vec::new();
-    for ((_plugin, mcp_name), arc) in plugin_tool_lists {
+    for ((_plugin, mcp_name, _agent_id, _args_canonical), arc) in plugin_tool_lists {
         for tool in arc.iter() {
             let value = serde_json::to_value(tool).unwrap_or(serde_json::Value::Null);
             plugin_entries.push(prefix_entry_field(value, "name", &mcp_name));
@@ -987,7 +1018,7 @@ async fn aggregate_plugin_tools(
 async fn aggregate_plugin_resources(
     inner: &Arc<Inner>,
     body: &mut serde_json::Value,
-    selection: &[(String, String)],
+    selection: &[PluginUpstreamKey],
     ws_session_id: Option<&str>,
 ) -> Result<(), ConduitError> {
     if let Some(ws_session_id) = ws_session_id {
@@ -1000,15 +1031,15 @@ async fn aggregate_plugin_resources(
 
     let states = collect_plugin_states(inner, selection);
     let plugin_resource_lists: Vec<(
-        (String, String),
+        PluginUpstreamKey,
         Arc<Vec<objectiveai_sdk::mcp::resource::Resource>>,
-    )> = futures::future::try_join_all(states.into_iter().map(|(pair, state)| async move {
+    )> = futures::future::try_join_all(states.into_iter().map(|(key, state)| async move {
         let resources = state
             .connection
             .list_resources()
             .await
             .map_err(|_| ConduitError::PluginListFailed)?;
-        Ok::<_, ConduitError>((pair, resources))
+        Ok::<_, ConduitError>((key, resources))
     }))
     .await?;
 
@@ -1021,7 +1052,7 @@ async fn aggregate_plugin_resources(
     };
 
     let mut plugin_entries: Vec<serde_json::Value> = Vec::new();
-    for ((_plugin, mcp_name), arc) in plugin_resource_lists {
+    for ((_plugin, mcp_name, _agent_id, _args_canonical), arc) in plugin_resource_lists {
         for resource in arc.iter() {
             let value = serde_json::to_value(resource).unwrap_or(serde_json::Value::Null);
             plugin_entries.push(prefix_entry_field(value, "uri", &mcp_name));
@@ -1038,13 +1069,13 @@ async fn aggregate_plugin_resources(
 /// `tools/list` and `resources/list` for the same ws_session_id.
 fn reconcile_interested_sessions(
     inner: &Arc<Inner>,
-    selection: &[(String, String)],
+    selection: &[PluginUpstreamKey],
     ws_session_id: &str,
 ) {
     let sess = get_or_create_session(inner, ws_session_id);
     let mut last = sess.last_selected.lock().unwrap();
-    let new_set: HashSet<(String, String)> = selection.iter().cloned().collect();
-    let old_set: HashSet<(String, String)> = last.iter().cloned().collect();
+    let new_set: HashSet<PluginUpstreamKey> = selection.iter().cloned().collect();
+    let old_set: HashSet<PluginUpstreamKey> = last.iter().cloned().collect();
     for removed in old_set.difference(&new_set) {
         if let Some(state) = inner.plugin_mcp_connections.get(removed) {
             state.interested_sessions.remove(ws_session_id);
@@ -1058,21 +1089,21 @@ fn reconcile_interested_sessions(
     *last = selection.to_vec();
 }
 
-/// Snapshot the `PluginMcpState`s for each `(plugin, mcp_name)` pair
-/// the selection references. Pairs without a matching live
-/// connection are silently skipped (the CONNECT never landed or got
-/// displaced) — degraded but proceeds.
+/// Snapshot the `PluginMcpState`s for each upstream key the
+/// selection references. Keys without a matching live connection
+/// are silently skipped (the CONNECT never landed or got displaced)
+/// — degraded but proceeds.
 fn collect_plugin_states(
     inner: &Arc<Inner>,
-    selection: &[(String, String)],
-) -> Vec<((String, String), Arc<PluginMcpState>)> {
+    selection: &[PluginUpstreamKey],
+) -> Vec<(PluginUpstreamKey, Arc<PluginMcpState>)> {
     selection
         .iter()
-        .filter_map(|pair| {
+        .filter_map(|key| {
             inner
                 .plugin_mcp_connections
-                .get(pair)
-                .map(|s| (pair.clone(), s.clone()))
+                .get(key)
+                .map(|s| (key.clone(), s.clone()))
         })
         .collect()
 }
@@ -1157,15 +1188,21 @@ async fn try_route_tools_call(
         return Ok(None);
     };
 
-    let states = collect_plugin_states(inner, &config.mcp_servers);
+    let agent_id = agent_id_from_headers(&request.headers);
+    let selection: Vec<PluginUpstreamKey> = config
+        .mcp_servers
+        .iter()
+        .map(|e| e.cache_key(&agent_id))
+        .collect();
+    let states = collect_plugin_states(inner, &selection);
     let plugin_lists_fut =
-        futures::future::try_join_all(states.into_iter().map(|(pair, state)| async move {
+        futures::future::try_join_all(states.into_iter().map(|(key, state)| async move {
             let tools = state
                 .connection
                 .list_tools()
                 .await
                 .map_err(|_| ConduitError::PluginListFailed)?;
-            Ok::<_, ConduitError>((pair, state, tools))
+            Ok::<_, ConduitError>((key, state, tools))
         }));
     let primary_tools_opt = match primary {
         Some(p) => {
@@ -1189,7 +1226,7 @@ async fn try_route_tools_call(
     // primary_tools is empty.)
     let plugin_prefixed: HashSet<String> = plugin_lists
         .iter()
-        .flat_map(|((_p, mcp_name), _s, tools)| {
+        .flat_map(|((_p, mcp_name, _aid, _args), _s, tools)| {
             let mcp_name = mcp_name.clone();
             tools
                 .iter()
@@ -1216,7 +1253,7 @@ async fn try_route_tools_call(
     }
 
     // Try each selected plugin.
-    for ((_plugin, mcp_name), state, tools) in &plugin_lists {
+    for ((_plugin, mcp_name, _aid, _args), state, tools) in &plugin_lists {
         let prefix = format!("{mcp_name}_");
         if let Some(stripped) = requested.strip_prefix(&prefix) {
             if tools.iter().any(|t| t.name == stripped) {
@@ -1259,15 +1296,21 @@ async fn try_route_resources_read(
         return Ok(None);
     };
 
-    let states = collect_plugin_states(inner, &config.mcp_servers);
+    let agent_id = agent_id_from_headers(&request.headers);
+    let selection: Vec<PluginUpstreamKey> = config
+        .mcp_servers
+        .iter()
+        .map(|e| e.cache_key(&agent_id))
+        .collect();
+    let states = collect_plugin_states(inner, &selection);
     let plugin_lists_fut =
-        futures::future::try_join_all(states.into_iter().map(|(pair, state)| async move {
+        futures::future::try_join_all(states.into_iter().map(|(key, state)| async move {
             let resources = state
                 .connection
                 .list_resources()
                 .await
                 .map_err(|_| ConduitError::PluginListFailed)?;
-            Ok::<_, ConduitError>((pair, state, resources))
+            Ok::<_, ConduitError>((key, state, resources))
         }));
     let (primary_resources, plugin_lists) = match primary {
         Some(p) => {
@@ -1283,7 +1326,7 @@ async fn try_route_resources_read(
 
     let plugin_prefixed: HashSet<String> = plugin_lists
         .iter()
-        .flat_map(|((_p, mcp_name), _s, resources)| {
+        .flat_map(|((_p, mcp_name, _aid, _args), _s, resources)| {
             let mcp_name = mcp_name.clone();
             resources
                 .iter()
@@ -1308,7 +1351,7 @@ async fn try_route_resources_read(
         }
     }
 
-    for ((_plugin, mcp_name), state, resources) in &plugin_lists {
+    for ((_plugin, mcp_name, _aid, _args), state, resources) in &plugin_lists {
         let prefix = format!("{mcp_name}_");
         if let Some(stripped) = requested.strip_prefix(&prefix) {
             if resources.iter().any(|r| r.uri == stripped) {
@@ -1390,13 +1433,72 @@ struct McpConfig {
     /// [`apply_tools_filter`].
     #[serde(default)]
     objectiveai_builtins: bool,
-    /// `(plugin_name, mcp_name)` pairs the server has chosen as
-    /// active for this ws_session_id. Drives `tools/list`
-    /// aggregation across the primary upstream + selected plugin
-    /// MCP connections and `list_changed` fan-out from selected
-    /// plugin upstreams.
+    /// Per-`(plugin, name)` entries the server has chosen as active
+    /// for this ws_session_id, plus each entry's `arguments` map.
+    /// Drives `tools/list` aggregation across the primary upstream
+    /// + selected plugin MCP connections and `list_changed`
+    /// fan-out from selected plugin upstreams.
     #[serde(default)]
-    mcp_servers: Vec<(String, String)>,
+    mcp_servers: Vec<McpServerConfigEntry>,
+}
+
+/// One entry inside [`McpConfig::mcp_servers`]. Mirrors the API's
+/// serialized `McpServerConfig` wire shape.
+#[derive(Debug, Clone, serde::Deserialize)]
+struct McpServerConfigEntry {
+    plugin: String,
+    name: String,
+    #[serde(default)]
+    arguments: Option<IndexMap<String, String>>,
+}
+
+impl McpServerConfigEntry {
+    /// Canonical string form of the `arguments` map. Used as part
+    /// of the [`Inner::plugin_mcp_connections`] cache key so two
+    /// agents asking for the same `(plugin, name)` with different
+    /// arguments don't share a connection. The map was already
+    /// key-sorted by `prepare` on the SDK side; we just stringify it.
+    fn args_canonical(&self) -> String {
+        self.arguments
+            .as_ref()
+            .map(|m| serde_json::to_string(m).unwrap_or_default())
+            .unwrap_or_default()
+    }
+
+    /// Cache key for `Inner::plugin_mcp_connections`. The `agent_id`
+    /// argument is the value read from the request's
+    /// `X-OBJECTIVEAI-AGENT-ID` header (empty string if absent).
+    fn cache_key(&self, agent_id: &str) -> PluginUpstreamKey {
+        (
+            self.plugin.clone(),
+            self.name.clone(),
+            agent_id.to_string(),
+            self.args_canonical(),
+        )
+    }
+}
+
+/// Composite cache key for plugin-MCP upstream connections.
+/// `(plugin_name, mcp_name, agent_id, args_canonical)` — extending
+/// the historical `(plugin, mcp_name)` tuple with the cli-session
+/// agent_id (from `X-OBJECTIVEAI-AGENT-ID`) and a canonical
+/// stringification of the entry's `arguments`. The extension is
+/// what enforces per-agent isolation: two agents asking for the
+/// same `(plugin, mcp_name)` get distinct entries and thus distinct
+/// plugin processes / upstream connections.
+type PluginUpstreamKey = (String, String, String, String);
+
+/// Case-insensitive `X-OBJECTIVEAI-AGENT-ID` lookup on a request's
+/// headers. Returns the empty string if the header is missing — that
+/// case folds into a single shared cache slot for un-stamped
+/// requests, matching the historical behavior before per-agent
+/// isolation was added.
+fn agent_id_from_headers(headers: &IndexMap<String, String>) -> String {
+    headers
+        .iter()
+        .find(|(k, _)| k.eq_ignore_ascii_case("X-OBJECTIVEAI-AGENT-ID"))
+        .map(|(_, v)| v.clone())
+        .unwrap_or_default()
 }
 
 fn read_mcp_config_header(headers: &IndexMap<String, String>) -> Option<McpConfig> {
