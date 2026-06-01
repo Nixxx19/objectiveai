@@ -5,13 +5,13 @@ from pydantic import BaseModel, ConfigDict
 
 
 class Me(BaseModel):
-    """Wire shape: `{"type":"notification","value":{"kind":"me","agent_id":"..."}}`.
+    """Wire shape: `{"type":"notification","value":{"kind":"me","agent_instance_hierarchy":"..."}}`.
 Emitted by `objectiveai agents me`. The configured self agent id,
-read from `Config.agent_id` — sourced from `OBJECTIVEAI_AGENT_ID`
-for direct CLI, or from the `X-OBJECTIVEAI-AGENT-ID` header when
+read from `Config.agent_instance_hierarchy` — sourced from `OBJECTIVEAI_AGENT_INSTANCE_HIERARCHY`
+for direct CLI, or from the `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY` header when
 running under the MCP server (which defaults to `"MCP"` when the
 header is absent)."""
     model_config = ConfigDict(title='cli.output.notification.Me')
 
-    agent_id: str
+    agent_instance_hierarchy: str
 

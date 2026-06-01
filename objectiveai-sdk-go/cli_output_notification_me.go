@@ -7,14 +7,14 @@ import (
 	"fmt"
 )
 
-// Wire shape: `{"type":"notification","value":{"kind":"me","agent_id":"..."}}`.
+// Wire shape: `{"type":"notification","value":{"kind":"me","agent_instance_hierarchy":"..."}}`.
 // Emitted by `objectiveai agents me`. The configured self agent id,
-// read from `Config.agent_id` — sourced from `OBJECTIVEAI_AGENT_ID`
-// for direct CLI, or from the `X-OBJECTIVEAI-AGENT-ID` header when
+// read from `Config.agent_instance_hierarchy` — sourced from `OBJECTIVEAI_AGENT_INSTANCE_HIERARCHY`
+// for direct CLI, or from the `X-OBJECTIVEAI-AGENT-INSTANCE-HIERARCHY` header when
 // running under the MCP server (which defaults to `"MCP"` when the
 // header is absent).
 type CliOutputNotificationMe struct {
-	AgentID string `json:"agent_id"`
+	AgentInstanceHierarchy string `json:"agent_instance_hierarchy"`
 }
 
 func (CliOutputNotificationMe) SchemaTitle() string { return "cli.output.notification.Me" }
@@ -27,7 +27,7 @@ func (v *CliOutputNotificationMe) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"agent_id"} {
+	for _, key := range []string{"agent_instance_hierarchy"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("CliOutputNotificationMe: missing required field %q", key)
 		}

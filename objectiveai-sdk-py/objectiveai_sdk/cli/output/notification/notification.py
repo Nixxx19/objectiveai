@@ -38,20 +38,20 @@ class Notification(RootModel):
 into the top-level JSON object via `#[serde(flatten)]` — there
 is no `value` wrapper or `type:"notification"` envelope.
 
-`Notification` has no struct-level `agent_id` field. Inner
+`Notification` has no struct-level `agent_instance_hierarchy` field. Inner
 payloads that name an agent (e.g. `Spawned`, `MessageQueued`,
-`Inactive`, `Me`) carry agent_id themselves — flattening would
+`Inactive`, `Me`) carry agent_instance_hierarchy themselves — flattening would
 otherwise collide on the wire. For payloads with no inherent
-agent_id (`Ok`, `LogContent`, `Mcp`, …), the cli session's
-agent_id is stamped at JSON-serialize time by
+agent_instance_hierarchy (`Ok`, `LogContent`, `Mcp`, …), the cli session's
+agent_instance_hierarchy is stamped at JSON-serialize time by
 [`super::super::Handle::emit`] iff the resulting JSON object
 doesn't already contain one.
 
 Wire:
   `{"type":"<typed-variant>",…fields…}` for typed variants.
   `{…object-keys…}` for `Other` payloads.
-  Handle additionally injects `"agent_id":"<cli-session-id>"`
-  at JSON level when no inner agent_id is present."""
+  Handle additionally injects `"agent_instance_hierarchy":"<cli-session-id>"`
+  at JSON level when no inner agent_instance_hierarchy is present."""
     model_config = ConfigDict(title='cli.output.notification.Notification')
 
     root: Union[NotificationTyped, NotificationOther]

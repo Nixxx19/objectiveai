@@ -13,7 +13,7 @@ type AgentMockContinuation struct {
 	// agent's first spawn and preserved verbatim across every
 	// continuation round so the agent's identity stays stable
 	// regardless of who resumes the conversation.
-	AgentID string `json:"agent_id"`
+	AgentInstanceHierarchy string `json:"agent_instance_hierarchy"`
 	MCPSessions OrderedMap[string, string] `json:"mcp_sessions"`
 	Messages []AgentCompletionsMessageMessage `json:"messages"`
 	Upstream AgentMockUpstream `json:"upstream"`
@@ -35,7 +35,7 @@ func (v *AgentMockContinuation) UnmarshalJSON(data []byte) error {
 	if err := json.Unmarshal(data, &raw); err != nil {
 		return err
 	}
-	for _, key := range []string{"agent_id", "mcp_sessions", "messages", "upstream"} {
+	for _, key := range []string{"agent_instance_hierarchy", "mcp_sessions", "messages", "upstream"} {
 		if _, ok := raw[key]; !ok {
 			return fmt.Errorf("AgentMockContinuation: missing required field %q", key)
 		}

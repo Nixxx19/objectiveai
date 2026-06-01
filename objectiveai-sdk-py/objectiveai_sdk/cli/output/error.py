@@ -26,7 +26,7 @@ untagged `Output` enum from a notification — `Output` tries
 rejects every non-error wire shape."""
     model_config = ConfigDict(title='cli.output.Error')
 
-    agent_id: Optional[str] = Field(None, description='Stamped at emit time by [`super::Handle`] when its `agent_id`\nfield is set; producers leave this `None` and let the handle\nfill it. Serde-skipped when `None`.', json_schema_extra={'omitempty': True})
+    agent_instance_hierarchy: Optional[str] = Field(None, description='Stamped at emit time by [`super::Handle`] when its `agent_instance_hierarchy`\nfield is set; producers leave this `None` and let the handle\nfill it. Serde-skipped when `None`.', json_schema_extra={'omitempty': True})
     fatal: bool
     level: Level
     message: JsonValue

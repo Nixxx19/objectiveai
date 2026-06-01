@@ -204,7 +204,7 @@ declare const AgentClaudeAgentSdkAgentBaseSchema: z.ZodObject<{
 type AgentClaudeAgentSdkAgentBase = z.infer<typeof AgentClaudeAgentSdkAgentBaseSchema>;
 
 declare const AgentClaudeAgentSdkContinuationSchema: z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     session_id: z.ZodString;
     upstream: z.ZodLiteral<"claude_agent_sdk">;
@@ -421,7 +421,7 @@ declare const AgentCodexSdkAgentBaseSchema: z.ZodObject<{
 type AgentCodexSdkAgentBase = z.infer<typeof AgentCodexSdkAgentBaseSchema>;
 
 declare const AgentCodexSdkContinuationSchema: z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     thread_id: z.ZodString;
     upstream: z.ZodLiteral<"codex_sdk">;
@@ -10033,7 +10033,7 @@ declare const AgentMockAgentBaseSchema: z.ZodObject<{
 type AgentMockAgentBase = z.infer<typeof AgentMockAgentBaseSchema>;
 
 declare const AgentMockContinuationSchema: z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     messages: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
@@ -11180,7 +11180,7 @@ declare const AgentOpenrouterAgentBaseSchema: z.ZodObject<{
 type AgentOpenrouterAgentBase = z.infer<typeof AgentOpenrouterAgentBaseSchema>;
 
 declare const AgentOpenrouterContinuationSchema: z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     messages: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
@@ -20054,7 +20054,7 @@ declare const AgentClientObjectiveaiMcpPluginMcpServerSchema: z.ZodObject<{
 type AgentClientObjectiveaiMcpPluginMcpServer = z.infer<typeof AgentClientObjectiveaiMcpPluginMcpServerSchema>;
 
 declare const AgentContinuationSchema: z.ZodUnion<readonly [z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     messages: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
@@ -20203,19 +20203,19 @@ declare const AgentContinuationSchema: z.ZodUnion<readonly [z.ZodObject<{
     upstream: z.ZodLiteral<"openrouter">;
     ws_session_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>, z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     session_id: z.ZodString;
     upstream: z.ZodLiteral<"claude_agent_sdk">;
     ws_session_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>, z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     thread_id: z.ZodString;
     upstream: z.ZodLiteral<"codex_sdk">;
     ws_session_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
 }, z.core.$strip>, z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
     mcp_sessions: z.ZodRecord<z.ZodString, z.ZodString>;
     messages: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
@@ -36779,7 +36779,7 @@ declare const CliOutputNotificationMcpSchema: z.ZodObject<{
 type CliOutputNotificationMcp = z.infer<typeof CliOutputNotificationMcpSchema>;
 
 declare const CliOutputNotificationMeSchema: z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
 }, z.core.$strip>;
 type CliOutputNotificationMe = z.infer<typeof CliOutputNotificationMeSchema>;
 
@@ -38521,7 +38521,7 @@ declare const CliOutputNotificationNotificationSchema: z.ZodUnion<readonly [z.Zo
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"mcp">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"me">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -40420,7 +40420,7 @@ declare const CliOutputNotificationNotificationValueSchema: z.ZodUnion<readonly 
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"mcp">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"me">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -42518,7 +42518,7 @@ declare const CliOutputNotificationTypedNotificationValueSchema: z.ZodUnion<read
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"mcp">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"me">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -42710,7 +42710,7 @@ declare const CliOutputNotificationViewerSendResultSchema: z.ZodObject<{
 type CliOutputNotificationViewerSendResult = z.infer<typeof CliOutputNotificationViewerSendResultSchema>;
 
 declare const CliOutputErrorSchema: z.ZodObject<{
-    agent_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    agent_instance_hierarchy: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     fatal: z.ZodBoolean;
     level: z.ZodEnum<{
         error: "error";
@@ -42737,7 +42737,7 @@ declare const CliOutputLevelSchema: z.ZodEnum<{
 type CliOutputLevel = z.infer<typeof CliOutputLevelSchema>;
 
 declare const CliOutputOutputSchema: z.ZodUnion<readonly [z.ZodObject<{
-    agent_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    agent_instance_hierarchy: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     fatal: z.ZodBoolean;
     level: z.ZodEnum<{
         error: "error";
@@ -44486,7 +44486,7 @@ declare const CliOutputOutputSchema: z.ZodUnion<readonly [z.ZodObject<{
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"mcp">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-    agent_id: z.ZodString;
+    agent_instance_hierarchy: z.ZodString;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"me">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -44650,7 +44650,7 @@ type CliOutputOutput = z.infer<typeof CliOutputOutputSchema>;
 declare const CliPluginsPluginCommandResponseSchema: z.ZodObject<{
     id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     value: z.ZodUnion<readonly [z.ZodObject<{
-        agent_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        agent_instance_hierarchy: z.ZodOptional<z.ZodNullable<z.ZodString>>;
         fatal: z.ZodBoolean;
         level: z.ZodEnum<{
             error: "error";
@@ -46399,7 +46399,7 @@ declare const CliPluginsPluginCommandResponseSchema: z.ZodObject<{
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"mcp">;
     }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-        agent_id: z.ZodString;
+        agent_instance_hierarchy: z.ZodString;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"me">;
     }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
@@ -46570,7 +46570,7 @@ declare const CliPluginsPluginOutputSchema: z.ZodUnion<readonly [z.ZodUnion<read
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"mcp">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-    agent_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    agent_instance_hierarchy: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     fatal: z.ZodBoolean;
     level: z.ZodEnum<{
         error: "error";
@@ -46595,7 +46595,7 @@ declare const CliPluginsTypedPluginOutputSchema: z.ZodUnion<readonly [z.ZodObjec
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"mcp">;
 }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-    agent_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    agent_instance_hierarchy: z.ZodOptional<z.ZodNullable<z.ZodString>>;
     fatal: z.ZodBoolean;
     level: z.ZodEnum<{
         error: "error";

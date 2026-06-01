@@ -6,7 +6,7 @@ import { CliOutputErrorTypeSchema } from "./errorType";
 import { CliOutputLevelSchema } from "./level";
 
 export const CliOutputErrorSchema = z.object({
-  agent_id: z.string().nullable().describe("Stamped at emit time by [`super::Handle`] when its `agent_id`\nfield is set; producers leave this `None` and let the handle\nfill it. Serde-skipped when `None`.").meta({ omitempty: true }).optional(),
+  agent_instance_hierarchy: z.string().nullable().describe("Stamped at emit time by [`super::Handle`] when its `agent_instance_hierarchy`\nfield is set; producers leave this `None` and let the handle\nfill it. Serde-skipped when `None`.").meta({ omitempty: true }).optional(),
   fatal: z.boolean(),
   level: CliOutputLevelSchema,
   message: JsonValueSchema,
