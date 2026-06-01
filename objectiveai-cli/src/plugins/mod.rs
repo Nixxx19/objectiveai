@@ -24,15 +24,19 @@
 //! - `Notification(Value)` → forward via [`Output::Notification`]
 //! - `Command { id, command }` → tokenize the string and spawn a
 //!   recursive `cli::run` call. The spawned command's emissions
-//!   ALWAYS flow back into the plugin's stdin, followed by one
-//!   terminal `command_complete` notification once the run
-//!   finishes. When the plugin minted an `id`, both the per-line
-//!   responses and the terminal marker carry `request_id: "<id>"`
-//!   stamped at the top level so the plugin can demultiplex
-//!   concurrent commands; when `id` is absent, the lines flow back
-//!   unstamped and the plugin gets a single in-order stream. Either
-//!   way the wire is line-serialized on the shared
-//!   `Arc<Mutex<ChildStdin>>`.
+//!   ALWAYS flow back into the plugin's stdin **as they happen**,
+//!   one envelope line per emit, followed by one terminal
+//!   `command_complete` notification once the run finishes. Every
+//!   line is wrapped in a `PluginCommandResponse { id, value }`
+//!   envelope so the plugin parses a uniform shape for every
+//!   command. When the plugin minted an `id`, the envelope's `id`
+//!   field echoes it (`{"id":"<id>","value":{…}}`) so the plugin
+//!   can demultiplex concurrent in-flight commands; when `id` is
+//!   absent, the field is dropped on the wire (`{"value":{…}}`)
+//!   and the plugin gets a single in-order stream delimited by
+//!   `command_complete` markers. Nothing from a spawned command
+//!   ever lands on the host's own stdout. Either way the wire is
+//!   line-serialized on the shared `Arc<Mutex<ChildStdin>>`.
 //! - parse failure → re-emit the raw line as a string-valued
 //!   notification, so it still appears in the host's JSONL stream
 //!
@@ -330,15 +334,18 @@ pub async fn dispatch_external(
             }
             Ok(PluginOutput::Typed(TypedPluginOutput::Command { id, command })) => {
                 // Per-command handle: writes back to the plugin's
-                // stdin in every case. When the plugin minted an
-                // `id`, stamp `request_id` on every emitted line so
-                // the plugin can demultiplex concurrent commands;
-                // when there's no id, lines flow back unstamped (the
-                // plugin gets the output but no correlation token).
-                let mut task_handle = Handle::from(HandleDestination::Stdin(plugin_stdin.clone()));
-                if let Some(rid) = &id {
-                    task_handle = task_handle.with_request_id(rid.clone());
-                }
+                // stdin in every case, wrapping each emitted line in
+                // a `PluginCommandResponse { id, value }` envelope.
+                // When the plugin minted an `id`, the envelope's
+                // `id` field echoes it so the plugin can demultiplex
+                // concurrent commands; when there's no id, the
+                // field is dropped on the wire and the plugin sees a
+                // single in-order stream delimited by
+                // `command_complete` markers.
+                let task_handle = Handle::from(HandleDestination::PluginCommandStdin {
+                    stdin: plugin_stdin.clone(),
+                    id: id.clone(),
+                });
                 command_tasks.push((id, spawn_command(command, cli_config, task_handle)));
             }
             Err(_) => {
@@ -363,10 +370,10 @@ pub async fn dispatch_external(
     // the final lines.
     for (id, t) in command_tasks {
         let exit_code = t.await.unwrap_or(-1);
-        let mut completion_handle = Handle::from(HandleDestination::Stdin(plugin_stdin.clone()));
-        if let Some(rid) = id {
-            completion_handle = completion_handle.with_request_id(rid);
-        }
+        let completion_handle = Handle::from(HandleDestination::PluginCommandStdin {
+            stdin: plugin_stdin.clone(),
+            id,
+        });
         Output::Notification(Notification {
             value: CommandComplete { exit_code }.into(),
         })

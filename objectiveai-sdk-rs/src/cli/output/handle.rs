@@ -5,6 +5,11 @@
 //! - [`HandleDestination::Stdin`] — a child process's stdin, for
 //!   programmatic embedders that spawn a subprocess to consume the
 //!   cli's output.
+//! - [`HandleDestination::PluginCommandStdin`] — the plugin command
+//!   response channel. Like `Stdin` (writes to a child's stdin) but
+//!   wraps each emitted `Output` in a
+//!   [`super::PluginCommandResponse`] envelope so plugins can
+//!   correlate concurrent in-flight commands by id.
 //! - [`HandleDestination::Collect`] — an in-memory shared `Vec`, for
 //!   tests or in-process embedders that want the events without a
 //!   subprocess.
@@ -37,8 +42,21 @@ pub enum HandleDestination {
     /// Write each line to this process's stdout; mirror fatal
     /// `Output::Error` lines to stderr.
     Stdout,
-    /// Write each line to a child process's stdin.
+    /// Write each line to a child process's stdin as the raw `Output`
+    /// JSON — the generic embedder destination.
     Stdin(Arc<Mutex<ChildStdin>>),
+    /// Plugin command response channel. Every emitted `Output` is
+    /// wrapped in a [`super::PluginCommandResponse`]
+    /// `{id, value: Output}` envelope before one NDJSON line is
+    /// written to the plugin's stdin. `id == None` means the
+    /// dispatching `TypedPluginOutput::Command` carried no id;
+    /// `serde(skip_serializing_if = "Option::is_none")` then drops
+    /// the field on the wire so the plugin can parse one shape
+    /// uniformly for id-less and id-bearing dispatches.
+    PluginCommandStdin {
+        stdin: Arc<Mutex<ChildStdin>>,
+        id: Option<String>,
+    },
     /// Push each emitted [`Output`] into a shared vector. Used by
     /// tests and by in-process embedders that want to observe every
     /// emitted line.
@@ -56,9 +74,8 @@ impl Default for HandleDestination {
     }
 }
 
-/// Output handle: a destination plus an optional `agent_id` and an
-/// optional `request_id`, both stamped on every emitted
-/// `Notification` and `Error` line.
+/// Output handle: a destination plus an optional `agent_id` that gets
+/// stamped on every emitted `Notification` and `Error` line.
 ///
 /// The `agent_id` field is set once by the cli's `run()` from
 /// `Config.agent_id` (env `OBJECTIVEAI_AGENT_ID`). All emit sites
@@ -66,20 +83,14 @@ impl Default for HandleDestination {
 /// own `agent_id: Option<String>` field that defaults to `None`, and
 /// `emit` overwrites it with the handle's value before writing.
 ///
-/// `request_id` is the plugin↔CLI correlation token. When the host
-/// dispatches a plugin-emitted `Command { id, .. }`, it builds a
-/// `Handle` whose destination is the plugin's stdin and whose
-/// `request_id` carries the plugin-minted id. Every line emitted
-/// downstream gets `"request_id":"<id>"` stamped at the top level,
-/// so the plugin can demultiplex concurrent in-flight commands by
-/// reading that field. `Notification` / `Error` payloads do NOT
-/// carry a `request_id` member; the stamp is purely an envelope-
-/// level JSON patch (mirrors agent_id's wire path).
+/// Plugin↔CLI correlation lives on the *destination*, not on the
+/// handle: a [`HandleDestination::PluginCommandStdin`] carries the
+/// originating command's `id` and wraps each emitted line in a
+/// [`super::PluginCommandResponse`] envelope.
 #[derive(Clone, Default)]
 pub struct Handle {
     pub destination: HandleDestination,
     pub agent_id: Option<String>,
-    pub request_id: Option<String>,
 }
 
 impl From<HandleDestination> for Handle {
@@ -87,7 +98,6 @@ impl From<HandleDestination> for Handle {
         Handle {
             destination,
             agent_id: None,
-            request_id: None,
         }
     }
 }
@@ -99,13 +109,6 @@ impl Handle {
         Handle::default()
     }
 
-    /// Builder: set the `request_id` stamp. See the [`Handle`]
-    /// type-level doc for the plugin↔CLI correlation contract.
-    pub fn with_request_id(mut self, id: String) -> Self {
-        self.request_id = Some(id);
-        self
-    }
-
     /// Emit `output` to this destination. Best-effort for `Stdout`:
     /// if the parent's read end of our pipe has closed (broken pipe)
     /// we silently swallow the error so a detached background writer
@@ -114,36 +117,26 @@ impl Handle {
     /// behaviour. Non-broken-pipe write errors fall through to a
     /// panic so genuine bugs still surface.
     pub async fn emit(&self, output: &Output) {
-        // Single Value round-trip when we have an agent_id or a
-        // request_id to stamp. Both remaining `Output` variants
-        // (Notification + Error) are object-shaped, so the inserts
-        // always land on a real object. agent_id only stamps in if
-        // the payload didn't already supply its own (variants like
-        // `Spawned` carry the spawned-agent id at the same level and
-        // we mustn't overwrite them); request_id always overwrites
-        // because no payload struct carries it — it's a pure
-        // envelope field minted by the host.
-        let json = if self.agent_id.is_some() || self.request_id.is_some() {
+        // Single Value round-trip when we have an agent_id to stamp.
+        // Both remaining variants (Notification + Error) are
+        // object-shaped, so the insert always lands on a real object.
+        // For Notifications the cli-session id only stamps in if the
+        // payload didn't already supply its own agent_id — variants
+        // like `Spawned` carry the spawned-agent id at the same level
+        // and we mustn't overwrite them.
+        let json = if let Some(id) = self.agent_id.as_deref() {
             let mut v =
                 serde_json::to_value(output).expect("Output serializes");
             if let Some(obj) = v.as_object_mut() {
-                if let Some(id) = self.agent_id.as_deref() {
-                    if !obj.contains_key("agent_id") {
-                        obj.insert(
-                            "agent_id".to_string(),
-                            serde_json::Value::String(id.to_string()),
-                        );
-                    }
-                }
-                if let Some(rid) = self.request_id.as_deref() {
+                if !obj.contains_key("agent_id") {
                     obj.insert(
-                        "request_id".to_string(),
-                        serde_json::Value::String(rid.to_string()),
+                        "agent_id".to_string(),
+                        serde_json::Value::String(id.to_string()),
                     );
                 }
             }
             serde_json::to_string(&v)
-                .expect("stamped Output reserializes")
+                .expect("agent-id-stamped Output reserializes")
         } else {
             serde_json::to_string(output).expect("Output serializes")
         };
@@ -178,6 +171,35 @@ impl Handle {
                     .write_all(b"\n")
                     .await
                     .expect("emit to child stdin failed");
+            }
+            HandleDestination::PluginCommandStdin { stdin, id } => {
+                use tokio::io::AsyncWriteExt;
+                // Wrap `output` in the plugin command response
+                // envelope. We don't reuse the `json` precomputed
+                // above because the wire root is
+                // `PluginCommandResponse`, not `Output` — the
+                // top-level `agent_id` patch wouldn't apply at the
+                // envelope's root (and any payload variant that
+                // wants `agent_id` carries it on its own field
+                // anyway, which the stamping above already touched
+                // via the Output's Value reserialization through
+                // serde would only matter if we wrapped that; here
+                // we wrap the bare `output`).
+                let envelope = crate::cli::plugins::PluginCommandResponse {
+                    id: id.clone(),
+                    value: output.clone(),
+                };
+                let line = serde_json::to_string(&envelope)
+                    .expect("PluginCommandResponse serializes");
+                let mut guard = stdin.lock().await;
+                guard
+                    .write_all(line.as_bytes())
+                    .await
+                    .expect("emit to plugin stdin failed");
+                guard
+                    .write_all(b"\n")
+                    .await
+                    .expect("emit to plugin stdin failed");
             }
             HandleDestination::Collect(vec) => {
                 vec.lock().await.push(self.stamped(output));

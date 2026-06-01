@@ -44,13 +44,15 @@ pub enum TypedPluginOutput {
         /// Optional plugin-minted correlation id for this command.
         /// The host ALWAYS pipes the command's emissions — plus a
         /// terminal `CommandComplete` notification — back into the
-        /// plugin's stdin; this field only controls whether each
-        /// line carries a `request_id` stamp at the top level. With
-        /// an `id`, plugins can demultiplex concurrent in-flight
-        /// commands by reading that field. Without one, the plugin
-        /// gets a single in-order stream and has to rely on
-        /// `command_complete` delimiters to know where one command's
-        /// output ends and the next begins.
+        /// plugin's stdin, wrapped in a [`PluginCommandResponse`]
+        /// envelope. This field is echoed in the envelope's `id`
+        /// slot when set, so plugins can demultiplex concurrent
+        /// in-flight commands by reading it. When absent, the
+        /// envelope's `id` field is omitted on the wire and the
+        /// plugin sees a single in-order stream delimited by
+        /// `command_complete` markers.
+        ///
+        /// [`PluginCommandResponse`]: super::PluginCommandResponse
         #[serde(default, skip_serializing_if = "Option::is_none")]
         id: Option<String>,
         command: String,
