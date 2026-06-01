@@ -32,6 +32,13 @@ struct EnvConfigBuilder {
     github_authorization: Option<String>,
     #[envconfig(from = "OBJECTIVEAI_AGENT_ID")]
     agent_id: Option<String>,
+    /// Bare 22-character ID of the agent invoking this cli. The full
+    /// `agent_id` is this base plus the agent-completion that spawned
+    /// it plus the parent-agent hierarchy; `agent_id_base` is just
+    /// the leaf identity, without the lineage. `None` when the cli
+    /// isn't being invoked by an agent.
+    #[envconfig(from = "OBJECTIVEAI_AGENT_ID_BASE")]
+    agent_id_base: Option<String>,
     /// MCP session id, propagated by `objectiveai-mcp` when it
     /// invokes this cli to run a tool, and by the cli further
     /// into every tool subprocess it spawns. Same string as the
@@ -59,6 +66,7 @@ impl EnvConfigBuilder {
             commit_author_email: self.commit_author_email,
             github_authorization: self.github_authorization,
             agent_id: self.agent_id,
+            agent_id_base: self.agent_id_base,
             mcp_session_id: self.mcp_session_id,
             mcp: self.mcp.map(|s| parse_bool(&s)),
         }
@@ -73,6 +81,7 @@ pub struct ConfigBuilder {
     pub commit_author_email: Option<String>,
     pub github_authorization: Option<String>,
     pub agent_id: Option<String>,
+    pub agent_id_base: Option<String>,
     pub mcp_session_id: Option<String>,
     pub mcp: Option<bool>,
 }
@@ -103,6 +112,7 @@ impl ConfigBuilder {
             commit_author_email: self.commit_author_email,
             github_authorization: self.github_authorization,
             agent_id: self.agent_id.unwrap_or_else(|| "cli".to_string()),
+            agent_id_base: self.agent_id_base,
             mcp_session_id: self.mcp_session_id,
             mcp: self.mcp.unwrap_or(false),
         }
@@ -123,6 +133,12 @@ pub struct Config {
     /// for MCP-routed calls, then per-request overridden from the
     /// `X-OBJECTIVEAI-AGENT-ID` header.
     pub agent_id: String,
+    /// Bare 22-character ID of the agent invoking this cli, without
+    /// the agent-completion that spawned it or the parent-agent
+    /// hierarchy. The full `agent_id` above is this base glued onto
+    /// the lineage. Sourced from `OBJECTIVEAI_AGENT_ID_BASE`; `None`
+    /// when the cli isn't being invoked by an agent.
+    pub agent_id_base: Option<String>,
     pub mcp_session_id: Option<String>,
     pub mcp: bool,
 }
