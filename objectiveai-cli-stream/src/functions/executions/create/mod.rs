@@ -68,6 +68,7 @@ pub async fn handle(
         log_writer,
         handle,
         |agg: &mut FunctionExecutionChunk, chunk: &FunctionExecutionChunk| agg.push(chunk),
+        None,
     )
     .await?;
 

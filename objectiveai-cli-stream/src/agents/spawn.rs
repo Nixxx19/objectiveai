@@ -44,6 +44,12 @@ pub async fn handle(
 
     let stream = Box::pin(stream);
 
+    // Once the API yields its first chunk, we know which agent(s)
+    // have been ultimately selected. Tell the conduit to drop every
+    // upstream `Connection` (primary + plugin-MCP) tied to a
+    // non-selected agent — those are dead weight after the API has
+    // committed.
+    let conduit_for_drop = conduit.clone();
     let consumed = streaming::run_chunk_loop::<_, AgentCompletionChunk, _, _>(
         stream,
         notifier,
@@ -52,6 +58,9 @@ pub async fn handle(
         log_writer,
         handle,
         |agg: &mut AgentCompletionChunk, chunk: &AgentCompletionChunk| agg.push(chunk),
+        Some(Box::new(move |selected: &std::collections::HashSet<String>| {
+            conduit_for_drop.drop_other_agents(selected);
+        })),
     )
     .await?;
 

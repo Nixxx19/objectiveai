@@ -58,6 +58,7 @@ pub async fn handle(
         |agg: &mut FunctionInventionRecursiveChunk, chunk: &FunctionInventionRecursiveChunk| {
             agg.push(chunk)
         },
+        None,
     )
     .await?;
 

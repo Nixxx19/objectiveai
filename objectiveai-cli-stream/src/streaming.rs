@@ -71,6 +71,7 @@ pub async fn run_chunk_loop<S, Chunk, E, F>(
     log_writer: LogWriter<Chunk>,
     handle: &Handle,
     push: F,
+    on_first_chunk_agent_ids: Option<Box<dyn FnOnce(&std::collections::HashSet<String>) + Send>>,
 ) -> Result<Consumed<Chunk>, String>
 where
     S: Stream<Item = Result<Chunk, E>> + Unpin,
@@ -81,6 +82,11 @@ where
     let registry = PipeRegistry::new();
     let mut aggregate: Option<Chunk> = None;
     let mut chunk_count: usize = 0;
+    // Once-only: fires after the first chunk whose
+    // `agent_completion_ids()` returns at least one id. The lineage-
+    // stamped ids identify the winning agent(s); the callback
+    // typically tells the conduit to sweep state for non-winners.
+    let mut on_first_chunk = on_first_chunk_agent_ids;
 
     // Spawn the coalescing writer task. Main loop sends each chunk
     // via the unbounded channel; the writer task batches them up
@@ -124,11 +130,14 @@ where
                 //    the writer stores; slashes inside the caller
                 //    (multi-segment callers like `cli/parent-X`)
                 //    become real subdirs via `pipes_root.join(...)`.
+                let mut lineage_ids_this_chunk: std::collections::HashSet<String> =
+                    std::collections::HashSet::new();
                 for raw in chunk.agent_completion_ids() {
                     let lineage_id = match &caller_agent_id {
                         Some(c) => format!("{c}/{raw}"),
                         None => raw.to_string(),
                     };
+                    lineage_ids_this_chunk.insert(lineage_id.clone());
                     registry
                         .ensure_pipe(
                             &lineage_id,
@@ -150,6 +159,15 @@ where
                     registry
                         .ensure_outbound_pipe(&lineage_id, &pipes_root, handle)
                         .await;
+                }
+
+                // First chunk with at least one agent id identifies
+                // the winning agent(s) — fire the callback exactly
+                // once so the conduit can drop state for losers.
+                if !lineage_ids_this_chunk.is_empty() {
+                    if let Some(cb) = on_first_chunk.take() {
+                        cb(&lineage_ids_this_chunk);
+                    }
                 }
 
                 // 3. Hand a clone to the writer task. Best-effort —

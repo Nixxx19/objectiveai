@@ -62,6 +62,12 @@ const MCP_CONFIG_HEADER: &str = "X-OBJECTIVEAI-MCP-CONFIG";
 
 struct ConduitState {
     connection: objectiveai_sdk::mcp::Connection,
+    /// `X-OBJECTIVEAI-AGENT-ID` of the request that dialed this
+    /// upstream. Used by [`ConduitMcpHandler::drop_other_agents`] to
+    /// sweep the per-primary `connections` map after the API has
+    /// committed to one agent (signalled implicitly by the first
+    /// streamed chunk arriving on cli-stream's consumer side).
+    agent_id: String,
 }
 
 /// One MCP connection the CLI has dialed during `initialize`. Wraps
@@ -202,6 +208,7 @@ impl ConduitMcpHandler {
         request_headers: &IndexMap<String, String>,
     ) -> Result<Arc<ConduitState>, objectiveai_sdk::mcp::Error> {
         let connect_headers = sanitize_connect_headers(request_headers);
+        let agent_id = agent_id_from_headers(request_headers);
         let connection = self
             .inner
             .client
@@ -212,7 +219,25 @@ impl ConduitMcpHandler {
             self.inner.clone(),
             connection.session_id.clone(),
         );
-        Ok(Arc::new(ConduitState { connection }))
+        Ok(Arc::new(ConduitState {
+            connection,
+            agent_id,
+        }))
+    }
+
+    /// Drop every `ConduitState` and every `PluginMcpState` whose
+    /// `agent_id` is NOT in `keep`. Called by cli-stream's chunk
+    /// consumer once the API's first streamed chunk identifies the
+    /// winning agent(s) — the losers' state becomes dead weight at
+    /// that point. The drop fires each `Connection`'s `Drop` impl,
+    /// which closes the upstream HTTP/SSE listener.
+    pub fn drop_other_agents(&self, keep: &std::collections::HashSet<String>) {
+        self.inner
+            .connections
+            .retain(|_, state| keep.contains(&state.agent_id));
+        self.inner
+            .plugin_mcp_connections
+            .retain(|key, _| keep.contains(&key.2));
     }
 }
 
@@ -671,9 +696,16 @@ async fn forward(
                 .map_err(|_| ConduitError::PrimaryDialFailed)?;
             install_list_changed_pump(&connection, inner.clone(), connection.session_id.clone());
             let session_id = connection.session_id.clone();
+            let agent_id_for_state = agent_id.clone();
             inner
                 .connections
-                .insert(session_id.clone(), Arc::new(ConduitState { connection }));
+                .insert(
+                    session_id.clone(),
+                    Arc::new(ConduitState {
+                        connection,
+                        agent_id: agent_id_for_state,
+                    }),
+                );
             Ok(Some(session_id))
         };
 
