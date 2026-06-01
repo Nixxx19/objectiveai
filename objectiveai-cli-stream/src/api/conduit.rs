@@ -62,12 +62,14 @@ const MCP_CONFIG_HEADER: &str = "X-OBJECTIVEAI-MCP-CONFIG";
 
 struct ConduitState {
     connection: objectiveai_sdk::mcp::Connection,
-    /// `X-OBJECTIVEAI-AGENT-ID` of the request that dialed this
-    /// upstream. Used by [`ConduitMcpHandler::drop_other_agents`] to
-    /// sweep the per-primary `connections` map after the API has
-    /// committed to one agent (signalled implicitly by the first
-    /// streamed chunk arriving on cli-stream's consumer side).
-    agent_id: String,
+    /// `X-OBJECTIVEAI-AGENT-ID-BASE` of the request that dialed this
+    /// upstream — the bare 22-character leaf identity, exactly what
+    /// the first streamed chunk's `agent` field carries. Used by
+    /// [`ConduitMcpHandler::drop_other_agents`] to sweep the
+    /// per-primary `connections` map once the API commits to a
+    /// winner; matching is a direct equality check (no lineage
+    /// composition).
+    agent_id_base: String,
 }
 
 /// One MCP connection the CLI has dialed during `initialize`. Wraps
@@ -208,7 +210,7 @@ impl ConduitMcpHandler {
         request_headers: &IndexMap<String, String>,
     ) -> Result<Arc<ConduitState>, objectiveai_sdk::mcp::Error> {
         let connect_headers = sanitize_connect_headers(request_headers);
-        let agent_id = agent_id_from_headers(request_headers);
+        let agent_id_base = agent_id_base_from_headers(request_headers);
         let connection = self
             .inner
             .client
@@ -221,12 +223,12 @@ impl ConduitMcpHandler {
         );
         Ok(Arc::new(ConduitState {
             connection,
-            agent_id,
+            agent_id_base,
         }))
     }
 
     /// Drop every `ConduitState` and every `PluginMcpState` whose
-    /// `agent_id` is NOT in `keep`. Called by cli-stream's chunk
+    /// `agent_id_base` is NOT in `keep`. Called by cli-stream's chunk
     /// consumer once the API's first streamed chunk identifies the
     /// winning agent(s) — the losers' state becomes dead weight at
     /// that point. The drop fires each `Connection`'s `Drop` impl,
@@ -234,7 +236,7 @@ impl ConduitMcpHandler {
     pub fn drop_other_agents(&self, keep: &std::collections::HashSet<String>) {
         self.inner
             .connections
-            .retain(|_, state| keep.contains(&state.agent_id));
+            .retain(|_, state| keep.contains(&state.agent_id_base));
         self.inner
             .plugin_mcp_connections
             .retain(|key, _| keep.contains(&key.2));
@@ -257,7 +259,7 @@ async fn dial_plugin_upstream(
     plugin_name: String,
     mcp_name: String,
     agent_id: String,
-    agent_id_base: Option<String>,
+    agent_id_base: String,
     arguments: Option<IndexMap<String, Option<String>>>,
     stored_session_id: Option<String>,
 ) -> Result<String, ConduitError> {
@@ -305,8 +307,8 @@ async fn dial_plugin_upstream(
     // config-shaped env vars travel through the default parent-env
     // inheritance (cli already stamped them on cli-stream).
     cmd.env("OBJECTIVEAI_AGENT_ID", &agent_id);
-    if let Some(base) = agent_id_base.as_deref() {
-        cmd.env("OBJECTIVEAI_AGENT_ID_BASE", base);
+    if !agent_id_base.is_empty() {
+        cmd.env("OBJECTIVEAI_AGENT_ID_BASE", &agent_id_base);
     }
     let mut child = cmd
         .stdin(std::process::Stdio::null())
@@ -391,9 +393,13 @@ async fn dial_plugin_upstream(
         .as_ref()
         .map(|m| serde_json::to_string(m).unwrap_or_default())
         .unwrap_or_default();
-    inner
-        .plugin_mcp_connections
-        .insert((plugin_name, mcp_name, agent_id, args_canonical), state);
+    // Cache key uses `agent_id_base` (bare 22-char leaf) in slot 2
+    // so the first streamed chunk's `agent` field — which is the
+    // same base — can directly identify which entries to keep.
+    inner.plugin_mcp_connections.insert(
+        (plugin_name, mcp_name, agent_id_base, args_canonical),
+        state,
+    );
 
     Ok(session_id)
 }
@@ -696,14 +702,14 @@ async fn forward(
                 .map_err(|_| ConduitError::PrimaryDialFailed)?;
             install_list_changed_pump(&connection, inner.clone(), connection.session_id.clone());
             let session_id = connection.session_id.clone();
-            let agent_id_for_state = agent_id.clone();
+            let agent_id_base_for_state = agent_id_base.clone();
             inner
                 .connections
                 .insert(
                     session_id.clone(),
                     Arc::new(ConduitState {
                         connection,
-                        agent_id: agent_id_for_state,
+                        agent_id_base: agent_id_base_for_state,
                     }),
                 );
             Ok(Some(session_id))
@@ -842,11 +848,11 @@ async fn forward(
         if let Some(body) = response.body.as_mut() {
             apply_tools_filter(inner, body, cfg).await;
             let ws_session_id = ws_session_id_from_headers(&request.headers);
-            let agent_id = agent_id_from_headers(&request.headers);
+            let agent_id_base = agent_id_base_from_headers(&request.headers);
             let selection: Vec<PluginUpstreamKey> = cfg
                 .mcp_servers
                 .iter()
-                .map(|e| e.cache_key(&agent_id))
+                .map(|e| e.cache_key(&agent_id_base))
                 .collect();
             aggregate_plugin_tools(inner, body, &selection, ws_session_id.as_deref()).await?;
         }
@@ -857,11 +863,11 @@ async fn forward(
         let cfg = config.expect("X-OBJECTIVEAI-MCP-CONFIG header is required on resources/list");
         if let Some(body) = response.body.as_mut() {
             let ws_session_id = ws_session_id_from_headers(&request.headers);
-            let agent_id = agent_id_from_headers(&request.headers);
+            let agent_id_base = agent_id_base_from_headers(&request.headers);
             let selection: Vec<PluginUpstreamKey> = cfg
                 .mcp_servers
                 .iter()
-                .map(|e| e.cache_key(&agent_id))
+                .map(|e| e.cache_key(&agent_id_base))
                 .collect();
             aggregate_plugin_resources(inner, body, &selection, ws_session_id.as_deref()).await?;
         }
@@ -1235,11 +1241,11 @@ async fn try_route_tools_call(
         return Ok(None);
     };
 
-    let agent_id = agent_id_from_headers(&request.headers);
+    let agent_id_base = agent_id_base_from_headers(&request.headers);
     let selection: Vec<PluginUpstreamKey> = config
         .mcp_servers
         .iter()
-        .map(|e| e.cache_key(&agent_id))
+        .map(|e| e.cache_key(&agent_id_base))
         .collect();
     let states = collect_plugin_states(inner, &selection);
     let plugin_lists_fut =
@@ -1343,11 +1349,11 @@ async fn try_route_resources_read(
         return Ok(None);
     };
 
-    let agent_id = agent_id_from_headers(&request.headers);
+    let agent_id_base = agent_id_base_from_headers(&request.headers);
     let selection: Vec<PluginUpstreamKey> = config
         .mcp_servers
         .iter()
-        .map(|e| e.cache_key(&agent_id))
+        .map(|e| e.cache_key(&agent_id_base))
         .collect();
     let states = collect_plugin_states(inner, &selection);
     let plugin_lists_fut =
@@ -1512,27 +1518,29 @@ impl McpServerConfigEntry {
             .unwrap_or_default()
     }
 
-    /// Cache key for `Inner::plugin_mcp_connections`. The `agent_id`
-    /// argument is the value read from the request's
-    /// `X-OBJECTIVEAI-AGENT-ID` header (empty string if absent).
-    fn cache_key(&self, agent_id: &str) -> PluginUpstreamKey {
+    /// Cache key for `Inner::plugin_mcp_connections`. The
+    /// `agent_id_base` argument is the value read from the request's
+    /// `X-OBJECTIVEAI-AGENT-ID-BASE` header (empty string if absent).
+    fn cache_key(&self, agent_id_base: &str) -> PluginUpstreamKey {
         (
             self.plugin.clone(),
             self.name.clone(),
-            agent_id.to_string(),
+            agent_id_base.to_string(),
             self.args_canonical(),
         )
     }
 }
 
 /// Composite cache key for plugin-MCP upstream connections.
-/// `(plugin_name, mcp_name, agent_id, args_canonical)` — extending
-/// the historical `(plugin, mcp_name)` tuple with the cli-session
-/// agent_id (from `X-OBJECTIVEAI-AGENT-ID`) and a canonical
-/// stringification of the entry's `arguments`. The extension is
-/// what enforces per-agent isolation: two agents asking for the
-/// same `(plugin, mcp_name)` get distinct entries and thus distinct
-/// plugin processes / upstream connections.
+/// `(plugin_name, mcp_name, agent_id_base, args_canonical)` —
+/// extending the historical `(plugin, mcp_name)` tuple with the
+/// agent's bare 22-char leaf identity (from
+/// `X-OBJECTIVEAI-AGENT-ID-BASE`) and a canonical stringification of
+/// the entry's `arguments`. Per-agent isolation is in slot 2:
+/// distinct bases ⇒ distinct entries ⇒ distinct plugin processes.
+/// Keying on the base (not the full lineage) lets cli-stream's
+/// chunk consumer match the first chunk's `agent` field directly
+/// when sweeping losing-agent state.
 type PluginUpstreamKey = (String, String, String, String);
 
 /// Case-insensitive `X-OBJECTIVEAI-AGENT-ID` lookup on a request's
@@ -1549,14 +1557,15 @@ fn agent_id_from_headers(headers: &IndexMap<String, String>) -> String {
 }
 
 /// Case-insensitive `X-OBJECTIVEAI-AGENT-ID-BASE` lookup. Returns
-/// `None` on absence (the base is genuinely optional — only present
-/// when the caller stamped it) so the env-var stamp at the
-/// `dial_plugin_upstream` site can skip it cleanly.
-fn agent_id_base_from_headers(headers: &IndexMap<String, String>) -> Option<String> {
+/// the empty string on absence — the empty-string slot folds all
+/// un-stamped requests together (mirrors `agent_id_from_headers`),
+/// which matches the historical default-everyone-shares slot.
+fn agent_id_base_from_headers(headers: &IndexMap<String, String>) -> String {
     headers
         .iter()
         .find(|(k, _)| k.eq_ignore_ascii_case("X-OBJECTIVEAI-AGENT-ID-BASE"))
         .map(|(_, v)| v.clone())
+        .unwrap_or_default()
 }
 
 fn read_mcp_config_header(headers: &IndexMap<String, String>) -> Option<McpConfig> {

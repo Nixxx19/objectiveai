@@ -130,14 +130,20 @@ where
                 //    the writer stores; slashes inside the caller
                 //    (multi-segment callers like `cli/parent-X`)
                 //    become real subdirs via `pipes_root.join(...)`.
-                let mut lineage_ids_this_chunk: std::collections::HashSet<String> =
+                // The chunk's raw `agent_completion_ids()` are bare
+                // 22-character base ids — exactly what the conduit
+                // keys its per-agent state on. Collect them here so
+                // the once-only selection callback can match
+                // directly. (The lineage-stamped form, used below
+                // for pipe directory layout, is a separate concern.)
+                let mut bare_ids_this_chunk: std::collections::HashSet<String> =
                     std::collections::HashSet::new();
                 for raw in chunk.agent_completion_ids() {
+                    bare_ids_this_chunk.insert(raw.to_string());
                     let lineage_id = match &caller_agent_id {
                         Some(c) => format!("{c}/{raw}"),
                         None => raw.to_string(),
                     };
-                    lineage_ids_this_chunk.insert(lineage_id.clone());
                     registry
                         .ensure_pipe(
                             &lineage_id,
@@ -163,10 +169,12 @@ where
 
                 // First chunk with at least one agent id identifies
                 // the winning agent(s) — fire the callback exactly
-                // once so the conduit can drop state for losers.
-                if !lineage_ids_this_chunk.is_empty() {
+                // once so the conduit can drop state for losers. The
+                // ids are the bare bases, which the conduit's
+                // per-agent state is keyed on directly.
+                if !bare_ids_this_chunk.is_empty() {
                     if let Some(cb) = on_first_chunk.take() {
-                        cb(&lineage_ids_this_chunk);
+                        cb(&bare_ids_this_chunk);
                     }
                 }
 
