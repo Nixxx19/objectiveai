@@ -85,15 +85,6 @@ pub struct CommandArgs {
     pub seed: Option<i64>,
 }
 
-/// Bound on the recursive retry that fires when cli-stream loses
-/// the per-agent single-flight bind race. Protects against logic
-/// bugs that would otherwise spin forever — real contention should
-/// resolve well within a handful of retries (the winner either
-/// finishes quickly and we deliver via the pipe path, or it's
-/// genuinely long-running and we should surface that instead of
-/// looping).
-const SLOT_TAKEN_MAX_RETRIES: usize = 32;
-
 pub async fn handle(
     args: CommandArgs,
     cli_config: &crate::Config,
@@ -113,17 +104,15 @@ pub async fn handle(
     // currently owns the per-agent socket. Each retry first re-runs
     // `try_pipe_delivery` (cheap), so once the winner has bound and
     // is serving, our next pass delivers via the pipe and never
-    // spawns. Bounded so a stuck winner can't livelock us.
-    for _ in 0..SLOT_TAKEN_MAX_RETRIES {
+    // spawns. Unbounded: the only way to escape `SlotTaken` is for
+    // the winner to release the socket, at which point we win or
+    // deliver via the now-live pipe.
+    loop {
         match handle_once(cli_config, &full_agent_id, content.clone(), args.seed, handle).await {
             Err(crate::error::Error::CliStreamSlotTaken { .. }) => continue,
             other => return other,
         }
     }
-    Err(crate::error::Error::AgentSlotPersistentlyTaken {
-        agent_id: full_agent_id,
-        attempts: SLOT_TAKEN_MAX_RETRIES,
-    })
 }
 
 async fn handle_once(

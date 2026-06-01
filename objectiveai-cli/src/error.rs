@@ -88,10 +88,6 @@ pub enum Error {
     )]
     CliStreamSlotTaken { stderr_tail: String },
     #[error(
-        "agent slot for {agent_id:?} was still taken after {attempts} retries; another caller appears to be holding the listener persistently"
-    )]
-    AgentSlotPersistentlyTaken { agent_id: String, attempts: usize },
-    #[error(
         "no prior agent_completion_request for agent {agent_id:?}; spawn the agent first with `agents spawn`"
     )]
     AgentNoPriorRequest { agent_id: String },

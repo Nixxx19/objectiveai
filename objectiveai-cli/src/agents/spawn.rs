@@ -70,15 +70,6 @@ pub struct CommandArgs {
     pub seed: Option<i64>,
 }
 
-/// Defensive retry bound matching `agents/message.rs`. `agents spawn`
-/// always sends `continuation: None`, so the API mints a fresh
-/// random `response_id` and the per-agent socket path is unique by
-/// construction — `CliStreamSlotTaken` from this dispatch entry
-/// indicates a logic bug, not a real race. The wrap is here for
-/// symmetry and future-proofing against endpoint additions that
-/// might let continuation flow through.
-const SLOT_TAKEN_MAX_RETRIES: usize = 32;
-
 pub async fn handle(
     args: CommandArgs,
     cli_config: &crate::Config,
@@ -103,7 +94,14 @@ pub async fn handle(
         continuation: None,
     };
 
-    for _ in 0..SLOT_TAKEN_MAX_RETRIES {
+    // `agents spawn` always sends `continuation: None`, so the API
+    // mints a fresh random `response_id` and the per-agent socket
+    // path is unique by construction — `CliStreamSlotTaken` from
+    // this dispatch entry indicates a logic bug, not a real race.
+    // The retry is here for symmetry with `agents message` and to
+    // future-proof against endpoint additions that might let
+    // continuation flow through.
+    loop {
         match crate::api::stream_subprocess::run_detached(
             cli_config,
             &["agents", "spawn"],
@@ -116,8 +114,4 @@ pub async fn handle(
             other => return other,
         }
     }
-    Err(crate::error::Error::AgentSlotPersistentlyTaken {
-        agent_id: cli_config.agent_id.clone(),
-        attempts: SLOT_TAKEN_MAX_RETRIES,
-    })
 }
