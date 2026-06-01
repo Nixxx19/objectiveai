@@ -7,6 +7,7 @@ pub use notification_value::*;
 // Shared / multi-command wire shapes.
 mod ack;
 mod cleared;
+mod command_complete;
 mod help;
 mod instructions;
 mod items;
@@ -33,6 +34,7 @@ pub mod swarms;
 pub use crate::filesystem::logs::LogContent;
 pub use ack::*;
 pub use cleared::*;
+pub use command_complete::*;
 pub use help::*;
 pub use instructions::*;
 pub use items::*;

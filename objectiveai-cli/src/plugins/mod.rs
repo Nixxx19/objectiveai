@@ -22,22 +22,38 @@
 //!
 //! - `Error` → forward via [`Output::Error`]
 //! - `Notification(Value)` → forward via [`Output::Notification`]
-//! - `Command { command }` → tokenize the string and spawn a recursive
-//!   `cli::run` call (fire-and-forget; multiple in flight is fine)
+//! - `Command { id, command }` → tokenize the string and spawn a
+//!   recursive `cli::run` call. The spawned command's emissions
+//!   ALWAYS flow back into the plugin's stdin, followed by one
+//!   terminal `command_complete` notification once the run
+//!   finishes. When the plugin minted an `id`, both the per-line
+//!   responses and the terminal marker carry `request_id: "<id>"`
+//!   stamped at the top level so the plugin can demultiplex
+//!   concurrent commands; when `id` is absent, the lines flow back
+//!   unstamped and the plugin gets a single in-order stream. Either
+//!   way the wire is line-serialized on the shared
+//!   `Arc<Mutex<ChildStdin>>`.
 //! - parse failure → re-emit the raw line as a string-valued
 //!   notification, so it still appears in the host's JSONL stream
 //!
-//! Plugin stderr is forwarded raw to this process's own stderr (same
-//! pattern as `api::detach`). The plugin's exit code becomes this
-//! function's `Err(PluginExit)` — which `run()` then emits as a fatal
-//! error and converts to exit code 1.
+//! Plugin stdin is opened with [`Stdio::piped`] so the host can write
+//! responses; plugins that don't read it just block their own input
+//! pipe (no-op). Plugin stderr is forwarded raw to this process's own
+//! stderr (same pattern as `api::detach`). The plugin's exit code
+//! becomes this function's `Err(PluginExit)` — which `run()` then
+//! emits as a fatal error and converts to exit code 1.
+
+use std::sync::Arc;
 
 use clap::Subcommand;
 use objectiveai_sdk::cli::output::{
-    Handle, Installed, Notification, Output, Plugin, Plugins, TypedNotificationValue,
+    CommandComplete, Handle, HandleDestination, Installed, Notification, Output, Plugin, Plugins,
+    TypedNotificationValue,
 };
 use objectiveai_sdk::cli::plugins::{PluginOutput, TypedPluginOutput};
 use tokio::io::AsyncBufReadExt;
+use tokio::process::ChildStdin;
+use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 
 mod install;
@@ -254,7 +270,7 @@ pub async fn dispatch_external(
 
     let mut cmd = tokio::process::Command::new(&exe);
     cmd.args(&rest)
-        .stdin(std::process::Stdio::null())
+        .stdin(std::process::Stdio::piped())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
     // Forward the full cli Config (agent lineage, MCP session, auth
@@ -267,10 +283,17 @@ pub async fn dispatch_external(
 
     let stdout = child.stdout.take().unwrap();
     let stderr = child.stderr.take().unwrap();
+    let plugin_stdin: Arc<Mutex<ChildStdin>> = Arc::new(Mutex::new(child.stdin.take().unwrap()));
 
     let stderr_task = tokio::spawn(forward_stderr(stderr));
 
-    let mut command_tasks: Vec<JoinHandle<i32>> = Vec::new();
+    // (request_id, run JoinHandle). When `request_id` is Some, the
+    // command's emissions are flowing back into the plugin's stdin
+    // and the dispatcher emits a terminal `CommandComplete` line
+    // (stamped with the same id) after the run resolves. When None
+    // it's legacy fire-and-forget — no terminal marker, output went
+    // to `handle`.
+    let mut command_tasks: Vec<(Option<String>, JoinHandle<i32>)> = Vec::new();
     let mut reader = tokio::io::BufReader::new(stdout);
     let mut line = String::new();
     loop {
@@ -305,8 +328,18 @@ pub async fn dispatch_external(
                 .emit(handle)
                 .await;
             }
-            Ok(PluginOutput::Typed(TypedPluginOutput::Command { command })) => {
-                command_tasks.push(spawn_command(command, cli_config, handle));
+            Ok(PluginOutput::Typed(TypedPluginOutput::Command { id, command })) => {
+                // Per-command handle: writes back to the plugin's
+                // stdin in every case. When the plugin minted an
+                // `id`, stamp `request_id` on every emitted line so
+                // the plugin can demultiplex concurrent commands;
+                // when there's no id, lines flow back unstamped (the
+                // plugin gets the output but no correlation token).
+                let mut task_handle = Handle::from(HandleDestination::Stdin(plugin_stdin.clone()));
+                if let Some(rid) = &id {
+                    task_handle = task_handle.with_request_id(rid.clone());
+                }
+                command_tasks.push((id, spawn_command(command, cli_config, task_handle)));
             }
             Err(_) => {
                 let value = serde_json::Value::String(trimmed.to_string());
@@ -321,10 +354,29 @@ pub async fn dispatch_external(
         }
     }
 
-    // Drain any in-flight Command runs the plugin queued before exiting.
-    for t in command_tasks {
-        let _ = t.await;
+    // Drain any in-flight Command runs the plugin queued before
+    // exiting. Each task gets a terminal `CommandComplete` on the
+    // plugin's stdin so the plugin always knows the run finished,
+    // even when it didn't mint a correlation id. Hold the
+    // `plugin_stdin` Arc until every marker has been written;
+    // dropping it earlier would close the plugin's stdin and lose
+    // the final lines.
+    for (id, t) in command_tasks {
+        let exit_code = t.await.unwrap_or(-1);
+        let mut completion_handle = Handle::from(HandleDestination::Stdin(plugin_stdin.clone()));
+        if let Some(rid) = id {
+            completion_handle = completion_handle.with_request_id(rid);
+        }
+        Output::Notification(Notification {
+            value: CommandComplete { exit_code }.into(),
+        })
+        .emit(&completion_handle)
+        .await;
     }
+    // Now safe to drop the dispatcher's reference; once the plugin
+    // closes its stdin handle the kernel pipe closes and a polite
+    // plugin sees EOF on its stdin read.
+    drop(plugin_stdin);
     let _ = stderr_task.await;
 
     let status = child
@@ -341,7 +393,12 @@ pub async fn dispatch_external(
 /// Tokenize the plugin's `command` string and spawn `cli::run` on it.
 /// Uses whitespace splitting — quoted args aren't supported (upgrade
 /// to `shlex` if a real plugin needs them).
-fn spawn_command(command: String, cli_config: &crate::Config, handle: &Handle) -> JoinHandle<i32> {
+///
+/// `handle` carries the destination + correlation id for THIS command's
+/// emissions. For id-bearing dispatches it's a stdin-routed handle
+/// stamped with the plugin's request_id; for legacy fire-and-forget
+/// dispatches it's the dispatcher's own handle.
+fn spawn_command(command: String, cli_config: &crate::Config, handle: Handle) -> JoinHandle<i32> {
     let tokens: Vec<String> = command.split_whitespace().map(String::from).collect();
     // `run()` expects argv[0] to be the binary name (clap ignores its
     // content). Prepend a placeholder.
@@ -350,7 +407,6 @@ fn spawn_command(command: String, cli_config: &crate::Config, handle: &Handle) -
     argv.extend(tokens);
 
     let cfg = cli_config.clone();
-    let handle = handle.clone();
     tokio::spawn(async move { crate::run::run(argv, &cfg, handle).await })
 }
 

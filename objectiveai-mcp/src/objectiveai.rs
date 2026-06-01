@@ -236,6 +236,7 @@ async fn run_cli_and_collect(
     let handle = objectiveai_sdk::cli::output::Handle {
         destination: objectiveai_sdk::cli::output::HandleDestination::Collect(collected.clone()),
         agent_id: Some(cli_config.agent_id.clone()),
+        request_id: None,
     };
     let _ = objectiveai_cli::run(args, &cli_config, handle).await;
 

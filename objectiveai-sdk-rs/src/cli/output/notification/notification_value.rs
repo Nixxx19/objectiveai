@@ -21,11 +21,11 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use super::{
-    ActiveAgent, Agent, AgentItems, Cleared, Detached, Execution, Function,
-    Help, Inactive, Installed, Instructions, Inventions, JqResults, Laboratory,
-    LogContent, LogStreamReady, Mcp, Me, MessageDelivered, MessageQueued, Ok,
-    Pair, Plugin, Plugins, Profile, Published, Schema, Schemas, Spawned, State,
-    Swarm, Tool, ToolLine, Tools, Updater, ViewerSendResult,
+    ActiveAgent, Agent, AgentItems, Cleared, CommandComplete, Detached, Execution,
+    Function, Help, Inactive, Installed, Instructions, Inventions, JqResults,
+    Laboratory, LogContent, LogStreamReady, Mcp, Me, MessageDelivered,
+    MessageQueued, Ok, Pair, Plugin, Plugins, Profile, Published, Schema, Schemas,
+    Spawned, State, Swarm, Tool, ToolLine, Tools, Updater, ViewerSendResult,
 };
 
 /// One emitted notification payload. Untagged wrapper around
@@ -107,6 +107,12 @@ pub enum TypedNotificationValue {
     // Shared / multi-command
     #[schemars(title = "Cleared")]
     Cleared(Cleared),
+    /// Terminal marker for a plugin-dispatched command. The
+    /// originating plugin's correlation id rides at the envelope
+    /// level (`Handle::request_id` → top-level `request_id` on the
+    /// emitted line); see [`CommandComplete`].
+    #[schemars(title = "CommandComplete")]
+    CommandComplete(CommandComplete),
     #[schemars(title = "Help")]
     Help(Help),
     #[schemars(title = "Installed")]
@@ -200,7 +206,7 @@ from_variant! {
     Execution, Function, Inventions, Pair, Profile, State,
     Laboratory,
     Swarm,
-    Cleared, Help, Installed, Instructions, JqResults, LogContent, LogStreamReady,
-    Mcp, Me, Ok, Plugin, Plugins, Published, Schema, Schemas, Tool, ToolLine, Tools,
-    Updater, ViewerSendResult,
+    Cleared, CommandComplete, Help, Installed, Instructions, JqResults, LogContent,
+    LogStreamReady, Mcp, Me, Ok, Plugin, Plugins, Published, Schema, Schemas, Tool,
+    ToolLine, Tools, Updater, ViewerSendResult,
 }

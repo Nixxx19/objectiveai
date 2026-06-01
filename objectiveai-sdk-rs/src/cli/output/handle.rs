@@ -56,18 +56,30 @@ impl Default for HandleDestination {
     }
 }
 
-/// Output handle: a destination plus an optional `agent_id` that gets
-/// stamped on every emitted `Notification` and `Error` line.
+/// Output handle: a destination plus an optional `agent_id` and an
+/// optional `request_id`, both stamped on every emitted
+/// `Notification` and `Error` line.
 ///
 /// The `agent_id` field is set once by the cli's `run()` from
 /// `Config.agent_id` (env `OBJECTIVEAI_AGENT_ID`). All emit sites
 /// stay verbatim — `Notification` and `Error` payloads carry their
 /// own `agent_id: Option<String>` field that defaults to `None`, and
 /// `emit` overwrites it with the handle's value before writing.
+///
+/// `request_id` is the plugin↔CLI correlation token. When the host
+/// dispatches a plugin-emitted `Command { id, .. }`, it builds a
+/// `Handle` whose destination is the plugin's stdin and whose
+/// `request_id` carries the plugin-minted id. Every line emitted
+/// downstream gets `"request_id":"<id>"` stamped at the top level,
+/// so the plugin can demultiplex concurrent in-flight commands by
+/// reading that field. `Notification` / `Error` payloads do NOT
+/// carry a `request_id` member; the stamp is purely an envelope-
+/// level JSON patch (mirrors agent_id's wire path).
 #[derive(Clone, Default)]
 pub struct Handle {
     pub destination: HandleDestination,
     pub agent_id: Option<String>,
+    pub request_id: Option<String>,
 }
 
 impl From<HandleDestination> for Handle {
@@ -75,6 +87,7 @@ impl From<HandleDestination> for Handle {
         Handle {
             destination,
             agent_id: None,
+            request_id: None,
         }
     }
 }
@@ -86,6 +99,13 @@ impl Handle {
         Handle::default()
     }
 
+    /// Builder: set the `request_id` stamp. See the [`Handle`]
+    /// type-level doc for the plugin↔CLI correlation contract.
+    pub fn with_request_id(mut self, id: String) -> Self {
+        self.request_id = Some(id);
+        self
+    }
+
     /// Emit `output` to this destination. Best-effort for `Stdout`:
     /// if the parent's read end of our pipe has closed (broken pipe)
     /// we silently swallow the error so a detached background writer
@@ -94,26 +114,36 @@ impl Handle {
     /// behaviour. Non-broken-pipe write errors fall through to a
     /// panic so genuine bugs still surface.
     pub async fn emit(&self, output: &Output) {
-        // Single Value round-trip when we have an agent_id to stamp.
-        // Both remaining variants (Notification + Error) are
-        // object-shaped, so the insert always lands on a real object.
-        // For Notifications the cli-session id only stamps in if the
-        // payload didn't already supply its own agent_id — variants
-        // like `Spawned` carry the spawned-agent id at the same level
-        // and we mustn't overwrite them.
-        let json = if let Some(id) = self.agent_id.as_deref() {
+        // Single Value round-trip when we have an agent_id or a
+        // request_id to stamp. Both remaining `Output` variants
+        // (Notification + Error) are object-shaped, so the inserts
+        // always land on a real object. agent_id only stamps in if
+        // the payload didn't already supply its own (variants like
+        // `Spawned` carry the spawned-agent id at the same level and
+        // we mustn't overwrite them); request_id always overwrites
+        // because no payload struct carries it — it's a pure
+        // envelope field minted by the host.
+        let json = if self.agent_id.is_some() || self.request_id.is_some() {
             let mut v =
                 serde_json::to_value(output).expect("Output serializes");
             if let Some(obj) = v.as_object_mut() {
-                if !obj.contains_key("agent_id") {
+                if let Some(id) = self.agent_id.as_deref() {
+                    if !obj.contains_key("agent_id") {
+                        obj.insert(
+                            "agent_id".to_string(),
+                            serde_json::Value::String(id.to_string()),
+                        );
+                    }
+                }
+                if let Some(rid) = self.request_id.as_deref() {
                     obj.insert(
-                        "agent_id".to_string(),
-                        serde_json::Value::String(id.to_string()),
+                        "request_id".to_string(),
+                        serde_json::Value::String(rid.to_string()),
                     );
                 }
             }
             serde_json::to_string(&v)
-                .expect("agent-id-stamped Output reserializes")
+                .expect("stamped Output reserializes")
         } else {
             serde_json::to_string(output).expect("Output serializes")
         };

@@ -40,7 +40,21 @@ pub enum PluginOutput {
 #[schemars(rename = "cli.plugins.TypedPluginOutput")]
 pub enum TypedPluginOutput {
     #[schemars(title = "Command")]
-    Command { command: String },
+    Command {
+        /// Optional plugin-minted correlation id for this command.
+        /// The host ALWAYS pipes the command's emissions — plus a
+        /// terminal `CommandComplete` notification — back into the
+        /// plugin's stdin; this field only controls whether each
+        /// line carries a `request_id` stamp at the top level. With
+        /// an `id`, plugins can demultiplex concurrent in-flight
+        /// commands by reading that field. Without one, the plugin
+        /// gets a single in-order stream and has to rely on
+        /// `command_complete` delimiters to know where one command's
+        /// output ends and the next begins.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        id: Option<String>,
+        command: String,
+    },
     #[schemars(title = "Mcp")]
     Mcp(Mcp),
     #[schemars(title = "Error")]
