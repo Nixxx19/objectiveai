@@ -482,7 +482,8 @@ where
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        // Composite agent id — the agent's identity. Resolution order:
+        // Composite agent id for the **primary** slot — the agent's
+        // identity if the primary runs. Resolution order:
         //   1. Internal `continuation` (server-side retry from the
         //      vector / laboratory layer): reuse the composite baked
         //      into the in-process state.
@@ -497,10 +498,15 @@ where
         //      full lineage). Empty parent is its own first-class
         //      slot, yielding a root composite of just the local id.
         //
-        // The local `id` (used as `AgentCompletionChunk.id`, viewer
-        // correlation, notify-target keys) is the trailing
-        // slash-separated segment of the composite — stable across
-        // every round for the same reason.
+        // Used as `agent_ids[0]` below (which is then leaf-projected
+        // into `ids[0]` and finally into `attempts[0].id` —
+        // `AgentCompletionChunk.id` / viewer correlation / notify-
+        // target key for the primary slot). Fallback slots get fresh
+        // per-slot composites at the `agent_ids` builder; their leaves
+        // flow downstream the same way via `attempts[i].id`. The
+        // pre-yield `send_viewer_err` path correlates against this
+        // primary leaf — there's no other meaningful candidate before
+        // any agent commits.
         let request_composite = request_continuation
             .as_ref()
             .map(|c| c.agent_id())
